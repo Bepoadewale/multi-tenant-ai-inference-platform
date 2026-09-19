@@ -22,7 +22,7 @@ PARTIALLY VALIDATED
 
 ## Known Failures
 
-- Remote fetch blocked by DNS on 2026-09-19.
+- GitHub CI rerun pending after replacing an invalid Trivy action tag and remediating the audited pytest advisory.
 
 ## Current P0 Objective
 
