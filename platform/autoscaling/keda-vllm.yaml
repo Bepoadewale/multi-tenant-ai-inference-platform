@@ -1,0 +1,16 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata: {name: vllm-queue-scaler}
+spec:
+  scaleTargetRef: {name: vllm-chat-default}
+  minReplicaCount: 1
+  maxReplicaCount: 4
+  pollingInterval: 15
+  cooldownPeriod: 300
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-operated.monitoring.svc:9090
+        metricName: inference_gateway_active_requests
+        query: sum(inference_gateway_active_requests{model="chat-default"})
+        threshold: "16"

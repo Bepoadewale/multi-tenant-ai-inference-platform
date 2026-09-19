@@ -1,0 +1,15 @@
+model: meta-llama/Llama-3.2-3B-Instruct
+revision: main
+dtype: auto
+quantization: null
+maxModelLen: 8192
+gpuMemoryUtilization: 0.90
+tensorParallelSize: 1
+maxNumSeqs: 32
+maxNumBatchedTokens: 8192
+enablePrefixCaching: true
+gpu:
+  enabled: false
+  count: 1
+  nodeSelector: {accelerator: nvidia}
+  tolerations: [{key: nvidia.com/gpu, operator: Exists, effect: NoSchedule}]
