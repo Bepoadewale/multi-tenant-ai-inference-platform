@@ -5,6 +5,7 @@ from uuid import uuid4
 from fastapi import HTTPException
 from fastapi.responses import StreamingResponse
 from inference_gateway.backends.mock import MockInferenceBackend
+from inference_gateway.backends.vllm import VllmBackend
 from inference_gateway.catalog.store import Catalog
 from inference_gateway.limiting.service import TenantLimiter
 from inference_gateway.metering.service import Meter
@@ -30,6 +31,11 @@ class GatewayService:
             Meter(),
         )
 
+    def backend_for(self, model, target):
+        if model.runtime == "vllm" and target.backend_url:
+            return VllmBackend(target.backend_url, model.model_id)
+        return self.backend
+
     async def chat(self, tenant: Tenant, request: ChatCompletionRequest):
         request_id, started = str(uuid4()), perf_counter()
         model = self.catalog.models.get(request.model)
@@ -38,6 +44,7 @@ class GatewayService:
         # Authorize before consuming an admission quota; rejected model access cannot
         # deliberately exhaust a tenant's valid workload budget.
         target = self.router.choose(tenant, model, request_id)
+        backend = self.backend_for(model, target)
         estimate = (
             sum(len(message.content.split()) for message in request.messages) + request.max_tokens
         )
@@ -48,9 +55,11 @@ class GatewayService:
             THROTTLES.labels(tenant.id, error.detail).inc()
             raise
         if request.stream:
-            return self._stream(tenant, request, target.name, target.version, request_id, started)
+            return self._stream(
+                tenant, request, target.name, target.version, request_id, started, backend
+            )
         try:
-            text, usage, ttft_ms = await self.backend.complete(request)
+            text, usage, ttft_ms = await backend.complete(request)
             self._record(
                 tenant,
                 request.model,
@@ -84,7 +93,7 @@ class GatewayService:
             ACTIVE.labels(tenant.id).dec()
             self.limiter.release(tenant, 0)
 
-    def _stream(self, tenant, request, backend, version, request_id, started):
+    def _stream(self, tenant, request, backend_name, version, request_id, started, backend):
         async def events():
             usage = Usage(
                 prompt_tokens=sum(len(message.content.split()) for message in request.messages),
@@ -92,7 +101,7 @@ class GatewayService:
                 total_tokens=0,
             )
             try:
-                async for token in self.backend.stream(request):
+                async for token in backend.stream(request):
                     usage.completion_tokens += 1
                     usage.total_tokens += 1
                     payload = {
@@ -106,7 +115,7 @@ class GatewayService:
                 self._record(
                     tenant,
                     request.model,
-                    backend,
+                    backend_name,
                     version,
                     request_id,
                     usage,

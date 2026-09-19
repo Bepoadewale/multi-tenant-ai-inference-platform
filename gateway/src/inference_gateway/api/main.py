@@ -1,4 +1,5 @@
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI
+from inference_gateway.auth.admin import platform_admin
 from inference_gateway.auth.service import authenticated_tenant
 from inference_gateway.models import ChatCompletionRequest, Tenant
 from inference_gateway.services.gateway import service
@@ -32,14 +33,12 @@ async def chat(request: ChatCompletionRequest, tenant: Tenant = Depends(authenti
 
 
 @app.get("/platform/v1/usage/{tenant_id}")
-def usage(tenant_id: str, tenant: Tenant = Depends(authenticated_tenant)):
-    if tenant.id != tenant_id:
-        raise HTTPException(403, "tenant-scoped access only")
+def usage(tenant_id: str, admin: str = Depends(platform_admin)):
     return service.meter.tenant_summary(tenant_id)
 
 
 @app.get("/platform/v1/capacity")
-def capacity(tenant: Tenant = Depends(authenticated_tenant)):
+def capacity(admin: str = Depends(platform_admin)):
     return {
         "state": "HEALTHY",
         "mode": "local-mock",
@@ -47,3 +46,13 @@ def capacity(tenant: Tenant = Depends(authenticated_tenant)):
         "gpu_telemetry": "unavailable in local mode",
         "queued_requests": 0,
     }
+
+
+@app.get("/platform/v1/models")
+def platform_models(admin: str = Depends(platform_admin)):
+    return list(service.catalog.models.values())
+
+
+@app.get("/platform/v1/tenants")
+def platform_tenants(admin: str = Depends(platform_admin)):
+    return list(service.catalog.tenants.values())

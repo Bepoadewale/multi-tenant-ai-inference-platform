@@ -12,4 +12,5 @@
 - [x] M10 usage/cost/capacity API design.
 - [x] M11 opt-in AWS GPU Terraform contract.
 - [x] M12 security, failure-mode, interview documentation.
-- [ ] Production hardening: OIDC/JWKS, Redis Lua, PostgreSQL/outbox, vLLM adapter integration tests, live GPU benchmarks, GitOps controller, Karpenter implementation.
+- [x] Production contracts: vLLM adapter, Redis Lua admission contract, strong admin endpoint guard, streaming semantics, and API tests.
+- [ ] Environment-dependent hardening: OIDC/JWKS, live Redis/PostgreSQL/outbox, vLLM adapter integration tests, live GPU benchmarks, GitOps controller, Karpenter implementation.

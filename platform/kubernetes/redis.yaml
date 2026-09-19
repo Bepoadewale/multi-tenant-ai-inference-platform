@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata: {name: inference-rate-limit-redis, namespace: inference}
+spec: {selector: {app: inference-rate-limit-redis}, ports: [{port: 6379}]}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: inference-rate-limit-redis, namespace: inference}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: inference-rate-limit-redis}}
+  template:
+    metadata: {labels: {app: inference-rate-limit-redis}}
+    spec:
+      containers:
+        - name: redis
+          image: redis:7.4-alpine
+          args: ["redis-server", "--appendonly", "no", "--save", ""]
+          resources: {requests: {cpu: 100m, memory: 128Mi}, limits: {cpu: 500m, memory: 256Mi}}
+          securityContext: {runAsNonRoot: true, allowPrivilegeEscalation: false, capabilities: {drop: ["ALL"]}}

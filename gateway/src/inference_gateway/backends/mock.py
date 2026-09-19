@@ -22,3 +22,6 @@ class MockInferenceBackend:
         for token in ["local", " inference", " response"]:
             await asyncio.sleep(0.002)
             yield token
+
+    async def health(self) -> bool:
+        return True
