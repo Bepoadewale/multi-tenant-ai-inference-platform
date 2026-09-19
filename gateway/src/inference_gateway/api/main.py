@@ -1,7 +1,7 @@
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, HTTPException
 from inference_gateway.auth.admin import platform_admin
 from inference_gateway.auth.service import authenticated_tenant
-from inference_gateway.models import ChatCompletionRequest, Tenant
+from inference_gateway.models import ChatCompletionRequest, RolloutWeights, Tenant
 from inference_gateway.services.gateway import service
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from starlette.responses import Response
@@ -56,3 +56,28 @@ def platform_models(admin: str = Depends(platform_admin)):
 @app.get("/platform/v1/tenants")
 def platform_tenants(admin: str = Depends(platform_admin)):
     return list(service.catalog.tenants.values())
+
+
+@app.get("/platform/v1/deployments")
+def deployments(admin: str = Depends(platform_admin)):
+    return [
+        {"alias": model.name, "targets": model.targets, "serving_mode": model.serving_mode}
+        for model in service.catalog.models.values()
+    ]
+
+
+@app.get("/platform/v1/rollouts/{alias}")
+def rollout(alias: str, admin: str = Depends(platform_admin)):
+    model = service.catalog.models.get(alias)
+    if not model:
+        raise HTTPException(404, "unknown model alias")
+    return {
+        "alias": alias,
+        "targets": model.targets,
+        "audit_events": [event for event in service.admin_audit if event.model == alias],
+    }
+
+
+@app.put("/platform/v1/rollouts/{alias}")
+def update_rollout(alias: str, update: RolloutWeights, admin: str = Depends(platform_admin)):
+    return service.update_rollout(admin, alias, update)

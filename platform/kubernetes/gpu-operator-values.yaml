@@ -1,0 +1,5 @@
+# Install only on NVIDIA GPU clusters. GPU Operator owns driver/toolkit/device plugin/DCGM lifecycle.
+driver: {enabled: true}
+devicePlugin: {enabled: true}
+dcgmExporter: {enabled: true}
+gfd: {enabled: true}

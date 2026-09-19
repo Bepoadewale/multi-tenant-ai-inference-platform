@@ -1,0 +1,1 @@
+{"title":"GPU Inference","panels":[{"title":"GPU utilization","targets":[{"expr":"avg(DCGM_FI_DEV_GPU_UTIL) by (node)"}]},{"title":"GPU framebuffer used","targets":[{"expr":"avg(DCGM_FI_DEV_FB_USED) by (node)"}]},{"title":"vLLM running requests","targets":[{"expr":"sum(vllm_num_requests_running) by (model_name)"}]}]}

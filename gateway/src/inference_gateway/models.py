@@ -96,3 +96,15 @@ class CapacityState(StrEnum):
     BUSY = "BUSY"
     SATURATED = "SATURATED"
     DEGRADED = "DEGRADED"
+
+
+class RolloutWeights(BaseModel):
+    weights: dict[str, int]
+
+
+class AdminAuditEvent(BaseModel):
+    actor: str
+    action: str
+    model: str
+    details: dict[str, str] = Field(default_factory=dict)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))

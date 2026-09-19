@@ -1,0 +1,14 @@
+# Optional EKS/Karpenter contract. Applying this can create costly GPU EC2 capacity.
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata: {name: inference-gpu}
+spec:
+  template:
+    metadata: {labels: {workload: inference, accelerator: nvidia}}
+    spec:
+      taints: [{key: nvidia.com/gpu, effect: NoSchedule}]
+      requirements:
+        - {key: karpenter.k8s.aws/instance-family, operator: In, values: [g5, g6]}
+        - {key: kubernetes.io/arch, operator: In, values: [amd64]}
+  limits: {cpu: "256"}
+  disruption: {consolidationPolicy: WhenEmpty, consolidateAfter: 5m}

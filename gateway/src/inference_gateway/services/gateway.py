@@ -9,7 +9,14 @@ from inference_gateway.backends.vllm import VllmBackend
 from inference_gateway.catalog.store import Catalog
 from inference_gateway.limiting.service import TenantLimiter
 from inference_gateway.metering.service import Meter
-from inference_gateway.models import ChatCompletionRequest, Tenant, Usage, UsageRecord
+from inference_gateway.models import (
+    AdminAuditEvent,
+    ChatCompletionRequest,
+    RolloutWeights,
+    Tenant,
+    Usage,
+    UsageRecord,
+)
 from inference_gateway.observability.metrics import (
     ACTIVE,
     LATENCY,
@@ -30,11 +37,35 @@ class GatewayService:
             MockInferenceBackend(),
             Meter(),
         )
+        self.admin_audit: list[AdminAuditEvent] = []
 
     def backend_for(self, model, target):
         if model.runtime == "vllm" and target.backend_url:
             return VllmBackend(target.backend_url, model.model_id)
         return self.backend
+
+    def update_rollout(self, actor: str, alias: str, update: RolloutWeights):
+        model = self.catalog.models.get(alias)
+        if not model:
+            raise HTTPException(404, "unknown model alias")
+        targets = {target.name: target for target in model.targets}
+        if set(update.weights) != set(targets) or sum(update.weights.values()) != 100:
+            raise HTTPException(422, "weights must cover every target and sum to 100")
+        if any(weight < 0 for weight in update.weights.values()):
+            raise HTTPException(422, "weights must be non-negative")
+        if any(not targets[name].healthy and weight > 0 for name, weight in update.weights.items()):
+            raise HTTPException(409, "cannot route traffic to an unhealthy target")
+        for name, weight in update.weights.items():
+            targets[name].weight = weight
+        self.admin_audit.append(
+            AdminAuditEvent(
+                actor=actor,
+                action="rollout.weights.updated",
+                model=alias,
+                details={name: str(weight) for name, weight in update.weights.items()},
+            )
+        )
+        return model
 
     async def chat(self, tenant: Tenant, request: ChatCompletionRequest):
         request_id, started = str(uuid4()), perf_counter()
