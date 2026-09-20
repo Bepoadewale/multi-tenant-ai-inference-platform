@@ -20,3 +20,11 @@
 - **PARTIALLY VALIDATED:** important integrations run but the central story is incomplete.
 - **LOCAL END-TO-END VALIDATED:** primary success runs locally with material evidence gaps remaining.
 - **PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE:** every checked gate has executed evidence; do not omit the suffix without production validation.
+
+# Clean-Room Reproducibility Gate
+
+`PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE` requires two executed clean-room cycles: clone → install → bootstrap gateway, Redis, CPU runtime, telemetry → smoke → authenticated inference/quota/queue/routing demo → overload or backend-failure demo → validation → project-scoped cleanup → second clean bootstrap/demo. Planned commands: `make install`, `make bootstrap-local`, `make smoke`, `make demo-local`, `make demo-overload`, `make verify`, `make clean-local`.
+
+- [ ] Clean clone/bootstrap has no hidden state; primary and failure demos pass.
+- [ ] Cleanup removes only this project and unrelated resources survive.
+- [ ] Post-cleanup absence and second bootstrap/demo are recorded in `docs/VALIDATION.md`.
