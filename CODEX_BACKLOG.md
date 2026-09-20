@@ -1,4 +1,15 @@
+# Completion Target
+
+PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE
+
+# Current Completion Blockers
+
+- Execute CPU-safe inference through authenticated tenant admission and Redis.
+- Prove distributed quotas, bounded queue behavior, routing, failure handling, metering, and telemetry.
+
 # P0 — Required for Portfolio Claim
+
+P0 items block PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE; do not select P1/P2 work first.
 
 - Add a CPU-safe real local inference backend and integration test.
 - Run Redis quota/rate-limit enforcement across two gateway instances.
