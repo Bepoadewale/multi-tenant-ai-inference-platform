@@ -28,3 +28,6 @@ P0 items block PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE; do not select P1/P2 wor
 # P3 — Future / Cloud / Hardware
 
 - vLLM on GPUs, DCGM, EKS and production autoscaling.
+# Clean-Room Completion Blocker
+
+- [ ] Pass the full clean-room reproducibility gate: deterministic bootstrap, smoke, inference and overload demos, safe cleanup, a second clean bootstrap, and recorded evidence. Break this into focused P0 work only during the scheduled week.
