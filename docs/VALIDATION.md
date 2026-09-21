@@ -6,7 +6,7 @@ Validation is local-first. Record hardware, runtime, exact command and result fo
 
 **Date:** 2026-09-21
 
-**Source revision:** Week 3 PR branch through `85b0b14` (clean-room cleanup behavior committed immediately after this evidence is reconciled).
+**Source revision:** `8d4b6e5` (`docs: record local completion evidence`).
 
 **Environment:** macOS, Docker Desktop Engine 29.0.1, Python 3.12, Docker Compose. No GPU, cloud account, or paid API.
 **Services:** two FastAPI gateways, two ONNX Runtime CPU targets, Redis 7.4, OTel Collector 0.120.0, Tempo 2.7.1, Prometheus 3.2.1, Grafana 11.5.1.
