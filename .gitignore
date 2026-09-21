@@ -8,3 +8,6 @@ __pycache__/
 .terraform/
 *.tfstate*
 benchmark-results/
+.venv/
+.local/
+models/

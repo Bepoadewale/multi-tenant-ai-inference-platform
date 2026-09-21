@@ -1,4 +1,6 @@
+import inspect
 import json
+import os
 from time import perf_counter
 from uuid import uuid4
 
@@ -8,6 +10,7 @@ from inference_gateway.backends.mock import MockInferenceBackend
 from inference_gateway.backends.onnx import OnnxRuntimeBackend
 from inference_gateway.backends.vllm import VllmBackend
 from inference_gateway.catalog.store import Catalog
+from inference_gateway.limiting.redis_service import RedisTenantLimiter
 from inference_gateway.limiting.service import TenantLimiter
 from inference_gateway.metering.service import Meter
 from inference_gateway.models import (
@@ -21,6 +24,7 @@ from inference_gateway.models import (
 from inference_gateway.observability.metrics import (
     ACTIVE,
     LATENCY,
+    QUEUE,
     REQUESTS,
     THROTTLES,
     TOKENS,
@@ -31,13 +35,10 @@ from inference_gateway.routing.router import Router
 
 class GatewayService:
     def __init__(self) -> None:
-        self.catalog, self.limiter, self.router, self.backend, self.meter = (
-            Catalog(),
-            TenantLimiter(),
-            Router(),
-            MockInferenceBackend(),
-            Meter(),
-        )
+        self.catalog = Catalog()
+        redis_url = os.getenv("REDIS_URL")
+        self.limiter = RedisTenantLimiter(redis_url) if redis_url else TenantLimiter()
+        self.router, self.backend, self.meter = Router(), MockInferenceBackend(), Meter()
         self.onnx_backend = OnnxRuntimeBackend()
         self.admin_audit: list[AdminAuditEvent] = []
 
@@ -84,7 +85,7 @@ class GatewayService:
             sum(len(message.content.split()) for message in request.messages) + request.max_tokens
         )
         try:
-            self.limiter.admit(tenant, estimate)
+            await self._admit(tenant, estimate)
             ACTIVE.labels(tenant.id).inc()
         except HTTPException as error:
             THROTTLES.labels(tenant.id, error.detail).inc()
@@ -126,7 +127,7 @@ class GatewayService:
             raise HTTPException(502, "inference backend failed") from error
         finally:
             ACTIVE.labels(tenant.id).dec()
-            self.limiter.release(tenant, 0)
+            await self._release(tenant, 0)
 
     def _stream(self, tenant, request, backend_name, version, request_id, started, backend):
         async def events():
@@ -162,11 +163,22 @@ class GatewayService:
                 yield "data: [DONE]\n\n"
             finally:
                 ACTIVE.labels(tenant.id).dec()
-                self.limiter.release(tenant, usage.total_tokens)
+                await self._release(tenant, usage.total_tokens)
 
         return StreamingResponse(
             events(), media_type="text/event-stream", headers={"X-Request-ID": request_id}
         )
+
+    async def _admit(self, tenant: Tenant, estimate: int) -> None:
+        result = self.limiter.admit(tenant, estimate)
+        if inspect.isawaitable(result):
+            await result
+        QUEUE.labels(tenant.id).set(0)
+
+    async def _release(self, tenant: Tenant, actual_tokens: int) -> None:
+        result = self.limiter.release(tenant, actual_tokens)
+        if inspect.isawaitable(result):
+            await result
 
     def _record(
         self,

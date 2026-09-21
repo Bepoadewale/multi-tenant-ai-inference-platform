@@ -29,6 +29,9 @@ class OnnxRuntimeBackend:
 
     async def complete(self, request: ChatCompletionRequest) -> tuple[str, Usage, float]:
         started = perf_counter()
+        delay_seconds = float(os.getenv("INFERENCE_RUNTIME_DELAY_SECONDS", "0"))
+        if delay_seconds:
+            await asyncio.sleep(delay_seconds)
         scores, labels = await asyncio.to_thread(
             self.session.run, ["scores", "label"], {"features": self._features(request)}
         )

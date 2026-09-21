@@ -17,6 +17,7 @@ services:
       context: .
       dockerfile: gateway/Dockerfile
     command: ["uvicorn", "inference_gateway.api.runtime:app", "--host", "0.0.0.0", "--port", "8000"]
+    environment: {INFERENCE_RUNTIME_DELAY_SECONDS: "0.35"}
     healthcheck:
       test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/health\")'"]
       interval: 3s
@@ -28,6 +29,7 @@ services:
       context: .
       dockerfile: gateway/Dockerfile
     command: ["uvicorn", "inference_gateway.api.runtime:app", "--host", "0.0.0.0", "--port", "8000"]
+    environment: {INFERENCE_RUNTIME_DELAY_SECONDS: "0.35"}
     healthcheck:
       test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/health\")'"]
       interval: 3s
@@ -43,6 +45,13 @@ services:
       INFERENCE_TARGET_V1_URL: http://runtime-v1:8000
       INFERENCE_TARGET_V2_URL: http://runtime-v2:8000
       REDIS_URL: redis://redis:6379/0
+      INFERENCE_AUTH_MODE: jwt
+      JWT_PUBLIC_KEY_PATH: /run/identity/public.pem
+      JWT_ISSUER: https://local.inference.platform
+      JWT_AUDIENCE: inference-gateway
+      INFERENCE_QUEUE_CAPACITY: "2"
+      INFERENCE_QUEUE_WAIT_SECONDS: "0.10"
+    volumes: ["./.local/identity/public.pem:/run/identity/public.pem:ro"]
     depends_on:
       redis: {condition: service_healthy}
       runtime-v1: {condition: service_healthy}
@@ -63,6 +72,13 @@ services:
       INFERENCE_TARGET_V1_URL: http://runtime-v1:8000
       INFERENCE_TARGET_V2_URL: http://runtime-v2:8000
       REDIS_URL: redis://redis:6379/0
+      INFERENCE_AUTH_MODE: jwt
+      JWT_PUBLIC_KEY_PATH: /run/identity/public.pem
+      JWT_ISSUER: https://local.inference.platform
+      JWT_AUDIENCE: inference-gateway
+      INFERENCE_QUEUE_CAPACITY: "2"
+      INFERENCE_QUEUE_WAIT_SECONDS: "0.10"
+    volumes: ["./.local/identity/public.pem:/run/identity/public.pem:ro"]
     depends_on:
       redis: {condition: service_healthy}
       runtime-v1: {condition: service_healthy}
