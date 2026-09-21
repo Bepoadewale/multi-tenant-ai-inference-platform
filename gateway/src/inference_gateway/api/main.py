@@ -11,7 +11,7 @@ app = FastAPI(title="Multi-tenant AI Inference Platform", version="0.1.0")
 
 @app.get("/healthz")
 def healthz():
-    return {"status": "ok", "mode": "local-mock"}
+    return {"status": "ok", "mode": "local-cpu-onnx"}
 
 
 @app.get("/metrics")
@@ -41,7 +41,7 @@ def usage(tenant_id: str, admin: str = Depends(platform_admin)):
 def capacity(admin: str = Depends(platform_admin)):
     return {
         "state": "HEALTHY",
-        "mode": "local-mock",
+        "mode": "local-cpu-onnx",
         "ready_replicas": 1,
         "gpu_telemetry": "unavailable in local mode",
         "queued_requests": 0,

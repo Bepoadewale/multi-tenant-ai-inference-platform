@@ -1,0 +1,79 @@
+name: multi-tenant-ai-inference-platform
+
+services:
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - inference-redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 2s
+      retries: 20
+
+  runtime-v1:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    command: ["uvicorn", "inference_gateway.api.runtime:app", "--host", "0.0.0.0", "--port", "8000"]
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/health\")'"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  runtime-v2:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    command: ["uvicorn", "inference_gateway.api.runtime:app", "--host", "0.0.0.0", "--port", "8000"]
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/health\")'"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  gateway-1:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    command: ["uvicorn", "inference_gateway.api.main:app", "--host", "0.0.0.0", "--port", "8080"]
+    environment:
+      INFERENCE_TARGET_V1_URL: http://runtime-v1:8000
+      INFERENCE_TARGET_V2_URL: http://runtime-v2:8000
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      redis: {condition: service_healthy}
+      runtime-v1: {condition: service_healthy}
+      runtime-v2: {condition: service_healthy}
+    ports: ["8081:8080"]
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8080/healthz\")'"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  gateway-2:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    command: ["uvicorn", "inference_gateway.api.main:app", "--host", "0.0.0.0", "--port", "8080"]
+    environment:
+      INFERENCE_TARGET_V1_URL: http://runtime-v1:8000
+      INFERENCE_TARGET_V2_URL: http://runtime-v2:8000
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      redis: {condition: service_healthy}
+      runtime-v1: {condition: service_healthy}
+      runtime-v2: {condition: service_healthy}
+    ports: ["8082:8080"]
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8080/healthz\")'"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  inference-redis:
+    name: multi-tenant-ai-inference-platform-redis

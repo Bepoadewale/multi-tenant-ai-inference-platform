@@ -5,6 +5,7 @@ from uuid import uuid4
 from fastapi import HTTPException
 from fastapi.responses import StreamingResponse
 from inference_gateway.backends.mock import MockInferenceBackend
+from inference_gateway.backends.onnx import OnnxRuntimeBackend
 from inference_gateway.backends.vllm import VllmBackend
 from inference_gateway.catalog.store import Catalog
 from inference_gateway.limiting.service import TenantLimiter
@@ -37,11 +38,14 @@ class GatewayService:
             MockInferenceBackend(),
             Meter(),
         )
+        self.onnx_backend = OnnxRuntimeBackend()
         self.admin_audit: list[AdminAuditEvent] = []
 
     def backend_for(self, model, target):
-        if model.runtime == "vllm" and target.backend_url:
+        if target.backend_url:
             return VllmBackend(target.backend_url, model.model_id)
+        if model.runtime == "onnx":
+            return self.onnx_backend
         return self.backend
 
     def update_rollout(self, actor: str, alias: str, update: RolloutWeights):

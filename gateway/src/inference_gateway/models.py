@@ -40,7 +40,7 @@ class ModelTarget(BaseModel):
 class ModelDefinition(BaseModel):
     name: str
     provider: str = "local"
-    runtime: Literal["mock", "vllm"] = "mock"
+    runtime: Literal["mock", "onnx", "vllm"] = "mock"
     model_id: str
     serving_mode: ServingMode = ServingMode.SHARED
     min_replicas: int = Field(default=1, ge=0)
