@@ -1,4 +1,4 @@
-.PHONY: install test lint run demo load-test bootstrap-local smoke demo-local demo-overload demo-routing demo-failure demo-metering verify clean-local destroy-local helm-lint terraform-validate
+.PHONY: install test lint run demo load-test bootstrap-local smoke demo-local demo-overload demo-routing demo-failure demo-metering demo-observability verify clean-local destroy-local helm-lint terraform-validate
 PYTHON ?= python3.12
 VENV := .venv
 PY := $(VENV)/bin/python
@@ -36,6 +36,8 @@ demo-failure:
 	./scripts/demo-backend-failure.sh
 demo-metering:
 	./scripts/demo-metering.sh
+demo-observability:
+	./scripts/demo-observability.sh
 verify:
 	$(MAKE) lint
 	$(MAKE) test
