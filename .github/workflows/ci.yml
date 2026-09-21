@@ -10,7 +10,7 @@ jobs:
         with: {python-version: "3.12"}
       - run: make install
       - run: make lint && make test && docker compose config --quiet
-      - run: pip-audit
+      - run: make audit
   manifests:
     runs-on: ubuntu-24.04
     steps:
@@ -38,7 +38,7 @@ jobs:
       - run: make install
       - run: make bootstrap-local
       - run: make smoke
-      - run: make demo-local && make demo-overload && make demo-routing && make demo-metering && make demo-observability && make demo-failure && make demo-recovery
+      - run: make demo-local && make demo-overload && make demo-routing && make demo-metering && make demo-observability && make demo-failure && make demo-timeout && make demo-recovery
       - run: make verify
       - if: always()
         run: make clean-local

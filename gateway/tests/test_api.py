@@ -8,7 +8,11 @@ def test_models_require_authenticated_identity():
     assert client.get("/v1/models").status_code == 401
     response = client.get("/v1/models", headers={"Authorization": "Bearer local-search-token"})
     assert response.status_code == 200
-    assert {item["id"] for item in response.json()["data"]} == {"chat-default", "embeddings"}
+    assert {item["id"] for item in response.json()["data"]} == {
+        "chat-default",
+        "chat-timeout-demo",
+        "embeddings",
+    }
 
 
 def test_platform_endpoints_require_stronger_role():

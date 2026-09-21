@@ -35,6 +35,7 @@ class ModelTarget(BaseModel):
     weight: int = Field(ge=0, le=100)
     healthy: bool = True
     backend_url: str | None = None
+    timeout_seconds: float | None = Field(default=None, gt=0)
 
 
 class ModelDefinition(BaseModel):

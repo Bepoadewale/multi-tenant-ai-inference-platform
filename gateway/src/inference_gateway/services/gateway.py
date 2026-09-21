@@ -46,7 +46,7 @@ class GatewayService:
 
     def backend_for(self, model, target):
         if target.backend_url:
-            return VllmBackend(target.backend_url, model.model_id)
+            return VllmBackend(target.backend_url, model.model_id, target.timeout_seconds)
         if model.runtime == "onnx":
             return self.onnx_backend
         return self.backend

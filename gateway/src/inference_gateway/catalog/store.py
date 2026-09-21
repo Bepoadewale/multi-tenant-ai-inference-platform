@@ -10,7 +10,7 @@ class Catalog:
         self.tenants = {
             "team-search": Tenant(
                 id="team-search",
-                allowed_models={"chat-default", "embeddings"},
+                allowed_models={"chat-default", "chat-timeout-demo", "embeddings"},
                 cost_center="SEARCH",
                 quotas=TenantQuota(
                     requests_per_minute=100,
@@ -58,6 +58,21 @@ class Catalog:
                 runtime="mock",
                 max_replicas=2,
                 targets=[ModelTarget(name="embeddings-v1", version="v1", weight=100)],
+            ),
+            "chat-timeout-demo": ModelDefinition(
+                name="chat-timeout-demo",
+                model_id="local/tiny-intent-classifier",
+                runtime="onnx",
+                max_replicas=1,
+                targets=[
+                    ModelTarget(
+                        name="onnx-delayed-fixture",
+                        version="v2",
+                        weight=100,
+                        backend_url=os.getenv("INFERENCE_TARGET_V2_URL"),
+                        timeout_seconds=0.1,
+                    )
+                ],
             ),
         }
 
