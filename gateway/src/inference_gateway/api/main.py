@@ -2,11 +2,13 @@ from fastapi import Depends, FastAPI, HTTPException
 from inference_gateway.auth.admin import platform_admin
 from inference_gateway.auth.service import authenticated_tenant
 from inference_gateway.models import ChatCompletionRequest, RolloutWeights, Tenant
+from inference_gateway.observability.tracing import configure_tracing
 from inference_gateway.services.gateway import service
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from starlette.responses import Response
 
 app = FastAPI(title="Multi-tenant AI Inference Platform", version="0.1.0")
+configure_tracing(app, "inference-gateway")
 
 
 @app.get("/healthz")

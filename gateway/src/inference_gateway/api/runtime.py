@@ -6,8 +6,10 @@ from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from inference_gateway.backends.onnx import OnnxRuntimeBackend
 from inference_gateway.models import ChatCompletionRequest
+from inference_gateway.observability.tracing import configure_tracing
 
 app = FastAPI(title="CPU ONNX Runtime Fixture", version="0.1.0")
+configure_tracing(app, "cpu-onnx-runtime")
 backend = OnnxRuntimeBackend()
 
 
