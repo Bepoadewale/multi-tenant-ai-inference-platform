@@ -11,3 +11,4 @@ benchmark-results/
 .venv/
 .local/
 models/
+:memory:.ses

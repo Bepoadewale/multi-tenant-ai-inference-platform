@@ -33,8 +33,8 @@ async def chat(request: ChatCompletionRequest, tenant: Tenant = Depends(authenti
 
 
 @app.get("/platform/v1/usage/{tenant_id}")
-def usage(tenant_id: str, admin: str = Depends(platform_admin)):
-    return service.meter.tenant_summary(tenant_id)
+async def usage(tenant_id: str, admin: str = Depends(platform_admin)):
+    return await service.tenant_usage(tenant_id)
 
 
 @app.get("/platform/v1/capacity")

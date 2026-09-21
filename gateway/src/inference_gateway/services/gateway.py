@@ -12,6 +12,7 @@ from inference_gateway.backends.vllm import VllmBackend
 from inference_gateway.catalog.store import Catalog
 from inference_gateway.limiting.redis_service import RedisTenantLimiter
 from inference_gateway.limiting.service import TenantLimiter
+from inference_gateway.metering.redis_service import RedisMeter
 from inference_gateway.metering.service import Meter
 from inference_gateway.models import (
     AdminAuditEvent,
@@ -38,7 +39,8 @@ class GatewayService:
         self.catalog = Catalog()
         redis_url = os.getenv("REDIS_URL")
         self.limiter = RedisTenantLimiter(redis_url) if redis_url else TenantLimiter()
-        self.router, self.backend, self.meter = Router(), MockInferenceBackend(), Meter()
+        self.router, self.backend = Router(), MockInferenceBackend()
+        self.meter = RedisMeter(redis_url) if redis_url else Meter()
         self.onnx_backend = OnnxRuntimeBackend()
         self.admin_audit: list[AdminAuditEvent] = []
 
@@ -96,7 +98,7 @@ class GatewayService:
             )
         try:
             text, usage, ttft_ms = await backend.complete(request)
-            self._record(
+            await self._record(
                 tenant,
                 request.model,
                 target.name,
@@ -148,7 +150,7 @@ class GatewayService:
                         ],
                     }
                     yield f"data: {json.dumps(payload)}\n\n"
-                self._record(
+                await self._record(
                     tenant,
                     request.model,
                     backend_name,
@@ -180,7 +182,7 @@ class GatewayService:
         if inspect.isawaitable(result):
             await result
 
-    def _record(
+    async def _record(
         self,
         tenant,
         model,
@@ -194,7 +196,7 @@ class GatewayService:
         outcome,
     ):
         latency_ms = (perf_counter() - started) * 1000
-        self.meter.record(
+        result = self.meter.record(
             UsageRecord(
                 request_id=request_id,
                 tenant_id=tenant.id,
@@ -208,11 +210,17 @@ class GatewayService:
                 outcome=outcome,
             )
         )
+        if inspect.isawaitable(result):
+            await result
         REQUESTS.labels(tenant.id, model, outcome).inc()
         TOKENS.labels(tenant.id, model, "prompt").inc(usage.prompt_tokens)
         TOKENS.labels(tenant.id, model, "completion").inc(usage.completion_tokens)
         LATENCY.labels(model).observe(latency_ms / 1000)
         TTFT.labels(model).observe(ttft_ms / 1000)
+
+    async def tenant_usage(self, tenant_id: str) -> dict:
+        result = self.meter.tenant_summary(tenant_id)
+        return await result if inspect.isawaitable(result) else result
 
 
 service = GatewayService()
