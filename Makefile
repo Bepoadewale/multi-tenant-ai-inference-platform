@@ -47,6 +47,8 @@ demo-recovery:
 verify:
 	$(MAKE) lint
 	$(MAKE) test
+	$(MAKE) audit
+	docker compose config --quiet
 clean-local:
 	./scripts/clean-local.sh
 destroy-local:
