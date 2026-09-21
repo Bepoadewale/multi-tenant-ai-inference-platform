@@ -26,6 +26,7 @@ from inference_gateway.observability.metrics import (
     ACTIVE,
     LATENCY,
     QUEUE,
+    QUEUE_WAIT,
     REQUESTS,
     THROTTLES,
     TOKENS,
@@ -172,10 +173,12 @@ class GatewayService:
         )
 
     async def _admit(self, tenant: Tenant, estimate: int) -> None:
+        started = perf_counter()
         result = self.limiter.admit(tenant, estimate)
         if inspect.isawaitable(result):
             await result
         QUEUE.labels(tenant.id).set(0)
+        QUEUE_WAIT.labels(tenant.id).observe(perf_counter() - started)
 
     async def _release(self, tenant: Tenant, actual_tokens: int) -> None:
         result = self.limiter.release(tenant, actual_tokens)

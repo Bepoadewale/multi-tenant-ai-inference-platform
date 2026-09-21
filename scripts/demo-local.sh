@@ -4,7 +4,15 @@ set -euo pipefail
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 "${repo_root}/scripts/smoke.sh"
 payments_token=$(jq -r '.payments' "${repo_root}/.local/identity/tokens.json")
+search_token=$(jq -r '.search' "${repo_root}/.local/identity/tokens.json")
 docker compose -f "${repo_root}/docker-compose.yml" exec -T redis redis-cli FLUSHDB >/dev/null
+
+curl -sS --connect-timeout 2 --max-time 5 -N http://localhost:8081/v1/chat/completions \
+  -H "Authorization: Bearer ${search_token}" -H 'content-type: application/json' \
+  -d '{"model":"chat-default","stream":true,"messages":[{"role":"user","content":"good streaming request"}],"max_tokens":4}' \
+  >/tmp/inference-stream.json
+grep -q 'classification=positive' /tmp/inference-stream.json
+grep -q 'data: \[DONE\]' /tmp/inference-stream.json
 
 request() {
   local port="$1"

@@ -11,3 +11,8 @@ LATENCY = Histogram(
 TTFT = Histogram("inference_gateway_ttft_seconds", "Time to first token", ["model"])
 ACTIVE = Gauge("inference_gateway_active_requests", "Active requests", ["tenant"])
 QUEUE = Gauge("inference_gateway_queue_depth", "Bounded tenant admission queue", ["tenant"])
+QUEUE_WAIT = Histogram(
+    "inference_gateway_queue_wait_seconds",
+    "Time spent waiting for bounded tenant admission",
+    ["tenant"],
+)
