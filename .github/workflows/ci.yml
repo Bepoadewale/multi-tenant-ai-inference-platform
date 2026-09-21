@@ -38,7 +38,7 @@ jobs:
       - run: make install
       - run: make bootstrap-local
       - run: make smoke
-      - run: make demo-local && make demo-overload && make demo-routing && make demo-metering && make demo-observability && make demo-failure
+      - run: make demo-local && make demo-overload && make demo-routing && make demo-metering && make demo-observability && make demo-failure && make demo-recovery
       - run: make verify
       - if: always()
         run: make clean-local
