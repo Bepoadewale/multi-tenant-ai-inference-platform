@@ -64,7 +64,7 @@ The local stack publishes gateways on `:8081` and `:8082`, Prometheus on `:9090`
 
 ## Security boundary
 
-The gateway does not trust tenant headers. Local Compose mode creates an ephemeral Ed25519 key pair and test tokens under ignored `.local/identity/`; the private key is mounted only where identity generation needs it and never committed. Gateway containers receive the public verification key. The local fixture distinguishes `inference.invoke` from `platform.admin`; an agent identity cannot self-escalate to rollout administration.
+The gateway does not trust tenant headers. Local Compose mode creates an ephemeral Ed25519 key pair and test tokens under ignored `.local/identity/`; the private key stays on the host and is never committed. Gateway containers receive only the public verification key. The local fixture distinguishes `inference.invoke` from `platform.admin`; an agent identity cannot self-escalate to rollout administration.
 
 The CPU runtime is deliberately lightweight and deterministic. It validates control-plane behavior, not model quality, GPU throughput, DCGM telemetry, KV-cache utilization, or production economics.
 

@@ -43,3 +43,16 @@ def test_streaming_is_sse_and_has_request_id():
     assert response.headers["content-type"].startswith("text/event-stream")
     assert "data: [DONE]" in response.text
     assert response.headers["x-request-id"]
+
+
+def test_unknown_model_is_rejected_before_runtime_invocation():
+    response = client.post(
+        "/v1/chat/completions",
+        headers={"Authorization": "Bearer local-search-token"},
+        json={
+            "model": "does-not-exist",
+            "messages": [{"role": "user", "content": "hello"}],
+        },
+    )
+    assert response.status_code == 404
+    assert response.json()["detail"] == "unknown model alias"

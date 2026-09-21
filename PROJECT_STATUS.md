@@ -2,7 +2,7 @@
 
 ## Current Maturity
 
-PARTIALLY VALIDATED
+PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE
 
 ## Maturity Model
 
@@ -10,32 +10,37 @@ PARTIALLY VALIDATED
 
 ## Executed and Verified
 
-- Tenant-aware local gateway, deterministic mock inference, weighted routing, metering and API tests.
+- Two independent FastAPI gateways authenticate Ed25519 JWTs and derive tenant/role server-side.
+- Redis Lua admission enforces shared request, token, concurrency, daily-budget, and bounded queue limits across both gateways.
+- Two Dockerized CPU ONNX Runtime targets return real deterministic classifier output through the OpenAI-compatible and SSE paths.
+- Admin-controlled weighted routing reaches the selected candidate runtime; ordinary tenant and agent identities cannot administer rollouts.
+- Redis metering stores metadata-only usage and survives a gateway restart.
+- OTel Collector, Tempo, Prometheus, and Grafana receive generated local gateway traffic.
+- Clean-room workflow passed twice: bootstrap, smoke, successful inference, bounded timeout failure, validation, project-scoped cleanup, then a second bootstrap/demo.
 
 ## Implemented but Not End-to-End Validated
 
-- Redis limiter, vLLM adapter, GPU/Kubernetes manifests, observability contracts.
+- CPU-safe local stack and its failure/recovery paths are validated. Production vLLM, GPU, and Kubernetes adapters remain static contracts.
 
 ## Simulated
 
-- Backend generation, usage economics and all GPU behavior.
+- No CPU backend generation is simulated: the local classifier is a real ONNX model. GPU/DCGM/KV-cache behavior and production cost allocation remain unexecuted.
 
 ## Architecture / Contracts Only
 
-- Distributed quota enforcement, real inference runtime and Grafana telemetry.
+- GPU serving, Kubernetes/EKS deployment/autoscaling, real cloud model hosting, and production durable metering/outbox.
 
 ## Known Failures
 
-- GitHub CI rerun pending after replacing an invalid Trivy action tag and remediating the audited pytest advisory.
+- None known. Required PR checks were green at the latest validated revision; future commits still require green CI.
 
 ## Current P0 Objective
 
-Run a CPU-safe real inference backend with Redis-backed tenant admission.
+Maintain the validated local-first control loop; take the highest-value P1 hardening item only after preserving clean-room reproducibility.
 
 ## Completion Blockers
 
-- No real CPU model runtime, Redis shared admission, or multi-gateway limit proof has executed.
-- Queue/backpressure, tenant isolation under distributed load, failure paths, usage persistence, and live telemetry/dashboard evidence are unexecuted.
+- None for the local-first completion gate. P1/P3 work remains below.
 
 ## Explicitly Unexecuted Production Adapters
 
@@ -43,18 +48,20 @@ Run a CPU-safe real inference backend with Redis-backed tenant admission.
 
 ## Last Validation
 
-- `PYTHONPATH=gateway/src ../ai-platform-control-plane/.venv/bin/python -m pytest -q`: 8 passed (2 dependency deprecation warnings).
-- `../ai-platform-control-plane/.venv/bin/python -m ruff check gateway/src gateway/tests benchmarks`: passed.
+- `make verify`: passed — Ruff, 20 pytest tests, pip-audit, and Compose configuration.
+- `make demo-local`, `make demo-overload`, `make demo-routing`, `make demo-metering`, `make demo-observability`, `make demo-failure`, `make demo-timeout`, and `make demo-recovery`: passed against the Docker stack.
+- PR #4 GitHub checks: `python`, `manifests`, `supply-chain`, and `local-e2e` passed.
 
 ## Last Updated
 
-2026-09-19, baseline `f7ab97f`.
+2026-09-21, Week 3 branch.
 
 ## Clean-Room Reproducibility
 
-**Status: NOT YET VALIDATED**
+**Status: VALIDATED**
 
-Completion requires two executed clean-room cycles: clean start → bootstrap → smoke → primary demo
-→ failure/security demo → validation → project-scoped cleanup, followed by a second clean bootstrap
-and demo. Existing developer state is not evidence. This status must be `VALIDATED` before
-`PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE` is allowed.
+Two clean-room cycles were executed on 2026-09-21. Each began after `make clean-local`, used
+`make install`, `make bootstrap-local`, and `make smoke`; the first ran the full demo/validation
+suite and the second reran the primary success and bounded-timeout failure demos. The cleanup
+asserted project Compose resources and generated artifacts were absent. An unrelated Redis
+sentinel container survived project cleanup.
