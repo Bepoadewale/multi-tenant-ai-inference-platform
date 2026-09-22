@@ -1,4 +1,4 @@
-.PHONY: install test lint audit run demo load-test bootstrap-local smoke demo-local demo-overload demo-routing demo-failure demo-timeout demo-metering demo-observability demo-recovery verify clean-local destroy-local helm-lint terraform-validate
+.PHONY: install test lint audit run demo load-test bootstrap-local smoke status demo-local demo-overload demo-routing demo-failure demo-timeout demo-metering demo-observability demo-recovery verify clean-local destroy-local helm-lint terraform-validate
 PYTHON ?= python3.12
 VENV := .venv
 PY := $(VENV)/bin/python
@@ -28,6 +28,8 @@ bootstrap-local:
 	./scripts/bootstrap-local.sh
 smoke:
 	./scripts/smoke.sh
+status:
+	./scripts/status.sh
 demo-local:
 	./scripts/demo-local.sh
 demo-overload:

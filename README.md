@@ -48,6 +48,7 @@ Prerequisites: Docker Desktop, Docker Compose, Python 3.12, `curl`, and `jq`. No
 make install
 make bootstrap-local
 make smoke
+make status              # service readiness and recorded request count
 make demo-local          # real inference, streaming, and shared quota
 make demo-overload       # bounded queue reject
 make demo-routing        # live candidate routing

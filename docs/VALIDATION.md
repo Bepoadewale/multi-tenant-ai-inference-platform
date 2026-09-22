@@ -19,6 +19,7 @@ Starting state was created with `make clean-local`. An unrelated `redis:7.4-alpi
 make install
 make bootstrap-local
 make smoke
+make status
 make demo-local
 make demo-overload
 make demo-routing
@@ -41,6 +42,7 @@ After cleanup, the project was recreated without using project-owned containers,
 make install
 make bootstrap-local
 make smoke
+make status
 make demo-local
 make demo-timeout
 make clean-local
