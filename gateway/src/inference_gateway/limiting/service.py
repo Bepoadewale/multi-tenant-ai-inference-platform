@@ -36,7 +36,9 @@ class TenantLimiter:
         reqs.append(now)
         tokens.append((now, estimated_tokens))
         self.active[tenant.id] += 1
+        self.daily[tenant.id] += estimated_tokens
 
     def release(self, tenant: Tenant, actual_tokens: int) -> None:
         self.active[tenant.id] = max(0, self.active[tenant.id] - 1)
-        self.daily[tenant.id] += actual_tokens
+        # Reserve the estimated daily budget at admission so concurrent requests cannot
+        # oversubscribe it. Actual usage remains in the privacy-safe metering record.

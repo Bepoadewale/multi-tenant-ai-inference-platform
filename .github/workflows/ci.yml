@@ -8,9 +8,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
-      - run: python -m pip install -e '.[dev]'
-      - run: make lint && make test
-      - run: pip-audit
+      - run: make install
+      - run: make lint && make test && docker compose config --quiet
+      - run: make audit
   manifests:
     runs-on: ubuntu-24.04
     steps:
@@ -29,3 +29,16 @@ jobs:
         with: {scan-type: fs, scan-ref: ., severity: HIGH,CRITICAL, exit-code: "1"}
       - uses: anchore/sbom-action@v0
         with: {path: ., format: spdx-json}
+  local-e2e:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: make install
+      - run: make bootstrap-local
+      - run: make smoke
+      - run: make demo-local && make demo-overload && make demo-routing && make demo-metering && make demo-observability && make demo-failure && make demo-timeout && make demo-recovery
+      - run: make verify
+      - if: always()
+        run: make clean-local

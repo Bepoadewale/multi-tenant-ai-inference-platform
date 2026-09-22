@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
-command -v kind >/dev/null || { echo 'install kind first'; exit 1; }
-kind get clusters | grep -qx inference-platform-local || kind create cluster --name inference-platform-local
-helm upgrade --install inference-platform platform/helm/inference-platform --namespace inference --create-namespace --set image.repository=nginx --set image.tag=1.27-alpine
-kubectl get pods -n inference
+
+repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+command -v docker >/dev/null || { echo 'Docker Desktop is required.' >&2; exit 1; }
+docker info >/dev/null 2>&1 || { echo 'Docker Desktop is not running.' >&2; exit 1; }
+"${repo_root}/.venv/bin/python" "${repo_root}/scripts/generate_local_identity.py"
+docker compose -f "${repo_root}/docker-compose.yml" up --build --wait --wait-timeout 180

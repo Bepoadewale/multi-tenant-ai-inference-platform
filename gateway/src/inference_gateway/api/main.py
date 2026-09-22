@@ -2,16 +2,18 @@ from fastapi import Depends, FastAPI, HTTPException
 from inference_gateway.auth.admin import platform_admin
 from inference_gateway.auth.service import authenticated_tenant
 from inference_gateway.models import ChatCompletionRequest, RolloutWeights, Tenant
+from inference_gateway.observability.tracing import configure_tracing
 from inference_gateway.services.gateway import service
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from starlette.responses import Response
 
 app = FastAPI(title="Multi-tenant AI Inference Platform", version="0.1.0")
+configure_tracing(app, "inference-gateway")
 
 
 @app.get("/healthz")
 def healthz():
-    return {"status": "ok", "mode": "local-mock"}
+    return {"status": "ok", "mode": "local-cpu-onnx"}
 
 
 @app.get("/metrics")
@@ -33,15 +35,15 @@ async def chat(request: ChatCompletionRequest, tenant: Tenant = Depends(authenti
 
 
 @app.get("/platform/v1/usage/{tenant_id}")
-def usage(tenant_id: str, admin: str = Depends(platform_admin)):
-    return service.meter.tenant_summary(tenant_id)
+async def usage(tenant_id: str, admin: str = Depends(platform_admin)):
+    return await service.tenant_usage(tenant_id)
 
 
 @app.get("/platform/v1/capacity")
 def capacity(admin: str = Depends(platform_admin)):
     return {
         "state": "HEALTHY",
-        "mode": "local-mock",
+        "mode": "local-cpu-onnx",
         "ready_replicas": 1,
         "gpu_telemetry": "unavailable in local mode",
         "queued_requests": 0,

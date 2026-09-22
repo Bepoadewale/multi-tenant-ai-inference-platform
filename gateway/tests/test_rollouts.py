@@ -9,7 +9,7 @@ def test_rollout_update_is_audited_and_must_sum_to_100():
     result = service.update_rollout(
         "operator",
         "chat-default",
-        RolloutWeights(weights={"llama-small-v1": 95, "llama-small-v2": 5}),
+        RolloutWeights(weights={"onnx-stable-v1": 95, "onnx-candidate-v2": 5}),
     )
     assert result.targets[0].weight == 95
     assert service.admin_audit[-1].action == "rollout.weights.updated"
@@ -17,5 +17,5 @@ def test_rollout_update_is_audited_and_must_sum_to_100():
         service.update_rollout(
             "operator",
             "chat-default",
-            RolloutWeights(weights={"llama-small-v1": 90, "llama-small-v2": 5}),
+            RolloutWeights(weights={"onnx-stable-v1": 90, "onnx-candidate-v2": 5}),
         )

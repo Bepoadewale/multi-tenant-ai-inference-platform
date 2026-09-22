@@ -1,0 +1,139 @@
+name: multi-tenant-ai-inference-platform
+
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.120.0
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes: ["./observability/otel-collector.yaml:/etc/otelcol-contrib/config.yaml:ro"]
+    ports: ["4318:4318"]
+
+  tempo:
+    image: grafana/tempo:2.7.1
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes: ["./observability/tempo.yaml:/etc/tempo.yaml:ro"]
+    ports: ["3200:3200"]
+
+  prometheus:
+    image: prom/prometheus:v3.2.1
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.path=/prometheus"]
+    volumes:
+      - "./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro"
+      - "inference-prometheus:/prometheus"
+    ports: ["9090:9090"]
+
+  grafana:
+    image: grafana/grafana:11.5.1
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    volumes:
+      - "./observability/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/local.yaml:ro"
+      - "./observability/grafana-dashboards.yaml:/etc/grafana/provisioning/dashboards/local.yaml:ro"
+      - "./dashboards:/var/lib/grafana/dashboards:ro"
+      - "inference-grafana:/var/lib/grafana"
+    ports: ["3002:3000"]
+
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - inference-redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 2s
+      retries: 20
+
+  runtime-v1:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    command: ["uvicorn", "inference_gateway.api.runtime:app", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      INFERENCE_RUNTIME_DELAY_SECONDS: "0.35"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/health\")'"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  runtime-v2:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    command: ["uvicorn", "inference_gateway.api.runtime:app", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      INFERENCE_RUNTIME_DELAY_SECONDS: "0.35"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/health\")'"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  gateway-1:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    command: ["uvicorn", "inference_gateway.api.main:app", "--host", "0.0.0.0", "--port", "8080"]
+    environment:
+      INFERENCE_TARGET_V1_URL: http://runtime-v1:8000
+      INFERENCE_TARGET_V2_URL: http://runtime-v2:8000
+      REDIS_URL: redis://redis:6379/0
+      INFERENCE_AUTH_MODE: jwt
+      JWT_PUBLIC_KEY_PATH: /run/identity/public.pem
+      JWT_ISSUER: https://local.inference.platform
+      JWT_AUDIENCE: inference-gateway
+      INFERENCE_QUEUE_CAPACITY: "2"
+      INFERENCE_QUEUE_WAIT_SECONDS: "0.10"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+    volumes: ["./.local/identity/public.pem:/run/identity/public.pem:ro"]
+    depends_on:
+      redis: {condition: service_healthy}
+      runtime-v1: {condition: service_healthy}
+      runtime-v2: {condition: service_healthy}
+      otel-collector: {condition: service_started}
+    ports: ["8081:8080"]
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8080/healthz\")'"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  gateway-2:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    command: ["uvicorn", "inference_gateway.api.main:app", "--host", "0.0.0.0", "--port", "8080"]
+    environment:
+      INFERENCE_TARGET_V1_URL: http://runtime-v1:8000
+      INFERENCE_TARGET_V2_URL: http://runtime-v2:8000
+      REDIS_URL: redis://redis:6379/0
+      INFERENCE_AUTH_MODE: jwt
+      JWT_PUBLIC_KEY_PATH: /run/identity/public.pem
+      JWT_ISSUER: https://local.inference.platform
+      JWT_AUDIENCE: inference-gateway
+      INFERENCE_QUEUE_CAPACITY: "2"
+      INFERENCE_QUEUE_WAIT_SECONDS: "0.10"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+    volumes: ["./.local/identity/public.pem:/run/identity/public.pem:ro"]
+    depends_on:
+      redis: {condition: service_healthy}
+      runtime-v1: {condition: service_healthy}
+      runtime-v2: {condition: service_healthy}
+      otel-collector: {condition: service_started}
+    ports: ["8082:8080"]
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8080/healthz\")'"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  inference-redis:
+    name: multi-tenant-ai-inference-platform-redis
+  inference-prometheus:
+    name: multi-tenant-ai-inference-platform-prometheus
+  inference-grafana:
+    name: multi-tenant-ai-inference-platform-grafana

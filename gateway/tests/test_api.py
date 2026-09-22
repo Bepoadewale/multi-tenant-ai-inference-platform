@@ -8,7 +8,11 @@ def test_models_require_authenticated_identity():
     assert client.get("/v1/models").status_code == 401
     response = client.get("/v1/models", headers={"Authorization": "Bearer local-search-token"})
     assert response.status_code == 200
-    assert {item["id"] for item in response.json()["data"]} == {"chat-default", "embeddings"}
+    assert {item["id"] for item in response.json()["data"]} == {
+        "chat-default",
+        "chat-timeout-demo",
+        "embeddings",
+    }
 
 
 def test_platform_endpoints_require_stronger_role():
@@ -39,3 +43,16 @@ def test_streaming_is_sse_and_has_request_id():
     assert response.headers["content-type"].startswith("text/event-stream")
     assert "data: [DONE]" in response.text
     assert response.headers["x-request-id"]
+
+
+def test_unknown_model_is_rejected_before_runtime_invocation():
+    response = client.post(
+        "/v1/chat/completions",
+        headers={"Authorization": "Bearer local-search-token"},
+        json={
+            "model": "does-not-exist",
+            "messages": [{"role": "user", "content": "hello"}],
+        },
+    )
+    assert response.status_code == 404
+    assert response.json()["detail"] == "unknown model alias"

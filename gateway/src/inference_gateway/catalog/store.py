@@ -1,3 +1,5 @@
+import os
+
 from inference_gateway.models import ModelDefinition, ModelTarget, Tenant, TenantQuota
 
 
@@ -8,7 +10,7 @@ class Catalog:
         self.tenants = {
             "team-search": Tenant(
                 id="team-search",
-                allowed_models={"chat-default", "embeddings"},
+                allowed_models={"chat-default", "chat-timeout-demo", "embeddings"},
                 cost_center="SEARCH",
                 quotas=TenantQuota(
                     requests_per_minute=100,
@@ -32,12 +34,22 @@ class Catalog:
         self.models = {
             "chat-default": ModelDefinition(
                 name="chat-default",
-                model_id="meta-llama/Llama-3.2-3B-Instruct",
-                runtime="mock",
+                model_id="local/tiny-intent-classifier",
+                runtime="onnx",
                 max_replicas=4,
                 targets=[
-                    ModelTarget(name="llama-small-v1", version="v1", weight=90),
-                    ModelTarget(name="llama-small-v2", version="v2", weight=10),
+                    ModelTarget(
+                        name="onnx-stable-v1",
+                        version="v1",
+                        weight=90,
+                        backend_url=os.getenv("INFERENCE_TARGET_V1_URL"),
+                    ),
+                    ModelTarget(
+                        name="onnx-candidate-v2",
+                        version="v2",
+                        weight=10,
+                        backend_url=os.getenv("INFERENCE_TARGET_V2_URL"),
+                    ),
                 ],
             ),
             "embeddings": ModelDefinition(
@@ -46,6 +58,21 @@ class Catalog:
                 runtime="mock",
                 max_replicas=2,
                 targets=[ModelTarget(name="embeddings-v1", version="v1", weight=100)],
+            ),
+            "chat-timeout-demo": ModelDefinition(
+                name="chat-timeout-demo",
+                model_id="local/tiny-intent-classifier",
+                runtime="onnx",
+                max_replicas=1,
+                targets=[
+                    ModelTarget(
+                        name="onnx-delayed-fixture",
+                        version="v2",
+                        weight=100,
+                        backend_url=os.getenv("INFERENCE_TARGET_V2_URL"),
+                        timeout_seconds=0.1,
+                    )
+                ],
             ),
         }
 

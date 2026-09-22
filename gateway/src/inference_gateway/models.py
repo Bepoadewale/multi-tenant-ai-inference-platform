@@ -35,12 +35,13 @@ class ModelTarget(BaseModel):
     weight: int = Field(ge=0, le=100)
     healthy: bool = True
     backend_url: str | None = None
+    timeout_seconds: float | None = Field(default=None, gt=0)
 
 
 class ModelDefinition(BaseModel):
     name: str
     provider: str = "local"
-    runtime: Literal["mock", "vllm"] = "mock"
+    runtime: Literal["mock", "onnx", "vllm"] = "mock"
     model_id: str
     serving_mode: ServingMode = ServingMode.SHARED
     min_replicas: int = Field(default=1, ge=0)

@@ -10,10 +10,12 @@ from inference_gateway.models import ChatCompletionRequest, Usage
 
 
 class VllmBackend:
-    def __init__(self, base_url: str, model_id: str) -> None:
+    def __init__(self, base_url: str, model_id: str, timeout_seconds: float | None = None) -> None:
         self.base_url = base_url.rstrip("/")
         self.model_id = model_id
-        self.timeout_seconds = float(os.getenv("INFERENCE_BACKEND_TIMEOUT_SECONDS", "30"))
+        self.timeout_seconds = timeout_seconds or float(
+            os.getenv("INFERENCE_BACKEND_TIMEOUT_SECONDS", "30")
+        )
 
     def _payload(self, request: ChatCompletionRequest, stream: bool) -> dict:
         return {
