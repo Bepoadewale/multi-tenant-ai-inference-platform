@@ -1,10 +1,10 @@
 # Roadmap
 
-- [x] M1 gateway, mock runtime, OpenAI-compatible chat/streaming, tests.
+- [x] M1 gateway, deterministic mock test backend, real CPU ONNX Runtime local backend, OpenAI-compatible chat/streaming, and tests.
 - [x] M2 authenticated fixture identity, tenant authorization, quotas, metering.
 - [x] M3 vLLM runtime configuration and Kubernetes/Helm contracts.
 - [x] M4 aliases, weighted routing, healthy backend behavior.
-- [x] M5 Prometheus metric contract, dashboards documentation, OTEL design.
+- [x] M5 Prometheus metrics, provisioned local dashboard, and OTLP export to Tempo for generated traffic.
 - [x] M6 benchmark/load client and report artifacts.
 - [x] M7 KEDA inference-demand scaling contract.
 - [x] M8 GPU scheduling/DCGM/GPU Operator documentation and manifests.
