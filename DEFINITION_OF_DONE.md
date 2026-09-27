@@ -8,7 +8,7 @@ The existing checked items prove the inference core. Before describing the repos
 as a complete *integrated flagship*, each planned vertical slice must have real local
 evidence and the cross-slice demonstration must pass clean-room validation.
 
-- [ ] Verified model registry/evaluation/canary/approval/promotion-or-rollback path.
+- [x] Verified model registry/evaluation/canary/approval/promotion-or-rollback path.
 - [ ] Explicit simulated-GPU capacity policy with real local admission evidence.
 - [ ] Request-to-release trace/SLO/estimated-cost correlation.
 - [ ] Governed remediation failure and verification path.

@@ -32,6 +32,7 @@ from inference_gateway.observability.metrics import (
     TOKENS,
     TTFT,
 )
+from inference_gateway.routing.rollout_store import RolloutStore
 from inference_gateway.routing.router import Router
 
 
@@ -41,6 +42,7 @@ class GatewayService:
         redis_url = os.getenv("REDIS_URL")
         self.limiter = RedisTenantLimiter(redis_url) if redis_url else TenantLimiter()
         self.router, self.backend = Router(), MockInferenceBackend()
+        self.rollouts = RolloutStore(redis_url)
         self.meter = RedisMeter(redis_url) if redis_url else Meter()
         self.onnx_backend = OnnxRuntimeBackend()
         self.admin_audit: list[AdminAuditEvent] = []
@@ -65,6 +67,7 @@ class GatewayService:
             raise HTTPException(409, "cannot route traffic to an unhealthy target")
         for name, weight in update.weights.items():
             targets[name].weight = weight
+        self.rollouts.put(alias, update.weights)
         self.admin_audit.append(
             AdminAuditEvent(
                 actor=actor,
@@ -80,6 +83,7 @@ class GatewayService:
         model = self.catalog.models.get(request.model)
         if not model:
             raise HTTPException(404, "unknown model alias")
+        self._apply_shared_rollout(model)
         # Authorize before consuming an admission quota; rejected model access cannot
         # deliberately exhaust a tenant's valid workload budget.
         target = self.router.choose(tenant, model, request_id)
@@ -224,6 +228,19 @@ class GatewayService:
     async def tenant_usage(self, tenant_id: str) -> dict:
         result = self.meter.tenant_summary(tenant_id)
         return await result if inspect.isawaitable(result) else result
+
+    def _apply_shared_rollout(self, model) -> None:
+        """Read validated release intent immediately before routing live traffic."""
+        weights = self.rollouts.get(model.name)
+        if weights is None:
+            return
+        targets = {target.name: target for target in model.targets}
+        if set(weights) != set(targets) or sum(weights.values()) != 100:
+            return
+        if any(weight < 0 or (weight > 0 and not targets[name].healthy) for name, weight in weights.items()):
+            return
+        for name, weight in weights.items():
+            targets[name].weight = weight
 
 
 service = GatewayService()

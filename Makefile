@@ -1,4 +1,4 @@
-.PHONY: install test lint audit run demo load-test bootstrap-local smoke status demo-local demo-overload demo-routing demo-failure demo-timeout demo-metering demo-observability demo-recovery demo-model-registry verify clean-local destroy-local helm-lint terraform-validate
+.PHONY: install test lint audit run demo load-test bootstrap-local smoke status demo-local demo-overload demo-routing demo-failure demo-timeout demo-metering demo-observability demo-recovery demo-model-registry demo-release-control verify clean-local destroy-local helm-lint terraform-validate
 PYTHON ?= python3.12
 VENV := .venv
 PY := $(VENV)/bin/python
@@ -49,6 +49,8 @@ demo-recovery:
 	./scripts/demo-recovery.sh
 demo-model-registry:
 	./scripts/demo-model-registry.sh
+demo-release-control:
+	./scripts/demo-release-control.sh
 verify:
 	$(MAKE) lint
 	$(MAKE) test

@@ -2,8 +2,10 @@
 
 Flagship context: the existing weighted-routing core is preserved. A local MLflow
 registry now stores real stable/candidate ONNX artifacts, SHA-256 digest tags, CPU
-fixture evaluation metrics, and `champion`/`candidate` aliases. Governed approval,
-promotion and rollback remain the next release-control slice.
+fixture evaluation metrics, and `champion`/`candidate` aliases. Release control binds
+those identifiers into a SQLite plan, denies self-approval, uses a separate
+`release.approve` role, writes canary intent to Redis for both gateways, promotes the
+MLflow champion alias, and restores the recorded prior champion on rollback.
 
 Model v1 is stable and v2 candidate. Progress 5→25→50→100% only after infrastructure health and workload-specific latency/error gates. Rollback changes target weights to zero; it does not claim model quality validation. Quality evaluation belongs to a separate curated evaluation pipeline.
 

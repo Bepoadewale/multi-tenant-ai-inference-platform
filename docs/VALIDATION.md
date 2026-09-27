@@ -19,9 +19,12 @@ SQLite store and artifacts directory, evaluated two generated ONNX artifacts wit
 health and registered model, while `make demo-model-registry` verified the aliases and
 recorded digest evidence in `.local/mlflow/registry-evidence.json`.
 
-This is registry and artifact-evidence validation only. It does **not** yet validate
-governed canary approval, promotion, rollback, or the expanded flagship clean-room
-cycle; those remain completion blockers.
+`make demo-release-control` additionally executed: plan creation from the MLflow
+aliases/digest; a denied requester approval; an independent `release.approve` grant;
+a Redis-shared 10% canary observed through a second gateway; 100% candidate promotion;
+and rollback to the recorded stable MLflow version with live stable-route evidence.
+The release store is SQLite-backed and unit tests reject a stale transition. This does
+not yet validate the expanded flagship clean-room cycle; that remains a later blocker.
 
 ## Clean-Room Validation
 
