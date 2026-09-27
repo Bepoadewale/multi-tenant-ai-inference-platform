@@ -7,14 +7,15 @@ services:
       dockerfile: gateway/Dockerfile
     user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
     command:
-      ["mlflow", "server", "--host", "0.0.0.0", "--port", "5000", "--allowed-hosts", "localhost:5000,localhost:15010,127.0.0.1:5000,127.0.0.1:15010,mlflow:5000", "--backend-store-uri", "sqlite:////mlflow/mlflow.db", "--serve-artifacts", "--artifacts-destination", "/mlflow/artifacts"]
+      ["mlflow", "server", "--host", "0.0.0.0", "--port", "5000", "--workers", "1", "--allowed-hosts", "localhost:5000,localhost:15010,127.0.0.1:5000,127.0.0.1:15010,mlflow:5000", "--backend-store-uri", "sqlite:////mlflow/mlflow.db", "--serve-artifacts", "--artifacts-destination", "/mlflow/artifacts"]
     volumes: ["./.local/mlflow:/mlflow"]
     ports: ["15010:5000"]
     healthcheck:
       test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:5000/health\")'"]
       interval: 3s
       timeout: 3s
-      retries: 30
+      start_period: 30s
+      retries: 60
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.120.0
