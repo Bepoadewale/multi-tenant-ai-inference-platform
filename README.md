@@ -1,8 +1,30 @@
-# Multi-Tenant AI Inference Platform
+# Multi-Tenant AI Platform
 
-A local-first, governed inference platform for shared AI model capacity. Applications and agents use an OpenAI-compatible API; the gateway verifies a signed identity, derives the tenant server-side, applies shared admission controls, routes to a model runtime, records privacy-safe usage, and emits metrics and traces.
+The public flagship for a local-first, governed AI platform. Its executed foundation is
+a multi-tenant inference platform: applications and agents use an OpenAI-compatible
+API; the gateway verifies a signed identity, derives the tenant server-side, applies
+shared admission controls, routes to a model runtime, records privacy-safe usage, and
+emits metrics and traces.
 
 It answers a practical platform question: **how can multiple teams use shared model capacity without receiving direct runtime, GPU, Redis, or infrastructure credentials?**
+
+## Flagship direction
+
+The proven inference core stays intact. The platform will add model release control,
+simulated-capacity policy, SLO/FinOps evidence, governed remediation, secure agent
+tools, optional edge operations and developer self-service as **separate validated
+vertical slices**—not as a rewrite or a merge of nine codebases.
+
+The first integrated demonstration is:
+
+```text
+tenant request -> identity/quota/policy -> verified candidate release -> canary traffic
+-> telemetry/SLO/cost evidence -> independent approval -> promote or roll back
+```
+
+See [flagship direction](docs/flagship-direction.md) for boundaries and the staged
+integration model. Commercial strategy is intentionally not maintained in this public
+repository.
 
 ## What it allows—and prevents
 
@@ -72,6 +94,7 @@ The CPU runtime is deliberately lightweight and deterministic. It validates cont
 ## Documentation
 
 - [Architecture](docs/architecture.md)
+- [Flagship direction](docs/flagship-direction.md)
 - [Multi-tenancy](docs/multi-tenancy.md)
 - [Routing](docs/routing.md)
 - [Observability](docs/observability.md)

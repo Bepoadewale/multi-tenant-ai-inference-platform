@@ -2,7 +2,10 @@
 
 ## Current Maturity
 
-PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE
+PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE for the multi-tenant inference core.
+
+The repository is now the public flagship. Flagship integrations are planned work and
+must not be represented as executed until they have their own local evidence.
 
 ## Maturity Model
 
@@ -36,11 +39,14 @@ PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE
 
 ## Current P0 Objective
 
-Maintain the validated local-first control loop; take the highest-value P1 hardening item only after preserving clean-room reproducibility.
+Add the first flagship vertical slice: a real local model registry/evaluation/release
+control path that preserves the validated gateway, tenant controls and clean-room demo.
 
 ## Completion Blockers
 
-- None for the local-first completion gate. P1/P3 work remains below.
+- None for the existing inference-core completion gate.
+- The flagship release-control, capacity, SLO/FinOps, remediation, secure-agent,
+  developer-self-service and optional edge slices are not yet executed here.
 
 ## Explicitly Unexecuted Production Adapters
 

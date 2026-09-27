@@ -2,6 +2,21 @@
 
 # Portfolio Complete — Local-First Scope Gate
 
+## Flagship evolution gate
+
+The existing checked items prove the inference core. Before describing the repository
+as a complete *integrated flagship*, each planned vertical slice must have real local
+evidence and the cross-slice demonstration must pass clean-room validation.
+
+- [ ] Verified model registry/evaluation/canary/approval/promotion-or-rollback path.
+- [ ] Explicit simulated-GPU capacity policy with real local admission evidence.
+- [ ] Request-to-release trace/SLO/estimated-cost correlation.
+- [ ] Governed remediation failure and verification path.
+- [ ] Secure delegated agent tool path without privilege amplification.
+- [ ] Developer self-service and optional edge interfaces remain narrow, independently
+  documented and honest about unexecuted adapters.
+- [ ] Integrated clean-room success and rollback demonstration.
+
 - [x] CPU-capable real model runtime returns output through the OpenAI-compatible API; streaming is exercised if claimed.
 - [x] Signed/authenticated tenant identity, isolation, and no cross-tenant leakage are tested.
 - [x] Redis-backed distributed quota/rate/concurrency enforcement is exercised across multiple gateway instances where practical.

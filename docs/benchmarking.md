@@ -1,5 +1,8 @@
 # Benchmarking and demo scenarios
 
+Flagship context: benchmark evidence must remain tied to the exact local runtime;
+planned registry, capacity and FinOps slices do not turn CPU fixture results into GPU claims.
+
 `make load-test` is a deterministic **mock-backend** benchmark client. It writes JSON, CSV, and
 Markdown metadata/results and explicitly labels its output `local-mock`; its figures are useful for
 gateway smoke/regression work only. They are not measurements of the Dockerized ONNX Runtime path,

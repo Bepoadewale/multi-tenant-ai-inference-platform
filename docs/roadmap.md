@@ -1,5 +1,17 @@
 # Roadmap
 
+## Flagship evolution
+
+The completed milestones below are the preserved inference core. The next milestones
+are additive vertical slices, each requiring real local execution and a failure path:
+
+- [ ] F1 MLflow-backed registry, evaluation, verified canary, approval and rollback.
+- [ ] F2 simulated-GPU capacity/admission policy; no physical GPU claims.
+- [ ] F3 request/release/SLO/estimated-cost correlation.
+- [ ] F4 governed incident/remediation and verification.
+- [ ] F5 delegated agent tools, self-service requests and optional edge adapter.
+- [ ] F6 integrated clean-room success and rollback demonstration.
+
 - [x] M1 gateway, deterministic mock test backend, real CPU ONNX Runtime local backend, OpenAI-compatible chat/streaming, and tests.
 - [x] M2 authenticated fixture identity, tenant authorization, quotas, metering.
 - [x] M3 vLLM runtime configuration and Kubernetes/Helm contracts.

@@ -1,5 +1,8 @@
 # Interview guide
 
+Flagship context: describe the executed inference core separately from each planned
+integration slice; do not collapse roadmap architecture into execution claims.
+
 This platform treats inference as a latency-sensitive, shared accelerator service. Discuss why vLLM supplies efficient continuous batching/OpenAI compatibility while the gateway owns identity/fairness/metering. Explain TTFT (prefill/user wait), TPOT (decode cadence), KV cache pressure, throughput-versus-tail-latency, and why CPU autoscaling is insufficient.
 
 Discuss integer GPU scheduling, tensor parallelism for models that do not fit one GPU, GPU cold starts/model distribution, DCGM telemetry, KEDA pod demand versus Karpenter node capacity, and shared versus dedicated pools. Explain quotas as tenant-scoped request/token/concurrency protection, aliases as safe rollout indirection, and metadata-only telemetry for prompt privacy.

@@ -2,6 +2,13 @@
 
 Validation is local-first. Record hardware, runtime, exact command and result for any benchmark; never infer GPU behavior from the deterministic CPU fixture or fabricate validation.
 
+## Flagship integration rule
+
+The evidence below validates the inference core only. Each future flagship vertical
+slice must add its own commands, external dependencies, success path, failure path and
+clean-room evidence before it is listed as executed. The integrated flagship demo must
+be rerun from clean project state after the slices are connected.
+
 ## Clean-Room Validation
 
 **Date:** 2026-09-21
