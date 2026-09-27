@@ -58,6 +58,7 @@ flowchart LR
 | Signed identity + tenant RBAC | ✅ EXECUTED LOCALLY | Ed25519 JWT issuer/audience/expiry/signature/tenant/role checks and negative tests. |
 | Distributed admission | ✅ EXECUTED LOCALLY | Redis Lua limits shared across two gateways; quota and queue demos return 429. |
 | Weighted routing | ✅ EXECUTED LOCALLY | Admin weight change sends live traffic to the candidate runtime. |
+| MLflow model registry | ✅ EXECUTED LOCALLY | Local MLflow records two real ONNX artifacts, SHA-256 digests, fixture evaluation metrics, and `champion`/`candidate` aliases. |
 | Usage + restart recovery | ✅ EXECUTED LOCALLY | Metadata-only Redis usage survives a gateway restart. |
 | Metrics, traces, dashboards | ✅ EXECUTED LOCALLY | Prometheus, OTel Collector, Tempo, and Grafana receive generated local traffic. |
 | GPU/vLLM/DCGM/Kubernetes | 📐 ARCHITECTURE / CONTRACT ONLY | No GPU or cloud execution is claimed. |
@@ -74,6 +75,7 @@ make status              # service readiness and recorded request count
 make demo-local          # real inference, streaming, and shared quota
 make demo-overload       # bounded queue reject
 make demo-routing        # live candidate routing
+make demo-model-registry # MLflow artifact, digest, evaluation and alias evidence
 make demo-metering       # privacy-safe durable usage
 make demo-observability  # Prometheus + Tempo evidence
 make demo-failure        # unavailable backend → 502
@@ -83,7 +85,7 @@ make verify
 make clean-local
 ```
 
-The local stack publishes gateways on `:8081` and `:8082`, Prometheus on `:9090`, Tempo on `:3200`, and Grafana on `:3002`. `make clean-local` removes only this repository's Compose containers, network, volumes, virtual environment, generated ONNX artifact, and generated identity fixture.
+The local stack publishes gateways on `:8081` and `:8082`, MLflow on `:15010`, Prometheus on `:9090`, Tempo on `:3200`, and Grafana on `:3002`. `make clean-local` removes only this repository's Compose containers, network, volumes, virtual environment, generated ONNX artifacts, MLflow state, and generated identity fixture.
 
 ## Security boundary
 

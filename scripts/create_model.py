@@ -11,11 +11,17 @@ import onnx
 from onnx import TensorProto, helper
 
 
-def create_model(output: Path) -> None:
+def create_model(output: Path, candidate: bool = False) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     # Features: positive terms, negative terms, input length, question marks.
     weights = np.array([[1.5, -1.5], [-1.5, 1.5], [0.02, 0.01], [0.0, 0.0]], dtype=np.float32)
-    bias = np.array([0.0, 0.0], dtype=np.float32)
+    # The candidate retains the fixture contract but is a distinct artifact, so a
+    # release later binds evidence to digest rather than a target name alone.
+    bias = (
+        np.array([0.05, -0.05], dtype=np.float32)
+        if candidate
+        else np.array([0.0, 0.0], dtype=np.float32)
+    )
     graph = helper.make_graph(
         [
             helper.make_node("Gemm", ["features", "weights", "bias"], ["scores"]),
@@ -41,4 +47,6 @@ def create_model(output: Path) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, default=Path("models/tiny-intent-classifier.onnx"))
-    create_model(parser.parse_args().output)
+    parser.add_argument("--candidate", action="store_true")
+    args = parser.parse_args()
+    create_model(args.output, args.candidate)

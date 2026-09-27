@@ -10,8 +10,8 @@ demonstration. Preserve the existing core while working through them.
 
 # Flagship P0 — Integrated Platform Story
 
-- [ ] Model release control: real MLflow registry, artifact integrity, offline
-  evaluation, governed canary, approval, promotion and rollback.
+- [ ] Model release control: MLflow registry, artifact integrity and fixture evaluation
+  are executed; add governed canary, independent approval, promotion and rollback.
 - [ ] Capacity policy: simulated-GPU capacity/admission decision with explicitly
   simulated hardware labels.
 - [ ] Operational evidence: correlate request, release, latency/SLO and estimated cost.

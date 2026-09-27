@@ -16,6 +16,7 @@ must not be represented as executed until they have their own local evidence.
 - Two independent FastAPI gateways authenticate Ed25519 JWTs and derive tenant/role server-side.
 - Redis Lua admission enforces shared request, token, concurrency, daily-budget, and bounded queue limits across both gateways.
 - Two Dockerized CPU ONNX Runtime targets return real deterministic classifier output through the OpenAI-compatible and SSE paths.
+- A local MLflow server records stable and candidate ONNX artifacts with real SHA-256 digests, CPU fixture evaluation metrics, and `champion`/`candidate` aliases.
 - Admin-controlled weighted routing reaches the selected candidate runtime; ordinary tenant and agent identities cannot administer rollouts.
 - Redis metering stores metadata-only usage and survives a gateway restart.
 - OTel Collector, Tempo, Prometheus, and Grafana receive generated local gateway traffic.
@@ -39,13 +40,13 @@ must not be represented as executed until they have their own local evidence.
 
 ## Current P0 Objective
 
-Add the first flagship vertical slice: a real local model registry/evaluation/release
-control path that preserves the validated gateway, tenant controls and clean-room demo.
+Extend the executed MLflow registry slice with a governed canary plan, independent
+approval, promotion-or-rollback and real gateway traffic evidence.
 
 ## Completion Blockers
 
 - None for the existing inference-core completion gate.
-- The flagship release-control, capacity, SLO/FinOps, remediation, secure-agent,
+- Governed canary approval, promotion and rollback; capacity, SLO/FinOps, remediation, secure-agent,
   developer-self-service and optional edge slices are not yet executed here.
 
 ## Explicitly Unexecuted Production Adapters

@@ -9,6 +9,20 @@ slice must add its own commands, external dependencies, success path, failure pa
 clean-room evidence before it is listed as executed. The integrated flagship demo must
 be rerun from clean project state after the slices are connected.
 
+## MLflow registry slice
+
+The first flagship slice was executed locally after the historical inference-core
+clean-room evidence below. `make bootstrap-local` started MLflow with a project-scoped
+SQLite store and artifacts directory, evaluated two generated ONNX artifacts with
+`CPUExecutionProvider`, registered their SHA-256 digests and fixture metrics, and set
+`champion` (stable v1) and `candidate` (v2) aliases. `make smoke` checked the MLflow
+health and registered model, while `make demo-model-registry` verified the aliases and
+recorded digest evidence in `.local/mlflow/registry-evidence.json`.
+
+This is registry and artifact-evidence validation only. It does **not** yet validate
+governed canary approval, promotion, rollback, or the expanded flagship clean-room
+cycle; those remain completion blockers.
+
 ## Clean-Room Validation
 
 **Date:** 2026-09-21

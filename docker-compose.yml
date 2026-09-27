@@ -1,6 +1,21 @@
 name: multi-tenant-ai-inference-platform
 
 services:
+  mlflow:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    command:
+      ["mlflow", "server", "--host", "0.0.0.0", "--port", "5000", "--backend-store-uri", "sqlite:////mlflow/mlflow.db", "--serve-artifacts", "--artifacts-destination", "/mlflow/artifacts"]
+    volumes: ["./.local/mlflow:/mlflow"]
+    ports: ["15010:5000"]
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:5000/health\")'"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.120.0
     command: ["--config=/etc/otelcol-contrib/config.yaml"]
@@ -51,6 +66,7 @@ services:
     command: ["uvicorn", "inference_gateway.api.runtime:app", "--host", "0.0.0.0", "--port", "8000"]
     environment:
       INFERENCE_RUNTIME_DELAY_SECONDS: "0.35"
+      ONNX_MODEL_PATH: /app/models/tiny-intent-classifier.onnx
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
     healthcheck:
       test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/health\")'"]
@@ -65,6 +81,7 @@ services:
     command: ["uvicorn", "inference_gateway.api.runtime:app", "--host", "0.0.0.0", "--port", "8000"]
     environment:
       INFERENCE_RUNTIME_DELAY_SECONDS: "0.35"
+      ONNX_MODEL_PATH: /app/models/tiny-intent-classifier-v2.onnx
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
     healthcheck:
       test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/health\")'"]

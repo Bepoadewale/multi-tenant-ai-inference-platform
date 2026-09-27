@@ -9,7 +9,8 @@
 | Weighted candidate routing | ✅ EXECUTED LOCALLY | Admin weight mutation routes real traffic to the v2 runtime. |
 | Privacy-safe usage + restart recovery | ✅ EXECUTED LOCALLY | Redis metadata records persist through a gateway restart; raw prompt/output are excluded. |
 | OTel / Prometheus / Tempo / Grafana | ✅ EXECUTED LOCALLY | Generated traffic is queryable in Prometheus and Tempo; Grafana is provisioned locally. |
-| Flagship model release control | 📋 ROADMAP | MLflow registry, evaluation, approval, promotion and rollback are the first additive vertical slice. |
+| MLflow registry + artifact evidence | ✅ EXECUTED LOCALLY | Local MLflow stores stable/candidate ONNX artifacts, SHA-256 digests, CPU fixture metrics, and `champion`/`candidate` aliases. |
+| Governed model release control | 🟡 IMPLEMENTED / NOT FULLY EXECUTED | Existing live weighted routing is executed; plan binding, independent approval, promotion and rollback are the next additive release controls. |
 | Flagship capacity / SLO / FinOps / remediation | 📋 ROADMAP | These consume narrow contracts from completed reference projects; no integration is claimed yet. |
 | Agent, developer and edge adapters | 📋 ROADMAP | Secure agent tools, golden paths and edge operations remain separately validated future slices. |
 | CPU model quality, cost, and performance | 🔵 SIMULATED / OUT OF SCOPE | The deterministic fixture validates platform flow, not quality or production economics. |

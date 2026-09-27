@@ -1,7 +1,9 @@
 # Model rollouts
 
-Flagship context: the existing weighted-routing core is preserved. MLflow-backed
-evaluation, approval, promotion and rollback are the next real release-control slice.
+Flagship context: the existing weighted-routing core is preserved. A local MLflow
+registry now stores real stable/candidate ONNX artifacts, SHA-256 digest tags, CPU
+fixture evaluation metrics, and `champion`/`candidate` aliases. Governed approval,
+promotion and rollback remain the next release-control slice.
 
 Model v1 is stable and v2 candidate. Progress 5→25→50→100% only after infrastructure health and workload-specific latency/error gates. Rollback changes target weights to zero; it does not claim model quality validation. Quality evaluation belongs to a separate curated evaluation pipeline.
 
