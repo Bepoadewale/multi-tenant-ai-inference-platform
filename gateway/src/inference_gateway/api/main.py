@@ -51,6 +51,14 @@ async def capacity(admin: str = Depends(platform_admin)):
     }
 
 
+@app.get("/platform/v1/requests/{request_id}/analysis")
+async def request_analysis(request_id: str, admin: str = Depends(platform_admin)):
+    analysis = await service.request_analysis(request_id)
+    if analysis is None:
+        raise HTTPException(404, "request operational evidence not found")
+    return analysis
+
+
 @app.get("/platform/v1/models")
 def platform_models(admin: str = Depends(platform_admin)):
     return list(service.catalog.models.values())

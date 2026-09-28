@@ -31,16 +31,21 @@ from inference_gateway.observability.metrics import (
     CAPACITY_DECISIONS,
     CAPACITY_QUEUE,
     CAPACITY_TENANT_ALLOCATED,
+    ESTIMATED_COST,
     LATENCY,
     QUEUE,
     QUEUE_WAIT,
+    RELEASE_CORRELATED_REQUESTS,
     REQUESTS,
+    SLO_EVALUATIONS,
     THROTTLES,
     TOKENS,
     TTFT,
 )
+from inference_gateway.operations.service import analyse, estimate_cost, evaluate_slo
 from inference_gateway.routing.rollout_store import RolloutStore
 from inference_gateway.routing.router import Router
+from opentelemetry import trace
 
 
 class GatewayService:
@@ -91,7 +96,7 @@ class GatewayService:
         model = self.catalog.models.get(request.model)
         if not model:
             raise HTTPException(404, "unknown model alias")
-        self._apply_shared_rollout(model)
+        release_context = self._apply_shared_rollout(model)
         # Authorize before consuming an admission quota; rejected model access cannot
         # deliberately exhaust a tenant's valid workload budget.
         target = self.router.choose(tenant, model, request_id)
@@ -117,10 +122,11 @@ class GatewayService:
                 started,
                 backend,
                 allocation,
+                release_context,
             )
         try:
             text, usage, ttft_ms = await backend.complete(request)
-            await self._record(
+            record = await self._record(
                 tenant,
                 request.model,
                 target.name,
@@ -131,6 +137,7 @@ class GatewayService:
                 ttft_ms,
                 False,
                 "success",
+                release_context,
             )
             return {
                 "id": f"chatcmpl-{request_id}",
@@ -146,17 +153,52 @@ class GatewayService:
                 "usage": usage.model_dump(),
                 "x_backend": target.name,
                 "x_capacity": allocation.model_dump(),
+                "x_observability": {
+                    "request_id": request_id,
+                    "trace_id": record.trace_id,
+                    "release_plan_id": record.release_plan_id,
+                },
             }
         except Exception as error:
-            REQUESTS.labels(tenant.id, request.model, "error").inc()
-            raise HTTPException(502, "inference backend failed") from error
+            failure_usage = Usage(
+                prompt_tokens=sum(len(message.content.split()) for message in request.messages),
+                completion_tokens=0,
+                total_tokens=sum(len(message.content.split()) for message in request.messages),
+            )
+            await self._record(
+                tenant,
+                request.model,
+                target.name,
+                target.version,
+                request_id,
+                failure_usage,
+                started,
+                None,
+                False,
+                "backend_error",
+                release_context,
+            )
+            raise HTTPException(
+                502,
+                "inference backend failed",
+                headers={"X-Request-ID": request_id},
+            ) from error
         finally:
             ACTIVE.labels(tenant.id).dec()
             await self._release(tenant, 0)
             await self._release_capacity(tenant, allocation)
 
     def _stream(
-        self, tenant, request, backend_name, version, request_id, started, backend, allocation
+        self,
+        tenant,
+        request,
+        backend_name,
+        version,
+        request_id,
+        started,
+        backend,
+        allocation,
+        release_context,
     ):
         async def events():
             usage = Usage(
@@ -187,6 +229,7 @@ class GatewayService:
                     2.0,
                     True,
                     "success",
+                    release_context,
                 )
                 yield "data: [DONE]\n\n"
             finally:
@@ -254,29 +297,44 @@ class GatewayService:
         ttft_ms,
         streaming,
         outcome,
+        release_context=None,
     ):
         latency_ms = (perf_counter() - started) * 1000
-        result = self.meter.record(
-            UsageRecord(
-                request_id=request_id,
-                tenant_id=tenant.id,
-                model=model,
-                backend=backend,
-                deployment_version=version,
-                usage=usage,
-                latency_ms=latency_ms,
-                ttft_ms=ttft_ms,
-                streaming=streaming,
-                outcome=outcome,
-            )
+        trace_context = trace.get_current_span().get_span_context()
+        trace_id = f"{trace_context.trace_id:032x}" if trace_context.is_valid else None
+        record = UsageRecord(
+            request_id=request_id,
+            tenant_id=tenant.id,
+            model=model,
+            backend=backend,
+            deployment_version=version,
+            usage=usage,
+            latency_ms=latency_ms,
+            ttft_ms=ttft_ms,
+            streaming=streaming,
+            outcome=outcome,
+            trace_id=trace_id,
+            release_plan_id=(release_context or {}).get("release_plan_id"),
+            release_phase=(release_context or {}).get("release_phase"),
         )
+        result = self.meter.record(record)
         if inspect.isawaitable(result):
             await result
         REQUESTS.labels(tenant.id, model, outcome).inc()
         TOKENS.labels(tenant.id, model, "prompt").inc(usage.prompt_tokens)
         TOKENS.labels(tenant.id, model, "completion").inc(usage.completion_tokens)
         LATENCY.labels(model).observe(latency_ms / 1000)
-        TTFT.labels(model).observe(ttft_ms / 1000)
+        if ttft_ms is not None:
+            TTFT.labels(model).observe(ttft_ms / 1000)
+        cost = estimate_cost(record)
+        ESTIMATED_COST.labels(tenant.id, model, cost["pricing_version"]).inc(
+            float(cost["total_cost_usd"])
+        )
+        slo = evaluate_slo(record)
+        SLO_EVALUATIONS.labels(model, slo["status"]).inc()
+        if record.release_plan_id:
+            RELEASE_CORRELATED_REQUESTS.labels(model, record.release_phase or "UNKNOWN").inc()
+        return record
 
     async def tenant_usage(self, tenant_id: str) -> dict:
         result = self.meter.tenant_summary(tenant_id)
@@ -286,18 +344,24 @@ class GatewayService:
         result = self.capacity.snapshot()
         return await result if inspect.isawaitable(result) else result
 
-    def _apply_shared_rollout(self, model) -> None:
+    async def request_analysis(self, request_id: str) -> dict | None:
+        result = self.meter.get_request(request_id)
+        record = await result if inspect.isawaitable(result) else result
+        return analyse(record) if record else None
+
+    def _apply_shared_rollout(self, model) -> dict[str, object] | None:
         """Read validated release intent immediately before routing live traffic."""
         weights = self.rollouts.get(model.name)
         if weights is None:
-            return
+            return None
         targets = {target.name: target for target in model.targets}
         if set(weights) != set(targets) or sum(weights.values()) != 100:
-            return
+            return None
         if any(weight < 0 or (weight > 0 and not targets[name].healthy) for name, weight in weights.items()):
-            return
+            return None
         for name, weight in weights.items():
             targets[name].weight = weight
+        return self.rollouts.get_context(model.name)
 
 
 service = GatewayService()

@@ -10,6 +10,9 @@ class Meter:
     def record(self, record: UsageRecord) -> None:
         self.records.append(record)
 
+    def get_request(self, request_id: str) -> UsageRecord | None:
+        return next((record for record in self.records if str(record.request_id) == request_id), None)
+
     def tenant_summary(self, tenant_id: str) -> dict:
         records = [record for record in self.records if record.tenant_id == tenant_id]
         tokens = sum(record.usage.total_tokens for record in records)

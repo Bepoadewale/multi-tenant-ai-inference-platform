@@ -39,10 +39,14 @@ def _weights(plan: ReleasePlan, candidate_weight: int) -> dict[str, int]:
     return {TARGETS["stable"]: 100 - candidate_weight, TARGETS["candidate"]: candidate_weight}
 
 
-def _write_weights(weights: dict[str, int]) -> None:
+def _write_weights(weights: dict[str, int], plan: ReleasePlan, phase: str) -> None:
     try:
         redis.Redis.from_url(os.environ["REDIS_URL"], decode_responses=True).set(
-            f"inference:rollout:{ALIAS}", json.dumps(weights, sort_keys=True)
+            f"inference:rollout:{ALIAS}",
+            json.dumps(
+                {"weights": weights, "release_plan_id": plan.id, "release_phase": phase},
+                sort_keys=True,
+            ),
         )
     except (KeyError, redis.RedisError) as error:
         raise HTTPException(503, "release rollout store unavailable") from error
@@ -92,7 +96,7 @@ def start_canary(plan_id: str, requester: str = Depends(platform_admin)):
     _assert_current(plan)
     if plan.status != "APPROVED":
         raise HTTPException(409, "release plan requires independent approval")
-    _write_weights(_weights(plan, plan.canary_weight))
+    _write_weights(_weights(plan, plan.canary_weight), plan, "CANARY")
     return store.transition(plan_id, "APPROVED", "CANARY")
 
 
@@ -102,7 +106,7 @@ def promote(plan_id: str, requester: str = Depends(platform_admin)):
     _assert_current(plan)
     if plan.status != "CANARY":
         raise HTTPException(409, "release plan is not in canary")
-    _write_weights(_weights(plan, 100))
+    _write_weights(_weights(plan, 100), plan, "PROMOTED")
     _client().set_registered_model_alias(MODEL_NAME, "champion", plan.candidate_version)
     return store.transition(plan_id, "CANARY", "PROMOTED")
 
@@ -112,7 +116,7 @@ def rollback(plan_id: str, requester: str = Depends(platform_admin)):
     plan = store.get(plan_id)
     if plan.status not in {"CANARY", "PROMOTED"}:
         raise HTTPException(409, "release plan has no active rollout")
-    _write_weights(_weights(plan, 0))
+    _write_weights(_weights(plan, 0), plan, "ROLLED_BACK")
     _client().set_registered_model_alias(MODEL_NAME, "champion", plan.champion_version)
     with Path(store.path).parent.joinpath("rollback-audit.txt").open("a") as audit:
         audit.write(f"{plan.id} rollback to model version {plan.champion_version}\n")
