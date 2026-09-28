@@ -62,7 +62,7 @@ Add the next flagship vertical slice: correlate request, model release, latency/
 
 ## Last Updated
 
-2026-09-28, `37c0da0` capacity-policy implementation; documentation and CI are pending.
+2026-09-28, `37c0da0` capacity-policy implementation; `974397a` recorded local evidence; `86f945e` hardened dependency-audit service selection. See PR #7 for current CI evidence.
 
 ## Clean-Room Reproducibility
 
