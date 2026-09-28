@@ -48,13 +48,13 @@ Kubernetes scheduler result, DCGM metric, or performance measurement.
 `GET /platform/v1/requests/{request_id}/analysis` with the platform-admin identity.
 The evidence record proves all of the following without retaining raw prompt or output:
 
-- the request reached the real CPU ONNX candidate target;
+- the request reached one of the real CPU ONNX targets while the shared canary was active;
 - the response/request record carries a real OpenTelemetry trace ID that is queryable
   from Tempo;
 - the record captures the active SQLite/Redis release plan and `CANARY` phase;
 - the metadata-only record includes token counts, target version, and a Decimal
   calculation from the versioned `local-fixture-2026-09-v1` price fixture;
-- the local request SLO is `SATISFIED` for the successful candidate request;
+- the local request SLO is `SATISFIED` for the successful canary-period request;
 - a real bounded `chat-timeout-demo` backend failure returns 502, retains its request
   ID and metadata-only record, and evaluates as `VIOLATED` rather than disappearing.
 

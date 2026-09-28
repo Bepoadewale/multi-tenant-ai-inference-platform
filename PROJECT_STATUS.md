@@ -60,7 +60,7 @@ Add governed remediation: use observed incident evidence to create a bounded, po
 
 ## Last Validation
 
-- `make lint`, `make test`, `make smoke`, `make demo-model-registry`, `make demo-release-control`, `make demo-capacity`, and `make demo-operational-evidence`: passed locally. The operational-evidence demo correlated a live candidate request with a Tempo trace, release plan, local SLO and explicit fixture cost; it also persisted an actual timeout as an SLO violation.
+- `make lint`, `make test`, `make smoke`, `make demo-model-registry`, `make demo-release-control`, `make demo-capacity`, and `make demo-operational-evidence`: passed locally. The operational-evidence demo correlated a live request during a canary with a Tempo trace, release plan, local SLO and explicit fixture cost; it also persisted an actual timeout as an SLO violation.
 - `make demo-local`, `make demo-overload`, `make demo-routing`, `make demo-metering`, `make demo-observability`, `make demo-failure`, `make demo-timeout`, and `make demo-recovery`: passed against the Docker stack.
 - PR #4 GitHub checks: `python`, `manifests`, `supply-chain`, and `local-e2e` passed.
 

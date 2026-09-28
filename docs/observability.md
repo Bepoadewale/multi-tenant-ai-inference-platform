@@ -3,7 +3,7 @@
 ## Executed request evidence
 
 `make demo-operational-evidence` proves a request-level evidence path across the
-existing local stack. A live candidate-canary request stores its active release plan
+existing local stack. A live request while the shared canary is active stores its release plan
 and phase, captures the current OpenTelemetry trace ID, reaches Tempo, and is exposed
 through the platform-admin request-analysis endpoint with the real route/version,
 token usage, an explicit local fixture SLO result, and a versioned estimated cost.

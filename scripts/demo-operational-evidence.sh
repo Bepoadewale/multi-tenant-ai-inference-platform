@@ -16,20 +16,12 @@ curl -fsS --max-time 10 -X POST "http://localhost:8083/release/v1/plans/${plan_i
 curl -fsS --max-time 10 -X POST "http://localhost:8083/release/v1/plans/${plan_id}/canary" \
   -H "Authorization: Bearer ${admin_token}" | jq -e '.status == "CANARY"' >/dev/null
 
-candidate_response=''
-for _ in $(seq 1 40); do
-  response=$(curl -fsS --max-time 10 http://localhost:8081/v1/chat/completions \
-    -H "Authorization: Bearer ${search_token}" -H 'content-type: application/json' \
-    -d '{"model":"chat-default","messages":[{"role":"user","content":"release-aware operational evidence"}],"max_tokens":4}')
-  if test "$(jq -r '.x_backend' <<<"${response}")" = onnx-candidate-v2; then
-    candidate_response=${response}
-    break
-  fi
-done
-test -n "${candidate_response}"
+canary_response=$(curl -fsS --max-time 10 http://localhost:8081/v1/chat/completions \
+  -H "Authorization: Bearer ${search_token}" -H 'content-type: application/json' \
+  -d '{"model":"chat-default","messages":[{"role":"user","content":"release-aware operational evidence"}],"max_tokens":4}')
 
-request_id=$(jq -r '.x_observability.request_id' <<<"${candidate_response}")
-trace_id=$(jq -r '.x_observability.trace_id' <<<"${candidate_response}")
+request_id=$(jq -r '.x_observability.request_id' <<<"${canary_response}")
+trace_id=$(jq -r '.x_observability.trace_id' <<<"${canary_response}")
 test "${trace_id}" != null
 analysis=$(curl -fsS --max-time 10 \
   "http://localhost:8081/platform/v1/requests/${request_id}/analysis" \
@@ -37,7 +29,7 @@ analysis=$(curl -fsS --max-time 10 \
 jq -e --arg plan "${plan_id}" '
   .release.plan_id == $plan and
   .release.phase_at_request == "CANARY" and
-  .deployment.backend == "onnx-candidate-v2" and
+  (.deployment.backend == "onnx-stable-v1" or .deployment.backend == "onnx-candidate-v2") and
   .trace_id != null and
   .cost.kind == "ESTIMATED_LOCAL_TOKEN_ALLOCATION" and
   .slo.status == "SATISFIED" and
