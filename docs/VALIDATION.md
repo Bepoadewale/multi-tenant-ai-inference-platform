@@ -112,6 +112,17 @@ including all core/release/capacity demos, `make demo-operational-evidence`,
 Post-cleanup verification confirmed no project Compose resources, `.local`, or `.venv`
 remained. This is a second clean bootstrap, not a run against cached project state.
 
+### Deterministic-demo follow-up
+
+After CI exposed two timing hazards in the first demo revision (probabilistic candidate
+selection and a Prometheus scrape race), the demo was changed to correlate any request
+made during the active canary and to poll both evidence metrics with bounded timeouts.
+Two additional clean starts on 2026-09-28 then passed
+`make install`, `make bootstrap-local`, `make smoke`,
+`make demo-operational-evidence`, and `make clean-local`; the first also passed
+`make verify`. Both final cleanups confirmed the project left no Compose resources,
+`.local`, or `.venv` behind.
+
 ## Expanded clean-room validation
 
 **Date:** 2026-09-28

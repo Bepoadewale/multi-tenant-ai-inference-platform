@@ -76,3 +76,5 @@ Historical core clean-room validation remains recorded below. The operational-ev
 slice additionally completed two clean-room cycles on 2026-09-28: each ran installation,
 bootstrap, every core/release/capacity/operational demo, `make verify`, and safe cleanup.
 Post-cleanup checks confirmed project Compose resources, `.local`, and `.venv` were absent.
+After the CI timing fix, two additional clean boot → operational-evidence demo → cleanup
+cycles passed; one also ran `make verify`.
