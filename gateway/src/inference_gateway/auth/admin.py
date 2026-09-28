@@ -23,3 +23,7 @@ def platform_admin(authorization: str | None = Header(default=None)) -> str:
 
 def release_approver(authorization: str | None = Header(default=None)) -> str:
     return require_role("release.approve", authorization)
+
+
+def remediation_approver(authorization: str | None = Header(default=None)) -> str:
+    return require_role("remediation.approve", authorization)

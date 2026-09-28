@@ -26,7 +26,13 @@ must not be represented as executed until they have their own local evidence.
   evidence linking a real request to its Tempo trace ID, selected target/version,
   active release plan/phase, local fixture SLO, and Decimal-calculated local token
   estimate. A real bounded backend timeout persists as an SLO violation.
-- Clean-room workflow passed twice: bootstrap, smoke, successful inference, bounded timeout failure, validation, project-scoped cleanup, then a second bootstrap/demo.
+- A separate remediation-control service consumes a real metadata-only failed canary
+  request, persists a SQLite incident/plan/timeline, requires a distinct
+  `remediation.approve` JWT, rechecks exact Redis/SQLite rollout state, applies only
+  the bounded stable rollback, verifies real ONNX recovery, and survives controller
+  restart. Its cooldown/action budget blocks repeat remediation loops.
+- Clean-room workflow passed twice: bootstrap, smoke, cumulative flagship demos,
+  validation, project-scoped cleanup, then a second bootstrap/demo.
 
 ## Implemented but Not End-to-End Validated
 
@@ -46,13 +52,14 @@ must not be represented as executed until they have their own local evidence.
 
 ## Current P0 Objective
 
-Add governed remediation: use observed incident evidence to create a bounded, policy-gated action and verify recovery without weakening the existing serving path.
+Add secure agent-tool governance: use a narrow delegated tool contract without
+privilege amplification or bypassing the existing gateway controls.
 
 ## Completion Blockers
 
 - None for the existing inference-core completion gate.
-- Remediation, secure-agent,
-  developer-self-service and optional edge slices are not yet executed here.
+- Secure-agent governance, developer-self-service, and optional edge slices are not
+  yet executed here.
 
 ## Explicitly Unexecuted Production Adapters
 
@@ -60,21 +67,26 @@ Add governed remediation: use observed incident evidence to create a bounded, po
 
 ## Last Validation
 
-- `make lint`, `make test`, `make smoke`, `make demo-model-registry`, `make demo-release-control`, `make demo-capacity`, and `make demo-operational-evidence`: passed locally. The operational-evidence demo correlated a live request during a canary with a Tempo trace, release plan, local SLO and explicit fixture cost; it also persisted an actual timeout as an SLO violation.
+- Two clean-room cycles on the governed-remediation revision passed. Both started from
+  `make clean-local`, ran `make install`, `make bootstrap-local`, `make smoke`, core
+  and cumulative flagship demos including `make demo-remediation`, `make verify`, and
+  `make clean-local`. The remediation demo created a real candidate-runtime outage,
+  persisted an incident, denied self-approval, accepted independent approval, rolled
+  traffic back to stable, verified ONNX inference, and recovered its audit after a
+  controller restart.
 - `make demo-local`, `make demo-overload`, `make demo-routing`, `make demo-metering`, `make demo-observability`, `make demo-failure`, `make demo-timeout`, and `make demo-recovery`: passed against the Docker stack.
 - PR #4 GitHub checks: `python`, `manifests`, `supply-chain`, and `local-e2e` passed.
 
 ## Last Updated
 
-2026-09-28, operational-evidence slice validated on `codex/flagship-operational-evidence`; final GitHub CI evidence will be recorded before review.
+2026-09-28, governed-remediation slice validated on
+`codex/flagship-governed-remediation`; final GitHub CI evidence will be recorded before review.
 
 ## Clean-Room Reproducibility
 
 **Status: VALIDATED**
 
-Historical core clean-room validation remains recorded below. The operational-evidence
-slice additionally completed two clean-room cycles on 2026-09-28: each ran installation,
-bootstrap, every core/release/capacity/operational demo, `make verify`, and safe cleanup.
-Post-cleanup checks confirmed project Compose resources, `.local`, and `.venv` were absent.
-After the CI timing fix, two additional clean boot → operational-evidence demo → cleanup
-cycles passed; one also ran `make verify`.
+Historical core and operational-evidence validation remains recorded below. The
+governed-remediation slice completed two clean-room cycles on 2026-09-28. Both ended
+with no project Compose resources, `.local`, or `.venv`; the second bootstrap ran after
+the first cleanup.

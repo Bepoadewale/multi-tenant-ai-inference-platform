@@ -13,7 +13,7 @@
 | Governed model release control | ✅ EXECUTED LOCALLY | SQLite plan binding, independent approval, Redis-shared canary, MLflow alias promotion and verified rollback run through real gateway traffic. |
 | Simulated accelerator capacity policy | ✅ EXECUTED LOCALLY | Redis-backed pool/tenant allocation admits, queues, rejects, and CPU-falls-back through the real gateway path. `simulated-l40s` is quota accounting only. |
 | Request-to-release operational evidence | ✅ EXECUTED LOCALLY | A platform-admin analysis retrieves a real Tempo trace ID, canary release plan/phase, route/version, local SLO result, and Decimal fixture cost. A bounded backend timeout is persisted as an SLO violation. |
-| Governed remediation | 📋 ROADMAP | It will consume incident and operational evidence through a narrow contract; no automated action is claimed yet. |
+| Governed canary remediation | ✅ EXECUTED LOCALLY | Separate controller consumes a real failed candidate canary record, persists SQLite incident/plan/audit state, requires independent approval, rejects stale rollout state, applies only stable rollback, verifies real ONNX recovery, exposes Prometheus metrics, and survives restart. |
 | Agent, developer and edge adapters | 📋 ROADMAP | Secure agent tools, golden paths and edge operations remain separately validated future slices. |
 | CPU model quality, cost, and performance | 🔵 SIMULATED / OUT OF SCOPE | The deterministic fixture validates platform flow, not quality or production economics. |
 | vLLM, physical GPU, DCGM, KV cache | 📐 ARCHITECTURE / CONTRACT ONLY | No accelerator runtime or GPU telemetry was executed; simulated capacity must not be interpreted as hardware scheduling. |

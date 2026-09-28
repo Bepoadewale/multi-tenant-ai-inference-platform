@@ -8,7 +8,7 @@ from pathlib import Path
 
 import mlflow
 import redis
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Query
 from inference_gateway.auth.admin import platform_admin, release_approver
 from inference_gateway.release.store import ReleasePlan, ReleaseStore
 
@@ -68,7 +68,10 @@ def healthz():
 
 
 @app.post("/release/v1/plans", response_model=None)
-def create_plan(requester: str = Depends(platform_admin)):
+def create_plan(
+    canary_weight: int = Query(default=10, ge=1, le=99),
+    requester: str = Depends(platform_admin),
+):
     champion, candidate, digest = _versions()
     return store.create(
         alias=ALIAS,
@@ -76,7 +79,7 @@ def create_plan(requester: str = Depends(platform_admin)):
         champion_version=champion,
         candidate_version=candidate,
         candidate_digest=digest,
-        canary_weight=10,
+        canary_weight=canary_weight,
     )
 
 
