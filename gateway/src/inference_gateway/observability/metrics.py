@@ -51,3 +51,23 @@ CAPACITY_QUEUE = Gauge(
     "Requests waiting for simulated GPU capacity",
     ["pool"],
 )
+REMEDIATION_INCIDENTS = Counter(
+    "inference_gateway_remediation_incidents_total",
+    "Governed remediation incidents created from observed request evidence",
+    ["model", "outcome"],
+)
+REMEDIATION_PLANS = Counter(
+    "inference_gateway_remediation_plans_total",
+    "Governed remediation plans by action and lifecycle status",
+    ["action", "status"],
+)
+REMEDIATION_ACTIONS = Counter(
+    "inference_gateway_remediation_actions_total",
+    "Bounded remediation action outcomes",
+    ["model", "result"],
+)
+REMEDIATION_VERIFICATIONS = Counter(
+    "inference_gateway_remediation_verifications_total",
+    "Post-action remediation verification outcomes",
+    ["model", "status"],
+)

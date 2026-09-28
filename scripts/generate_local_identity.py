@@ -44,6 +44,12 @@ def main() -> None:
         "reporting": token(private_bytes.decode(), "developer-reporting", "team-reporting", ["inference.invoke"]),
         "admin": token(private_bytes.decode(), "platform-admin", "team-search", ["platform.admin"]),
         "approver": token(private_bytes.decode(), "release-approver", "team-search", ["release.approve"]),
+        "remediation_approver": token(
+            private_bytes.decode(),
+            "remediation-approver",
+            "team-search",
+            ["remediation.approve"],
+        ),
     }))
 
 
