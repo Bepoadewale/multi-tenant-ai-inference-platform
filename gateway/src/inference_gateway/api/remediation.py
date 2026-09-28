@@ -13,6 +13,7 @@ from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Response
 from inference_gateway.auth.admin import platform_admin, remediation_approver
+from inference_gateway.auth.agent import AgentIdentity, delegated_agent, require_agent_scope
 from inference_gateway.metering.redis_service import RedisMeter
 from inference_gateway.observability.metrics import (
     REMEDIATION_ACTIONS,
@@ -110,6 +111,73 @@ async def create_incident(
     return _incident_response(incident)
 
 
+@app.post("/remediation/v1/agent/incidents/{request_id}/plans")
+async def agent_create_plan(
+    request_id: str, agent: AgentIdentity = Depends(delegated_agent)
+) -> RemediationPlan:
+    """Allow a delegated agent to prepare—but never approve or execute—a rollback plan."""
+    require_agent_scope(agent, "remediation.plan")
+    incident = store.by_source_request(request_id)
+    if incident is None:
+        record = await meter.get_request(request_id)
+        if (
+            record is None
+            or record.tenant_id != agent.tenant
+            or record.outcome == "success"
+            or record.model != MODEL
+            or not record.release_plan_id
+            or record.release_phase != "CANARY"
+        ):
+            raise HTTPException(422, "request is not eligible for delegated canary planning")
+        incident = RemediationIncident(
+            source_request_id=request_id,
+            tenant=record.tenant_id,
+            model=record.model,
+            backend=record.backend,
+            deployment_version=record.deployment_version,
+            release_plan_id=record.release_plan_id,
+            release_phase=record.release_phase,
+            outcome=record.outcome,
+            slo_status="VIOLATED",
+        )
+        store.save_incident(incident)
+        store.append(
+            incident.id,
+            _event("AGENT_INCIDENT_DETECTED", agent.subject, request_id=request_id, delegator=agent.delegated_by),
+        )
+        REMEDIATION_INCIDENTS.labels(model=incident.model, outcome=incident.outcome).inc()
+    if incident.tenant != agent.tenant:
+        raise HTTPException(403, "cross-tenant remediation planning denied")
+    if incident.state != IncidentState.DETECTED:
+        raise HTTPException(409, "incident is not awaiting remediation planning")
+    context = rollouts.get_context(incident.model)
+    if (
+        not context
+        or context.get("release_plan_id") != incident.release_plan_id
+        or context.get("release_phase") != "CANARY"
+    ):
+        raise HTTPException(409, "CANARY_CONTEXT_CHANGED")
+    weights = context.get("weights")
+    if not isinstance(weights, dict):
+        raise HTTPException(409, "CANARY_CONTEXT_CHANGED")
+    plan = RemediationPlan(
+        incident_id=incident.id,
+        requester=agent.subject,
+        model=incident.model,
+        release_plan_id=incident.release_plan_id,
+        expected_weights=weights,
+        plan_hash=store.plan_hash(incident=incident, weights=weights),
+    )
+    store.save_plan(plan)
+    store.transition_incident(incident.id, IncidentState.PLAN_PENDING_APPROVAL)
+    store.append(
+        incident.id,
+        _event("AGENT_PLAN_CREATED", agent.subject, plan_id=plan.id, delegator=agent.delegated_by),
+    )
+    REMEDIATION_PLANS.labels(action=plan.action, status=plan.status).inc()
+    return plan
+
+
 @app.get("/remediation/v1/incidents/{incident_id}")
 def get_incident(incident_id: str, actor: str = Depends(platform_admin)) -> dict[str, object]:
     return _incident_response(store.get_incident(incident_id))
@@ -181,7 +249,10 @@ def execute_plan(plan_id: str, actor: str = Depends(platform_admin)) -> dict[str
     if not executor.precondition(plan):
         REMEDIATION_ACTIONS.labels(model=plan.model, result="STALE_PLAN").inc()
         raise HTTPException(409, "STALE_REMEDIATION_PLAN")
-    reserved, reason = store.reserve_action(plan.model)
+    reserved, reason = store.reserve_action(
+        plan.model,
+        cooldown_seconds=int(os.getenv("REMEDIATION_COOLDOWN_SECONDS", "30")),
+    )
     if not reserved:
         REMEDIATION_ACTIONS.labels(model=plan.model, result=reason).inc()
         raise HTTPException(429, reason)

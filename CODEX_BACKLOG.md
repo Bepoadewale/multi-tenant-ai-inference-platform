@@ -16,7 +16,7 @@ demonstration. Preserve the existing core while working through them.
   simulated hardware labels, Redis-shared allocation, bounded queueing, rejection, and CPU fallback.
 - [x] Operational evidence: correlate request, release, latency/SLO and estimated cost.
 - [x] Governed remediation: incident evidence, bounded approved action and verification.
-- [ ] Secure agent governance: delegated platform-tool access without privilege amplification.
+- [x] Secure agent governance: delegated platform-tool access without privilege amplification.
 - [ ] Developer self-service and optional edge adapters through narrow contracts.
 - [ ] Integrated clean-room success and failure demonstration with safe teardown.
 
