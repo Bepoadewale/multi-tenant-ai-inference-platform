@@ -18,6 +18,7 @@ must not be represented as executed until they have their own local evidence.
 - Two Dockerized CPU ONNX Runtime targets return real deterministic classifier output through the OpenAI-compatible and SSE paths.
 - A local MLflow server records stable and candidate ONNX artifacts with real SHA-256 digests, CPU fixture evaluation metrics, and `champion`/`candidate` aliases.
 - Release control persists SQLite plans, binds them to MLflow versions/digests, requires a distinct `release.approve` identity, uses Redis-shared canary weights across gateways, and verifies promotion and rollback with live ONNX traffic; a stale transition is rejected in tests.
+- Redis-shared simulated-capacity admission enforces a fixed local pool and tenant allocation. The demo proves admission, bounded waiting, tenant quota rejection, and an explicit CPU fallback; all inference still runs through CPU ONNX Runtime.
 - Admin-controlled weighted routing reaches the selected candidate runtime; ordinary tenant and agent identities cannot administer rollouts.
 - Redis metering stores metadata-only usage and survives a gateway restart.
 - OTel Collector, Tempo, Prometheus, and Grafana receive generated local gateway traffic.
@@ -29,7 +30,7 @@ must not be represented as executed until they have their own local evidence.
 
 ## Simulated
 
-- No CPU backend generation is simulated: the local classifier is a real ONNX model. GPU/DCGM/KV-cache behavior and production cost allocation remain unexecuted.
+- No CPU backend generation is simulated: the local classifier is a real ONNX model. The `simulated-l40s` pool is Redis quota accounting only. GPU/DCGM/KV-cache behavior and production cost allocation remain unexecuted.
 
 ## Architecture / Contracts Only
 
@@ -41,12 +42,12 @@ must not be represented as executed until they have their own local evidence.
 
 ## Current P0 Objective
 
-Add the next flagship vertical slice: an explicitly simulated-GPU capacity and admission decision that is exercised by the local serving path.
+Add the next flagship vertical slice: correlate request, model release, latency/SLO evidence, and an explicitly estimated cost without weakening the existing serving path.
 
 ## Completion Blockers
 
 - None for the existing inference-core completion gate.
-- Capacity, SLO/FinOps, remediation, secure-agent,
+- SLO/FinOps, remediation, secure-agent,
   developer-self-service and optional edge slices are not yet executed here.
 
 ## Explicitly Unexecuted Production Adapters
@@ -55,13 +56,13 @@ Add the next flagship vertical slice: an explicitly simulated-GPU capacity and a
 
 ## Last Validation
 
-- `make lint`, `make test`, `make smoke`, `make demo-model-registry`, and `make demo-release-control`: passed locally. The release demo exercised independent approval denial/grant, shared canary, promotion, and rollback.
+- `make lint`, `make test`, `make smoke`, `make demo-model-registry`, `make demo-release-control`, and `make demo-capacity`: passed locally. The capacity demo exercised shared simulated-pool admission, bounded capacity queueing, tenant rejection, and real CPU fallback inference.
 - `make demo-local`, `make demo-overload`, `make demo-routing`, `make demo-metering`, `make demo-observability`, `make demo-failure`, `make demo-timeout`, and `make demo-recovery`: passed against the Docker stack.
 - PR #4 GitHub checks: `python`, `manifests`, `supply-chain`, and `local-e2e` passed.
 
 ## Last Updated
 
-2026-09-21, Week 3 branch.
+2026-09-28, `37c0da0` capacity-policy implementation; documentation and CI are pending.
 
 ## Clean-Room Reproducibility
 

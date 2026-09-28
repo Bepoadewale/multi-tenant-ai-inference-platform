@@ -12,8 +12,8 @@ demonstration. Preserve the existing core while working through them.
 
 - [x] Model release control: MLflow registry, artifact integrity, fixture evaluation,
   durable plan, independent approval, shared canary, promotion and rollback.
-- [ ] Capacity policy: simulated-GPU capacity/admission decision with explicitly
-  simulated hardware labels.
+- [x] Capacity policy: simulated-GPU capacity/admission decision with explicitly
+  simulated hardware labels, Redis-shared allocation, bounded queueing, rejection, and CPU fallback.
 - [ ] Operational evidence: correlate request, release, latency/SLO and estimated cost.
 - [ ] Governed remediation: incident evidence, bounded approved action and verification.
 - [ ] Secure agent governance: delegated platform-tool access without privilege amplification.

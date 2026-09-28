@@ -9,7 +9,7 @@ as a complete *integrated flagship*, each planned vertical slice must have real 
 evidence and the cross-slice demonstration must pass clean-room validation.
 
 - [x] Verified model registry/evaluation/canary/approval/promotion-or-rollback path.
-- [ ] Explicit simulated-GPU capacity policy with real local admission evidence.
+- [x] Explicit simulated-GPU capacity policy with real local admission evidence: Redis-shared allocation, bounded queueing, tenant rejection, and CPU fallback while inference remains real CPU ONNX.
 - [ ] Request-to-release trace/SLO/estimated-cost correlation.
 - [ ] Governed remediation failure and verification path.
 - [ ] Secure delegated agent tool path without privilege amplification.

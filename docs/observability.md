@@ -4,11 +4,13 @@ Flagship context: the existing telemetry core will be extended to correlate rele
 SLO and estimated-cost evidence; those correlations are not yet executed.
 
 Gateway metrics cover requests/outcomes, prompt/completion tokens, throttles, active requests,
-queue depth/wait, end-to-end latency, and TTFT. Local Compose exports OTLP through the Collector to
+queue depth/wait, end-to-end latency, TTFT, and simulated-capacity decisions/allocation/queue depth.
+Local Compose exports OTLP through the Collector to
 Tempo and exposes Prometheus metrics; generated demo traffic is queryable in both systems. The
 executed trace surface is FastAPI request and HTTP client instrumentation, with request correlation
 where provided. Explicit child spans for admission, routing, backend call, and metering are
 production observability hardening rather than executed local evidence. vLLM `/metrics` and DCGM
-Exporter would supply serving/GPU telemetry in GPU mode, which is not executed here.
+Exporter would supply serving/GPU telemetry in GPU mode, which is not executed here. Capacity
+metrics label the local pool as simulated and must not be read as DCGM or physical utilization.
 
 Example workload SLOs—not universal numbers: 99.9% successful requests, an agreed model-specific p95 TTFT objective, and low infrastructure-generated 5xx rate. Dashboard views should answer: who is throttled, where tail latency originates, which model is saturated, and what GPU memory/utilization says about capacity.

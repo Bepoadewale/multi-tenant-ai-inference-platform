@@ -15,11 +15,11 @@ simulated-capacity policy, SLO/FinOps evidence, governed remediation, secure age
 tools, optional edge operations and developer self-service as **separate validated
 vertical slices**—not as a rewrite or a merge of nine codebases.
 
-The first integrated demonstration is:
+The current integrated demonstration is:
 
 ```text
-tenant request -> identity/quota/policy -> verified candidate release -> canary traffic
--> telemetry/SLO/cost evidence -> independent approval -> promote or roll back
+tenant request -> identity/quota/capacity policy -> verified candidate release
+-> shared canary traffic -> independent approval -> promote or roll back
 ```
 
 See [flagship direction](docs/flagship-direction.md) for boundaries and the staged
@@ -30,6 +30,7 @@ repository.
 
 - A signed tenant identity can invoke only its assigned model aliases.
 - Two independent gateway processes share Redis-backed request, token, concurrency, daily-budget, and bounded-queue admission.
+- A model can require simulated shared accelerator capacity, queue briefly for it, be rejected at a tenant bound, or use an explicitly permitted CPU fallback. This is Redis quota accounting only; inference remains real CPU ONNX Runtime.
 - A platform administrator can adjust a weighted rollout; ordinary tenants and agents cannot.
 - Inference traffic reaches two real local CPU ONNX Runtime targets. Streaming is OpenAI-compatible SSE.
 - Usage records contain tenant/model/backend/token/latency metadata, never raw prompts or responses.
@@ -40,7 +41,8 @@ flowchart LR
   A[Application or agent] --> G[FastAPI gateway]
   G --> J[Ed25519 JWT: tenant + roles]
   J --> R[Redis Lua admission]
-  R --> W[Weighted router]
+  R --> C[Simulated capacity admission]
+  C --> W[Weighted router]
   W --> O1[CPU ONNX runtime v1]
   W --> O2[CPU ONNX runtime v2]
   G --> U[Redis metadata-only usage]
@@ -57,12 +59,13 @@ flowchart LR
 | CPU ONNX Runtime inference | ✅ EXECUTED LOCALLY | Two runtime containers return real classifier output through the gateway. |
 | Signed identity + tenant RBAC | ✅ EXECUTED LOCALLY | Ed25519 JWT issuer/audience/expiry/signature/tenant/role checks and negative tests. |
 | Distributed admission | ✅ EXECUTED LOCALLY | Redis Lua limits shared across two gateways; quota and queue demos return 429. |
+| Simulated accelerator capacity policy | ✅ EXECUTED LOCALLY | Shared Redis capacity accounting admits, queues, rejects tenant overuse, and allows an explicit CPU fallback while requests still execute on real CPU ONNX. |
 | Weighted routing | ✅ EXECUTED LOCALLY | Admin weight change sends live traffic to the candidate runtime. |
 | MLflow model registry | ✅ EXECUTED LOCALLY | Local MLflow records two real ONNX artifacts, SHA-256 digests, fixture evaluation metrics, and `champion`/`candidate` aliases. |
 | Governed model release | ✅ EXECUTED LOCALLY | SQLite plans bind MLflow aliases/digests; separate roles prove approval, shared canary, promotion, stale-state rejection, and rollback. |
 | Usage + restart recovery | ✅ EXECUTED LOCALLY | Metadata-only Redis usage survives a gateway restart. |
 | Metrics, traces, dashboards | ✅ EXECUTED LOCALLY | Prometheus, OTel Collector, Tempo, and Grafana receive generated local traffic. |
-| GPU/vLLM/DCGM/Kubernetes | 📐 ARCHITECTURE / CONTRACT ONLY | No GPU or cloud execution is claimed. |
+| Physical GPU/vLLM/DCGM/Kubernetes | 📐 ARCHITECTURE / CONTRACT ONLY | Simulated capacity is not physical accelerator scheduling; no GPU or cloud execution is claimed. |
 
 ## Run locally
 
@@ -78,6 +81,7 @@ make demo-overload       # bounded queue reject
 make demo-routing        # live candidate routing
 make demo-model-registry # MLflow artifact, digest, evaluation and alias evidence
 make demo-release-control # plan → independent approval → canary → promote → rollback
+make demo-capacity       # simulated accelerator admission, queue, reject, and CPU fallback
 make demo-metering       # privacy-safe durable usage
 make demo-observability  # Prometheus + Tempo evidence
 make demo-failure        # unavailable backend → 502
