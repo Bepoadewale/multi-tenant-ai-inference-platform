@@ -22,5 +22,5 @@ done
 wait
 
 grep -q '^429$' "${results}"/*.status
-grep -R -Eq 'queue (wait exceeded|full)' "${results}"/*.json
+grep -R -Eq 'queue (wait exceeded|full)|simulated GPU tenant capacity quota exceeded|simulated GPU capacity queue (wait exceeded|full)' "${results}"/*.json
 echo 'Overload demo passed: bounded shared admission returned an explicit 429 instead of unbounded waiting.'

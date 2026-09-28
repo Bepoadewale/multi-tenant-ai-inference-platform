@@ -26,7 +26,12 @@ def test_platform_endpoints_require_stronger_role():
         "/platform/v1/tenants", headers={"Authorization": "Bearer local-platform-admin-token"}
     )
     assert response.status_code == 200
-    assert {tenant["id"] for tenant in response.json()} == {"team-search", "team-payments"}
+    assert {tenant["id"] for tenant in response.json()} == {
+        "team-analytics",
+        "team-payments",
+        "team-reporting",
+        "team-search",
+    }
 
 
 def test_streaming_is_sse_and_has_request_id():

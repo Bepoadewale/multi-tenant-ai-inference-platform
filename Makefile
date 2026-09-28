@@ -1,4 +1,4 @@
-.PHONY: install test lint audit run demo load-test bootstrap-local smoke status demo-local demo-overload demo-routing demo-failure demo-timeout demo-metering demo-observability demo-recovery demo-model-registry demo-release-control verify clean-local destroy-local helm-lint terraform-validate
+.PHONY: install test lint audit run demo load-test bootstrap-local smoke status demo-local demo-overload demo-routing demo-failure demo-timeout demo-metering demo-observability demo-recovery demo-model-registry demo-release-control demo-capacity verify clean-local destroy-local helm-lint terraform-validate
 PYTHON ?= python3.12
 VENV := .venv
 PY := $(VENV)/bin/python
@@ -18,7 +18,7 @@ test:
 lint:
 	$(PY) -m ruff check gateway/src gateway/tests benchmarks scripts
 audit:
-	$(PY) -m pip_audit
+	$(PY) -m pip_audit --skip-editable
 run:
 	PYTHONPATH=gateway/src $(VENV)/bin/uvicorn inference_gateway.api.main:app --port 8080 --reload
 demo:
@@ -51,6 +51,8 @@ demo-model-registry:
 	./scripts/demo-model-registry.sh
 demo-release-control:
 	./scripts/demo-release-control.sh
+demo-capacity:
+	./scripts/demo-capacity.sh
 verify:
 	$(MAKE) lint
 	$(MAKE) test

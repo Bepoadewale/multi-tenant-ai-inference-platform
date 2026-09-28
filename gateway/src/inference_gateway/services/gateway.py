@@ -9,6 +9,8 @@ from fastapi.responses import StreamingResponse
 from inference_gateway.backends.mock import MockInferenceBackend
 from inference_gateway.backends.onnx import OnnxRuntimeBackend
 from inference_gateway.backends.vllm import VllmBackend
+from inference_gateway.capacity.redis_service import RedisCapacityService
+from inference_gateway.capacity.service import CapacityService
 from inference_gateway.catalog.store import Catalog
 from inference_gateway.limiting.redis_service import RedisTenantLimiter
 from inference_gateway.limiting.service import TenantLimiter
@@ -16,6 +18,7 @@ from inference_gateway.metering.redis_service import RedisMeter
 from inference_gateway.metering.service import Meter
 from inference_gateway.models import (
     AdminAuditEvent,
+    CapacityAllocation,
     ChatCompletionRequest,
     RolloutWeights,
     Tenant,
@@ -24,6 +27,10 @@ from inference_gateway.models import (
 )
 from inference_gateway.observability.metrics import (
     ACTIVE,
+    CAPACITY_ALLOCATED,
+    CAPACITY_DECISIONS,
+    CAPACITY_QUEUE,
+    CAPACITY_TENANT_ALLOCATED,
     LATENCY,
     QUEUE,
     QUEUE_WAIT,
@@ -41,6 +48,7 @@ class GatewayService:
         self.catalog = Catalog()
         redis_url = os.getenv("REDIS_URL")
         self.limiter = RedisTenantLimiter(redis_url) if redis_url else TenantLimiter()
+        self.capacity = RedisCapacityService(redis_url) if redis_url else CapacityService()
         self.router, self.backend = Router(), MockInferenceBackend()
         self.rollouts = RolloutStore(redis_url)
         self.meter = RedisMeter(redis_url) if redis_url else Meter()
@@ -91,15 +99,24 @@ class GatewayService:
         estimate = (
             sum(len(message.content.split()) for message in request.messages) + request.max_tokens
         )
+        allocation = await self._admit_capacity(tenant, model)
         try:
             await self._admit(tenant, estimate)
             ACTIVE.labels(tenant.id).inc()
         except HTTPException as error:
+            await self._release_capacity(tenant, allocation)
             THROTTLES.labels(tenant.id, error.detail).inc()
             raise
         if request.stream:
             return self._stream(
-                tenant, request, target.name, target.version, request_id, started, backend
+                tenant,
+                request,
+                target.name,
+                target.version,
+                request_id,
+                started,
+                backend,
+                allocation,
             )
         try:
             text, usage, ttft_ms = await backend.complete(request)
@@ -128,6 +145,7 @@ class GatewayService:
                 ],
                 "usage": usage.model_dump(),
                 "x_backend": target.name,
+                "x_capacity": allocation.model_dump(),
             }
         except Exception as error:
             REQUESTS.labels(tenant.id, request.model, "error").inc()
@@ -135,8 +153,11 @@ class GatewayService:
         finally:
             ACTIVE.labels(tenant.id).dec()
             await self._release(tenant, 0)
+            await self._release_capacity(tenant, allocation)
 
-    def _stream(self, tenant, request, backend_name, version, request_id, started, backend):
+    def _stream(
+        self, tenant, request, backend_name, version, request_id, started, backend, allocation
+    ):
         async def events():
             usage = Usage(
                 prompt_tokens=sum(len(message.content.split()) for message in request.messages),
@@ -171,10 +192,42 @@ class GatewayService:
             finally:
                 ACTIVE.labels(tenant.id).dec()
                 await self._release(tenant, usage.total_tokens)
+                await self._release_capacity(tenant, allocation)
 
         return StreamingResponse(
-            events(), media_type="text/event-stream", headers={"X-Request-ID": request_id}
+            events(),
+            media_type="text/event-stream",
+            headers={
+                "X-Request-ID": request_id,
+                "X-Capacity-Decision": allocation.decision,
+                "X-Capacity-Hardware": "simulated" if allocation.simulated_hardware else "cpu",
+            },
         )
+
+    async def _admit_capacity(self, tenant: Tenant, model) -> CapacityAllocation:
+        try:
+            result = self.capacity.admit(tenant, model)
+            allocation = await result if inspect.isawaitable(result) else result
+        except HTTPException as error:
+            CAPACITY_DECISIONS.labels(tenant.id, model.gpu_type or "cpu", "REJECTED").inc()
+            raise error
+        pool = allocation.pool or "cpu"
+        CAPACITY_DECISIONS.labels(tenant.id, pool, allocation.decision).inc()
+        if allocation.decision.value == "SIMULATED_GPU_ADMITTED":
+            CAPACITY_ALLOCATED.labels(pool).inc(allocation.slots)
+            CAPACITY_TENANT_ALLOCATED.labels(tenant.id, pool).inc(allocation.slots)
+        if allocation.queued:
+            CAPACITY_DECISIONS.labels(tenant.id, pool, "QUEUED").inc()
+            CAPACITY_QUEUE.labels(pool).set(0)
+        return allocation
+
+    async def _release_capacity(self, tenant: Tenant, allocation: CapacityAllocation) -> None:
+        result = self.capacity.release(tenant, allocation)
+        if inspect.isawaitable(result):
+            await result
+        if allocation.decision.value == "SIMULATED_GPU_ADMITTED":
+            CAPACITY_ALLOCATED.labels(allocation.pool).dec(allocation.slots)
+            CAPACITY_TENANT_ALLOCATED.labels(tenant.id, allocation.pool).dec(allocation.slots)
 
     async def _admit(self, tenant: Tenant, estimate: int) -> None:
         started = perf_counter()
@@ -227,6 +280,10 @@ class GatewayService:
 
     async def tenant_usage(self, tenant_id: str) -> dict:
         result = self.meter.tenant_summary(tenant_id)
+        return await result if inspect.isawaitable(result) else result
+
+    async def capacity_snapshot(self) -> dict:
+        result = self.capacity.snapshot()
         return await result if inspect.isawaitable(result) else result
 
     def _apply_shared_rollout(self, model) -> None:
