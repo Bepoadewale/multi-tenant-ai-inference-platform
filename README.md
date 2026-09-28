@@ -31,6 +31,13 @@ failed candidate canary request -> durable incident -> immutable rollback plan
 -> live ONNX verification -> durable audit timeline
 ```
 
+The delegated-agent slice adds a deliberately narrow HTTP tool facade. It is not an
+MCP implementation: the separately validated `secure-mcp-infrastructure-gateway`
+remains the portfolio's protocol-level MCP reference. Here, an Ed25519-signed agent
+identity can discover only metadata evidence and canary-plan preparation for its own
+tenant; it cannot approve, execute, promote, change routing, or obtain infrastructure
+credentials.
+
 See [flagship direction](docs/flagship-direction.md) for boundaries and the staged
 integration model. Commercial strategy is intentionally not maintained in this public
 repository.
@@ -46,6 +53,7 @@ repository.
 - A platform administrator can retrieve metadata-only evidence for one completed request: its Tempo trace ID, route/version, active release plan, local fixture SLO result, and versioned estimated token cost.
 - A remediation controller can act only on an observed failed `chat-default` **canary** request. Its sole allowlisted action is restoring the previously verified stable ONNX target; it cannot run shell commands, alter arbitrary routing, call Kubernetes, or access cloud credentials.
 - The remediation requester cannot approve its own plan. Execution re-reads Redis rollout context and the SQLite release state, rejects a stale plan, applies cooldown/action-budget guards, verifies stable inference, and persists the incident/plan/audit timeline.
+- A delegated agent can discover only `get_request_evidence` and `plan_canary_rollback` when its short-lived token includes the matching scopes. Tool discovery omits approval and execution; evidence is tenant-bound and metadata-only; every call is durably audited by an argument hash rather than raw tool arguments.
 - Explicit failures are returned for quota exhaustion, overload, an unavailable backend, and a bounded backend timeout. Requests are not replayed after a backend error.
 
 ```mermaid
@@ -77,6 +85,7 @@ flowchart LR
 | Governed model release | ✅ EXECUTED LOCALLY | SQLite plans bind MLflow aliases/digests; separate roles prove approval, shared canary, promotion, stale-state rejection, and rollback. |
 | Request operational evidence | ✅ EXECUTED LOCALLY | A real canary request correlates a Tempo trace ID, release plan, target version, local request SLO, and Decimal-calculated fixture token estimate; an actual backend timeout persists as an SLO violation. |
 | Governed canary remediation | ✅ EXECUTED LOCALLY | A failed candidate canary request creates a durable SQLite incident; separate approval, exact-state protection, bounded stable rollback, restart recovery, audit, Prometheus metrics, and live ONNX verification run locally. |
+| Delegated agent-tool governance | ✅ EXECUTED LOCALLY | A short-lived Ed25519 agent identity receives filtered discovery, same-tenant metadata evidence, cross-tenant denial, plan-only canary rollback authority, durable audit, and no approval/execution privilege. This is an HTTP facade, not an MCP protocol claim. |
 | Usage + restart recovery | ✅ EXECUTED LOCALLY | Metadata-only Redis usage survives a gateway restart. |
 | Metrics, traces, dashboards | ✅ EXECUTED LOCALLY | Prometheus, OTel Collector, Tempo, and Grafana receive generated local traffic. |
 | Physical GPU/vLLM/DCGM/Kubernetes | 📐 ARCHITECTURE / CONTRACT ONLY | Simulated capacity is not physical accelerator scheduling; no GPU or cloud execution is claimed. |
@@ -98,6 +107,7 @@ make demo-release-control # plan → independent approval → canary → promote
 make demo-capacity       # simulated accelerator admission, queue, reject, and CPU fallback
 make demo-operational-evidence # canary request → Tempo trace/release/SLO/estimated cost + timeout SLO violation
 make demo-remediation # failed canary → incident → independent approval → stable rollback → verified recovery
+make demo-agent-tools # filtered agent tools → tenant evidence → denied cross-tenant read → plan-only rollback → human approval
 make demo-metering       # privacy-safe durable usage
 make demo-observability  # Prometheus + Tempo evidence
 make demo-failure        # unavailable backend → 502
@@ -107,7 +117,7 @@ make verify
 make clean-local
 ```
 
-The local stack publishes gateways on `:8081` and `:8082`, release control on `:8083`, remediation control on `:8084`, MLflow on `:15010`, Prometheus on `:9090`, Tempo on `:3200`, and Grafana on `:3002`. `make clean-local` removes only this repository's Compose containers, network, volumes, virtual environment, generated ONNX artifacts, MLflow/release/remediation state, and generated identity fixture.
+The local stack publishes gateways on `:8081` and `:8082`, release control on `:8083`, remediation control on `:8084`, delegated agent tools on `:8085`, MLflow on `:15010`, Prometheus on `:9090`, Tempo on `:3200`, and Grafana on `:3002`. `make clean-local` removes only this repository's Compose containers, network, volumes, virtual environment, generated ONNX artifacts, MLflow/release/remediation/agent-tool state, and generated identity fixture.
 
 ## Security boundary
 
@@ -136,6 +146,18 @@ rejected. A per-model cooldown and action budget prevent retry loops. The contro
 then verifies both rollout state and a real post-action ONNX request. It does **not**
 receive generic shell, Docker, Kubernetes, cloud, model-registry, or tenant-inference
 authority.
+
+## Delegated agent-tool boundary
+
+The `agent-tools` service is intentionally a narrow facade rather than a general
+agent-admin API. Its local agent JWT has `principal_type=agent`, a named human
+delegator, a five-minute expiry, the `agent.tools` role, and only `inference.read` and
+`remediation.plan` scopes. It can read evidence only for `team-search` and create one
+immutable canary rollback plan from a recorded failed request. A distinct
+`remediation.approve` identity and a `platform.admin` identity remain necessary to
+approve and execute that plan. `tools/list` does not reveal privileged operations.
+The persistent tool audit stores actor, tenant, tool, timestamp and SHA-256 argument
+hash—never raw prompts, responses, tokens or arguments.
 
 ## Documentation
 

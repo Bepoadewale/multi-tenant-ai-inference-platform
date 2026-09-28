@@ -18,7 +18,10 @@ evidence and the cross-slice demonstration must pass clean-room validation.
   rollout state, applies only bounded stable rollback, prevents repeated action with a
   cooldown/action budget, verifies recovery through real ONNX inference, and survives
   controller restart.
-- [ ] Secure delegated agent tool path without privilege amplification.
+- [x] Secure delegated agent tool path: short-lived delegated identity, filtered
+  discovery, same-tenant metadata evidence, plan-only canary rollback preparation,
+  independent approval/execution, durable hashed audit, cross-tenant denial, and
+  restart recovery are executed locally. This facade does not claim MCP protocol execution.
 - [ ] Developer self-service and optional edge interfaces remain narrow, independently
   documented and honest about unexecuted adapters.
 - [ ] Integrated clean-room success and rollback demonstration.

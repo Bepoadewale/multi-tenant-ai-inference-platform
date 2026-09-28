@@ -89,6 +89,43 @@ protection. This local controller has exactly one allowlisted action,
 `ROLLBACK_CANARY_TO_STABLE`; it does not execute shell commands or access Docker,
 Kubernetes, cloud, model-registry, or tenant-inference credentials.
 
+## Delegated agent-tool governance slice
+
+`make demo-agent-tools` runs the narrow agent authority path against the real local
+Compose stack. A five-minute Ed25519 token with `principal_type=agent`, named
+delegator, `agent.tools`, `inference.read`, and `remediation.plan` discovers exactly
+two HTTP-facade tools: `get_request_evidence` and `plan_canary_rollback`. This is not
+an MCP protocol validation; the standalone secure MCP gateway repository remains the
+protocol-level reference implementation.
+
+The demo executes and verifies:
+
+- same-tenant, metadata-only request evidence is returned without prompt or completion
+  content;
+- evidence for a real `team-reporting` request is denied to the `team-search` agent;
+- a stopped candidate runtime produces a real failed canary request;
+- the agent creates a bounded, durable rollback plan but receives `403` when attempting
+  approval or execution;
+- distinct remediation-approver and platform-admin identities approve and execute the
+  plan; subsequent real ONNX traffic reaches stable v1;
+- Prometheus records allowed tool calls, and the agent-tools service restart retains the
+  SQLite audit whose arguments are SHA-256 hashes only.
+
+The Compose fixture sets the remediation cooldown to one second so independent local
+demos can execute sequentially. The controller default remains 30 seconds when the
+environment value is absent; action-budget and cooldown enforcement remain tested.
+
+### Slice clean-room evidence
+
+On 2026-09-28, the delegated-agent path was run twice after project-scoped cleanup.
+Each cycle started from absent project containers, network, volumes, `.local`, and
+`.venv`; ran `make install`, `make bootstrap-local`, `make smoke`, and
+`make demo-agent-tools`; then checked lint/tests/Compose configuration and ran
+`make clean-local`. Both final cleanups confirmed no Compose resources with the
+`multi-tenant-ai-inference-platform` label and no `.local` or `.venv` remained.
+This validates the new slice's clean bootstrap/teardown behavior. The future integrated
+flagship clean-room run remains a separate P0 item and must repeat all slices together.
+
 ## Governed-remediation clean-room validation
 
 **Date:** 2026-09-28

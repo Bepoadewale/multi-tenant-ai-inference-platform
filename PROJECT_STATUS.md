@@ -31,6 +31,10 @@ must not be represented as executed until they have their own local evidence.
   `remediation.approve` JWT, rechecks exact Redis/SQLite rollout state, applies only
   the bounded stable rollback, verifies real ONNX recovery, and survives controller
   restart. Its cooldown/action budget blocks repeat remediation loops.
+- A separate delegated-agent-tools service validates a five-minute Ed25519 agent JWT,
+  filters discovery to same-tenant evidence and canary-plan preparation, denies
+  cross-tenant evidence, and persists metadata-only hashed tool-call audit records.
+  The agent cannot approve or execute the resulting remediation plan.
 - Clean-room workflow passed twice: bootstrap, smoke, cumulative flagship demos,
   validation, project-scoped cleanup, then a second bootstrap/demo.
 
@@ -52,14 +56,13 @@ must not be represented as executed until they have their own local evidence.
 
 ## Current P0 Objective
 
-Add secure agent-tool governance: use a narrow delegated tool contract without
-privilege amplification or bypassing the existing gateway controls.
+Add developer self-service through a narrow, validated golden-path contract without
+turning this repository into a portal rewrite.
 
 ## Completion Blockers
 
 - None for the existing inference-core completion gate.
-- Secure-agent governance, developer-self-service, and optional edge slices are not
-  yet executed here.
+- Developer-self-service and optional edge slices are not yet executed here.
 
 ## Explicitly Unexecuted Production Adapters
 
@@ -67,6 +70,13 @@ privilege amplification or bypassing the existing gateway controls.
 
 ## Last Validation
 
+- Delegated-agent slice: two clean bootstrap → smoke → `make demo-agent-tools` →
+  teardown cycles passed on 2026-09-28. The live demo exercised filtered discovery,
+  same-tenant evidence, cross-tenant denial, plan-only authority, independent
+  approval/execution, Prometheus tool metrics, durable hashed audit, service restart,
+  and real stable-ONNX recovery. Static validation after the second run passed Ruff,
+  37 pytest tests, and Compose configuration. The full all-slice clean-room rerun is
+  still an explicit flagship completion item.
 - Two clean-room cycles on the governed-remediation revision passed. Both started from
   `make clean-local`, ran `make install`, `make bootstrap-local`, `make smoke`, core
   and cumulative flagship demos including `make demo-remediation`, `make verify`, and
@@ -80,7 +90,8 @@ privilege amplification or bypassing the existing gateway controls.
 ## Last Updated
 
 2026-09-28, governed-remediation slice validated on
-`codex/flagship-governed-remediation`; final GitHub CI evidence will be recorded before review.
+`codex/flagship-agent-tool-governance`; this slice's second clean-room cycle and final
+GitHub CI evidence will be recorded before review.
 
 ## Clean-Room Reproducibility
 
