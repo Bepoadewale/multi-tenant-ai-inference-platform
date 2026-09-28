@@ -58,15 +58,25 @@ curl -fsS --max-time 10 "http://localhost:8082/platform/v1/requests/${timeout_re
   -H "Authorization: Bearer ${admin_token}" \
   | jq -e '.outcome == "backend_error" and .slo.status == "VIOLATED"' >/dev/null
 
-for _ in $(seq 1 30); do
-  if curl -sS --max-time 5 --data-urlencode 'query=sum(inference_gateway_estimated_cost_usd_total)' \
-    http://localhost:9090/api/v1/query | jq -e '.data.result[0]?.value[1] | tonumber? > 0' >/dev/null; then
-    break
-  fi
-  sleep 2
-done
-curl -sS --max-time 5 --data-urlencode 'query=sum(inference_gateway_request_slo_evaluations_total{status="VIOLATED"})' \
-  http://localhost:9090/api/v1/query | jq -e '.data.result[0]?.value[1] | tonumber? > 0' >/dev/null
+wait_for_positive_metric() {
+  local query=$1
+  local label=$2
+  for _ in $(seq 1 30); do
+    if curl -sS --max-time 5 --data-urlencode "query=${query}" \
+      http://localhost:9090/api/v1/query \
+      | jq -e '.data.result[0]?.value[1] | tonumber? > 0' >/dev/null; then
+      return 0
+    fi
+    sleep 2
+  done
+  echo "Prometheus did not expose positive ${label} within the bounded timeout." >&2
+  return 1
+}
+
+wait_for_positive_metric 'sum(inference_gateway_estimated_cost_usd_total)' 'estimated-cost evidence'
+wait_for_positive_metric \
+  'sum(inference_gateway_request_slo_evaluations_total{status="VIOLATED"})' \
+  'violated-SLO evidence'
 
 curl -fsS --max-time 10 -X POST "http://localhost:8083/release/v1/plans/${plan_id}/rollback" \
   -H "Authorization: Bearer ${admin_token}" | jq -e '.status == "ROLLED_BACK"' >/dev/null
