@@ -19,7 +19,7 @@ lint:
 	$(PY) -m ruff check gateway/src gateway/tests benchmarks scripts
 audit:
 	@for attempt in 1 2 3; do \
-		$(PY) -m pip_audit --skip-editable && exit 0; \
+		$(PY) -m pip_audit -s osv --skip-editable && exit 0; \
 		if [ "$$attempt" -eq 3 ]; then exit 1; fi; \
 		echo "pip-audit registry request failed; retrying ($$attempt/3)"; sleep 5; \
 	done
