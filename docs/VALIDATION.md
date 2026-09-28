@@ -2,6 +2,30 @@
 
 Validation is local-first. Record hardware, runtime, exact command and result for any benchmark; never infer GPU behavior from the deterministic CPU fixture or fabricate validation.
 
+## Flagship integration rule
+
+The evidence below validates the inference core only. Each future flagship vertical
+slice must add its own commands, external dependencies, success path, failure path and
+clean-room evidence before it is listed as executed. The integrated flagship demo must
+be rerun from clean project state after the slices are connected.
+
+## MLflow registry slice
+
+The first flagship slice was executed locally after the historical inference-core
+clean-room evidence below. `make bootstrap-local` started MLflow with a project-scoped
+SQLite store and artifacts directory, evaluated two generated ONNX artifacts with
+`CPUExecutionProvider`, registered their SHA-256 digests and fixture metrics, and set
+`champion` (stable v1) and `candidate` (v2) aliases. `make smoke` checked the MLflow
+health and registered model, while `make demo-model-registry` verified the aliases and
+recorded digest evidence in `.local/mlflow/registry-evidence.json`.
+
+`make demo-release-control` additionally executed: plan creation from the MLflow
+aliases/digest; a denied requester approval; an independent `release.approve` grant;
+a Redis-shared 10% canary observed through a second gateway; 100% candidate promotion;
+and rollback to the recorded stable MLflow version with live stable-route evidence.
+The release store is SQLite-backed and unit tests reject a stale transition. This does
+not yet validate the expanded flagship clean-room cycle; that remains a later blocker.
+
 ## Clean-Room Validation
 
 **Date:** 2026-09-21

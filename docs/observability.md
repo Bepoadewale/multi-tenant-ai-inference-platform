@@ -1,5 +1,8 @@
 # Observability and SLOs
 
+Flagship context: the existing telemetry core will be extended to correlate release,
+SLO and estimated-cost evidence; those correlations are not yet executed.
+
 Gateway metrics cover requests/outcomes, prompt/completion tokens, throttles, active requests,
 queue depth/wait, end-to-end latency, and TTFT. Local Compose exports OTLP through the Collector to
 Tempo and exposes Prometheus metrics; generated demo traffic is queryable in both systems. The

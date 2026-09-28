@@ -2,7 +2,10 @@
 
 ## Current Maturity
 
-PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE
+PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE for the multi-tenant inference core.
+
+The repository is now the public flagship. Flagship integrations are planned work and
+must not be represented as executed until they have their own local evidence.
 
 ## Maturity Model
 
@@ -13,6 +16,8 @@ PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE
 - Two independent FastAPI gateways authenticate Ed25519 JWTs and derive tenant/role server-side.
 - Redis Lua admission enforces shared request, token, concurrency, daily-budget, and bounded queue limits across both gateways.
 - Two Dockerized CPU ONNX Runtime targets return real deterministic classifier output through the OpenAI-compatible and SSE paths.
+- A local MLflow server records stable and candidate ONNX artifacts with real SHA-256 digests, CPU fixture evaluation metrics, and `champion`/`candidate` aliases.
+- Release control persists SQLite plans, binds them to MLflow versions/digests, requires a distinct `release.approve` identity, uses Redis-shared canary weights across gateways, and verifies promotion and rollback with live ONNX traffic; a stale transition is rejected in tests.
 - Admin-controlled weighted routing reaches the selected candidate runtime; ordinary tenant and agent identities cannot administer rollouts.
 - Redis metering stores metadata-only usage and survives a gateway restart.
 - OTel Collector, Tempo, Prometheus, and Grafana receive generated local gateway traffic.
@@ -36,11 +41,13 @@ PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE
 
 ## Current P0 Objective
 
-Maintain the validated local-first control loop; take the highest-value P1 hardening item only after preserving clean-room reproducibility.
+Add the next flagship vertical slice: an explicitly simulated-GPU capacity and admission decision that is exercised by the local serving path.
 
 ## Completion Blockers
 
-- None for the local-first completion gate. P1/P3 work remains below.
+- None for the existing inference-core completion gate.
+- Capacity, SLO/FinOps, remediation, secure-agent,
+  developer-self-service and optional edge slices are not yet executed here.
 
 ## Explicitly Unexecuted Production Adapters
 
@@ -48,7 +55,7 @@ Maintain the validated local-first control loop; take the highest-value P1 harde
 
 ## Last Validation
 
-- `make verify`: passed — Ruff, 20 pytest tests, pip-audit, and Compose configuration.
+- `make lint`, `make test`, `make smoke`, `make demo-model-registry`, and `make demo-release-control`: passed locally. The release demo exercised independent approval denial/grant, shared canary, promotion, and rollback.
 - `make demo-local`, `make demo-overload`, `make demo-routing`, `make demo-metering`, `make demo-observability`, `make demo-failure`, `make demo-timeout`, and `make demo-recovery`: passed against the Docker stack.
 - PR #4 GitHub checks: `python`, `manifests`, `supply-chain`, and `local-e2e` passed.
 

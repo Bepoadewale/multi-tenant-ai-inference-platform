@@ -4,7 +4,21 @@ PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE
 
 # Current Completion Blockers
 
-None for `PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE`. Preserve the validated clean-room path while completing the P1 items below.
+The inference core is complete locally. The public flagship remains incomplete until
+the vertical slices below are independently executed and integrated into one clean-room
+demonstration. Preserve the existing core while working through them.
+
+# Flagship P0 — Integrated Platform Story
+
+- [x] Model release control: MLflow registry, artifact integrity, fixture evaluation,
+  durable plan, independent approval, shared canary, promotion and rollback.
+- [ ] Capacity policy: simulated-GPU capacity/admission decision with explicitly
+  simulated hardware labels.
+- [ ] Operational evidence: correlate request, release, latency/SLO and estimated cost.
+- [ ] Governed remediation: incident evidence, bounded approved action and verification.
+- [ ] Secure agent governance: delegated platform-tool access without privilege amplification.
+- [ ] Developer self-service and optional edge adapters through narrow contracts.
+- [ ] Integrated clean-room success and failure demonstration with safe teardown.
 
 # P0 — Required for Portfolio Claim
 

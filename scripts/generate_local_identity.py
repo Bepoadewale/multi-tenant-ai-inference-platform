@@ -28,18 +28,20 @@ def main() -> None:
     root = Path(".local/identity")
     root.mkdir(parents=True, exist_ok=True)
     private_path, public_path, tokens_path = root / "private.pem", root / "public.pem", root / "tokens.json"
-    if private_path.exists() and public_path.exists() and tokens_path.exists():
-        return
-    private = Ed25519PrivateKey.generate()
-    private_bytes = private.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption())
-    public_bytes = private.public_key().public_bytes(serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo)
-    private_path.write_bytes(private_bytes)
-    public_path.write_bytes(public_bytes)
-    private_path.chmod(0o600)
+    if private_path.exists() and public_path.exists():
+        private_bytes = private_path.read_bytes()
+    else:
+        private = Ed25519PrivateKey.generate()
+        private_bytes = private.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption())
+        public_bytes = private.public_key().public_bytes(serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo)
+        private_path.write_bytes(private_bytes)
+        public_path.write_bytes(public_bytes)
+        private_path.chmod(0o600)
     tokens_path.write_text(json.dumps({
         "search": token(private_bytes.decode(), "developer-search", "team-search", ["inference.invoke"]),
         "payments": token(private_bytes.decode(), "developer-payments", "team-payments", ["inference.invoke"]),
         "admin": token(private_bytes.decode(), "platform-admin", "team-search", ["platform.admin"]),
+        "approver": token(private_bytes.decode(), "release-approver", "team-search", ["release.approve"]),
     }))
 
 

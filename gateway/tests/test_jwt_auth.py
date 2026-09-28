@@ -10,7 +10,7 @@ from cryptography.hazmat.primitives.serialization import (
     PublicFormat,
 )
 from fastapi import HTTPException
-from inference_gateway.auth.admin import platform_admin
+from inference_gateway.auth.admin import platform_admin, release_approver
 from inference_gateway.auth.service import authenticated_tenant
 
 
@@ -85,3 +85,12 @@ def test_agent_identity_cannot_gain_platform_admin_without_role(jwt_identity):
     with pytest.raises(HTTPException) as error:
         platform_admin(f"Bearer {token}")
     assert error.value.status_code == 403
+
+
+def test_release_approval_requires_a_separate_role(jwt_identity):
+    with pytest.raises(HTTPException) as error:
+        release_approver(f"Bearer {_token(jwt_identity, roles=['platform.admin'])}")
+    assert error.value.status_code == 403
+    assert release_approver(
+        f"Bearer {_token(jwt_identity, sub='independent-approver', roles=['release.approve'])}"
+    ) == "independent-approver"

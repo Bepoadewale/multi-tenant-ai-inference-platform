@@ -1,4 +1,4 @@
-.PHONY: install test lint audit run demo load-test bootstrap-local smoke status demo-local demo-overload demo-routing demo-failure demo-timeout demo-metering demo-observability demo-recovery verify clean-local destroy-local helm-lint terraform-validate
+.PHONY: install test lint audit run demo load-test bootstrap-local smoke status demo-local demo-overload demo-routing demo-failure demo-timeout demo-metering demo-observability demo-recovery demo-model-registry demo-release-control verify clean-local destroy-local helm-lint terraform-validate
 PYTHON ?= python3.12
 VENV := .venv
 PY := $(VENV)/bin/python
@@ -11,7 +11,8 @@ install:
 	$(PYTHON) -m venv $(VENV)
 	$(PY) -m pip install --upgrade pip
 	$(PY) -m pip install -e '.[dev]'
-	$(PY) scripts/create_model.py
+	$(PY) scripts/create_model.py --output models/tiny-intent-classifier.onnx
+	$(PY) scripts/create_model.py --output models/tiny-intent-classifier-v2.onnx --candidate
 test:
 	PYTHONPATH=gateway/src $(PY) -m pytest -q
 lint:
@@ -46,6 +47,10 @@ demo-observability:
 	./scripts/demo-observability.sh
 demo-recovery:
 	./scripts/demo-recovery.sh
+demo-model-registry:
+	./scripts/demo-model-registry.sh
+demo-release-control:
+	./scripts/demo-release-control.sh
 verify:
 	$(MAKE) lint
 	$(MAKE) test

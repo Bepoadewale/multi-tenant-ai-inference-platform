@@ -1,8 +1,30 @@
-# Multi-Tenant AI Inference Platform
+# Multi-Tenant AI Platform
 
-A local-first, governed inference platform for shared AI model capacity. Applications and agents use an OpenAI-compatible API; the gateway verifies a signed identity, derives the tenant server-side, applies shared admission controls, routes to a model runtime, records privacy-safe usage, and emits metrics and traces.
+The public flagship for a local-first, governed AI platform. Its executed foundation is
+a multi-tenant inference platform: applications and agents use an OpenAI-compatible
+API; the gateway verifies a signed identity, derives the tenant server-side, applies
+shared admission controls, routes to a model runtime, records privacy-safe usage, and
+emits metrics and traces.
 
 It answers a practical platform question: **how can multiple teams use shared model capacity without receiving direct runtime, GPU, Redis, or infrastructure credentials?**
+
+## Flagship direction
+
+The proven inference core stays intact. The platform will add model release control,
+simulated-capacity policy, SLO/FinOps evidence, governed remediation, secure agent
+tools, optional edge operations and developer self-service as **separate validated
+vertical slices**—not as a rewrite or a merge of nine codebases.
+
+The first integrated demonstration is:
+
+```text
+tenant request -> identity/quota/policy -> verified candidate release -> canary traffic
+-> telemetry/SLO/cost evidence -> independent approval -> promote or roll back
+```
+
+See [flagship direction](docs/flagship-direction.md) for boundaries and the staged
+integration model. Commercial strategy is intentionally not maintained in this public
+repository.
 
 ## What it allows—and prevents
 
@@ -36,6 +58,8 @@ flowchart LR
 | Signed identity + tenant RBAC | ✅ EXECUTED LOCALLY | Ed25519 JWT issuer/audience/expiry/signature/tenant/role checks and negative tests. |
 | Distributed admission | ✅ EXECUTED LOCALLY | Redis Lua limits shared across two gateways; quota and queue demos return 429. |
 | Weighted routing | ✅ EXECUTED LOCALLY | Admin weight change sends live traffic to the candidate runtime. |
+| MLflow model registry | ✅ EXECUTED LOCALLY | Local MLflow records two real ONNX artifacts, SHA-256 digests, fixture evaluation metrics, and `champion`/`candidate` aliases. |
+| Governed model release | ✅ EXECUTED LOCALLY | SQLite plans bind MLflow aliases/digests; separate roles prove approval, shared canary, promotion, stale-state rejection, and rollback. |
 | Usage + restart recovery | ✅ EXECUTED LOCALLY | Metadata-only Redis usage survives a gateway restart. |
 | Metrics, traces, dashboards | ✅ EXECUTED LOCALLY | Prometheus, OTel Collector, Tempo, and Grafana receive generated local traffic. |
 | GPU/vLLM/DCGM/Kubernetes | 📐 ARCHITECTURE / CONTRACT ONLY | No GPU or cloud execution is claimed. |
@@ -52,6 +76,8 @@ make status              # service readiness and recorded request count
 make demo-local          # real inference, streaming, and shared quota
 make demo-overload       # bounded queue reject
 make demo-routing        # live candidate routing
+make demo-model-registry # MLflow artifact, digest, evaluation and alias evidence
+make demo-release-control # plan → independent approval → canary → promote → rollback
 make demo-metering       # privacy-safe durable usage
 make demo-observability  # Prometheus + Tempo evidence
 make demo-failure        # unavailable backend → 502
@@ -61,17 +87,18 @@ make verify
 make clean-local
 ```
 
-The local stack publishes gateways on `:8081` and `:8082`, Prometheus on `:9090`, Tempo on `:3200`, and Grafana on `:3002`. `make clean-local` removes only this repository's Compose containers, network, volumes, virtual environment, generated ONNX artifact, and generated identity fixture.
+The local stack publishes gateways on `:8081` and `:8082`, release control on `:8083`, MLflow on `:15010`, Prometheus on `:9090`, Tempo on `:3200`, and Grafana on `:3002`. `make clean-local` removes only this repository's Compose containers, network, volumes, virtual environment, generated ONNX artifacts, MLflow/release state, and generated identity fixture.
 
 ## Security boundary
 
-The gateway does not trust tenant headers. Local Compose mode creates an ephemeral Ed25519 key pair and test tokens under ignored `.local/identity/`; the private key stays on the host and is never committed. Gateway containers receive only the public verification key. The local fixture distinguishes `inference.invoke` from `platform.admin`; an agent identity cannot self-escalate to rollout administration.
+The gateway does not trust tenant headers. Local Compose mode creates an ephemeral Ed25519 key pair and test tokens under ignored `.local/identity/`; the private key stays on the host and is never committed. Gateway containers receive only the public verification key. The local fixture distinguishes `inference.invoke`, `platform.admin`, and `release.approve`; a requester cannot approve their own release plan, and an agent identity cannot self-escalate to rollout administration.
 
 The CPU runtime is deliberately lightweight and deterministic. It validates control-plane behavior, not model quality, GPU throughput, DCGM telemetry, KV-cache utilization, or production economics.
 
 ## Documentation
 
 - [Architecture](docs/architecture.md)
+- [Flagship direction](docs/flagship-direction.md)
 - [Multi-tenancy](docs/multi-tenancy.md)
 - [Routing](docs/routing.md)
 - [Observability](docs/observability.md)
