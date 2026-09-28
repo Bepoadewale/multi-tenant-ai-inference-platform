@@ -7,7 +7,7 @@ are additive vertical slices, each requiring real local execution and a failure 
 
 - [x] F1 MLflow-backed registry, evaluation, verified canary, approval and rollback.
 - [x] F2 simulated-GPU capacity/admission policy: Redis-shared allocation, bounded queueing, tenant rejection, and CPU fallback; no physical GPU claims.
-- [ ] F3 request/release/SLO/estimated-cost correlation.
+- [x] F3 request/release/SLO/estimated-cost correlation.
 - [ ] F4 governed incident/remediation and verification.
 - [ ] F5 delegated agent tools, self-service requests and optional edge adapter.
 - [ ] F6 integrated clean-room success and rollback demonstration.

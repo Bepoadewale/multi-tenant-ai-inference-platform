@@ -1,6 +1,23 @@
 # FinOps
 
-Flagship context: FinOps becomes an additive evidence slice. Existing local estimates
-remain estimates until request-to-release cost correlation is executed.
+## Executed local evidence
 
-Usage records contain tenant/model/tokens/latency/outcome but never prompt or completion text. The local report estimates $0.80 per million tokens solely as a transparent illustrative allocation—not billing. Production allocation combines GPU-hour cloud cost, reserved/spot commitments, utilization, model replicas, and tenant token usage. Tag deployments by tenant/model/cost center and track shared-pool allocation policy.
+`make demo-operational-evidence` sends a real request through a verified canary and
+retrieves its metadata-only request analysis. The analysis is correlated to model,
+backend/version, release plan/phase, token usage, local SLO result, and Tempo trace
+ID. Cost is calculated with `Decimal` from the versioned
+`local-fixture-2026-09-v1` price catalog:
+
+- prompt tokens: $0.20 per million;
+- completion tokens: $0.80 per million.
+
+The response labels its cost `ESTIMATED_LOCAL_TOKEN_ALLOCATION`. It is a transparent
+local allocation signal, **not** a provider bill, invoice, realized margin, GPU-hour
+cost, or cloud price. Prometheus exposes the accumulated estimate as
+`inference_gateway_estimated_cost_usd_total`.
+
+Usage records contain tenant/model/backend/version/token/latency/outcome and release
+metadata, but never prompt or completion text. The direct request record is bounded
+with a seven-day Redis TTL. Production allocation should incorporate versioned cloud
+prices, GPU-hours, commitments, utilization, replicas, and tenant/model/cost-center
+policy; those inputs are not executed here.

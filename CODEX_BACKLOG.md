@@ -14,7 +14,8 @@ demonstration. Preserve the existing core while working through them.
   durable plan, independent approval, shared canary, promotion and rollback.
 - [x] Capacity policy: simulated-GPU capacity/admission decision with explicitly
   simulated hardware labels, Redis-shared allocation, bounded queueing, rejection, and CPU fallback.
-- [ ] Operational evidence: correlate request, release, latency/SLO and estimated cost.
+- [x] Operational evidence: correlate request, release, latency/SLO and estimated cost.
+- [ ] Governed remediation: incident evidence, bounded approved action and verification.
 - [ ] Governed remediation: incident evidence, bounded approved action and verification.
 - [ ] Secure agent governance: delegated platform-tool access without privilege amplification.
 - [ ] Developer self-service and optional edge adapters through narrow contracts.

@@ -10,7 +10,9 @@ evidence and the cross-slice demonstration must pass clean-room validation.
 
 - [x] Verified model registry/evaluation/canary/approval/promotion-or-rollback path.
 - [x] Explicit simulated-GPU capacity policy with real local admission evidence: Redis-shared allocation, bounded queueing, tenant rejection, and CPU fallback while inference remains real CPU ONNX.
-- [ ] Request-to-release trace/SLO/estimated-cost correlation.
+- [x] Request-to-release trace/SLO/estimated-cost correlation with a real Tempo trace,
+  active release-plan context, metadata-only Redis record, explicit Decimal fixture
+  estimate, and a persisted timeout SLO violation.
 - [ ] Governed remediation failure and verification path.
 - [ ] Secure delegated agent tool path without privilege amplification.
 - [ ] Developer self-service and optional edge interfaces remain narrow, independently
