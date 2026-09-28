@@ -100,6 +100,9 @@ class UsageRecord(BaseModel):
     ttft_ms: float | None
     streaming: bool
     outcome: str
+    trace_id: str | None = None
+    release_plan_id: str | None = None
+    release_phase: str | None = None
 
 
 class CapacityState(StrEnum):

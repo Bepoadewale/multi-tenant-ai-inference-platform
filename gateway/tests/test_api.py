@@ -61,3 +61,23 @@ def test_unknown_model_is_rejected_before_runtime_invocation():
     )
     assert response.status_code == 404
     assert response.json()["detail"] == "unknown model alias"
+
+
+def test_operational_analysis_requires_platform_admin_and_returns_metadata_only():
+    chat = client.post(
+        "/v1/chat/completions",
+        headers={"Authorization": "Bearer local-search-token"},
+        json={
+            "model": "chat-default",
+            "messages": [{"role": "user", "content": "do not retain this raw prompt"}],
+        },
+    )
+    request_id = chat.json()["x_observability"]["request_id"]
+    assert client.get(f"/platform/v1/requests/{request_id}/analysis").status_code == 403
+    response = client.get(
+        f"/platform/v1/requests/{request_id}/analysis",
+        headers={"Authorization": "Bearer local-platform-admin-token"},
+    )
+    assert response.status_code == 200
+    assert response.json()["privacy"]["raw_prompt_stored"] is False
+    assert "do not retain" not in response.text

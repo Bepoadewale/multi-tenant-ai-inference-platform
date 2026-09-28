@@ -19,7 +19,8 @@ The current integrated demonstration is:
 
 ```text
 tenant request -> identity/quota/capacity policy -> verified candidate release
--> shared canary traffic -> independent approval -> promote or roll back
+-> shared canary traffic -> trace + local SLO + estimated cost evidence
+-> independent approval -> promote or roll back
 ```
 
 See [flagship direction](docs/flagship-direction.md) for boundaries and the staged
@@ -34,6 +35,7 @@ repository.
 - A platform administrator can adjust a weighted rollout; ordinary tenants and agents cannot.
 - Inference traffic reaches two real local CPU ONNX Runtime targets. Streaming is OpenAI-compatible SSE.
 - Usage records contain tenant/model/backend/token/latency metadata, never raw prompts or responses.
+- A platform administrator can retrieve metadata-only evidence for one completed request: its Tempo trace ID, route/version, active release plan, local fixture SLO result, and versioned estimated token cost.
 - Explicit failures are returned for quota exhaustion, overload, an unavailable backend, and a bounded backend timeout. Requests are not replayed after a backend error.
 
 ```mermaid
@@ -63,6 +65,7 @@ flowchart LR
 | Weighted routing | ✅ EXECUTED LOCALLY | Admin weight change sends live traffic to the candidate runtime. |
 | MLflow model registry | ✅ EXECUTED LOCALLY | Local MLflow records two real ONNX artifacts, SHA-256 digests, fixture evaluation metrics, and `champion`/`candidate` aliases. |
 | Governed model release | ✅ EXECUTED LOCALLY | SQLite plans bind MLflow aliases/digests; separate roles prove approval, shared canary, promotion, stale-state rejection, and rollback. |
+| Request operational evidence | ✅ EXECUTED LOCALLY | A real canary request correlates a Tempo trace ID, release plan, target version, local request SLO, and Decimal-calculated fixture token estimate; an actual backend timeout persists as an SLO violation. |
 | Usage + restart recovery | ✅ EXECUTED LOCALLY | Metadata-only Redis usage survives a gateway restart. |
 | Metrics, traces, dashboards | ✅ EXECUTED LOCALLY | Prometheus, OTel Collector, Tempo, and Grafana receive generated local traffic. |
 | Physical GPU/vLLM/DCGM/Kubernetes | 📐 ARCHITECTURE / CONTRACT ONLY | Simulated capacity is not physical accelerator scheduling; no GPU or cloud execution is claimed. |
@@ -82,6 +85,7 @@ make demo-routing        # live candidate routing
 make demo-model-registry # MLflow artifact, digest, evaluation and alias evidence
 make demo-release-control # plan → independent approval → canary → promote → rollback
 make demo-capacity       # simulated accelerator admission, queue, reject, and CPU fallback
+make demo-operational-evidence # canary request → Tempo trace/release/SLO/estimated cost + timeout SLO violation
 make demo-metering       # privacy-safe durable usage
 make demo-observability  # Prometheus + Tempo evidence
 make demo-failure        # unavailable backend → 502
@@ -99,6 +103,15 @@ The gateway does not trust tenant headers. Local Compose mode creates an ephemer
 
 The CPU runtime is deliberately lightweight and deterministic. It validates control-plane behavior, not model quality, GPU throughput, DCGM telemetry, KV-cache utilization, or production economics.
 
+## Operational evidence boundary
+
+`GET /platform/v1/requests/{request_id}/analysis` is restricted to the local
+`platform.admin` role. It reads a seven-day, Redis-backed metadata record—tenant,
+model, deployment version, release-plan context, token totals, outcome and trace ID.
+It never stores prompt or completion text. The SLO thresholds are local fixture
+thresholds; the cost uses a versioned Decimal token-price fixture and is explicitly
+**not** cloud billing, an invoice, or a physical-GPU allocation.
+
 ## Documentation
 
 - [Architecture](docs/architecture.md)
@@ -106,6 +119,7 @@ The CPU runtime is deliberately lightweight and deterministic. It validates cont
 - [Multi-tenancy](docs/multi-tenancy.md)
 - [Routing](docs/routing.md)
 - [Observability](docs/observability.md)
+- [FinOps](docs/finops.md)
 - [Security](docs/security.md)
 - [Failure modes](docs/failure-modes.md)
 - [Implementation status](docs/IMPLEMENTATION_STATUS.md)

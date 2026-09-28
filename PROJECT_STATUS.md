@@ -22,6 +22,10 @@ must not be represented as executed until they have their own local evidence.
 - Admin-controlled weighted routing reaches the selected candidate runtime; ordinary tenant and agent identities cannot administer rollouts.
 - Redis metering stores metadata-only usage and survives a gateway restart.
 - OTel Collector, Tempo, Prometheus, and Grafana receive generated local gateway traffic.
+- A platform-admin-only request-analysis API retrieves Redis-backed, metadata-only
+  evidence linking a real request to its Tempo trace ID, selected target/version,
+  active release plan/phase, local fixture SLO, and Decimal-calculated local token
+  estimate. A real bounded backend timeout persists as an SLO violation.
 - Clean-room workflow passed twice: bootstrap, smoke, successful inference, bounded timeout failure, validation, project-scoped cleanup, then a second bootstrap/demo.
 
 ## Implemented but Not End-to-End Validated
@@ -30,7 +34,7 @@ must not be represented as executed until they have their own local evidence.
 
 ## Simulated
 
-- No CPU backend generation is simulated: the local classifier is a real ONNX model. The `simulated-l40s` pool is Redis quota accounting only. GPU/DCGM/KV-cache behavior and production cost allocation remain unexecuted.
+- No CPU backend generation is simulated: the local classifier is a real ONNX model. The `simulated-l40s` pool is Redis quota accounting only. GPU/DCGM/KV-cache behavior and production cost allocation remain unexecuted. Request cost is a versioned local fixture estimate, not billing.
 
 ## Architecture / Contracts Only
 
@@ -42,12 +46,12 @@ must not be represented as executed until they have their own local evidence.
 
 ## Current P0 Objective
 
-Add the next flagship vertical slice: correlate request, model release, latency/SLO evidence, and an explicitly estimated cost without weakening the existing serving path.
+Add governed remediation: use observed incident evidence to create a bounded, policy-gated action and verify recovery without weakening the existing serving path.
 
 ## Completion Blockers
 
 - None for the existing inference-core completion gate.
-- SLO/FinOps, remediation, secure-agent,
+- Remediation, secure-agent,
   developer-self-service and optional edge slices are not yet executed here.
 
 ## Explicitly Unexecuted Production Adapters
@@ -56,20 +60,21 @@ Add the next flagship vertical slice: correlate request, model release, latency/
 
 ## Last Validation
 
-- `make lint`, `make test`, `make smoke`, `make demo-model-registry`, `make demo-release-control`, and `make demo-capacity`: passed locally. The capacity demo exercised shared simulated-pool admission, bounded capacity queueing, tenant rejection, and real CPU fallback inference.
+- `make lint`, `make test`, `make smoke`, `make demo-model-registry`, `make demo-release-control`, `make demo-capacity`, and `make demo-operational-evidence`: passed locally. The operational-evidence demo correlated a live request during a canary with a Tempo trace, release plan, local SLO and explicit fixture cost; it also persisted an actual timeout as an SLO violation.
 - `make demo-local`, `make demo-overload`, `make demo-routing`, `make demo-metering`, `make demo-observability`, `make demo-failure`, `make demo-timeout`, and `make demo-recovery`: passed against the Docker stack.
 - PR #4 GitHub checks: `python`, `manifests`, `supply-chain`, and `local-e2e` passed.
 
 ## Last Updated
 
-2026-09-28, `37c0da0` capacity-policy implementation; `974397a` recorded local evidence; `86f945e` hardened dependency-audit service selection. See PR #7 for current CI evidence.
+2026-09-28, operational-evidence slice validated on `codex/flagship-operational-evidence`; final GitHub CI evidence will be recorded before review.
 
 ## Clean-Room Reproducibility
 
 **Status: VALIDATED**
 
-Two clean-room cycles were executed on 2026-09-21. Each began after `make clean-local`, used
-`make install`, `make bootstrap-local`, and `make smoke`; the first ran the full demo/validation
-suite and the second reran the primary success and bounded-timeout failure demos. The cleanup
-asserted project Compose resources and generated artifacts were absent. An unrelated Redis
-sentinel container survived project cleanup.
+Historical core clean-room validation remains recorded below. The operational-evidence
+slice additionally completed two clean-room cycles on 2026-09-28: each ran installation,
+bootstrap, every core/release/capacity/operational demo, `make verify`, and safe cleanup.
+Post-cleanup checks confirmed project Compose resources, `.local`, and `.venv` were absent.
+After the CI timing fix, two additional clean boot → operational-evidence demo → cleanup
+cycles passed; one also ran `make verify`.
