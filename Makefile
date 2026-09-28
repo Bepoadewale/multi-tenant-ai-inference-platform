@@ -18,7 +18,11 @@ test:
 lint:
 	$(PY) -m ruff check gateway/src gateway/tests benchmarks scripts
 audit:
-	$(PY) -m pip_audit --skip-editable
+	@for attempt in 1 2 3; do \
+		$(PY) -m pip_audit --skip-editable && exit 0; \
+		if [ "$$attempt" -eq 3 ]; then exit 1; fi; \
+		echo "pip-audit registry request failed; retrying ($$attempt/3)"; sleep 5; \
+	done
 run:
 	PYTHONPATH=gateway/src $(VENV)/bin/uvicorn inference_gateway.api.main:app --port 8080 --reload
 demo:
