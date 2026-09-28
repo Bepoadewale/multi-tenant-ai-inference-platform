@@ -81,7 +81,22 @@ timeline=$(curl -fsS --max-time 10 "http://localhost:8084/remediation/v1/inciden
   -H "Authorization: Bearer ${admin_token}")
 jq -e 'map(.event) | index("INCIDENT_DETECTED") and index("PLAN_CREATED") and index("PLAN_APPROVED") and index("REMEDIATION_VERIFIED")' <<<"${timeline}" >/dev/null
 
-# Prove the controller has no in-memory-only incident record.
+for _ in $(seq 1 30); do
+  if curl -sS --max-time 5 --data-urlencode \
+    'query=sum(inference_gateway_remediation_actions_total{result="ROLLED_BACK"})' \
+    http://localhost:9090/api/v1/query \
+    | jq -e '.data.result[0]?.value[1] | tonumber? > 0' >/dev/null; then
+    break
+  fi
+  sleep 2
+done
+curl -sS --max-time 5 --data-urlencode \
+  'query=sum(inference_gateway_remediation_actions_total{result="ROLLED_BACK"})' \
+  http://localhost:9090/api/v1/query \
+  | jq -e '.data.result[0]?.value[1] | tonumber? > 0' >/dev/null
+
+# Prove the controller has no in-memory-only incident record. The metric assertion
+# intentionally precedes restart because Prometheus client counters are process-local.
 "${compose[@]}" restart remediation-control >/dev/null
 for _ in $(seq 1 30); do
   if curl -fsS --max-time 5 http://localhost:8084/healthz >/dev/null; then break; fi

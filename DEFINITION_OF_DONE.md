@@ -13,7 +13,11 @@ evidence and the cross-slice demonstration must pass clean-room validation.
 - [x] Request-to-release trace/SLO/estimated-cost correlation with a real Tempo trace,
   active release-plan context, metadata-only Redis record, explicit Decimal fixture
   estimate, and a persisted timeout SLO violation.
-- [ ] Governed remediation failure and verification path.
+- [x] Governed remediation consumes a real failed canary metadata record, persists a
+  durable incident/plan/audit timeline, requires independent approval, rejects stale
+  rollout state, applies only bounded stable rollback, prevents repeated action with a
+  cooldown/action budget, verifies recovery through real ONNX inference, and survives
+  controller restart.
 - [ ] Secure delegated agent tool path without privilege amplification.
 - [ ] Developer self-service and optional edge interfaces remain narrow, independently
   documented and honest about unexecuted adapters.

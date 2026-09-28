@@ -23,6 +23,14 @@ tenant request -> identity/quota/capacity policy -> verified candidate release
 -> independent approval -> promote or roll back
 ```
 
+The remediation slice extends that path only after evidence exists:
+
+```text
+failed candidate canary request -> durable incident -> immutable rollback plan
+-> independent remediation approval -> exact rollout precondition -> stable-only routing
+-> live ONNX verification -> durable audit timeline
+```
+
 See [flagship direction](docs/flagship-direction.md) for boundaries and the staged
 integration model. Commercial strategy is intentionally not maintained in this public
 repository.
@@ -36,6 +44,8 @@ repository.
 - Inference traffic reaches two real local CPU ONNX Runtime targets. Streaming is OpenAI-compatible SSE.
 - Usage records contain tenant/model/backend/token/latency metadata, never raw prompts or responses.
 - A platform administrator can retrieve metadata-only evidence for one completed request: its Tempo trace ID, route/version, active release plan, local fixture SLO result, and versioned estimated token cost.
+- A remediation controller can act only on an observed failed `chat-default` **canary** request. Its sole allowlisted action is restoring the previously verified stable ONNX target; it cannot run shell commands, alter arbitrary routing, call Kubernetes, or access cloud credentials.
+- The remediation requester cannot approve its own plan. Execution re-reads Redis rollout context and the SQLite release state, rejects a stale plan, applies cooldown/action-budget guards, verifies stable inference, and persists the incident/plan/audit timeline.
 - Explicit failures are returned for quota exhaustion, overload, an unavailable backend, and a bounded backend timeout. Requests are not replayed after a backend error.
 
 ```mermaid
@@ -66,6 +76,7 @@ flowchart LR
 | MLflow model registry | ✅ EXECUTED LOCALLY | Local MLflow records two real ONNX artifacts, SHA-256 digests, fixture evaluation metrics, and `champion`/`candidate` aliases. |
 | Governed model release | ✅ EXECUTED LOCALLY | SQLite plans bind MLflow aliases/digests; separate roles prove approval, shared canary, promotion, stale-state rejection, and rollback. |
 | Request operational evidence | ✅ EXECUTED LOCALLY | A real canary request correlates a Tempo trace ID, release plan, target version, local request SLO, and Decimal-calculated fixture token estimate; an actual backend timeout persists as an SLO violation. |
+| Governed canary remediation | ✅ EXECUTED LOCALLY | A failed candidate canary request creates a durable SQLite incident; separate approval, exact-state protection, bounded stable rollback, restart recovery, audit, Prometheus metrics, and live ONNX verification run locally. |
 | Usage + restart recovery | ✅ EXECUTED LOCALLY | Metadata-only Redis usage survives a gateway restart. |
 | Metrics, traces, dashboards | ✅ EXECUTED LOCALLY | Prometheus, OTel Collector, Tempo, and Grafana receive generated local traffic. |
 | Physical GPU/vLLM/DCGM/Kubernetes | 📐 ARCHITECTURE / CONTRACT ONLY | Simulated capacity is not physical accelerator scheduling; no GPU or cloud execution is claimed. |
@@ -86,6 +97,7 @@ make demo-model-registry # MLflow artifact, digest, evaluation and alias evidenc
 make demo-release-control # plan → independent approval → canary → promote → rollback
 make demo-capacity       # simulated accelerator admission, queue, reject, and CPU fallback
 make demo-operational-evidence # canary request → Tempo trace/release/SLO/estimated cost + timeout SLO violation
+make demo-remediation # failed canary → incident → independent approval → stable rollback → verified recovery
 make demo-metering       # privacy-safe durable usage
 make demo-observability  # Prometheus + Tempo evidence
 make demo-failure        # unavailable backend → 502
@@ -95,7 +107,7 @@ make verify
 make clean-local
 ```
 
-The local stack publishes gateways on `:8081` and `:8082`, release control on `:8083`, MLflow on `:15010`, Prometheus on `:9090`, Tempo on `:3200`, and Grafana on `:3002`. `make clean-local` removes only this repository's Compose containers, network, volumes, virtual environment, generated ONNX artifacts, MLflow/release state, and generated identity fixture.
+The local stack publishes gateways on `:8081` and `:8082`, release control on `:8083`, remediation control on `:8084`, MLflow on `:15010`, Prometheus on `:9090`, Tempo on `:3200`, and Grafana on `:3002`. `make clean-local` removes only this repository's Compose containers, network, volumes, virtual environment, generated ONNX artifacts, MLflow/release/remediation state, and generated identity fixture.
 
 ## Security boundary
 
@@ -111,6 +123,19 @@ model, deployment version, release-plan context, token totals, outcome and trace
 It never stores prompt or completion text. The SLO thresholds are local fixture
 thresholds; the cost uses a versioned Decimal token-price fixture and is explicitly
 **not** cloud billing, an invoice, or a physical-GPU allocation.
+
+## Governed remediation boundary
+
+Remediation is intentionally not an autonomous infrastructure administrator. The
+separate controller accepts only a request ID for a recorded `backend_error` during an
+active `chat-default` canary. It produces a SHA-256-bound plan for the single
+`ROLLBACK_CANARY_TO_STABLE` action, requires a distinct `remediation.approve` identity,
+and rechecks the precise Redis rollout weights, release-plan ID, release phase, and
+SQLite release status immediately before writing stable-only weights. A stale plan is
+rejected. A per-model cooldown and action budget prevent retry loops. The controller
+then verifies both rollout state and a real post-action ONNX request. It does **not**
+receive generic shell, Docker, Kubernetes, cloud, model-registry, or tenant-inference
+authority.
 
 ## Documentation
 

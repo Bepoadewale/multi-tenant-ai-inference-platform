@@ -64,6 +64,92 @@ Prometheus was queried for positive
 and SLO thresholds are explicitly local fixture evidence, not production billing or
 production SLO commitments.
 
+## Governed-remediation slice
+
+`make demo-remediation` starts from the healthy local stack and creates a 99% candidate
+canary through the existing release-control API. It stops the candidate CPU ONNX runtime
+to produce an actual gateway `502` with an `X-Request-ID`, then restores the runtime
+before remediation is considered. The separate remediation controller accepts that
+metadata-only failed canary request, persists a SQLite incident, creates a SHA-256-bound
+rollback plan, denies requester self-approval, accepts a distinct
+`remediation.approve` JWT, rechecks exact Redis rollout state and the SQLite release
+state, and changes only the canary weights to stable=100/candidate=0.
+
+The demo verifies all of the following:
+
+- a subsequent real request reaches `onnx-stable-v1`;
+- the release is `ROLLED_BACK` and the incident is `RESOLVED`;
+- the audit timeline contains detection, planning, approval, execution, and verified
+  recovery events;
+- a restart of `remediation-control` retains the incident and timeline;
+- Prometheus scrapes controller incident, plan, action, and verification metrics.
+
+Unit tests additionally prove the cooldown/action budget and stale-plan executor
+protection. This local controller has exactly one allowlisted action,
+`ROLLBACK_CANARY_TO_STABLE`; it does not execute shell commands or access Docker,
+Kubernetes, cloud, model-registry, or tenant-inference credentials.
+
+## Governed-remediation clean-room validation
+
+**Date:** 2026-09-28
+
+**Source revision:** `2f7afbd` (implementation); final documentation is committed with
+the same slice.
+
+**Environment:** macOS, Docker Desktop, Docker Compose, Python 3.12. No cloud
+account, paid API, physical GPU, vLLM runtime, or Kubernetes cluster.
+
+### Cycle 1
+
+Starting after `make clean-local`, this full cumulative sequence passed:
+
+```console
+make install
+make bootstrap-local
+make smoke
+make demo-local
+make demo-overload
+make demo-routing
+make demo-metering
+make demo-observability
+make demo-failure
+make demo-timeout
+make demo-recovery
+make demo-model-registry
+make demo-release-control
+make demo-capacity
+make demo-operational-evidence
+make demo-remediation
+make verify
+make clean-local
+```
+
+`make verify` passed Ruff, 35 pytest tests, `pip-audit --skip-editable`, and
+`docker compose config --quiet`. Post-cleanup checks confirmed that no project Compose
+containers, volumes, `.local`, or `.venv` remained.
+
+### Cycle 2
+
+After Cycle 1 cleanup, a second clean bootstrap passed:
+
+```console
+make install
+make bootstrap-local
+make smoke
+make demo-local
+make demo-release-control
+make demo-capacity
+make demo-operational-evidence
+make demo-remediation
+make verify
+make clean-local
+```
+
+The second run used new project-scoped Redis, MLflow, SQLite, identity, and ONNX
+fixture state. It again ended with no project-owned runtime resources, `.local`, or
+`.venv`. This validates reproducibility of the cumulative slice without relying on
+leftover action-budget state.
+
 ## Operational-evidence clean-room validation
 
 **Date:** 2026-09-28
