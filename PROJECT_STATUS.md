@@ -66,14 +66,13 @@ Add governed remediation: use observed incident evidence to create a bounded, po
 
 ## Last Updated
 
-2026-09-28, operational-evidence slice in progress on `codex/flagship-operational-evidence`; final clean-room and CI evidence will be recorded before review.
+2026-09-28, operational-evidence slice validated on `codex/flagship-operational-evidence`; final GitHub CI evidence will be recorded before review.
 
 ## Clean-Room Reproducibility
 
 **Status: VALIDATED**
 
-Two clean-room cycles were executed on 2026-09-21. Each began after `make clean-local`, used
-`make install`, `make bootstrap-local`, and `make smoke`; the first ran the full demo/validation
-suite and the second reran the primary success and bounded-timeout failure demos. The cleanup
-asserted project Compose resources and generated artifacts were absent. An unrelated Redis
-sentinel container survived project cleanup.
+Historical core clean-room validation remains recorded below. The operational-evidence
+slice additionally completed two clean-room cycles on 2026-09-28: each ran installation,
+bootstrap, every core/release/capacity/operational demo, `make verify`, and safe cleanup.
+Post-cleanup checks confirmed project Compose resources, `.local`, and `.venv` were absent.

@@ -42,6 +42,76 @@ The model policy, pool name, decision, and `simulated_hardware=true` metadata ar
 reported to the client and Prometheus. `simulated-l40s` is **not** a GPU device,
 Kubernetes scheduler result, DCGM metric, or performance measurement.
 
+## Operational-evidence slice
+
+`make demo-operational-evidence` executes a governed canary request, then retrieves
+`GET /platform/v1/requests/{request_id}/analysis` with the platform-admin identity.
+The evidence record proves all of the following without retaining raw prompt or output:
+
+- the request reached the real CPU ONNX candidate target;
+- the response/request record carries a real OpenTelemetry trace ID that is queryable
+  from Tempo;
+- the record captures the active SQLite/Redis release plan and `CANARY` phase;
+- the metadata-only record includes token counts, target version, and a Decimal
+  calculation from the versioned `local-fixture-2026-09-v1` price fixture;
+- the local request SLO is `SATISFIED` for the successful candidate request;
+- a real bounded `chat-timeout-demo` backend failure returns 502, retains its request
+  ID and metadata-only record, and evaluates as `VIOLATED` rather than disappearing.
+
+Prometheus was queried for positive
+`inference_gateway_estimated_cost_usd_total` and
+`inference_gateway_request_slo_evaluations_total{status="VIOLATED"}` values. The cost
+and SLO thresholds are explicitly local fixture evidence, not production billing or
+production SLO commitments.
+
+## Operational-evidence clean-room validation
+
+**Date:** 2026-09-28
+
+**Source revisions:** `e72c8e8` (implementation) and `a02c154` (initial documentation);
+final evidence wording was committed after both cycles.
+
+**Environment:** macOS, Docker Desktop, Docker Compose, Python 3.12. No cloud
+account, paid API, physical GPU, vLLM runtime, or Kubernetes cluster.
+
+### Cycle 1
+
+Starting from `make clean-local`, the following passed:
+
+```console
+make install
+make bootstrap-local
+make status
+make demo-local
+make demo-overload
+make demo-routing
+make demo-metering
+make demo-observability
+make demo-failure
+make demo-timeout
+make demo-recovery
+make demo-model-registry
+make demo-release-control
+make demo-capacity
+make demo-operational-evidence
+make verify
+make clean-local
+```
+
+`make verify` passed Ruff, 32 pytest tests, `pip-audit --skip-editable`, and
+`docker compose config --quiet`. The operational demo observed a real canary trace in
+Tempo, positive estimated-cost and violated-SLO metrics in Prometheus, then rolled the
+canary back to stable. Cleanup removed only project Compose resources, volumes,
+generated models, local identity, MLflow/release state, and virtual environment.
+
+### Cycle 2
+
+After Cycle 1 cleanup, a second clean bootstrap repeated the same command sequence,
+including all core/release/capacity demos, `make demo-operational-evidence`,
+`make verify`, and `make clean-local`. It passed with the same evidence boundaries.
+Post-cleanup verification confirmed no project Compose resources, `.local`, or `.venv`
+remained. This is a second clean bootstrap, not a run against cached project state.
+
 ## Expanded clean-room validation
 
 **Date:** 2026-09-28
