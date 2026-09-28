@@ -26,7 +26,7 @@ repositories into one monolith.
 | Reference project | Flagship vertical slice | Contract boundary |
 | --- | --- | --- |
 | Model Deployment Control Plane | registry, evaluation, canary, approval, promotion/rollback | verified release plan and traffic intent |
-| GPU Scheduler Lab | simulated-GPU capacity/admission policy | capacity and placement decision |
+| GPU Scheduler Lab | simulated-GPU capacity/admission policy | Redis-shared simulated capacity decision; physical placement stays in the lab/production adapter |
 | AI Observability + FinOps | traces, SLO evidence, cost attribution | telemetry and usage events |
 | AI SRE Auto-Remediation | governed incident/remediation | evidence, plan, approval, bounded action |
 | Secure MCP Gateway | secure agent platform-tool access | delegated tool invocation |
@@ -37,8 +37,8 @@ repositories into one monolith.
 ## First integrated demonstration
 
 ```text
-tenant request -> signed identity/quota/policy -> verified candidate release
--> local serving canary -> trace/SLO/cost evidence -> independent approval
+tenant request -> signed identity/quota -> simulated-capacity admission
+-> verified candidate release -> local serving canary -> trace/SLO/cost evidence -> independent approval
 -> champion promotion OR automatic rollback to the previous champion
 ```
 
@@ -47,9 +47,11 @@ quality, artifact-integrity or latency gate must not become champion.
 
 ## Local-first boundary
 
-The flagship must run with Docker/kind, Redis/Postgres where needed, MLflow, ONNX CPU
-fixtures, OpenTelemetry, Prometheus and Grafana. Real GPUs, paid clouds and external
-model APIs are optional adapters, not requirements for the core proof.
+The flagship runs locally with Docker, Redis, MLflow, ONNX CPU fixtures,
+OpenTelemetry, Prometheus and Grafana. The current capacity slice uses `simulated-l40s`
+as Redis quota accounting only; it never claims GPU placement or performance. kind,
+real GPUs, paid clouds and external model APIs remain optional adapters, not
+requirements for the core proof.
 
 Commercial positioning, buyer strategy, pricing and hosted-product decisions are
 deliberately absent from this public repository and retained in a private strategy

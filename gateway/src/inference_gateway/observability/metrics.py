@@ -16,3 +16,23 @@ QUEUE_WAIT = Histogram(
     "Time spent waiting for bounded tenant admission",
     ["tenant"],
 )
+CAPACITY_DECISIONS = Counter(
+    "inference_gateway_simulated_gpu_capacity_decisions_total",
+    "Simulated GPU capacity policy decisions; local ONNX execution remains CPU-only",
+    ["tenant", "pool", "decision"],
+)
+CAPACITY_ALLOCATED = Gauge(
+    "inference_gateway_simulated_gpu_allocated_slots",
+    "Allocated slots in simulated GPU quota accounting",
+    ["pool"],
+)
+CAPACITY_TENANT_ALLOCATED = Gauge(
+    "inference_gateway_simulated_gpu_tenant_allocated_slots",
+    "Tenant allocation in simulated GPU quota accounting",
+    ["tenant", "pool"],
+)
+CAPACITY_QUEUE = Gauge(
+    "inference_gateway_simulated_gpu_capacity_queue_depth",
+    "Requests waiting for simulated GPU capacity",
+    ["pool"],
+)

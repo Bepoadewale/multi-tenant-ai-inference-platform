@@ -6,7 +6,7 @@ The completed milestones below are the preserved inference core. The next milest
 are additive vertical slices, each requiring real local execution and a failure path:
 
 - [x] F1 MLflow-backed registry, evaluation, verified canary, approval and rollback.
-- [ ] F2 simulated-GPU capacity/admission policy; no physical GPU claims.
+- [x] F2 simulated-GPU capacity/admission policy: Redis-shared allocation, bounded queueing, tenant rejection, and CPU fallback; no physical GPU claims.
 - [ ] F3 request/release/SLO/estimated-cost correlation.
 - [ ] F4 governed incident/remediation and verification.
 - [ ] F5 delegated agent tools, self-service requests and optional edge adapter.

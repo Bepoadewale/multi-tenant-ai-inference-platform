@@ -40,6 +40,8 @@ def main() -> None:
     tokens_path.write_text(json.dumps({
         "search": token(private_bytes.decode(), "developer-search", "team-search", ["inference.invoke"]),
         "payments": token(private_bytes.decode(), "developer-payments", "team-payments", ["inference.invoke"]),
+        "analytics": token(private_bytes.decode(), "developer-analytics", "team-analytics", ["inference.invoke"]),
+        "reporting": token(private_bytes.decode(), "developer-reporting", "team-reporting", ["inference.invoke"]),
         "admin": token(private_bytes.decode(), "platform-admin", "team-search", ["platform.admin"]),
         "approver": token(private_bytes.decode(), "release-approver", "team-search", ["release.approve"]),
     }))

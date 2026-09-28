@@ -1,6 +1,12 @@
 import os
 
-from inference_gateway.models import ModelDefinition, ModelTarget, Tenant, TenantQuota
+from inference_gateway.models import (
+    CapacityPolicy,
+    ModelDefinition,
+    ModelTarget,
+    Tenant,
+    TenantQuota,
+)
 
 
 class Catalog:
@@ -17,6 +23,7 @@ class Catalog:
                     tokens_per_minute=100_000,
                     concurrent_requests=10,
                     daily_token_quota=2_000_000,
+                    simulated_gpu_slots=1,
                 ),
             ),
             "team-payments": Tenant(
@@ -28,6 +35,31 @@ class Catalog:
                     tokens_per_minute=500,
                     concurrent_requests=2,
                     daily_token_quota=10_000,
+                    simulated_gpu_slots=1,
+                ),
+            ),
+            "team-analytics": Tenant(
+                id="team-analytics",
+                allowed_models={"chat-cpu-fallback-demo"},
+                cost_center="ANALYTICS",
+                quotas=TenantQuota(
+                    requests_per_minute=20,
+                    tokens_per_minute=10_000,
+                    concurrent_requests=5,
+                    daily_token_quota=100_000,
+                    simulated_gpu_slots=1,
+                ),
+            ),
+            "team-reporting": Tenant(
+                id="team-reporting",
+                allowed_models={"chat-default"},
+                cost_center="REPORTING",
+                quotas=TenantQuota(
+                    requests_per_minute=20,
+                    tokens_per_minute=10_000,
+                    concurrent_requests=5,
+                    daily_token_quota=100_000,
+                    simulated_gpu_slots=1,
                 ),
             ),
         }
@@ -36,6 +68,9 @@ class Catalog:
                 name="chat-default",
                 model_id="local/tiny-intent-classifier",
                 runtime="onnx",
+                gpu_count=1,
+                gpu_type="simulated-l40s",
+                capacity_policy=CapacityPolicy.REQUIRE_SIMULATED_GPU,
                 max_replicas=4,
                 targets=[
                     ModelTarget(
@@ -63,6 +98,9 @@ class Catalog:
                 name="chat-timeout-demo",
                 model_id="local/tiny-intent-classifier",
                 runtime="onnx",
+                gpu_count=1,
+                gpu_type="simulated-l40s",
+                capacity_policy=CapacityPolicy.REQUIRE_SIMULATED_GPU,
                 max_replicas=1,
                 targets=[
                     ModelTarget(
@@ -71,6 +109,23 @@ class Catalog:
                         weight=100,
                         backend_url=os.getenv("INFERENCE_TARGET_V2_URL"),
                         timeout_seconds=0.1,
+                    )
+                ],
+            ),
+            "chat-cpu-fallback-demo": ModelDefinition(
+                name="chat-cpu-fallback-demo",
+                model_id="local/tiny-intent-classifier",
+                runtime="onnx",
+                gpu_count=1,
+                gpu_type="simulated-l40s",
+                capacity_policy=CapacityPolicy.ALLOW_CPU_FALLBACK,
+                max_replicas=1,
+                targets=[
+                    ModelTarget(
+                        name="onnx-cpu-fallback-v1",
+                        version="v1",
+                        weight=100,
+                        backend_url=os.getenv("INFERENCE_TARGET_V1_URL"),
                     )
                 ],
             ),

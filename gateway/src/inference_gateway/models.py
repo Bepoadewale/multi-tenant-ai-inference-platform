@@ -13,11 +13,20 @@ class ServingMode(StrEnum):
     DEDICATED = "dedicated"
 
 
+class CapacityPolicy(StrEnum):
+    """Scheduling intent, never a claim about physical accelerator execution."""
+
+    CPU_ONLY = "CPU_ONLY"
+    REQUIRE_SIMULATED_GPU = "REQUIRE_SIMULATED_GPU"
+    ALLOW_CPU_FALLBACK = "ALLOW_CPU_FALLBACK"
+
+
 class TenantQuota(BaseModel):
     requests_per_minute: int = Field(gt=0)
     tokens_per_minute: int = Field(gt=0)
     concurrent_requests: int = Field(gt=0)
     daily_token_quota: int = Field(gt=0)
+    simulated_gpu_slots: int = Field(default=0, ge=0)
 
 
 class Tenant(BaseModel):
@@ -53,6 +62,7 @@ class ModelDefinition(BaseModel):
     max_num_seqs: int = Field(default=32, ge=1)
     max_num_batched_tokens: int = Field(default=8192, ge=128)
     gpu_memory_utilization: float = Field(default=0.9, gt=0, le=1)
+    capacity_policy: CapacityPolicy = CapacityPolicy.CPU_ONLY
     dtype: str = "auto"
     quantization: str | None = None
     prefix_caching: bool = True
@@ -97,6 +107,20 @@ class CapacityState(StrEnum):
     BUSY = "BUSY"
     SATURATED = "SATURATED"
     DEGRADED = "DEGRADED"
+
+
+class CapacityDecision(StrEnum):
+    CPU_ONLY = "CPU_ONLY"
+    SIMULATED_GPU_ADMITTED = "SIMULATED_GPU_ADMITTED"
+    CPU_FALLBACK = "CPU_FALLBACK"
+
+
+class CapacityAllocation(BaseModel):
+    decision: CapacityDecision
+    pool: str | None = None
+    slots: int = Field(default=0, ge=0)
+    simulated_hardware: bool = False
+    queued: bool = False
 
 
 class RolloutWeights(BaseModel):

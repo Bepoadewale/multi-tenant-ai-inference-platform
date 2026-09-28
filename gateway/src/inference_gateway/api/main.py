@@ -40,13 +40,14 @@ async def usage(tenant_id: str, admin: str = Depends(platform_admin)):
 
 
 @app.get("/platform/v1/capacity")
-def capacity(admin: str = Depends(platform_admin)):
+async def capacity(admin: str = Depends(platform_admin)):
+    snapshot = await service.capacity_snapshot()
     return {
         "state": "HEALTHY",
-        "mode": "local-cpu-onnx",
-        "ready_replicas": 1,
-        "gpu_telemetry": "unavailable in local mode",
-        "queued_requests": 0,
+        "runtime": "local-cpu-onnx",
+        "hardware": "SIMULATED",
+        "warning": "Capacity is Redis quota accounting only; no physical GPU scheduling occurred.",
+        **snapshot,
     }
 
 
