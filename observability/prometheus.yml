@@ -8,3 +8,6 @@ scrape_configs:
   - job_name: governed-remediation-control
     static_configs:
       - targets: [remediation-control:8080]
+  - job_name: delegated-agent-tools
+    static_configs:
+      - targets: [agent-tools:8080]

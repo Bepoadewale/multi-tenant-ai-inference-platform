@@ -127,6 +127,9 @@ services:
       REDIS_URL: redis://redis:6379/0
       RELEASE_DB_PATH: /release/release.db
       REMEDIATION_DB_PATH: /remediation/remediation.db
+      # The production-safe controller default is 30 seconds. This local fixture
+      # keeps the guard but uses one second so independent demos can run in sequence.
+      REMEDIATION_COOLDOWN_SECONDS: "1"
       INFERENCE_AUTH_MODE: jwt
       JWT_PUBLIC_KEY_PATH: /run/identity/public.pem
       JWT_ISSUER: https://local.inference.platform
@@ -141,6 +144,35 @@ services:
       redis: {condition: service_healthy}
       otel-collector: {condition: service_started}
     ports: ["8084:8080"]
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8080/healthz\")'"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  agent-tools:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    command: ["uvicorn", "inference_gateway.api.agent_tools:app", "--host", "0.0.0.0", "--port", "8080"]
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      AGENT_TOOLS_DB_PATH: /agent-tools/audit.db
+      REMEDIATION_CONTROL_URL: http://remediation-control:8080
+      INFERENCE_AUTH_MODE: jwt
+      JWT_PUBLIC_KEY_PATH: /run/identity/public.pem
+      JWT_ISSUER: https://local.inference.platform
+      JWT_AUDIENCE: inference-gateway
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+    volumes:
+      - "./.local/agent-tools:/agent-tools"
+      - "./.local/identity/public.pem:/run/identity/public.pem:ro"
+    depends_on:
+      redis: {condition: service_healthy}
+      remediation-control: {condition: service_healthy}
+      otel-collector: {condition: service_started}
+    ports: ["8085:8080"]
     healthcheck:
       test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8080/healthz\")'"]
       interval: 3s

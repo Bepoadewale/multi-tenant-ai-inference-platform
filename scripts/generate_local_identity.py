@@ -15,10 +15,35 @@ ISSUER = "https://local.inference.platform"
 AUDIENCE = "inference-gateway"
 
 
-def token(private_key: str, subject: str, tenant: str, roles: list[str]) -> str:
+def token(
+    private_key: str,
+    subject: str,
+    tenant: str,
+    roles: list[str],
+    *,
+    lifetime_seconds: int = 4 * 60 * 60,
+    principal_type: str | None = None,
+    delegated_by: str | None = None,
+    scopes: list[str] | None = None,
+) -> str:
     now = datetime.now(UTC)
+    claims = {
+        "sub": subject,
+        "tenant": tenant,
+        "roles": roles,
+        "iss": ISSUER,
+        "aud": AUDIENCE,
+        "iat": now,
+        "exp": now + timedelta(seconds=lifetime_seconds),
+    }
+    if principal_type:
+        claims["principal_type"] = principal_type
+    if delegated_by:
+        claims["delegated_by"] = delegated_by
+    if scopes:
+        claims["scope"] = " ".join(scopes)
     return jwt.encode(
-        {"sub": subject, "tenant": tenant, "roles": roles, "iss": ISSUER, "aud": AUDIENCE, "iat": now, "exp": now + timedelta(hours=4)},
+        claims,
         private_key,
         algorithm="EdDSA",
     )
@@ -49,6 +74,16 @@ def main() -> None:
             "remediation-approver",
             "team-search",
             ["remediation.approve"],
+        ),
+        "delegated_agent": token(
+            private_bytes.decode(),
+            "release-observer-agent",
+            "team-search",
+            ["agent.tools"],
+            lifetime_seconds=300,
+            principal_type="agent",
+            delegated_by="developer-search",
+            scopes=["inference.read", "remediation.plan"],
         ),
     }))
 

@@ -3,7 +3,18 @@ set -euo pipefail
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 docker compose -f "${repo_root}/docker-compose.yml" down --volumes --remove-orphans
-if [[ -n "$(docker compose -f "${repo_root}/docker-compose.yml" ps -aq)" ]]; then
+project_name="multi-tenant-ai-inference-platform"
+# Compose can leave containers in Created state after an interrupted network/start
+# operation. Remove only containers labeled as belonging to this Compose project.
+container_ids=$(docker ps -aq --filter "label=com.docker.compose.project=${project_name}")
+if [[ -n "${container_ids}" ]]; then
+  docker rm -f ${container_ids}
+fi
+network_ids=$(docker network ls -q --filter "label=com.docker.compose.project=${project_name}")
+if [[ -n "${network_ids}" ]]; then
+  docker network rm ${network_ids}
+fi
+if [[ -n "$(docker ps -aq --filter "label=com.docker.compose.project=${project_name}")" ]]; then
   echo 'Project Compose resources still exist after cleanup.' >&2
   exit 1
 fi
