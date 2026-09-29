@@ -78,7 +78,8 @@ adapters remain explicitly outside this status.
 ## Current P0 Objective
 
 Complete the two-cycle clean-room validation for the new Operator Console drill-down
-routes; do not regress tenant isolation, bounded authority, or truthful evidence labels.
+routes, including fixed Prometheus-backed model observability and its Grafana deep
+link; do not regress tenant isolation, bounded authority, or truthful evidence labels.
 
 ## Completion Blockers
 

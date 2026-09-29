@@ -6,6 +6,7 @@ const short = (value, length = 8) => String(value ?? "—").slice(0, length);
 const list = (data, key) => Array.isArray(data?.[key]) ? data[key] : [];
 const array = (data) => Array.isArray(data) ? data : [];
 const metricValue = (data) => data?.data?.result?.[0]?.value?.[1] ?? "0";
+const promValue = (data) => data?.result?.[0]?.value?.[1] ?? "0";
 const json = (data) => `<pre class="json">${safe(JSON.stringify(data, null, 2))}</pre>`;
 
 function toast(message) { const node = $("toast"); node.textContent = message; node.style.display = "block"; setTimeout(() => { node.style.display = "none"; }, 5000); }
@@ -87,7 +88,30 @@ async function detailPage(kind, id) {
   app().innerHTML = '<section class="page"><p class="loading">Loading scoped platform evidence…</p></section>';
   const data = await fetchJson(endpoints[kind]);
   if (kind === "tenant") return section("TENANT DETAIL", data.tenant.id, `${breadcrumb(parent, data.tenant.id)}<div class="detail-grid"><div class="panel"><h3>Admission policy</h3>${keyValues(data.tenant)}<h3>Usage evidence</h3>${json(data.usage)}</div><div class="panel"><h3>Assigned model and deployment context</h3>${json({ models: data.models, deployments: data.deployments })}</div></div>`);
-  if (kind === "model") return section("MODEL DETAIL", id, `${breadcrumb(parent, id)}<div class="detail-grid"><div class="panel"><h3>Routing & audit context</h3>${json(data.rollout)}</div><div class="panel"><h3>Registry & deployment evidence</h3>${json({ deployments: data.deployments, registry: data.registry })}</div></div>`);
+  if (kind === "model") {
+    const telemetry = data.telemetry || {};
+    const outcomeRows = array(telemetry.outcomes?.result).map((item) => `<tr><td>${safe(item.metric?.outcome || "unknown")}</td><td>${safe(item.value?.[1] || "0")}</td></tr>`);
+    const sloRows = array(telemetry.slo?.result).map((item) => `<tr><td>${safe(item.metric?.status || "unknown")}</td><td>${safe(item.value?.[1] || "0")}</td></tr>`);
+    const phaseRows = array(telemetry.release_phase?.result).map((item) => `<tr><td>${safe(item.metric?.phase || "unknown")}</td><td>${safe(item.value?.[1] || "0")}</td></tr>`);
+    const telemetryMetrics = [
+      [promValue(telemetry.requests), "Recorded requests"],
+      [promValue(telemetry.p95_latency_seconds), "p95 latency (seconds)"],
+      [promValue(telemetry.p95_ttft_seconds), "p95 time to first token (seconds)"],
+      [promValue(telemetry.tokens), "Metered tokens"],
+      [promValue(telemetry.estimated_cost_usd), "Estimated cost (USD)"],
+    ];
+    return section("MODEL DETAIL", id, `${breadcrumb(parent, id)}
+      <div class="metrics model-metrics">${telemetryMetrics.map(([number, label]) => `<div class="metric"><span>${safe(label)}</span><strong>${safe(number)}</strong><span>Prometheus</span></div>`).join("")}</div>
+      <div class="grid two">
+        ${card("Request outcomes", table(["Outcome", "Requests"], outcomeRows), '<span class="pill">Prometheus</span>')}
+        ${card("SLO evidence", table(["Status", "Evaluations"], sloRows), '<span class="pill">Prometheus</span>')}
+      </div>
+      <div class="grid two">
+        ${card("Canary phase evidence", table(["Release phase", "Requests"], phaseRows), '<span class="pill">Release-correlated</span>')}
+        ${card("Deep observability", '<p class="table-caption">Open the provisioned Grafana dashboard with this model preselected. Local estimated cost is fixture pricing, not cloud billing.</p>', `<a class="text-button" target="_blank" rel="noreferrer" href="${safe(data.grafana_url)}">Open model in Grafana</a>`)}
+      </div>
+      <div class="detail-grid"><div class="panel"><h3>Routing & audit context</h3>${json(data.rollout)}</div><div class="panel"><h3>Registry & deployment evidence</h3>${json({ deployments: data.deployments, registry: data.registry })}</div></div>`);
+  }
   if (kind === "release") return section("RELEASE DETAIL", short(id), `${breadcrumb(parent, short(id))}<div class="detail-grid"><div class="panel"><h3>Immutable release plan</h3>${keyValues(data)}<div class="section-actions">${actions(data)}</div></div><div class="panel"><h3>Plan evidence</h3>${json(data)}</div></div>`);
   if (kind === "incident") { const incident = data.incident.incident || data.incident; const events = array(data.timeline); return section("INCIDENT DETAIL", short(id), `${breadcrumb(parent, short(id))}<div class="detail-grid"><div class="panel"><h3>Incident state</h3>${keyValues(incident)}</div><div class="panel"><h3>Audit timeline</h3><ol class="timeline">${events.map((event) => `<li><strong>${safe(event.event || event.type)}</strong><span>${safe(event.created_at || event.timestamp)} · ${safe(event.actor)}</span></li>`).join("") || '<li><strong>No timeline events</strong></li>'}</ol></div></div>`); }
   if (kind === "sandbox") return section("SANDBOX TASK", data.task.task_kind, `${breadcrumb(parent, data.task.task_kind)}<div class="detail-grid"><div class="panel"><h3>Task outcome</h3>${keyValues(data.task)}</div><div class="panel"><h3>Hardening evidence</h3>${json(data.task.hardening)}</div></div>`);

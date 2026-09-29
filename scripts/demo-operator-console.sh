@@ -13,7 +13,7 @@ cd "$repo_root"
 overview=$(curl -fsS http://localhost:8091/console/v1/overview)
 jq -e '.tenants and .models and .capacity and .release_plans and .devices and .registry' <<<"$overview" >/dev/null
 curl -fsS http://localhost:8091/console/v1/tenants/team-search | jq -e '.tenant.id == "team-search" and .usage' >/dev/null
-curl -fsS http://localhost:8091/console/v1/models/chat-default | jq -e '.rollout.alias == "chat-default" and .registry' >/dev/null
+curl -fsS http://localhost:8091/console/v1/models/chat-default | jq -e '.rollout.alias == "chat-default" and .registry and .telemetry and .grafana_url' >/dev/null
 curl -fsS http://localhost:8091/console/v1/agents | jq -e '.tools and .audit' >/dev/null
 device_id=$(jq -r '.devices.devices[0].device_id // empty' <<<"$overview")
 if [[ -n "$device_id" ]]; then
@@ -43,4 +43,4 @@ if [[ -n "$incident_id" ]]; then
   curl -fsS "http://localhost:8091/console/v1/incidents/${incident_id}" | jq -e '.incident and .timeline' >/dev/null
 fi
 
-echo 'Operator-console demo passed: routed tenant/model/agent/device evidence loaded through the local BFF; release and sandbox details loaded after scoped actions; and cumulative runs also verified developer and incident detail routes.'
+echo 'Operator-console demo passed: routed tenant/model/agent/device evidence loaded through the local BFF; fixed Prometheus-backed model telemetry and Grafana deep links loaded without exposing arbitrary query access; release and sandbox details loaded after scoped actions; and cumulative runs also verified developer and incident detail routes.'

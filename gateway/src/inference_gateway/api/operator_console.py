@@ -109,6 +109,51 @@ async def _gateway_snapshot(client: httpx.AsyncClient) -> tuple[str, list[dict],
     )
 
 
+async def _prometheus_query(client: httpx.AsyncClient, query: str) -> dict:
+    """Run one fixed server-side PromQL query for the local console.
+
+    This intentionally does not expose a browser-controlled PromQL proxy. Model
+    aliases are validated by the gateway rollout lookup before reaching this helper.
+    """
+
+    prometheus = _url("PROMETHEUS_URL", "http://prometheus:9090")
+    try:
+        response = await client.get(f"{prometheus}/api/v1/query", params={"query": query})
+        response.raise_for_status()
+        body = response.json()
+        if body.get("status") != "success":
+            return {"_error": "Prometheus did not return a successful query"}
+        return body.get("data", {})
+    except (httpx.HTTPError, ValueError) as error:
+        return {"_error": str(error)}
+
+
+async def _model_telemetry(client: httpx.AsyncClient, alias: str) -> dict[str, dict]:
+    # JSON quoting produces a PromQL-safe string literal and prevents the alias from
+    # altering the fixed query shape.
+    model = json.dumps(alias)
+    queries = {
+        "requests": f"sum(inference_gateway_requests_total{{model={model}}})",
+        "outcomes": f"sum by (outcome) (inference_gateway_requests_total{{model={model}}})",
+        "p95_latency_seconds": (
+            "histogram_quantile(0.95, sum(rate("
+            f"inference_gateway_request_duration_seconds_bucket{{model={model}}}[5m]"
+            ")) by (le))"
+        ),
+        "p95_ttft_seconds": (
+            "histogram_quantile(0.95, sum(rate("
+            f"inference_gateway_ttft_seconds_bucket{{model={model}}}[5m]"
+            ")) by (le))"
+        ),
+        "tokens": f"sum(inference_gateway_tokens_total{{model={model}}})",
+        "estimated_cost_usd": f"sum(inference_gateway_estimated_cost_usd_total{{model={model}}})",
+        "slo": f"sum by (status) (inference_gateway_request_slo_evaluations_total{{model={model}}})",
+        "release_phase": f"sum by (phase) (inference_gateway_release_correlated_requests_total{{model={model}}})",
+    }
+    results = await asyncio.gather(*(_prometheus_query(client, query) for query in queries.values()))
+    return dict(zip(queries, results, strict=True))
+
+
 @app.get("/healthz")
 def healthz() -> dict[str, str]:
     _tokens()
@@ -159,9 +204,18 @@ async def model_detail(alias: str) -> dict:
             _request(client, "GET", f"{gateway}/platform/v1/deployments", token_key="admin"),
             _request(client, "GET", f"{mlflow}/api/2.0/mlflow/registered-models/search?max_results=20"),
         )
+        if "_error" in rollout:
+            raise HTTPException(404, "model alias not found")
+        telemetry = await _model_telemetry(client, alias)
     if "_error" in rollout:
         raise HTTPException(404, "model alias not found")
-    return {"rollout": rollout, "deployments": deployments, "registry": registry}
+    return {
+        "rollout": rollout,
+        "deployments": deployments,
+        "registry": registry,
+        "telemetry": telemetry,
+        "grafana_url": f"{_url('GRAFANA_URL', 'http://localhost:3002')}/d/afzqe0e3u9logf/inference-gateway?var-model={alias}",
+    }
 
 
 @app.get("/console/v1/releases/{plan_id}")

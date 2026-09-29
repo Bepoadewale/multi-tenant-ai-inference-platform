@@ -26,7 +26,10 @@ checks remain authoritative.
 - overview: tenant admission and Prometheus request/throttle totals;
 - tenant pages: assigned models, admission limits, and metadata-only usage evidence;
 - model and release pages: serving targets, rollout audit context, MLflow registry
-  evidence, immutable plans, and the eligible next release action;
+  evidence, immutable plans, and the eligible next release action. Model detail pages
+  also query fixed Prometheus metrics for request volume/outcomes, p95 latency, p95
+  time-to-first-token, tokens, estimated fixture cost, SLO evidence, and release
+  phase. They link to the same model-filtered Grafana dashboard for deeper analysis;
 - operations pages: remediation incident state, timeline, and Redis-backed simulated
   capacity (**not physical GPU state**);
 - agent and sandbox pages: filtered tool audit, task outcome, and hardening metadata;
@@ -35,7 +38,8 @@ checks remain authoritative.
 
 Every list row links to its scoped detail route, for example
 `#/tenants/team-search`, `#/models/chat-default`, or `#/incidents/<id>`. The console
-has no generic browser proxy or arbitrary command/action form.
+has no generic browser proxy, arbitrary PromQL interface, or arbitrary command/action
+form. The browser asks only for fixed, server-defined views and actions.
 
 ## Local security boundary
 
