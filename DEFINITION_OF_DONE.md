@@ -29,6 +29,11 @@ evidence and the cross-slice demonstration must pass clean-room validation.
 - [x] Narrow edge interface is independently executed: distinct signed device identities,
   durable inventory, local ONNX on a compatible agent, public-only central fallback on a
   constrained agent, restricted/LOCAL_ONLY denial, Prometheus evidence, and restart recovery.
+- [x] Bounded sandboxed agent execution: a five-minute signed delegated agent can request
+  only named fixture tasks; a trusted controller creates a real non-root, read-only,
+  capability-dropped, socketless, host-bind-free, `network=none`, CPU/memory/PID-bounded
+  Docker child; patch and containment probes execute, arbitrary command input is denied,
+  child resources are removed, audit is durable, and control restart recovery is proven.
 - [ ] Integrated clean-room success and rollback demonstration.
 
 - [x] CPU-capable real model runtime returns output through the OpenAI-compatible API; streaming is exercised if claimed.

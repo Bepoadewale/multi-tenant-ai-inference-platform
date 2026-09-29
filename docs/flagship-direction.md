@@ -74,3 +74,24 @@ execution, gateway fallback, policy denial, and control restart recovery are rea
 Signed packages, desired-state reconciliation, staged fleet rollout/rollback, offline
 telemetry buffering, and physical hardware remain in the standalone edge project or
 future adapters.
+
+## Sandboxed-agent boundary
+
+The sandbox slice is intentionally narrow. A short-lived signed delegated agent can
+request only one of two named fixture tasks: make a bounded patch to an immutable
+fixture repository, or perform a controlled outbound-network probe. It cannot submit
+an arbitrary shell command, choose an image, mount a host path, select a Docker
+network, access platform credentials, approve a release, or call the remediation
+executor.
+
+```text
+signed delegated agent -> fixed task kind -> trusted sandbox controller
+-> disposable non-root child container -> patch/containment evidence -> destroy
+```
+
+The trusted controller has Docker API access solely to create labelled child
+containers. The untrusted child is run with a read-only root filesystem, dropped
+capabilities, no-new-privileges, CPU/memory/PID bounds, no Docker socket, no host bind
+mount, and `network=none`. It is not a claim of gVisor, Firecracker, Kubernetes pod
+sandboxing, or general arbitrary-agent-code execution; those remain separate
+production/standalone-runtime concerns.

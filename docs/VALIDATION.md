@@ -2,6 +2,30 @@
 
 Validation is local-first. Record hardware, runtime, exact command and result for any benchmark; never infer GPU behavior from the deterministic CPU fixture or fabricate validation.
 
+## Bounded sandboxed-agent slice
+
+**Date:** 2026-09-29
+
+**Environment:** macOS, Docker Desktop, Docker Compose, Python 3.12. No cloud
+account, GPU, Kubernetes cluster, or paid API.
+
+A clean local bootstrap, `make smoke`, and `make demo-sandboxed-agent` passed. The
+demo sent a five-minute Ed25519-signed delegated agent identity to `sandbox-control`.
+The controller accepted only the `fixture_patch` and `containment_probe` task kinds.
+The fixture task ran real unit tests and wrote a patch in a disposable child Docker
+container. The containment task attempted outbound HTTP and was blocked by
+`network=none`. The live response recorded a non-root UID, read-only root filesystem,
+dropped capabilities, no-new-privileges, CPU/memory/PID bounds, absent Docker socket,
+and absent host bind mounts. Extra `command` input and an unrecognised task kind were
+rejected with `422`; no arbitrary command was executed. Prometheus recorded both task
+outcomes, child containers and workspace volumes were absent after each task, and the
+metadata-only SQLite audit survived an intentional controller restart.
+
+Static validation before the live run passed Ruff, `42 passed` pytest tests, and
+`docker compose config --quiet`. A second clean container cycle will be recorded before
+review. This does not claim gVisor, Firecracker, Kubernetes sandboxing, or general
+arbitrary-agent-code execution.
+
 ## Narrow edge-adapter slice
 
 **Date:** 2026-09-29

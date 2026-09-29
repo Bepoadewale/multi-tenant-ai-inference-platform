@@ -46,6 +46,11 @@ as executed until they have their own local evidence.
   CPU ONNX session; the constrained agent falls back only for public data. Restricted
   and `LOCAL_ONLY` requests without a local model are denied, and inventory survives
   edge-control restart. Device hardware labels are simulated.
+- A separate sandbox-control service validates a five-minute signed delegated agent,
+  accepts only named fixture tasks, and durably records metadata-only task evidence.
+  Its trusted controller creates real disposable hardened Docker children: the patch
+  task and blocked outbound-network probe executed; arbitrary task input is rejected;
+  child container/workspace cleanup and control restart recovery were verified.
 - Clean-room workflow passed twice: bootstrap, smoke, cumulative flagship demos,
   validation, project-scoped cleanup, then a second bootstrap/demo.
 
@@ -67,7 +72,7 @@ as executed until they have their own local evidence.
 
 ## Current P0 Objective
 
-Run a final all-slice clean-room success and failure demonstration without weakening
+Run the final all-slice clean-room success and failure demonstration without weakening
 the independently validated core and vertical-slice evidence.
 
 ## Completion Blockers
@@ -78,9 +83,17 @@ the independently validated core and vertical-slice evidence.
 ## Explicitly Unexecuted Production Adapters
 
 - GPU/vLLM execution, DCGM/KV-cache signals, Kubernetes/EKS autoscaling, and production model hosting.
+- gVisor/Firecracker/Kubernetes sandbox runtime execution.
 
 ## Last Validation
 
+- Sandboxed-agent slice: clean local bootstrap → smoke → `make demo-sandboxed-agent`
+  passed on 2026-09-29. A five-minute signed delegated agent ran a real non-root
+  fixture patch task in a disposable Docker child, an outbound network probe was
+  blocked by `network=none`, arbitrary command input returned 422, child containers
+  and volumes were absent after each task, Prometheus recorded both outcomes, and the
+  SQLite task audit survived sandbox-control restart. Ruff and `42 passed` pytest
+  tests passed before live validation; a second clean cycle is pending.
 - Edge-adapter slice: two local container recreations passed on 2026-09-29. Each
   proved two independent signed device agents, SQLite inventory, real compatible-device
   local ONNX, constrained-device public gateway fallback, restricted/LOCAL_ONLY denial,
@@ -113,8 +126,8 @@ the independently validated core and vertical-slice evidence.
 
 ## Last Updated
 
-2026-09-29, edge adapter live validation in progress on
-`codex/flagship-edge-adapter`; GitHub CI evidence will be recorded before review.
+2026-09-29, sandboxed-agent live validation in progress on
+`codex/flagship-sandboxed-agent`; GitHub CI is required before review.
 
 ## Clean-Room Reproducibility
 
