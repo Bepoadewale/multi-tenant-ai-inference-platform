@@ -2,6 +2,36 @@
 
 Validation is local-first. Record hardware, runtime, exact command and result for any benchmark; never infer GPU behavior from the deterministic CPU fixture or fabricate validation.
 
+## Narrow edge-adapter slice
+
+**Date:** 2026-09-29
+
+**Environment:** macOS, Docker Desktop, Docker Compose, Python 3.12. No cloud
+account, GPU, mobile/embedded hardware, or paid API.
+
+`make bootstrap-local`, `make smoke`, and `make demo-edge-adapter` passed against the
+live Compose stack. The demo verified two independently running device-agent containers
+with distinct Ed25519 device identities registered and heartbeated into the edge
+control service's SQLite inventory. The simulated `laptop-high` agent ran a real local
+CPU ONNX request; the simulated constrained agent used the existing central gateway
+only for public traffic. Restricted and `LOCAL_ONLY` requests with no local model
+returned `403` rather than invoking fallback. The inventory survived an intentional
+`edge-control` restart, while Prometheus observed registration evidence before that
+process-local counter reset.
+
+This slice does not claim signed model packages, desired-state reconciliation, OTA,
+offline buffering, physical device behavior, NPU execution, or managed fleet control.
+Those belong to the standalone hybrid edge project or production adapters. A final
+all-slice clean-room cycle will re-run this adapter with the full flagship story.
+
+Two separate local container recreations were exercised before recording this result.
+The second began after `make clean-local` removed the project containers, images,
+volumes, `.local`, generated ONNX models, and virtual environment; it rebuilt the
+Compose services, initialized fixture models, passed smoke, and reran the edge demo.
+Both runs ended in Ruff clean, `41 passed` pytest results, and valid Compose
+configuration. This is slice-level reproducibility evidence; the remaining P0 is one
+final all-slice clean-room demonstration.
+
 ## Developer self-service golden-path slice
 
 **Date:** 2026-09-29

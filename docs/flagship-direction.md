@@ -30,7 +30,7 @@ repositories into one monolith.
 | AI Observability + FinOps | traces, SLO evidence, cost attribution | telemetry and usage events |
 | AI SRE Auto-Remediation | governed incident/remediation | evidence, plan, approval, bounded action |
 | Secure MCP Gateway | secure agent platform-tool access | delegated tool invocation |
-| Hybrid AI Edge Platform | optional edge artifact/routing extension | fleet/artifact and local-cloud routing contract |
+| Hybrid AI Edge Platform | narrow local-cloud routing adapter | signed device registration, metadata-only inventory, local-ONNX-or-policy-fallback contract; OTA/fleet rollout stays in the reference project |
 | AI Developer Platform | self-service/golden paths | durable tenant/model-bound integration profile and token-free starter contract |
 | Secure Agent Runtime | bounded agent execution | capability-scoped task contract |
 
@@ -56,3 +56,21 @@ requirements for the core proof.
 Commercial positioning, buyer strategy, pricing and hosted-product decisions are
 deliberately absent from this public repository and retained in a private strategy
 repository.
+
+## Edge-adapter boundary
+
+The executed flagship edge slice proves only the integration seam:
+
+```text
+signed device registration -> durable capability inventory
+-> compatible device local ONNX OR constrained-device public fallback
+-> restricted / LOCAL_ONLY denial -> restart recovery
+```
+
+It runs two independent device-agent containers. Their `laptop-high` and
+`embedded-constrained` labels are **simulated profiles**, not device or benchmark
+evidence. HTTP registration, SQLite persistence, signed device identities, local ONNX
+execution, gateway fallback, policy denial, and control restart recovery are real.
+Signed packages, desired-state reconciliation, staged fleet rollout/rollback, offline
+telemetry buffering, and physical hardware remain in the standalone edge project or
+future adapters.

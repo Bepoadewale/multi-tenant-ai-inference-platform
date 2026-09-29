@@ -26,8 +26,9 @@ evidence and the cross-slice demonstration must pass clean-room validation.
   human developer identity, tenant/model authorization, durable idempotent profile,
   token-free starter artifacts, real generated-client ONNX request, cross-tenant/model/
   agent denials, restart recovery, and Prometheus evidence.
-- [ ] Optional edge interface remains narrow, independently documented, and honest
-  about unexecuted adapters.
+- [x] Narrow edge interface is independently executed: distinct signed device identities,
+  durable inventory, local ONNX on a compatible agent, public-only central fallback on a
+  constrained agent, restricted/LOCAL_ONLY denial, Prometheus evidence, and restart recovery.
 - [ ] Integrated clean-room success and rollback demonstration.
 
 - [x] CPU-capable real model runtime returns output through the OpenAI-compatible API; streaming is exercised if claimed.

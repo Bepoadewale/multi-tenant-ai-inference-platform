@@ -43,3 +43,15 @@ token at runtime; it has no direct dependency on Redis, MLflow, model runtimes, 
 rollout controls. Profiles are tenant-isolated and survive service restart. Delegated
 agent identities are intentionally denied: agent assistance belongs behind the bounded
 agent-tools contract, not a self-provisioning path.
+
+## Narrow edge-routing adapter
+
+`edge-control` has its own SQLite device registry, while `edge-device-search` and
+`edge-device-constrained` are independently running FastAPI agents. Both use signed
+device-only JWTs to register their simulated profile and heartbeat metadata. A caller
+still presents a normal signed tenant identity to the device agent. The capable device
+loads an independent local ONNX Runtime session for `chat-default`; the constrained
+device advertises no local model and forwards only public requests to the existing
+gateway. Restricted, `LOCAL_ONLY`, and `PRIVACY_FIRST` requests without a local model
+stop at the device. Artifact distribution and desired-state rollout remain outside the
+narrow adapter.

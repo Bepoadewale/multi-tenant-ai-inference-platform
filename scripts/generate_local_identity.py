@@ -95,6 +95,23 @@ def main() -> None:
             delegated_by="developer-search",
             scopes=["inference.read", "remediation.plan"],
         ),
+        # Device identities are distinct from human, service, and delegated-agent
+        # identities. They can register/heartbeat with the local edge adapter but
+        # cannot administer releases or use platform operations.
+        "edge_search_device": token(
+            private_bytes.decode(),
+            "edge-search-001",
+            "team-search",
+            ["edge.connect"],
+            principal_type="device",
+        ),
+        "edge_constrained_device": token(
+            private_bytes.decode(),
+            "edge-constrained-001",
+            "team-search",
+            ["edge.connect"],
+            principal_type="device",
+        ),
     }))
 
 
