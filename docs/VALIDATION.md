@@ -34,6 +34,42 @@ verification and reran the same full cumulative demo successfully. This validate
 local-first public flagship; it does not claim GPU/vLLM, DCGM, Kubernetes/EKS,
 cloud-hosted model, or production sandbox execution.
 
+## Operator Console clean-room validation
+
+**Date:** 2026-09-29
+
+**Environment:** macOS, Docker Desktop, Docker Compose, Python 3.12. No cloud account,
+GPU, Kubernetes cluster, or paid API.
+
+Two new, independent clean-room cycles passed for the Operator Console revision. Cycle
+1 began with `make clean-local`; cycle 2 began only after cycle 1 verified zero
+project-labelled containers and volumes and the absence of `.local`, `.venv`, and
+generated models. Each cycle ran:
+
+```console
+make install
+make bootstrap-local
+make smoke
+make demo-flagship
+make verify
+make clean-local
+```
+
+`make smoke` asserted both `GET /healthz` and the actual browser page at
+`http://localhost:8091/`; the page includes `AI Platform Operator Console`. The
+cumulative demo exercised the console's real overview aggregation, fixed release-plan
+create/approve/canary/rollback transitions, and fixed hardened sandbox task, alongside
+the established flagship success and failure paths. Each `make verify` passed Ruff,
+`44 passed` pytest tests (one expected Starlette deprecation warning), dependency audit,
+and `docker compose config --quiet`.
+
+Each final `make clean-local` removed only this project's Compose services, project
+images, volumes, network, generated models, local identity/state, and virtual
+environment. Post-cleanup verification found zero project containers and zero
+project-labelled volumes. This demonstrates reproducible local execution of the
+Operator Console; it does not claim enterprise browser SSO, production BFF token
+exchange, cloud-hosted models, physical GPU scheduling, or Kubernetes/EKS deployment.
+
 ## Bounded sandboxed-agent slice
 
 **Date:** 2026-09-29

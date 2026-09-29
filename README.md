@@ -65,6 +65,14 @@ short-lived delegated agent can request only named fixture tasks. A trusted cont
 creates a disposable child container that is non-root, read-only, capability-dropped,
 network-isolated, resource-limited, and denied both Docker socket and host bind mounts.
 
+The operator-console slice brings the executed local services into one browser control
+surface at **http://localhost:8091**. It shows tenant admission, simulated capacity,
+MLflow models, release plans, incidents, delegated-tool audit, sandbox tasks,
+developer integrations, and edge inventory. Its fixed buttons forward only release
+transitions and named sandbox tasks to the existing scoped APIs; it does not add an
+unrestricted orchestration backdoor. The local console uses synthetic server-side
+fixture identities and is not a claim of production web SSO.
+
 See [flagship direction](docs/flagship-direction.md) for boundaries and the staged
 integration model. Commercial strategy is intentionally not maintained in this public
 repository.
@@ -126,6 +134,7 @@ flowchart LR
 | Developer self-service golden path | ✅ EXECUTED LOCALLY | Separate self-service API creates a durable tenant-bound model-integration profile and token-free starter artifacts. The generated client executes a real ONNX request; unauthorized model, tenant, and agent attempts are denied. |
 | Narrow edge routing adapter | ✅ EXECUTED LOCALLY | Two independent edge-agent containers register signed device identities with SQLite control state. Compatible requests use local CPU ONNX; constrained-device public requests use the gateway; restricted and `LOCAL_ONLY` fallback is denied; inventory survives control restart. |
 | Bounded sandboxed agent execution | ✅ EXECUTED LOCALLY | A short-lived signed agent invokes only named fixture tasks. A trusted controller creates disposable hardened Docker children; real fixture tests/patching and an outbound-network probe run, arbitrary command input is rejected, child resources are removed, and SQLite audit survives restart. |
+| Unified operator console | ✅ EXECUTED LOCALLY | Local browser console aggregates live cross-slice evidence and forwards only fixed release/sandbox actions through existing authorization boundaries. Local fixture identities remain server-side. |
 | Usage + restart recovery | ✅ EXECUTED LOCALLY | Metadata-only Redis usage survives a gateway restart. |
 | Metrics, traces, dashboards | ✅ EXECUTED LOCALLY | Prometheus, OTel Collector, Tempo, and Grafana receive generated local traffic. |
 | Physical GPU/vLLM/DCGM/Kubernetes | 📐 ARCHITECTURE / CONTRACT ONLY | Simulated capacity is not physical accelerator scheduling; no GPU or cloud execution is claimed. |
@@ -151,6 +160,7 @@ make demo-agent-tools # filtered agent tools → tenant evidence → denied cros
 make demo-self-service # signed developer → durable integration profile → generated token-free client → real ONNX request
 make demo-edge-adapter # registered local device ONNX → constrained public fallback → privacy/LOCAL_ONLY denial → durable inventory restart
 make demo-sandboxed-agent # delegated agent → hardened disposable task → patch + blocked egress probe → cleanup + audit restart
+make demo-operator-console # unified browser-control API → cross-slice evidence → scoped release actions + named sandbox task
 make demo-metering       # privacy-safe durable usage
 make demo-observability  # Prometheus + Tempo evidence
 make demo-failure        # unavailable backend → 502
@@ -160,7 +170,7 @@ make verify
 make clean-local
 ```
 
-The local stack publishes gateways on `:8081` and `:8082`, release control on `:8083`, remediation control on `:8084`, delegated agent tools on `:8085`, developer self-service on `:8086`, edge control on `:8087`, edge devices on `:8088` and `:8089`, sandbox control on `:8090`, MLflow on `:15010`, Prometheus on `:9090`, Tempo on `:3200`, and Grafana on `:3002`. `make clean-local` removes only this repository's Compose resources, locally built images, generated artifacts, and local state.
+The local stack publishes gateways on `:8081` and `:8082`, release control on `:8083`, remediation control on `:8084`, delegated agent tools on `:8085`, developer self-service on `:8086`, edge control on `:8087`, edge devices on `:8088` and `:8089`, sandbox control on `:8090`, the operator console on `:8091`, MLflow on `:15010`, Prometheus on `:9090`, Tempo on `:3200`, and Grafana on `:3002`. `make clean-local` removes only this repository's Compose resources, locally built images, generated artifacts, and local state.
 
 ## Security boundary
 

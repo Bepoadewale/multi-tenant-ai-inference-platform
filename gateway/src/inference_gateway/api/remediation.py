@@ -111,6 +111,11 @@ async def create_incident(
     return _incident_response(incident)
 
 
+@app.get("/remediation/v1/incidents")
+def list_incidents(actor: str = Depends(platform_admin)) -> dict[str, object]:
+    return {"incidents": store.list_incidents()}
+
+
 @app.post("/remediation/v1/agent/incidents/{request_id}/plans")
 async def agent_create_plan(
     request_id: str, agent: AgentIdentity = Depends(delegated_agent)

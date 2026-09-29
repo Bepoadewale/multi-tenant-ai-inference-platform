@@ -24,6 +24,9 @@ workflow while pursuing production hardening only as P1/P3 work.
 - [x] Bounded sandboxed agent execution: short-lived delegated identity, fixed task
   contract, real hardened disposable Docker child, patch/containment proof, durable
   audit, cleanup, and restart recovery.
+- [x] Operator console foundation: local BFF, packaged browser assets, scoped release/
+  sandbox actions, cross-slice evidence view, Docker UI smoke check, and two-cycle
+  clean-room validation.
 - [x] Integrated clean-room success and failure demonstration with safe teardown.
 
 # P0 — Required for Portfolio Claim

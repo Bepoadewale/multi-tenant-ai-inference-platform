@@ -67,6 +67,11 @@ class RemediationStore:
             raise HTTPException(404, "unknown remediation incident")
         return RemediationIncident.model_validate_json(row[0])
 
+    def list_incidents(self) -> list[RemediationIncident]:
+        with self._connect() as db:
+            rows = db.execute("SELECT payload FROM remediation_incidents ORDER BY rowid DESC").fetchall()
+        return [RemediationIncident.model_validate_json(row[0]) for row in rows]
+
     def by_source_request(self, request_id: str) -> RemediationIncident | None:
         with self._connect() as db:
             row = db.execute(

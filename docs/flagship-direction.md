@@ -33,6 +33,7 @@ repositories into one monolith.
 | Hybrid AI Edge Platform | narrow local-cloud routing adapter | signed device registration, metadata-only inventory, local-ONNX-or-policy-fallback contract; OTA/fleet rollout stays in the reference project |
 | AI Developer Platform | self-service/golden paths | durable tenant/model-bound integration profile and token-free starter contract |
 | Secure Agent Runtime | bounded agent execution | capability-scoped task contract |
+| Flagship operator console | unified browser operations | local backend-for-frontend over existing scoped APIs |
 
 ## First integrated demonstration
 
@@ -107,3 +108,22 @@ capabilities, no-new-privileges, CPU/memory/PID bounds, no Docker socket, no hos
 mount, and `network=none`. It is not a claim of gVisor, Firecracker, Kubernetes pod
 sandboxing, or general arbitrary-agent-code execution; those remain separate
 production/standalone-runtime concerns.
+
+## Operator-console boundary
+
+The local operator console is the unified entry point for the executed flagship demo:
+
+```text
+browser -> operator-console backend -> fixed service API calls -> existing policy,
+approval, audit, release, and sandbox controls
+```
+
+It aggregates live evidence from the gateway, Redis-backed capacity, MLflow, release
+control, remediation, delegated-agent audit, sandbox control, developer self-service,
+edge inventory, and Prometheus. Its only mutation routes are fixed release transitions
+and the two already-allowlisted sandbox fixture tasks; it cannot submit arbitrary
+commands, alter tenant identity, access Redis/Docker credentials, or bypass the
+underlying release approval checks. Browser clients never receive the synthetic local
+tokens. The server-side token bundle is a **local demo convenience**, not production
+authentication. A production console requires enterprise SSO, per-user authorization,
+CSRF/session protections, and a scoped backend-for-frontend credential exchange.

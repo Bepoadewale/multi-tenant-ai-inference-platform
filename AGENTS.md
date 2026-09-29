@@ -19,3 +19,12 @@ Clean-room reproducibility is a mandatory completion criterion. Do not mark this
 clean project state using documented commands, execute the primary and required failure demos, run
 validation, and safely tear down only this project's local resources. Do not infer reproducibility
 from an existing developer environment; execute it after project-specific cleanup.
+
+## Pull-request review rule
+
+Do not certify any implementation PR as ready for human review until it includes executed,
+project-scoped clean-room evidence for the change: clean state, bootstrap, smoke, the relevant
+success and failure/security demos, validation, safe cleanup, and a second clean bootstrap/demo.
+Record exact commands and outcomes in `docs/VALIDATION.md`; if the sequence has not run or fails,
+the PR remains draft. Documentation-only changes may state that clean-room execution is not
+applicable, but must not imply implementation validation.

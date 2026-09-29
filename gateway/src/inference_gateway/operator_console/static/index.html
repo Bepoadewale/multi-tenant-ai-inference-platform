@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Platform Operator Console</title>
+    <link rel="stylesheet" href="/assets/styles.css" />
+  </head>
+  <body>
+    <aside>
+      <div class="brand"><span class="mark">A</span><span>AI Platform</span></div>
+      <div class="environment"><span class="dot"></span> LOCAL DEMO</div>
+      <nav>
+        <a class="active" href="#overview">Overview</a>
+        <a href="#release">Model releases</a>
+        <a href="#operations">Operations</a>
+        <a href="#boundaries">Boundaries</a>
+      </nav>
+      <div class="sidebar-note">CPU ONNX inference is real.<br />GPU capacity is simulated.</div>
+    </aside>
+    <main>
+      <header>
+        <div><p class="eyebrow">MULTI-TENANT AI PLATFORM</p><h1>Operator Console</h1></div>
+        <div class="header-actions"><span id="updated" class="muted">Loading platform state…</span><button class="secondary" id="refresh">Refresh</button></div>
+      </header>
+      <section class="notice"><strong>Local operator mode.</strong> This console is a browser-to-local-backend demo. It forwards only fixed actions to existing scoped APIs; production needs enterprise identity and backend-for-frontend token exchange.</section>
+      <section id="overview">
+        <div class="section-title"><div><p class="eyebrow">OVERVIEW</p><h2>Shared AI capacity, governed</h2></div><span class="status good">SYSTEM HEALTHY</span></div>
+        <div class="metrics" id="metrics"></div>
+        <div class="grid two">
+          <article><div class="card-title"><h3>Tenant admission</h3><span class="pill">Redis shared</span></div><div id="tenants"></div></article>
+          <article><div class="card-title"><h3>Serving & capacity</h3><span class="pill simulated">SIMULATED GPU</span></div><div id="capacity"></div></article>
+        </div>
+      </section>
+      <section id="release">
+        <div class="section-title"><div><p class="eyebrow">MODEL CONTROL</p><h2>Release decisions</h2></div><button class="primary" data-release="create">Create canary plan</button></div>
+        <div class="grid two">
+          <article><div class="card-title"><h3>MLflow registry</h3><span class="pill">Artifact evidence</span></div><div id="registry"></div></article>
+          <article><div class="card-title"><h3>Release plans</h3><span class="pill">Approval gated</span></div><div id="plans"></div></article>
+        </div>
+      </section>
+      <section id="operations">
+        <div class="section-title"><div><p class="eyebrow">OPERATIONS</p><h2>Evidence, recovery & platform access</h2></div></div>
+        <div class="grid three">
+          <article><div class="card-title"><h3>Remediation incidents</h3><span class="pill">Bounded</span></div><div id="incidents"></div></article>
+          <article><div class="card-title"><h3>Delegated agent tools</h3><span class="pill">Audited</span></div><div id="agents"></div></article>
+          <article><div class="card-title"><h3>Sandboxed tasks</h3><button class="text-button" data-sandbox="fixture_patch">Run patch task</button></div><div id="sandbox"></div></article>
+        </div>
+        <div class="grid two">
+          <article><div class="card-title"><h3>Developer integrations</h3><span class="pill">Tenant bound</span></div><div id="integrations"></div></article>
+          <article><div class="card-title"><h3>Edge inventory</h3><span class="pill simulated">HARDWARE SIMULATED</span></div><div id="devices"></div></article>
+        </div>
+      </section>
+      <section id="boundaries">
+        <div class="section-title"><div><p class="eyebrow">EVIDENCE BOUNDARY</p><h2>What this local console proves</h2></div></div>
+        <div class="boundary"><div><strong>Executed locally</strong><p>Signed identity, tenant admission, Redis quotas, CPU ONNX serving, MLflow release control, tracing, remediation, edge policy, developer profiles, delegated tools, and hardened Docker fixture tasks.</p></div><div><strong>Not claimed</strong><p>Physical GPU scheduling, vLLM/DCGM, Kubernetes/EKS production deployment, cloud-hosted models, and enterprise web SSO.</p></div></div>
+      </section>
+    </main>
+    <div id="toast" role="status"></div>
+    <script src="/assets/app.js"></script>
+  </body>
+</html>
