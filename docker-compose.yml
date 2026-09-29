@@ -337,6 +337,7 @@ services:
       SANDBOX_CONTROL_URL: http://sandbox-control:8080
       PROMETHEUS_URL: http://prometheus:9090
       MLFLOW_URL: http://mlflow:5000
+      GRAFANA_URL: http://localhost:3002
     volumes:
       - "./.local/identity:/run/identity:ro"
     depends_on:

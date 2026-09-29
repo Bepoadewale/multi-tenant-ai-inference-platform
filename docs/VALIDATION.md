@@ -523,3 +523,47 @@ make clean-local
 ```
 
 All commands passed. The second bootstrap returned real ONNX output and an explicit bounded timeout failure; final cleanup again removed only project-owned resources. This is local platform-flow evidence, not GPU, vLLM, quality, throughput, or cloud evidence.
+## Lifecycle concurrency guard
+
+`bootstrap-local` and `clean-local` use a project-local lifecycle lock. A second
+bootstrap or cleanup fails clearly while the first is active, rather than allowing
+overlapping Compose operations to leave stale project state. The lock records its
+owner PID; an interrupted owner leaves a stale lock that the next project lifecycle
+command safely reclaims. The lock does not affect other Docker Compose projects.
+
+## Operator-console drill-down and model-observability clean-room validation
+
+**Date:** 2026-09-29
+
+**Starting state:** Docker Desktop was reset to zero containers, images, and volumes.
+The repository's `.venv`, `.local`, and generated `models/` artifacts were removed by
+the initial project-scoped cleanup.
+
+The following documented default-path sequence completed successfully:
+
+```console
+make clean-local
+make install
+make bootstrap-local
+make smoke
+make demo-flagship
+make verify
+make clean-local
+```
+
+The clean bootstrap built the local Compose stack from no Docker images. `make smoke`
+and `make demo-flagship` completed before `make verify`; the latter completed Ruff,
+pytest, dependency audit, and Compose configuration validation. The final
+`make clean-local` ran only after those preceding commands succeeded and left zero
+project-labelled containers, volumes, or networks, with no `.venv`, `.local`, or
+generated `models/` directory. The cycle therefore exercised the fixed
+Prometheus-backed model detail endpoint and its Grafana dashboard configuration as
+part of the flagship stack.
+
+The second independent cycle began only after that teardown. It repeated the exact
+same sequence from a clean project state, including a rebuild of the project Compose
+images, live smoke checks, the full flagship demo, and verification. Its final cleanup
+again left zero project-labelled containers, volumes, or networks, with `.venv`,
+`.local`, and generated `models/` absent. Both cycles therefore validate the packaged
+operator-console drill-downs and fixed Prometheus-backed model observability without
+depending on prior project state.

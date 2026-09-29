@@ -2,7 +2,9 @@
 
 The operator console is the unified local browser surface for the public flagship.
 It is intentionally a restrained operations UI: dense tables, status chips, clear
-evidence boundaries, and no simulated charts or invented AI analysis.
+evidence boundaries, and no simulated charts or invented AI analysis. It uses
+hash-routed list and detail views rather than presenting every service as a separate
+browser endpoint.
 
 ## Run it
 
@@ -13,18 +15,31 @@ make demo-flagship
 open http://localhost:8091
 ```
 
-`make demo-operator-console` proves the console backend can retrieve live evidence,
-create/approve/canary/rollback a release through the existing release service, and
-invoke a named hardened sandbox fixture task. The actions are forwarded to the existing
-services; their state machines and authorization checks remain authoritative.
+`make demo-operator-console` proves the console backend can retrieve routed tenant,
+model, and delegated-agent evidence; create/approve/canary/rollback a release through
+the existing release service; and invoke a named hardened sandbox fixture task. The
+actions are forwarded to the existing services; their state machines and authorization
+checks remain authoritative.
 
 ## What it shows
 
-- tenant admission and Prometheus request/throttle totals;
-- Redis-backed simulated capacity (**not physical GPU state**);
-- MLflow aliases/artifact registry and durable release plans;
-- remediation incidents, delegated-agent metadata audit, and sandbox task audit;
-- developer integration profiles and edge-device inventory.
+- overview: tenant admission and Prometheus request/throttle totals;
+- tenant pages: assigned models, admission limits, and metadata-only usage evidence;
+- model and release pages: serving targets, rollout audit context, MLflow registry
+  evidence, immutable plans, and the eligible next release action. Model detail pages
+  also query fixed Prometheus metrics for request volume/outcomes, p95 latency, p95
+  time-to-first-token, tokens, estimated fixture cost, SLO evidence, and release
+  phase. They link to the same model-filtered Grafana dashboard for deeper analysis;
+- operations pages: remediation incident state, timeline, and Redis-backed simulated
+  capacity (**not physical GPU state**);
+- agent and sandbox pages: filtered tool audit, task outcome, and hardening metadata;
+- developer profile pages: tenant-bound profile metadata and token-free generated files;
+- edge pages: independent simulated device-agent inventory and explicit hardware boundary.
+
+Every list row links to its scoped detail route, for example
+`#/tenants/team-search`, `#/models/chat-default`, or `#/incidents/<id>`. The console
+has no generic browser proxy, arbitrary PromQL interface, or arbitrary command/action
+form. The browser asks only for fixed, server-defined views and actions.
 
 ## Local security boundary
 

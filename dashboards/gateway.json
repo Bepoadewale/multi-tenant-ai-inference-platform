@@ -1,1 +1,51 @@
-{"title":"Inference Gateway","panels":[{"title":"Requests / outcome","targets":[{"expr":"sum(rate(inference_gateway_requests_total[5m])) by (tenant,model,outcome)"}]},{"title":"p95 latency","targets":[{"expr":"histogram_quantile(0.95,sum(rate(inference_gateway_request_duration_seconds_bucket[5m])) by (le,model))"}]},{"title":"Tenant throttles","targets":[{"expr":"sum(rate(inference_gateway_throttles_total[5m])) by (tenant)"}]}]}
+{
+  "title": "Inference Gateway",
+  "templating": {
+    "list": [
+      {
+        "name": "model",
+        "label": "Model",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "definition": "label_values(inference_gateway_requests_total, model)",
+        "query": { "query": "label_values(inference_gateway_requests_total, model)", "refId": "Prometheus-model-Variable-Query" },
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": false,
+        "current": { "text": "All", "value": "$__all" }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "title": "Requests / outcome",
+      "targets": [
+        { "expr": "sum(rate(inference_gateway_requests_total{model=~\"$model\"}[5m])) by (tenant,model,outcome)" }
+      ]
+    },
+    {
+      "title": "p95 latency",
+      "targets": [
+        { "expr": "histogram_quantile(0.95,sum(rate(inference_gateway_request_duration_seconds_bucket{model=~\"$model\"}[5m])) by (le,model))" }
+      ]
+    },
+    {
+      "title": "p95 time to first token",
+      "targets": [
+        { "expr": "histogram_quantile(0.95,sum(rate(inference_gateway_ttft_seconds_bucket{model=~\"$model\"}[5m])) by (le,model))" }
+      ]
+    },
+    {
+      "title": "Estimated fixture cost",
+      "targets": [
+        { "expr": "sum(inference_gateway_estimated_cost_usd_total{model=~\"$model\"}) by (model)" }
+      ]
+    },
+    {
+      "title": "Tenant throttles",
+      "targets": [
+        { "expr": "sum(rate(inference_gateway_throttles_total[5m])) by (tenant)" }
+      ]
+    }
+  ]
+}
