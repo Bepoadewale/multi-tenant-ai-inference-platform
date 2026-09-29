@@ -24,6 +24,12 @@ tenant request -> identity/quota/capacity policy -> verified candidate release
 -> independent approval -> promote or roll back
 ```
 
+Run the complete local proof with `make demo-flagship` after `make bootstrap-local`.
+It executes the preserved inference path and each integrated slice's success and
+failure assertions against one live Compose stack; `make clean-local` removes only
+resources owned by this project. Two clean-room cycles of that workflow are recorded
+in [validation evidence](docs/VALIDATION.md).
+
 The remediation slice extends that path only after evidence exists:
 
 ```text

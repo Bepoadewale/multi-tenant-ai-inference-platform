@@ -34,7 +34,9 @@ evidence and the cross-slice demonstration must pass clean-room validation.
   capability-dropped, socketless, host-bind-free, `network=none`, CPU/memory/PID-bounded
   Docker child; patch and containment probes execute, arbitrary command input is denied,
   child resources are removed, audit is durable, and control restart recovery is proven.
-- [ ] Integrated clean-room success and rollback demonstration.
+- [x] Integrated clean-room success and rollback demonstration: two full clean-room
+  cycles ran `make demo-flagship`, including success, policy/failure, recovery,
+  rollback and teardown evidence.
 
 - [x] CPU-capable real model runtime returns output through the OpenAI-compatible API; streaming is exercised if claimed.
 - [x] Signed/authenticated tenant identity, isolation, and no cross-tenant leakage are tested.
@@ -57,7 +59,7 @@ evidence and the cross-slice demonstration must pass clean-room validation.
 
 # Clean-Room Reproducibility Gate
 
-`PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE` requires two executed clean-room cycles: clone → install → bootstrap gateway, Redis, CPU runtime, telemetry → smoke → authenticated inference/quota/queue/routing demo → overload or backend-failure demo → validation → project-scoped cleanup → second clean bootstrap/demo. Planned commands: `make install`, `make bootstrap-local`, `make smoke`, `make demo-local`, `make demo-overload`, `make verify`, `make clean-local`.
+`PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE` requires two executed clean-room cycles: clone → install → bootstrap gateway, Redis, CPU runtime, telemetry → smoke → authenticated inference/quota/queue/routing demo → overload or backend-failure demo → validation → project-scoped cleanup → second clean bootstrap/demo. Executed commands: `make install`, `make bootstrap-local`, `make smoke`, `make demo-flagship`, `make verify`, `make clean-local`.
 
 - [x] Clean clone/bootstrap has no hidden state; primary and failure demos pass.
 - [x] Cleanup removes only this project and unrelated resources survive.

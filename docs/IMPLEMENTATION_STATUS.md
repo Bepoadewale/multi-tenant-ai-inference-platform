@@ -26,4 +26,10 @@
 
 ## Clean-room evidence boundary
 
-Clean-room reproducibility is ✅ EXECUTED LOCALLY. Two bootstrap → smoke → demo/failure → validation → project-scoped cleanup cycles were run on 2026-09-21; the second started after cleanup, and an unrelated Docker sentinel survived the cleanup test. See `docs/VALIDATION.md`.
+Clean-room reproducibility is ✅ EXECUTED LOCALLY. The historical inference-core
+cycles remain recorded in `docs/VALIDATION.md`; on 2026-09-29 two complete cumulative
+flagship cycles ran `make install`, `make bootstrap-local`, `make smoke`,
+`make demo-flagship`, `make verify`, and project-scoped `make clean-local`. The second
+started after the first cleanup and both left no project Compose resources,
+project-labelled sandbox children, `.local`, `.venv`, or generated models. See
+`docs/VALIDATION.md`.

@@ -2,6 +2,38 @@
 
 Validation is local-first. Record hardware, runtime, exact command and result for any benchmark; never infer GPU behavior from the deterministic CPU fixture or fabricate validation.
 
+## Cumulative flagship clean-room validation
+
+**Date:** 2026-09-29
+**Environment:** macOS, Docker Desktop, Docker Compose, Python 3.12. No cloud
+account, GPU, Kubernetes cluster, or paid API.
+
+Two complete project-scoped clean-room cycles passed. Each began from
+`make clean-local` and then executed:
+
+```console
+make install
+make bootstrap-local
+make smoke
+make demo-flagship
+make verify
+make clean-local
+```
+
+`make demo-flagship` passed its authenticated inference, shared admission/overload,
+weighted routing, metering, observability, backend-unavailable/timeout, restart
+recovery, MLflow registry/release, simulated-capacity, request-evidence,
+self-service, delegated-tool, remediation, edge-policy, and hardened sandbox child
+assertions against the live Compose stack. `make verify` passed Ruff, `42 passed`
+pytest tests, dependency audit, and `docker compose config --quiet`.
+
+After each cleanup, `docker compose ps -a` had no project resources and there were no
+project-labelled sandbox children, project volumes, `.local`, `.venv`, or generated
+model directory. The second bootstrap started only after that first post-cleanup
+verification and reran the same full cumulative demo successfully. This validates the
+local-first public flagship; it does not claim GPU/vLLM, DCGM, Kubernetes/EKS,
+cloud-hosted model, or production sandbox execution.
+
 ## Bounded sandboxed-agent slice
 
 **Date:** 2026-09-29
@@ -49,16 +81,16 @@ process-local counter reset.
 
 This slice does not claim signed model packages, desired-state reconciliation, OTA,
 offline buffering, physical device behavior, NPU execution, or managed fleet control.
-Those belong to the standalone hybrid edge project or production adapters. A final
-all-slice clean-room cycle will re-run this adapter with the full flagship story.
+Those belong to the standalone hybrid edge project or production adapters. The later
+cumulative clean-room evidence above reran this adapter with the full flagship story.
 
 Two separate local container recreations were exercised before recording this result.
 The second began after `make clean-local` removed the project containers, images,
 volumes, `.local`, generated ONNX models, and virtual environment; it rebuilt the
 Compose services, initialized fixture models, passed smoke, and reran the edge demo.
 Both runs ended in Ruff clean, `41 passed` pytest results, and valid Compose
-configuration. This is slice-level reproducibility evidence; the remaining P0 is one
-final all-slice clean-room demonstration.
+configuration. This is slice-level reproducibility evidence; the later cumulative
+clean-room section records the final integrated demonstration.
 
 ## Developer self-service golden-path slice
 

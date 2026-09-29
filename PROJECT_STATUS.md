@@ -2,10 +2,11 @@
 
 ## Current Maturity
 
-PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE for the multi-tenant inference core.
+PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE.
 
-The repository is now the public flagship. Flagship integrations must not be represented
-as executed until they have their own local evidence.
+The public flagship's preserved inference core and every currently scoped vertical
+slice have executed together in two clean-room local cycles. Production/cloud/hardware
+adapters remain explicitly outside this status.
 
 ## Maturity Model
 
@@ -72,13 +73,12 @@ as executed until they have their own local evidence.
 
 ## Current P0 Objective
 
-Run the final all-slice clean-room success and failure demonstration without weakening
-the independently validated core and vertical-slice evidence.
+Maintain the executed flagship contract and its clean-room workflow; do not regress
+tenant isolation, bounded authority, or truthful evidence labels.
 
 ## Completion Blockers
 
-- None for the existing inference-core completion gate.
-- A final all-slice clean-room run remains.
+None for the local-first flagship gate.
 
 ## Explicitly Unexecuted Production Adapters
 
@@ -86,6 +86,18 @@ the independently validated core and vertical-slice evidence.
 - gVisor/Firecracker/Kubernetes sandbox runtime execution.
 
 ## Last Validation
+
+- **Cumulative flagship clean-room validation:** two complete clean-room cycles passed
+  on 2026-09-29. Each ran `make clean-local`, `make install`,
+  `make bootstrap-local`, `make smoke`, `make demo-flagship`, `make verify`, and
+  `make clean-local`. The cumulative demo exercised authenticated inference, shared
+  admission/overload, routing, metering, observability, backend failure/timeout,
+  recovery, MLflow registry/release, simulated capacity, request evidence,
+  self-service, delegated tools, remediation, edge policy, and hardened sandbox
+  tasks. `make verify` passed Ruff, `42 passed` pytest tests, dependency audit, and
+  Compose configuration. After each cleanup there were no project Compose resources,
+  project-labelled sandbox children, `.local`, `.venv`, or generated models; cycle 2
+  began only after cycle 1 cleanup.
 
 - Sandboxed-agent slice: clean local bootstrap → smoke → `make demo-sandboxed-agent`
   passed on 2026-09-29. A five-minute signed delegated agent ran a real non-root
@@ -113,8 +125,8 @@ the independently validated core and vertical-slice evidence.
   same-tenant evidence, cross-tenant denial, plan-only authority, independent
   approval/execution, Prometheus tool metrics, durable hashed audit, service restart,
   and real stable-ONNX recovery. Static validation after the second run passed Ruff,
-  37 pytest tests, and Compose configuration. The full all-slice clean-room rerun is
-  still an explicit flagship completion item.
+  37 pytest tests, and Compose configuration. The later cumulative flagship
+  clean-room evidence above fulfilled the all-slice completion item.
 - Two clean-room cycles on the governed-remediation revision passed. Both started from
   `make clean-local`, ran `make install`, `make bootstrap-local`, `make smoke`, core
   and cumulative flagship demos including `make demo-remediation`, `make verify`, and
@@ -127,14 +139,14 @@ the independently validated core and vertical-slice evidence.
 
 ## Last Updated
 
-2026-09-29, sandboxed-agent live validation in progress on
-`codex/flagship-sandboxed-agent`; GitHub CI is required before review.
+2026-09-29, cumulative flagship clean-room evidence recorded on
+`codex/flagship-final-cleanroom`; GitHub CI is required before review.
 
 ## Clean-Room Reproducibility
 
 **Status: VALIDATED**
 
-Historical core and operational-evidence validation remains recorded below. The
-developer-self-service slice completed two clean-room cycles on 2026-09-29. Both ended
-with no project Compose resources, `.local`, `.venv`, or generated models; the second
-bootstrap ran after the first cleanup.
+Two full cumulative cycles passed on 2026-09-29. Both ended with no project Compose
+resources, project-labelled sandbox children, `.local`, `.venv`, or generated models;
+the second bootstrap ran after the first cleanup. Detailed commands and evidence are in
+`docs/VALIDATION.md`.

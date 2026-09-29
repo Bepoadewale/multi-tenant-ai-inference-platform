@@ -15,7 +15,9 @@ are additive vertical slices, each requiring real local execution and a failure 
 - [x] F7 bounded sandboxed agent execution: short-lived delegated identity, named task
   contract, real hardened disposable Docker child, patch/containment proof, durable
   metadata-only audit, cleanup, and restart recovery.
-- [ ] F8 integrated clean-room success and rollback demonstration.
+- [x] F8 integrated clean-room success and rollback demonstration: two full
+  bootstrap → smoke → `demo-flagship` → verify → safe-cleanup cycles passed on
+  2026-09-29.
 
 - [x] M1 gateway, deterministic mock test backend, real CPU ONNX Runtime local backend, OpenAI-compatible chat/streaming, and tests.
 - [x] M2 authenticated fixture identity, tenant authorization, quotas, metering.
