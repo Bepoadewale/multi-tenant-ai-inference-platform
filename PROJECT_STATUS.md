@@ -40,6 +40,12 @@ as executed until they have their own local evidence.
   starter artifacts, and proves the generated client executes real ONNX inference.
   Unassigned models, cross-tenant profile reads, and delegated-agent creation attempts
   are denied; the profile survives a service restart.
+- Two independent edge-agent containers authenticate with distinct signed device
+  identities, register and heartbeat into durable SQLite inventory, and expose
+  policy-aware local-versus-central inference. The compatible agent executes its own
+  CPU ONNX session; the constrained agent falls back only for public data. Restricted
+  and `LOCAL_ONLY` requests without a local model are denied, and inventory survives
+  edge-control restart. Device hardware labels are simulated.
 - Clean-room workflow passed twice: bootstrap, smoke, cumulative flagship demos,
   validation, project-scoped cleanup, then a second bootstrap/demo.
 
@@ -61,13 +67,13 @@ as executed until they have their own local evidence.
 
 ## Current P0 Objective
 
-Add the optional edge-fleet adapter through a narrow, validated contract without
-turning this repository into an edge-platform rewrite.
+Run a final all-slice clean-room success and failure demonstration without weakening
+the independently validated core and vertical-slice evidence.
 
 ## Completion Blockers
 
 - None for the existing inference-core completion gate.
-- The optional edge slice and a final all-slice clean-room run remain.
+- A final all-slice clean-room run remains.
 
 ## Explicitly Unexecuted Production Adapters
 
@@ -75,6 +81,11 @@ turning this repository into an edge-platform rewrite.
 
 ## Last Validation
 
+- Edge-adapter slice: two local container recreations passed on 2026-09-29. Each
+  proved two independent signed device agents, SQLite inventory, real compatible-device
+  local ONNX, constrained-device public gateway fallback, restricted/LOCAL_ONLY denial,
+  Prometheus registration evidence, and edge-control restart recovery. Final static
+  validation passed Ruff, `41 passed` pytest tests, and Compose config.
 - Developer self-service slice: local Compose bootstrap → smoke →
   `make demo-self-service` passed on 2026-09-29. The live demo created a durable,
   idempotent `team-search` profile, executed its generated token-free client against
@@ -102,9 +113,8 @@ turning this repository into an edge-platform rewrite.
 
 ## Last Updated
 
-2026-09-29, developer-self-service slice validated twice locally on
-`codex/flagship-developer-self-service`; GitHub CI evidence will be recorded before
-review.
+2026-09-29, edge adapter live validation in progress on
+`codex/flagship-edge-adapter`; GitHub CI evidence will be recorded before review.
 
 ## Clean-Room Reproducibility
 

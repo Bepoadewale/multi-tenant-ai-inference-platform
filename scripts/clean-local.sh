@@ -2,7 +2,7 @@
 set -euo pipefail
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-docker compose -f "${repo_root}/docker-compose.yml" down --volumes --remove-orphans
+docker compose -f "${repo_root}/docker-compose.yml" down --volumes --remove-orphans --rmi local
 project_name="multi-tenant-ai-inference-platform"
 # Compose can leave containers in Created state after an interrupted network/start
 # operation. Remove only containers labeled as belonging to this Compose project.
@@ -25,4 +25,4 @@ for path in .venv models .local; do
     exit 1
   fi
 done
-echo 'Removed only multi-tenant-ai-inference-platform Compose resources, volumes, and generated artifacts.'
+echo 'Removed only multi-tenant-ai-inference-platform Compose resources, locally built images, volumes, and generated artifacts.'

@@ -10,7 +10,8 @@ are additive vertical slices, each requiring real local execution and a failure 
 - [x] F3 request/release/SLO/estimated-cost correlation.
 - [x] F4 governed incident/remediation and verification.
 - [x] F5 delegated agent tools and developer self-service requests.
-- [ ] F6 optional edge adapter.
+- [x] F6 narrow edge adapter: signed device registration, durable local inventory,
+  compatible device local ONNX, constrained-device public fallback, and privacy/LOCAL_ONLY denial. Hardware profiles are simulated; OTA/fleet rollout remains separate.
 - [ ] F7 integrated clean-room success and rollback demonstration.
 
 - [x] M1 gateway, deterministic mock test backend, real CPU ONNX Runtime local backend, OpenAI-compatible chat/streaming, and tests.

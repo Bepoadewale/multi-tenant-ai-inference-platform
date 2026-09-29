@@ -20,7 +20,8 @@ demonstration. Preserve the existing core while working through them.
 - [x] Developer self-service: durable tenant/model-bound integration profiles,
   token-free starter artifacts, generated-client inference, idempotency, isolation,
   agent denial, restart recovery, and metrics.
-- [ ] Optional edge adapter through a narrow contract.
+- [x] Narrow edge adapter: signed device registration, durable inventory, independent
+  local ONNX, public-only central fallback, privacy/LOCAL_ONLY denial, and restart recovery.
 - [ ] Integrated clean-room success and failure demonstration with safe teardown.
 
 # P0 — Required for Portfolio Claim
