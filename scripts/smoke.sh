@@ -28,6 +28,7 @@ wait_for "developer-self-service readiness" curl -fsS --connect-timeout 2 --max-
 wait_for "edge control readiness" curl -fsS --connect-timeout 2 --max-time 5 http://localhost:8087/healthz
 wait_for "sandbox control readiness" curl -fsS --connect-timeout 2 --max-time 5 http://localhost:8090/healthz
 wait_for "operator console readiness" curl -fsS --connect-timeout 2 --max-time 5 http://localhost:8091/healthz
+wait_for "operator console UI" bash -c "curl -fsS --connect-timeout 2 --max-time 5 http://localhost:8091/ | grep -q 'AI Platform Operator Console'"
 for port in 8088 8089; do
   wait_for "edge device ${port} readiness" curl -fsS --connect-timeout 2 --max-time 5 "http://localhost:${port}/healthz"
 done

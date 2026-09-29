@@ -17,6 +17,9 @@ package-dir = {"" = "gateway/src"}
 [tool.setuptools.packages.find]
 where = ["gateway/src"]
 
+[tool.setuptools.package-data]
+inference_gateway = ["operator_console/static/*.html", "operator_console/static/*.css", "operator_console/static/*.js"]
+
 [tool.pytest.ini_options]
 pythonpath = ["gateway/src"]
 testpaths = ["gateway/tests"]
