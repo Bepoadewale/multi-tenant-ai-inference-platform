@@ -3,8 +3,8 @@
 This is the executed foundation of the public flagship. Release, simulated capacity,
 request-level FinOps/SLO evidence, and governed canary remediation attach through
 narrow contracts described in [flagship direction](flagship-direction.md). Secure-agent
-tools and developer self-service are executed narrow services; edge capability remains
-a future slice. None replaces the gateway or merges another repository wholesale.
+tools, developer self-service, edge routing, and bounded sandbox execution are narrow
+services. None replaces the gateway or merges another repository wholesale.
 
 The gateway is the tenant boundary; a model runtime is not an authorization system. It resolves an authenticated credential to a tenant, checks model permission and atomic quota admission, chooses a healthy weighted deployment target, proxies compatible requests, and writes metadata-only usage records. The local stack executes this design through two CPU ONNX Runtime targets; shared pools maximize batching/utilization, while a dedicated pool contract exists for predictable isolation at higher cost.
 
@@ -55,3 +55,14 @@ device advertises no local model and forwards only public requests to the existi
 gateway. Restricted, `LOCAL_ONLY`, and `PRIVACY_FIRST` requests without a local model
 stop at the device. Artifact distribution and desired-state rollout remain outside the
 narrow adapter.
+
+## Bounded sandboxed-agent execution
+
+`sandbox-control` is a separate FastAPI service with a durable SQLite task store. It
+accepts only a signed, short-lived delegated agent identity and two fixed task kinds:
+fixture patching and a containment probe. The trusted controller has Docker API access
+only to create labelled child containers. Those children get a Docker-managed workspace
+volume, clone the fixture repository from their immutable image, run as UID 65532 with
+read-only root filesystem, dropped capabilities, no-new-privileges, CPU/memory/PID
+bounds, no Docker socket, no host bind mounts, and no network. The controller collects
+only patch hash/hardening metadata and removes every child container and workspace.

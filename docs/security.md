@@ -33,3 +33,13 @@ remediation APIs. The device agent validates the original signed tenant token be
 inference and evaluates privacy before any central fallback. Its control-plane SQLite
 registry stores device/profile/model/network/telemetry metadata—not inference inputs
 or outputs. Profiles are simulation inputs, not attestation or physical hardware proof.
+
+The sandbox controller is explicitly a trusted local control component: it alone has
+Docker API access to create project-labelled child containers. A signed delegated agent
+has only `agent.sandbox` and `sandbox.execute`, a named human delegator, and a
+five-minute expiry. It can select only a named task, never an arbitrary command/image/
+network/mount. Every child uses non-root UID 65532, read-only root filesystem, dropped
+Linux capabilities, no-new-privileges, CPU/memory/PID limits, `network=none`, no
+Docker socket, and no host bind mount. Task records retain metadata and patch hashes,
+not workspace contents. This does not claim gVisor, Firecracker, or Kubernetes sandbox
+execution.

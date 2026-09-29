@@ -18,6 +18,18 @@ if [[ -n "$(docker ps -aq --filter "label=com.docker.compose.project=${project_n
   echo 'Project Compose resources still exist after cleanup.' >&2
   exit 1
 fi
+image_ids=$(docker image ls -q --filter "label=com.bepoadewale.project=${project_name}")
+if [[ -n "${image_ids}" ]]; then
+  docker image rm -f ${image_ids}
+fi
+volume_ids=$(docker volume ls -q --filter "label=com.bepoadewale.project=${project_name}")
+if [[ -n "${volume_ids}" ]]; then
+  docker volume rm -f ${volume_ids}
+fi
+if [[ -n "$(docker ps -aq --filter "label=com.bepoadewale.project=${project_name}")" ]] || [[ -n "$(docker volume ls -q --filter "label=com.bepoadewale.project=${project_name}")" ]]; then
+  echo 'Project sandbox resources still exist after cleanup.' >&2
+  exit 1
+fi
 rm -rf "${repo_root}/.venv" "${repo_root}/models" "${repo_root}/.local"
 for path in .venv models .local; do
   if [[ -e "${repo_root}/${path}" ]]; then

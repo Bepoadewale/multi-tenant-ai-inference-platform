@@ -22,6 +22,9 @@ demonstration. Preserve the existing core while working through them.
   agent denial, restart recovery, and metrics.
 - [x] Narrow edge adapter: signed device registration, durable inventory, independent
   local ONNX, public-only central fallback, privacy/LOCAL_ONLY denial, and restart recovery.
+- [x] Bounded sandboxed agent execution: short-lived delegated identity, fixed task
+  contract, real hardened disposable Docker child, patch/containment proof, durable
+  audit, cleanup, and restart recovery.
 - [ ] Integrated clean-room success and failure demonstration with safe teardown.
 
 # P0 — Required for Portfolio Claim

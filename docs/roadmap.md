@@ -12,7 +12,10 @@ are additive vertical slices, each requiring real local execution and a failure 
 - [x] F5 delegated agent tools and developer self-service requests.
 - [x] F6 narrow edge adapter: signed device registration, durable local inventory,
   compatible device local ONNX, constrained-device public fallback, and privacy/LOCAL_ONLY denial. Hardware profiles are simulated; OTA/fleet rollout remains separate.
-- [ ] F7 integrated clean-room success and rollback demonstration.
+- [x] F7 bounded sandboxed agent execution: short-lived delegated identity, named task
+  contract, real hardened disposable Docker child, patch/containment proof, durable
+  metadata-only audit, cleanup, and restart recovery.
+- [ ] F8 integrated clean-room success and rollback demonstration.
 
 - [x] M1 gateway, deterministic mock test backend, real CPU ONNX Runtime local backend, OpenAI-compatible chat/streaming, and tests.
 - [x] M2 authenticated fixture identity, tenant authorization, quotas, metering.

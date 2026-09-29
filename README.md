@@ -12,7 +12,8 @@ It answers a practical platform question: **how can multiple teams use shared mo
 
 The proven inference core stays intact. The platform adds model release control,
 simulated-capacity policy, SLO/FinOps evidence, governed remediation, secure agent
-tools, developer self-service, and a narrow edge-routing adapter as **separate
+tools, developer self-service, a narrow edge-routing adapter, and bounded sandboxed
+agent execution as **separate
 validated vertical slices**—not as a rewrite or a merge of nine codebases.
 
 The current integrated demonstration is:
@@ -53,6 +54,11 @@ constrained device uses the central gateway only for public traffic. Restricted 
 device boundary. Hardware labels are simulated; the processes, signing, local ONNX,
 routing, and restart recovery are real local behavior.
 
+The sandbox slice is a bounded task contract, not unrestricted agent shell access. A
+short-lived delegated agent can request only named fixture tasks. A trusted controller
+creates a disposable child container that is non-root, read-only, capability-dropped,
+network-isolated, resource-limited, and denied both Docker socket and host bind mounts.
+
 See [flagship direction](docs/flagship-direction.md) for boundaries and the staged
 integration model. Commercial strategy is intentionally not maintained in this public
 repository.
@@ -76,6 +82,9 @@ repository.
 - Two independent edge-device identities register and heartbeat into a durable local
   inventory. A compatible profile executes local ONNX; a constrained profile has no
   local model and may fall back only for public traffic. Hardware is simulated.
+- A delegated sandbox agent can request only named fixture tasks. It cannot supply an
+  arbitrary command, select an image/network, mount a host path, access a child Docker
+  socket, approve a release, or invoke remediation execution.
 - Explicit failures are returned for quota exhaustion, overload, an unavailable backend, and a bounded backend timeout. Requests are not replayed after a backend error.
 
 ```mermaid
@@ -110,6 +119,7 @@ flowchart LR
 | Delegated agent-tool governance | ✅ EXECUTED LOCALLY | A short-lived Ed25519 agent identity receives filtered discovery, same-tenant metadata evidence, cross-tenant denial, plan-only canary rollback authority, durable audit, and no approval/execution privilege. This is an HTTP facade, not an MCP protocol claim. |
 | Developer self-service golden path | ✅ EXECUTED LOCALLY | Separate self-service API creates a durable tenant-bound model-integration profile and token-free starter artifacts. The generated client executes a real ONNX request; unauthorized model, tenant, and agent attempts are denied. |
 | Narrow edge routing adapter | ✅ EXECUTED LOCALLY | Two independent edge-agent containers register signed device identities with SQLite control state. Compatible requests use local CPU ONNX; constrained-device public requests use the gateway; restricted and `LOCAL_ONLY` fallback is denied; inventory survives control restart. |
+| Bounded sandboxed agent execution | ✅ EXECUTED LOCALLY | A short-lived signed agent invokes only named fixture tasks. A trusted controller creates disposable hardened Docker children; real fixture tests/patching and an outbound-network probe run, arbitrary command input is rejected, child resources are removed, and SQLite audit survives restart. |
 | Usage + restart recovery | ✅ EXECUTED LOCALLY | Metadata-only Redis usage survives a gateway restart. |
 | Metrics, traces, dashboards | ✅ EXECUTED LOCALLY | Prometheus, OTel Collector, Tempo, and Grafana receive generated local traffic. |
 | Physical GPU/vLLM/DCGM/Kubernetes | 📐 ARCHITECTURE / CONTRACT ONLY | Simulated capacity is not physical accelerator scheduling; no GPU or cloud execution is claimed. |
@@ -134,6 +144,7 @@ make demo-remediation # failed canary → incident → independent approval → 
 make demo-agent-tools # filtered agent tools → tenant evidence → denied cross-tenant read → plan-only rollback → human approval
 make demo-self-service # signed developer → durable integration profile → generated token-free client → real ONNX request
 make demo-edge-adapter # registered local device ONNX → constrained public fallback → privacy/LOCAL_ONLY denial → durable inventory restart
+make demo-sandboxed-agent # delegated agent → hardened disposable task → patch + blocked egress probe → cleanup + audit restart
 make demo-metering       # privacy-safe durable usage
 make demo-observability  # Prometheus + Tempo evidence
 make demo-failure        # unavailable backend → 502
@@ -143,7 +154,7 @@ make verify
 make clean-local
 ```
 
-The local stack publishes gateways on `:8081` and `:8082`, release control on `:8083`, remediation control on `:8084`, delegated agent tools on `:8085`, developer self-service on `:8086`, edge control on `:8087`, edge devices on `:8088` and `:8089`, MLflow on `:15010`, Prometheus on `:9090`, Tempo on `:3200`, and Grafana on `:3002`. `make clean-local` removes only this repository's Compose resources, locally built images, generated artifacts, and local state.
+The local stack publishes gateways on `:8081` and `:8082`, release control on `:8083`, remediation control on `:8084`, delegated agent tools on `:8085`, developer self-service on `:8086`, edge control on `:8087`, edge devices on `:8088` and `:8089`, sandbox control on `:8090`, MLflow on `:15010`, Prometheus on `:9090`, Tempo on `:3200`, and Grafana on `:3002`. `make clean-local` removes only this repository's Compose resources, locally built images, generated artifacts, and local state.
 
 ## Security boundary
 
