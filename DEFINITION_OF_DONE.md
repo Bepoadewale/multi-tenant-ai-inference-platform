@@ -22,8 +22,12 @@ evidence and the cross-slice demonstration must pass clean-room validation.
   discovery, same-tenant metadata evidence, plan-only canary rollback preparation,
   independent approval/execution, durable hashed audit, cross-tenant denial, and
   restart recovery are executed locally. This facade does not claim MCP protocol execution.
-- [ ] Developer self-service and optional edge interfaces remain narrow, independently
-  documented and honest about unexecuted adapters.
+- [x] Developer self-service is a narrow, independently executed contract: signed
+  human developer identity, tenant/model authorization, durable idempotent profile,
+  token-free starter artifacts, real generated-client ONNX request, cross-tenant/model/
+  agent denials, restart recovery, and Prometheus evidence.
+- [ ] Optional edge interface remains narrow, independently documented, and honest
+  about unexecuted adapters.
 - [ ] Integrated clean-room success and rollback demonstration.
 
 - [x] CPU-capable real model runtime returns output through the OpenAI-compatible API; streaming is exercised if claimed.

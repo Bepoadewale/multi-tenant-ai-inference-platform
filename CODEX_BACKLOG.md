@@ -17,7 +17,10 @@ demonstration. Preserve the existing core while working through them.
 - [x] Operational evidence: correlate request, release, latency/SLO and estimated cost.
 - [x] Governed remediation: incident evidence, bounded approved action and verification.
 - [x] Secure agent governance: delegated platform-tool access without privilege amplification.
-- [ ] Developer self-service and optional edge adapters through narrow contracts.
+- [x] Developer self-service: durable tenant/model-bound integration profiles,
+  token-free starter artifacts, generated-client inference, idempotency, isolation,
+  agent denial, restart recovery, and metrics.
+- [ ] Optional edge adapter through a narrow contract.
 - [ ] Integrated clean-room success and failure demonstration with safe teardown.
 
 # P0 — Required for Portfolio Claim

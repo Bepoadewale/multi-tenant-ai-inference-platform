@@ -24,6 +24,7 @@ wait_for "MLflow readiness" curl -fsS --connect-timeout 2 --max-time 5 http://lo
 wait_for "release-control readiness" curl -fsS --connect-timeout 2 --max-time 5 http://localhost:8083/healthz
 wait_for "remediation-control readiness" curl -fsS --connect-timeout 2 --max-time 5 http://localhost:8084/healthz
 wait_for "agent-tools readiness" curl -fsS --connect-timeout 2 --max-time 5 http://localhost:8085/healthz
+wait_for "developer-self-service readiness" curl -fsS --connect-timeout 2 --max-time 5 http://localhost:8086/healthz
 curl -fsS --connect-timeout 2 --max-time 5 "http://localhost:15010/api/2.0/mlflow/registered-models/get?name=local-tiny-intent-classifier" | jq -e '.registered_model.name == "local-tiny-intent-classifier"' >/dev/null
 
 for port in 8081 8082; do
@@ -32,4 +33,4 @@ for port in 8081 8082; do
   wait_for "gateway ${port} signed identity" curl -fsS --connect-timeout 2 --max-time 5 "http://localhost:${port}/v1/models" -H "Authorization: Bearer ${search_token}"
 done
 curl -fsS --connect-timeout 2 --max-time 5 http://localhost:3002/api/health | jq -e '.database == "ok"' >/dev/null
-echo 'Smoke passed: MLflow registry, release/remediation controls, delegated agent tools, two gateways, CPU ONNX targets, Prometheus, Tempo, and Grafana are healthy.'
+echo 'Smoke passed: MLflow registry, release/remediation controls, delegated agent tools, developer self-service, two gateways, CPU ONNX targets, Prometheus, Tempo, and Grafana are healthy.'

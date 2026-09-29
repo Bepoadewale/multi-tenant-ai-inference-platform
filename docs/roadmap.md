@@ -8,9 +8,10 @@ are additive vertical slices, each requiring real local execution and a failure 
 - [x] F1 MLflow-backed registry, evaluation, verified canary, approval and rollback.
 - [x] F2 simulated-GPU capacity/admission policy: Redis-shared allocation, bounded queueing, tenant rejection, and CPU fallback; no physical GPU claims.
 - [x] F3 request/release/SLO/estimated-cost correlation.
-- [ ] F4 governed incident/remediation and verification.
-- [ ] F5 delegated agent tools, self-service requests and optional edge adapter.
-- [ ] F6 integrated clean-room success and rollback demonstration.
+- [x] F4 governed incident/remediation and verification.
+- [x] F5 delegated agent tools and developer self-service requests.
+- [ ] F6 optional edge adapter.
+- [ ] F7 integrated clean-room success and rollback demonstration.
 
 - [x] M1 gateway, deterministic mock test backend, real CPU ONNX Runtime local backend, OpenAI-compatible chat/streaming, and tests.
 - [x] M2 authenticated fixture identity, tenant authorization, quotas, metering.
