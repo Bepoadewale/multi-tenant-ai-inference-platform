@@ -40,7 +40,7 @@ jobs:
       - if: failure()
         run: docker compose ps -a && docker compose logs --no-color
       - run: make smoke
-      - run: make demo-local && make demo-overload && make demo-routing && make demo-metering && make demo-observability && make demo-failure && make demo-timeout && make demo-recovery && make demo-model-registry && make demo-release-control && make demo-capacity && make demo-operational-evidence && make demo-agent-tools && make demo-remediation
+      - run: make demo-local && make demo-overload && make demo-routing && make demo-metering && make demo-observability && make demo-failure && make demo-timeout && make demo-recovery && make demo-model-registry && make demo-release-control && make demo-capacity && make demo-operational-evidence && make demo-self-service && make demo-agent-tools && make demo-remediation
       - run: make verify
       - if: always()
         run: make clean-local
