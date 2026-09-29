@@ -7,10 +7,18 @@ docker info >/dev/null 2>&1 || { echo 'Docker Desktop is not running.' >&2; exit
 mkdir -p "${repo_root}/.local/mlflow" "${repo_root}/.local/release" "${repo_root}/.local/remediation" "${repo_root}/.local/agent-tools" "${repo_root}/.local/self-service" "${repo_root}/.local/edge" "${repo_root}/.local/sandbox"
 lock_dir="${repo_root}/.local/.lifecycle-lock"
 if ! mkdir "${lock_dir}" 2>/dev/null; then
-  echo 'Another project lifecycle command is already running; wait for it to finish.' >&2
-  exit 1
+  lock_pid=$(cat "${lock_dir}/pid" 2>/dev/null || true)
+  if [[ -z "${lock_pid}" ]] || ! kill -0 "${lock_pid}" 2>/dev/null; then
+    rm -f "${lock_dir}/pid"
+    rmdir "${lock_dir}" 2>/dev/null || true
+  fi
+  if ! mkdir "${lock_dir}" 2>/dev/null; then
+    echo 'Another project lifecycle command is already running; wait for it to finish.' >&2
+    exit 1
+  fi
 fi
-trap 'rmdir "${lock_dir}" 2>/dev/null || true' EXIT
+printf '%s\n' "$$" > "${lock_dir}/pid"
+trap 'rm -f "${lock_dir}/pid"; rmdir "${lock_dir}" 2>/dev/null || true' EXIT
 "${repo_root}/.venv/bin/python" "${repo_root}/scripts/generate_local_identity.py"
 export LOCAL_UID="$(id -u)"
 export LOCAL_GID="$(id -g)"

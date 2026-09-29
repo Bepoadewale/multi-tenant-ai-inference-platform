@@ -6,10 +6,18 @@ project_name="multi-tenant-ai-inference-platform"
 mkdir -p "${repo_root}/.local"
 lock_dir="${repo_root}/.local/.lifecycle-lock"
 if ! mkdir "${lock_dir}" 2>/dev/null; then
-  echo 'Another project lifecycle command is already running; wait for it to finish.' >&2
-  exit 1
+  lock_pid=$(cat "${lock_dir}/pid" 2>/dev/null || true)
+  if [[ -z "${lock_pid}" ]] || ! kill -0 "${lock_pid}" 2>/dev/null; then
+    rm -f "${lock_dir}/pid"
+    rmdir "${lock_dir}" 2>/dev/null || true
+  fi
+  if ! mkdir "${lock_dir}" 2>/dev/null; then
+    echo 'Another project lifecycle command is already running; wait for it to finish.' >&2
+    exit 1
+  fi
 fi
-trap 'rmdir "${lock_dir}" 2>/dev/null || true' EXIT
+printf '%s\n' "$$" > "${lock_dir}/pid"
+trap 'rm -f "${lock_dir}/pid"; rmdir "${lock_dir}" 2>/dev/null || true' EXIT
 dead_ids=$(docker ps -aq --filter "label=com.docker.compose.project=${project_name}" --filter status=dead)
 if [[ -n "${dead_ids}" ]]; then
   echo 'Docker Desktop has stale dead records for this project. Restart Docker Desktop; if they remain, use its Troubleshoot cleanup before retrying project cleanup.' >&2

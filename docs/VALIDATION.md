@@ -527,5 +527,6 @@ All commands passed. The second bootstrap returned real ONNX output and an expli
 
 `bootstrap-local` and `clean-local` use a project-local lifecycle lock. A second
 bootstrap or cleanup fails clearly while the first is active, rather than allowing
-overlapping Compose operations to leave stale project state. The lock does not affect
-other Docker Compose projects.
+overlapping Compose operations to leave stale project state. The lock records its
+owner PID; an interrupted owner leaves a stale lock that the next project lifecycle
+command safely reclaims. The lock does not affect other Docker Compose projects.
