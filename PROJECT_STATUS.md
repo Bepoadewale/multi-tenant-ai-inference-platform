@@ -4,8 +4,8 @@
 
 PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE for the multi-tenant inference core.
 
-The repository is now the public flagship. Flagship integrations are planned work and
-must not be represented as executed until they have their own local evidence.
+The repository is now the public flagship. Flagship integrations must not be represented
+as executed until they have their own local evidence.
 
 ## Maturity Model
 
@@ -35,6 +35,11 @@ must not be represented as executed until they have their own local evidence.
   filters discovery to same-tenant evidence and canary-plan preparation, denies
   cross-tenant evidence, and persists metadata-only hashed tool-call audit records.
   The agent cannot approve or execute the resulting remediation plan.
+- A separate developer-self-service service validates a signed human developer identity,
+  persists a tenant/model-bound integration profile in SQLite, returns token-free
+  starter artifacts, and proves the generated client executes real ONNX inference.
+  Unassigned models, cross-tenant profile reads, and delegated-agent creation attempts
+  are denied; the profile survives a service restart.
 - Clean-room workflow passed twice: bootstrap, smoke, cumulative flagship demos,
   validation, project-scoped cleanup, then a second bootstrap/demo.
 
@@ -56,13 +61,13 @@ must not be represented as executed until they have their own local evidence.
 
 ## Current P0 Objective
 
-Add developer self-service through a narrow, validated golden-path contract without
-turning this repository into a portal rewrite.
+Add the optional edge-fleet adapter through a narrow, validated contract without
+turning this repository into an edge-platform rewrite.
 
 ## Completion Blockers
 
 - None for the existing inference-core completion gate.
-- Developer-self-service and optional edge slices are not yet executed here.
+- The optional edge slice and a final all-slice clean-room run remain.
 
 ## Explicitly Unexecuted Production Adapters
 
@@ -70,6 +75,14 @@ turning this repository into a portal rewrite.
 
 ## Last Validation
 
+- Developer self-service slice: local Compose bootstrap → smoke →
+  `make demo-self-service` passed on 2026-09-29. The live demo created a durable,
+  idempotent `team-search` profile, executed its generated token-free client against
+  real ONNX inference, denied an unassigned model, cross-tenant read, and delegated
+  agent creation, exposed a Prometheus profile metric, and recovered the profile after
+  a service restart. Two clean cycles passed: each began with `make clean-local`, then
+  `make install`, bootstrap, smoke, demo, Ruff, 40 pytest tests, Compose config, and
+  safe cleanup; the second started only after the first cleanup.
 - Delegated-agent slice: two clean bootstrap → smoke → `make demo-agent-tools` →
   teardown cycles passed on 2026-09-28. The live demo exercised filtered discovery,
   same-tenant evidence, cross-tenant denial, plan-only authority, independent
@@ -89,15 +102,15 @@ turning this repository into a portal rewrite.
 
 ## Last Updated
 
-2026-09-28, governed-remediation slice validated on
-`codex/flagship-agent-tool-governance`; this slice's second clean-room cycle and final
-GitHub CI evidence will be recorded before review.
+2026-09-29, developer-self-service slice validated twice locally on
+`codex/flagship-developer-self-service`; GitHub CI evidence will be recorded before
+review.
 
 ## Clean-Room Reproducibility
 
 **Status: VALIDATED**
 
 Historical core and operational-evidence validation remains recorded below. The
-governed-remediation slice completed two clean-room cycles on 2026-09-28. Both ended
-with no project Compose resources, `.local`, or `.venv`; the second bootstrap ran after
-the first cleanup.
+developer-self-service slice completed two clean-room cycles on 2026-09-29. Both ended
+with no project Compose resources, `.local`, `.venv`, or generated models; the second
+bootstrap ran after the first cleanup.

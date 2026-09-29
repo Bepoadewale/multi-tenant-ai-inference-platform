@@ -31,7 +31,7 @@ repositories into one monolith.
 | AI SRE Auto-Remediation | governed incident/remediation | evidence, plan, approval, bounded action |
 | Secure MCP Gateway | secure agent platform-tool access | delegated tool invocation |
 | Hybrid AI Edge Platform | optional edge artifact/routing extension | fleet/artifact and local-cloud routing contract |
-| AI Developer Platform | self-service/golden paths | service/request contract |
+| AI Developer Platform | self-service/golden paths | durable tenant/model-bound integration profile and token-free starter contract |
 | Secure Agent Runtime | bounded agent execution | capability-scoped task contract |
 
 ## First integrated demonstration

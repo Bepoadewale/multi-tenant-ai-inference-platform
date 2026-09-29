@@ -10,10 +10,10 @@ It answers a practical platform question: **how can multiple teams use shared mo
 
 ## Flagship direction
 
-The proven inference core stays intact. The platform will add model release control,
+The proven inference core stays intact. The platform adds model release control,
 simulated-capacity policy, SLO/FinOps evidence, governed remediation, secure agent
-tools, optional edge operations and developer self-service as **separate validated
-vertical slices**—not as a rewrite or a merge of nine codebases.
+tools, and developer self-service as **separate validated vertical slices**—not as a
+rewrite or a merge of nine codebases. Optional edge operations remain future work.
 
 The current integrated demonstration is:
 
@@ -38,6 +38,13 @@ identity can discover only metadata evidence and canary-plan preparation for its
 tenant; it cannot approve, execute, promote, change routing, or obtain infrastructure
 credentials.
 
+The developer-self-service slice adds the narrow contract that a developer portal or
+golden-path template would call. A signed human developer can create a durable,
+tenant-bound inference integration profile for an assigned model. The profile returns
+token-free starter files and the approved API/model contract; it does not return a
+tenant header, runtime/Redis credential, rollout control, or platform-admin authority.
+Delegated agents cannot create these profiles.
+
 See [flagship direction](docs/flagship-direction.md) for boundaries and the staged
 integration model. Commercial strategy is intentionally not maintained in this public
 repository.
@@ -54,6 +61,10 @@ repository.
 - A remediation controller can act only on an observed failed `chat-default` **canary** request. Its sole allowlisted action is restoring the previously verified stable ONNX target; it cannot run shell commands, alter arbitrary routing, call Kubernetes, or access cloud credentials.
 - The remediation requester cannot approve its own plan. Execution re-reads Redis rollout context and the SQLite release state, rejects a stale plan, applies cooldown/action-budget guards, verifies stable inference, and persists the incident/plan/audit timeline.
 - A delegated agent can discover only `get_request_evidence` and `plan_canary_rollback` when its short-lived token includes the matching scopes. Tool discovery omits approval and execution; evidence is tenant-bound and metadata-only; every call is durably audited by an argument hash rather than raw tool arguments.
+- A human developer with `developer.self_service` can generate a tenant-bound
+  integration profile only for an assigned alias. The profile is idempotent and
+  durable, produces token-free client/config/documentation files, and can be read only
+  by the same tenant. It cannot be created by a delegated agent.
 - Explicit failures are returned for quota exhaustion, overload, an unavailable backend, and a bounded backend timeout. Requests are not replayed after a backend error.
 
 ```mermaid
@@ -86,6 +97,7 @@ flowchart LR
 | Request operational evidence | ✅ EXECUTED LOCALLY | A real canary request correlates a Tempo trace ID, release plan, target version, local request SLO, and Decimal-calculated fixture token estimate; an actual backend timeout persists as an SLO violation. |
 | Governed canary remediation | ✅ EXECUTED LOCALLY | A failed candidate canary request creates a durable SQLite incident; separate approval, exact-state protection, bounded stable rollback, restart recovery, audit, Prometheus metrics, and live ONNX verification run locally. |
 | Delegated agent-tool governance | ✅ EXECUTED LOCALLY | A short-lived Ed25519 agent identity receives filtered discovery, same-tenant metadata evidence, cross-tenant denial, plan-only canary rollback authority, durable audit, and no approval/execution privilege. This is an HTTP facade, not an MCP protocol claim. |
+| Developer self-service golden path | ✅ EXECUTED LOCALLY | Separate self-service API creates a durable tenant-bound model-integration profile and token-free starter artifacts. The generated client executes a real ONNX request; unauthorized model, tenant, and agent attempts are denied. |
 | Usage + restart recovery | ✅ EXECUTED LOCALLY | Metadata-only Redis usage survives a gateway restart. |
 | Metrics, traces, dashboards | ✅ EXECUTED LOCALLY | Prometheus, OTel Collector, Tempo, and Grafana receive generated local traffic. |
 | Physical GPU/vLLM/DCGM/Kubernetes | 📐 ARCHITECTURE / CONTRACT ONLY | Simulated capacity is not physical accelerator scheduling; no GPU or cloud execution is claimed. |
@@ -108,6 +120,7 @@ make demo-capacity       # simulated accelerator admission, queue, reject, and C
 make demo-operational-evidence # canary request → Tempo trace/release/SLO/estimated cost + timeout SLO violation
 make demo-remediation # failed canary → incident → independent approval → stable rollback → verified recovery
 make demo-agent-tools # filtered agent tools → tenant evidence → denied cross-tenant read → plan-only rollback → human approval
+make demo-self-service # signed developer → durable integration profile → generated token-free client → real ONNX request
 make demo-metering       # privacy-safe durable usage
 make demo-observability  # Prometheus + Tempo evidence
 make demo-failure        # unavailable backend → 502
@@ -117,7 +130,7 @@ make verify
 make clean-local
 ```
 
-The local stack publishes gateways on `:8081` and `:8082`, release control on `:8083`, remediation control on `:8084`, delegated agent tools on `:8085`, MLflow on `:15010`, Prometheus on `:9090`, Tempo on `:3200`, and Grafana on `:3002`. `make clean-local` removes only this repository's Compose containers, network, volumes, virtual environment, generated ONNX artifacts, MLflow/release/remediation/agent-tool state, and generated identity fixture.
+The local stack publishes gateways on `:8081` and `:8082`, release control on `:8083`, remediation control on `:8084`, delegated agent tools on `:8085`, developer self-service on `:8086`, MLflow on `:15010`, Prometheus on `:9090`, Tempo on `:3200`, and Grafana on `:3002`. `make clean-local` removes only this repository's Compose containers, network, volumes, virtual environment, generated ONNX artifacts, MLflow/release/remediation/agent-tool/self-service state, and generated identity fixture.
 
 ## Security boundary
 
@@ -158,6 +171,18 @@ immutable canary rollback plan from a recorded failed request. A distinct
 approve and execute that plan. `tools/list` does not reveal privileged operations.
 The persistent tool audit stores actor, tenant, tool, timestamp and SHA-256 argument
 hash—never raw prompts, responses, tokens or arguments.
+
+## Developer self-service boundary
+
+`developer-self-service` is not a portal rewrite and is not a source of privileged
+credentials. It is the small service/request contract an Internal Developer Platform
+can call. A signed non-agent principal with `developer.self_service` creates a profile
+for only its server-derived tenant and assigned model alias. The response includes an
+idempotent, SQLite-persisted integration record plus starter `README`, configuration,
+and Python client files. Those artifacts require `INFERENCE_API_TOKEN` only at runtime;
+they contain no bearer token, tenant override header, Redis/runtime access, or rollout
+authority. Reads are tenant-isolated, unassigned aliases are denied, and an agent
+identity is denied before profile creation.
 
 ## Documentation
 

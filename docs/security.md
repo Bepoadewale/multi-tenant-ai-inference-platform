@@ -16,3 +16,12 @@ the requester cannot self-approve. The exact release plan and weights are precon
 checked immediately before execution. Stale state is rejected, while cooldown and
 action-budget guards prevent retry loops. The controller has no generic shell,
 Kubernetes, Docker, cloud, registry, or tenant-inference credential.
+
+The developer-self-service service is also deliberately bounded. It validates the
+same signed JWT issuer/audience/expiry/signature controls as the gateway, derives the
+tenant server-side, requires `developer.self_service`, and rejects delegated agent
+principals. It accepts only tenant-assigned aliases, isolates profile reads by tenant,
+and makes repeated calls safe through tenant-scoped idempotency fingerprints. Generated
+starter files contain no bearer token or tenant override header; the local demo supplies
+an already-issued fixture token only at client execution time. Production identity/token
+issuance remains an external identity-provider adapter.

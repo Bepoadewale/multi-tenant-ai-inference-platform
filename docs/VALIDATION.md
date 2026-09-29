@@ -2,6 +2,64 @@
 
 Validation is local-first. Record hardware, runtime, exact command and result for any benchmark; never infer GPU behavior from the deterministic CPU fixture or fabricate validation.
 
+## Developer self-service golden-path slice
+
+**Date:** 2026-09-29
+
+**Source revisions:** `3f26767` (initial implementation) plus the bootstrap/configuration
+refresh follow-up on `codex/flagship-developer-self-service`.
+
+**Environment:** macOS, Docker Desktop, Docker Compose, Python 3.12. No cloud
+account, GPU, paid API, Kubernetes cluster, or external developer portal.
+
+The slice adds `developer-self-service`, a separate FastAPI process and SQLite store.
+It is intentionally the narrow request contract a portal or golden-path template would
+call, rather than a Backstage replacement. `make demo-self-service` proves all of the
+following against the live local stack:
+
+- a signed human `developer.self_service` identity creates a durable, tenant-bound
+  `team-search` profile for its assigned `chat-default` alias;
+- the returned generated Python client and configuration contain no bearer token,
+  tenant override header, Redis credential, runtime credential, or rollout authority;
+- supplying the fixture token only at runtime lets that generated client make a real
+  request through the gateway to a CPU ONNX target;
+- the same tenant/idempotency key replays the same profile, whereas a changed request
+  is conflict-protected;
+- an unassigned model is denied, another tenant cannot read the profile, and a
+  delegated-agent identity cannot create it;
+- the profile survives a `developer-self-service` restart; and
+- Prometheus observes `inference_gateway_developer_integration_profiles_total` before
+  the intentional process restart resets process-local counters.
+
+### Clean-room cycle 1
+
+Starting after `make clean-local`, the following passed:
+
+```console
+make install
+make bootstrap-local
+make smoke
+make demo-self-service
+make lint
+make test
+docker compose config --quiet
+make clean-local
+```
+
+`make test` passed 40 tests; Ruff and Compose configuration passed. Cleanup confirmed
+there were no project-labeled containers and no `.local`, `.venv`, or generated model
+directory remaining.
+
+### Clean-room cycle 2
+
+After cycle 1 cleanup, the same fresh install/bootstrap/smoke/self-service demo and
+static validation sequence passed again. The second generated profile reached real ONNX
+inference, exercised the same model/tenant/agent denials and restart recovery, and the
+final project-scoped cleanup again left no project containers, `.local`, `.venv`, or
+generated models. This validates the slice twice from clean project state; it does not
+claim a real Backstage deployment, enterprise identity provider, Kubernetes deployment,
+GPU runtime, or cloud-hosted model.
+
 ## Flagship integration rule
 
 The evidence below validates the preserved inference core plus the executed model

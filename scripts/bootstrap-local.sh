@@ -8,7 +8,9 @@ mkdir -p "${repo_root}/.local/mlflow" "${repo_root}/.local/release" "${repo_root
 "${repo_root}/.venv/bin/python" "${repo_root}/scripts/generate_local_identity.py"
 export LOCAL_UID="$(id -u)"
 export LOCAL_GID="$(id -g)"
-# Recreate project services so mounted dependency configuration (for example new
-# Prometheus scrape targets) cannot be silently inherited from an older local stack.
-docker compose -f "${repo_root}/docker-compose.yml" up --build --force-recreate --wait --wait-timeout 240
+# Refresh only this project's services so mounted dependency configuration (for example
+# new Prometheus scrape targets) cannot be silently inherited from an older local stack.
+# A project-scoped down avoids Compose's parallel --force-recreate name collision.
+docker compose -f "${repo_root}/docker-compose.yml" down --remove-orphans >/dev/null
+docker compose -f "${repo_root}/docker-compose.yml" up --build --wait --wait-timeout 240
 MLFLOW_TRACKING_URI=http://localhost:15010 "${repo_root}/.venv/bin/python" "${repo_root}/scripts/register_mlflow_models.py"
