@@ -10,7 +10,7 @@ if ! docker info >/dev/null 2>&1; then
 fi
 
 expected_services=(
-  gateway-1 gateway-2 runtime-v1 runtime-v2 redis otel-collector tempo prometheus grafana
+  gateway-1 gateway-2 runtime-v1 runtime-v2 redis otel-collector tempo prometheus grafana operator-console
 )
 
 for service in "${expected_services[@]}"; do
@@ -39,6 +39,7 @@ probe "gateway-2" "http://localhost:8082/healthz"
 probe "Prometheus" "http://localhost:9090/-/ready"
 probe "Tempo" "http://localhost:3200/ready"
 probe "Grafana" "http://localhost:3002/api/health"
+probe "Operator console" "http://localhost:8091/healthz"
 
 request_count=$(curl -fsS --get --data-urlencode 'query=sum(inference_gateway_requests_total)' \
   'http://localhost:9090/api/v1/query' | jq -r '.data.result[0].value[1] // "0"')

@@ -31,5 +31,6 @@ run_demo demo-agent-tools
 run_demo demo-remediation
 run_demo demo-edge-adapter
 run_demo demo-sandboxed-agent
+run_demo demo-operator-console
 
 echo 'Flagship demo passed: authenticated tenant inference, shared admission and failure paths, model release/capacity/evidence/remediation, delegated tools, developer self-service, edge routing, and bounded sandboxed execution all completed against one local stack.'

@@ -93,6 +93,11 @@ class ReleaseStore:
             raise HTTPException(404, "unknown release plan")
         return ReleasePlan(*row)
 
+    def list(self) -> list[ReleasePlan]:
+        with self._connect() as db:
+            rows = db.execute("SELECT * FROM release_plans ORDER BY created_at DESC").fetchall()
+        return [ReleasePlan(*row) for row in rows]
+
     def approve(self, plan_id: str, approver: str) -> ReleasePlan:
         plan = self.get(plan_id)
         if plan.requester == approver:

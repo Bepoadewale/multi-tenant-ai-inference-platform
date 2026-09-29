@@ -320,6 +320,42 @@ services:
       timeout: 3s
       retries: 30
 
+  operator-console:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    command: ["uvicorn", "inference_gateway.api.operator_console:app", "--host", "0.0.0.0", "--port", "8080"]
+    environment:
+      CONSOLE_TOKENS_PATH: /run/identity/tokens.json
+      GATEWAY_URL: http://gateway-1:8080
+      RELEASE_CONTROL_URL: http://release-control:8080
+      REMEDIATION_CONTROL_URL: http://remediation-control:8080
+      EDGE_CONTROL_URL: http://edge-control:8080
+      SELF_SERVICE_URL: http://developer-self-service:8080
+      AGENT_TOOLS_URL: http://agent-tools:8080
+      SANDBOX_CONTROL_URL: http://sandbox-control:8080
+      PROMETHEUS_URL: http://prometheus:9090
+      MLFLOW_URL: http://mlflow:5000
+    volumes:
+      - "./.local/identity:/run/identity:ro"
+    depends_on:
+      gateway-1: {condition: service_healthy}
+      release-control: {condition: service_healthy}
+      remediation-control: {condition: service_healthy}
+      agent-tools: {condition: service_healthy}
+      developer-self-service: {condition: service_healthy}
+      edge-control: {condition: service_healthy}
+      sandbox-control: {condition: service_healthy}
+      prometheus: {condition: service_started}
+      mlflow: {condition: service_healthy}
+    ports: ["8091:8080"]
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8080/healthz\")'"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
   gateway-1:
     build:
       context: .

@@ -83,6 +83,11 @@ def create_plan(
     )
 
 
+@app.get("/release/v1/plans")
+def list_plans(requester: str = Depends(platform_admin)):
+    return {"plans": store.list()}
+
+
 @app.get("/release/v1/plans/{plan_id}")
 def get_plan(plan_id: str, requester: str = Depends(platform_admin)):
     return store.get(plan_id)
