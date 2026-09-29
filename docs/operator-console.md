@@ -36,10 +36,33 @@ checks remain authoritative.
 - developer profile pages: tenant-bound profile metadata and token-free generated files;
 - edge pages: independent simulated device-agent inventory and explicit hardware boundary.
 
+## Guided local workflows
+
+The console is not only a status page. It provides narrowly scoped workflow controls
+that call the services which already own the relevant authorization and state machine:
+
+- **Models & releases:** choose a small canary percentage, then follow the existing
+  evaluation → independent approval → canary → promote or rollback transitions.
+- **Operations:** create only the pre-defined canary rollback plan for an eligible
+  incident, then forward independent approval and bounded execution to remediation
+  control. No arbitrary remediation, shell command, Kubernetes action, or URL can be
+  entered in the UI.
+- **Developer integrations:** create a tenant-bound, token-free starter profile. The
+  downstream self-service API still checks model assignment and persists the profile.
+- **Agents & sandbox:** view delegated permissions and invoke only the named patch or
+  containment fixture tasks; arbitrary task input remains unavailable.
+- **Edge fleet:** toggle online/offline only for the two known local fixture agents.
+  This is explicitly a simulated network input, never a physical device control.
+
+The overview has browser-session activity for operator orientation. It is not an audit
+system; durable audit remains in each owning service and is visible through the linked
+detail views.
+
 Every list row links to its scoped detail route, for example
 `#/tenants/team-search`, `#/models/chat-default`, or `#/incidents/<id>`. The console
-has no generic browser proxy, arbitrary PromQL interface, or arbitrary command/action
-form. The browser asks only for fixed, server-defined views and actions.
+has no generic browser proxy, arbitrary PromQL interface, arbitrary command/action
+form, arbitrary URL target, or browser-held platform token. The browser asks only for
+fixed, server-defined views and actions.
 
 ## Local security boundary
 

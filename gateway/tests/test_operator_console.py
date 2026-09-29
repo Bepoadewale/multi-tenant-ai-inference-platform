@@ -93,3 +93,83 @@ def test_release_store_lists_newest_plan(tmp_path):
     )
 
     assert [plan.id for plan in store.list()] == [second.id, first.id]
+
+
+def test_operator_console_forwards_only_constrained_workflow_actions(monkeypatch, tmp_path):
+    token_path = tmp_path / "tokens.json"
+    token_path.write_text('{"admin":"x","search":"x","remediation_approver":"x"}')
+    monkeypatch.setattr(operator_console, "TOKENS_PATH", token_path)
+    calls = []
+
+    async def fake_request(_client, method, url, **kwargs):
+        calls.append((method, url, kwargs))
+        return {"ok": True, "profile": {"id": "profile-1"}}
+
+    monkeypatch.setattr(operator_console, "_request", fake_request)
+    client = TestClient(operator_console.app)
+
+    created = client.post(
+        "/console/v1/developer/integrations",
+        json={"service_name": "search-api", "model": "chat-default", "owner": "search", "environment": "staging"},
+    )
+    planned = client.post("/console/v1/remediation/incidents/incident-1/plan")
+    approved = client.post("/console/v1/remediation/plans/plan-1/approve")
+    executed = client.post("/console/v1/remediation/plans/plan-1/execute")
+
+    assert created.status_code == 201
+    assert planned.status_code == 200
+    assert approved.status_code == 200
+    assert executed.status_code == 200
+    assert calls[0][1].endswith("/developer/v1/inference-integrations")
+    assert calls[0][2]["token_key"] == "search"
+    assert calls[0][2]["headers"]["Idempotency-Key"].startswith("console-profile-")
+    assert calls[1][1].endswith("/remediation/v1/incidents/incident-1/plans")
+    assert calls[1][2]["token_key"] == "admin"
+    assert calls[2][1].endswith("/remediation/v1/plans/plan-1/approve")
+    assert calls[2][2]["token_key"] == "remediation_approver"
+    assert calls[3][1].endswith("/remediation/v1/plans/plan-1/execute")
+    assert calls[3][2]["token_key"] == "admin"
+    assert client.post("/console/v1/remediation/plans/plan-1/delete").status_code == 422
+
+
+def test_operator_console_limits_edge_network_toggle_to_known_fixture(monkeypatch, tmp_path):
+    token_path = tmp_path / "tokens.json"
+    token_path.write_text("{}")
+    monkeypatch.setattr(operator_console, "TOKENS_PATH", token_path)
+    observed = []
+
+    async def fake_request(_client, method, url, **_kwargs):
+        observed.append((method, url))
+        return {"device_id": "edge-search-001", "network": "OFFLINE", "simulated": True}
+
+    monkeypatch.setattr(operator_console, "_request", fake_request)
+    client = TestClient(operator_console.app)
+
+    response = client.post("/console/v1/edge/devices/edge-search-001/network/offline")
+
+    assert response.status_code == 200
+    assert observed == [("POST", "http://edge-device-search:8080/edge/v1/network/offline")]
+    assert client.post("/console/v1/edge/devices/arbitrary/network/offline").status_code == 404
+    assert client.post("/console/v1/edge/devices/edge-search-001/network/flaky").status_code == 422
+
+
+def test_operator_console_returns_incident_plans_for_workflow(monkeypatch, tmp_path):
+    token_path = tmp_path / "tokens.json"
+    token_path.write_text('{"admin":"x"}')
+    monkeypatch.setattr(operator_console, "TOKENS_PATH", token_path)
+
+    async def fake_request(_client, _method, url, **_kwargs):
+        if url.endswith("/remediation/v1/incidents/incident-1"):
+            return {"incident": {"id": "incident-1", "state": "PLAN_PENDING_APPROVAL"}}
+        if url.endswith("/remediation/v1/incidents/incident-1/timeline"):
+            return [{"event": "PLAN_CREATED", "details": {"plan_id": "plan-1"}}]
+        if url.endswith("/remediation/v1/plans/plan-1"):
+            return {"id": "plan-1", "status": "PENDING_APPROVAL", "action": "ROLLBACK"}
+        raise AssertionError(url)
+
+    monkeypatch.setattr(operator_console, "_request", fake_request)
+    response = TestClient(operator_console.app).get("/console/v1/incidents/incident-1")
+
+    assert response.status_code == 200
+    assert response.json()["incident"]["id"] == "incident-1"
+    assert response.json()["plans"] == [{"id": "plan-1", "status": "PENDING_APPROVAL", "action": "ROLLBACK"}]

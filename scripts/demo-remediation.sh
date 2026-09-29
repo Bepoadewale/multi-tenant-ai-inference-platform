@@ -11,7 +11,6 @@ compose=(docker compose -f "${repo_root}/docker-compose.yml")
 
 admin_token=$(jq -r '.admin' "${repo_root}/.local/identity/tokens.json")
 release_approver_token=$(jq -r '.approver' "${repo_root}/.local/identity/tokens.json")
-remediation_approver_token=$(jq -r '.remediation_approver' "${repo_root}/.local/identity/tokens.json")
 search_token=$(jq -r '.search' "${repo_root}/.local/identity/tokens.json")
 plan_id=""
 
@@ -57,19 +56,20 @@ incident=$(curl -fsS --max-time 10 -X POST http://localhost:8084/remediation/v1/
   -H "Authorization: Bearer ${admin_token}" -H 'content-type: application/json' \
   -d "{\"request_id\":\"${failure_request_id}\"}")
 incident_id=$(jq -r '.incident.id' <<<"${incident}")
-remediation_plan=$(curl -fsS --max-time 10 -X POST "http://localhost:8084/remediation/v1/incidents/${incident_id}/plans" \
-  -H "Authorization: Bearer ${admin_token}")
+# Drive the known remediation workflow through the Operator Console BFF. The direct
+# self-approval denial below remains important: the BFF's independent approver is
+# deliberately different from the original requester.
+remediation_plan=$(curl -fsS --max-time 10 -X POST "http://localhost:8091/console/v1/remediation/incidents/${incident_id}/plan")
 remediation_plan_id=$(jq -r '.id' <<<"${remediation_plan}")
 
 self_status=$(curl -sS -o /tmp/remediation-self-approval.json -w '%{http_code}' --max-time 10 \
   -X POST "http://localhost:8084/remediation/v1/plans/${remediation_plan_id}/approve" \
   -H "Authorization: Bearer ${admin_token}")
 test "${self_status}" = 403
-curl -fsS --max-time 10 -X POST "http://localhost:8084/remediation/v1/plans/${remediation_plan_id}/approve" \
-  -H "Authorization: Bearer ${remediation_approver_token}" | jq -e '.status == "APPROVED"' >/dev/null
+curl -fsS --max-time 10 -X POST "http://localhost:8091/console/v1/remediation/plans/${remediation_plan_id}/approve" \
+  | jq -e '.status == "APPROVED"' >/dev/null
 
-result=$(curl -fsS --max-time 10 -X POST "http://localhost:8084/remediation/v1/plans/${remediation_plan_id}/execute" \
-  -H "Authorization: Bearer ${admin_token}")
+result=$(curl -fsS --max-time 10 -X POST "http://localhost:8091/console/v1/remediation/plans/${remediation_plan_id}/execute")
 jq -e '.verified == true and .incident.state == "RESOLVED" and .plan.status == "EXECUTED"' <<<"${result}" >/dev/null
 
 response=$(curl -fsS --max-time 10 http://localhost:8082/v1/chat/completions \

@@ -30,6 +30,15 @@
       <section class="notice"><strong>Local operator mode.</strong> This browser-to-local-backend demo exposes rendered evidence and fixed, scoped actions only. Production needs enterprise identity and backend-for-frontend token exchange.</section>
       <div id="app" aria-live="polite"></div>
     </main>
+    <dialog id="action-dialog" aria-labelledby="dialog-title">
+      <form id="canary-form" method="dialog" class="dialog-content">
+        <input id="dialog-kind" type="hidden" value="" />
+        <div class="dialog-heading"><div><p class="eyebrow">GOVERNED RELEASE</p><h2 id="dialog-title">Create canary release plan</h2></div><button id="dialog-cancel" type="button" class="icon-button" aria-label="Close">×</button></div>
+        <p id="dialog-copy" class="table-caption"></p>
+        <label>Canary traffic percentage<select name="canary_weight"><option value="5">5%</option><option value="10" selected>10%</option><option value="25">25%</option></select></label>
+        <div class="dialog-actions"><button id="dialog-cancel-secondary" type="button" class="secondary">Cancel</button><button id="dialog-confirm" type="submit" class="primary">Create plan</button></div>
+      </form>
+    </dialog>
     <div id="toast" role="status"></div>
     <script src="/assets/app.js"></script>
   </body>

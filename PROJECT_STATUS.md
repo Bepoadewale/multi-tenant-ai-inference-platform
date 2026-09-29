@@ -77,9 +77,9 @@ adapters remain explicitly outside this status.
 
 ## Current P0 Objective
 
-Keep the operator-console drill-down path reproducible while maintaining tenant
-isolation, bounded authority, and truthful evidence labels. The dedicated two-cycle
-clean-room validation completed on 2026-09-29.
+No P0 completion blocker remains. Current P1 objective: complete the operator-console
+workflow UI with clean-room evidence while maintaining tenant isolation, bounded
+authority, and truthful evidence labels.
 
 ## Completion Blockers
 
