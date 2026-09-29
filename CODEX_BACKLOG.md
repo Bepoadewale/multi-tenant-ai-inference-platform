@@ -30,7 +30,7 @@ workflow while pursuing production hardening only as P1/P3 work.
 - [ ] Operator-console drill-downs: complete two-cycle clean-room validation for linked
   tenant, model/release, incident, agent/sandbox, developer, and edge routes backed by
   scoped local BFF detail APIs, including fixed Prometheus-backed model evidence and
-  Grafana deep links.
+  Grafana deep links. Cycle 1 passed on 2026-09-29; cycle 2 remains required.
 - [x] Integrated clean-room success and failure demonstration with safe teardown.
 
 # P0 — Required for Portfolio Claim

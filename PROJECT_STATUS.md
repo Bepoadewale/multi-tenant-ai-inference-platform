@@ -77,15 +77,17 @@ adapters remain explicitly outside this status.
 
 ## Current P0 Objective
 
-Complete the two-cycle clean-room validation for the new Operator Console drill-down
-routes, including fixed Prometheus-backed model observability and its Grafana deep
-link; do not regress tenant isolation, bounded authority, or truthful evidence labels.
+Complete clean-room validation cycle 2 for the new Operator Console drill-down routes,
+including fixed Prometheus-backed model observability and its Grafana deep link; cycle
+1 passed on 2026-09-29. Do not regress tenant isolation, bounded authority, or
+truthful evidence labels.
 
 ## Completion Blockers
 
-- The newly implemented Operator Console drill-down views require dedicated two-cycle
-  clean-room evidence before their implementation PR is review-ready. The prior
-  console-foundation completion evidence remains valid only for that earlier scope.
+- The newly implemented Operator Console drill-down views have one successful
+  dedicated clean-room cycle; they require cycle 2 before their implementation PR is
+  review-ready. The prior console-foundation completion evidence remains valid only
+  for that earlier scope.
 
 ## Explicitly Unexecuted Production Adapters
 

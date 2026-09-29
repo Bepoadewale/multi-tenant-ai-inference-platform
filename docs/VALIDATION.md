@@ -530,3 +530,36 @@ bootstrap or cleanup fails clearly while the first is active, rather than allowi
 overlapping Compose operations to leave stale project state. The lock records its
 owner PID; an interrupted owner leaves a stale lock that the next project lifecycle
 command safely reclaims. The lock does not affect other Docker Compose projects.
+
+## Operator-console drill-down and model-observability clean-room cycle 1
+
+**Date:** 2026-09-29
+
+**Starting state:** Docker Desktop was reset to zero containers, images, and volumes.
+The repository's `.venv`, `.local`, and generated `models/` artifacts were removed by
+the initial project-scoped cleanup.
+
+The following documented default-path sequence completed successfully:
+
+```console
+make clean-local
+make install
+make bootstrap-local
+make smoke
+make demo-flagship
+make verify
+make clean-local
+```
+
+The clean bootstrap built the local Compose stack from no Docker images. `make smoke`
+and `make demo-flagship` completed before `make verify`; the latter completed Ruff,
+pytest, dependency audit, and Compose configuration validation. The final
+`make clean-local` ran only after those preceding commands succeeded and left zero
+project-labelled containers, volumes, or networks, with no `.venv`, `.local`, or
+generated `models/` directory. The cycle therefore exercised the fixed
+Prometheus-backed model detail endpoint and its Grafana dashboard configuration as
+part of the flagship stack.
+
+This is cycle **1 of 2** for the operator-console drill-down revision. It does not
+make the PR review-ready; the second independent clean-start/bootstrap/demo/cleanup
+cycle remains required.
