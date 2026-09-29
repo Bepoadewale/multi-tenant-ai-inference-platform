@@ -26,6 +26,7 @@ wait_for "remediation-control readiness" curl -fsS --connect-timeout 2 --max-tim
 wait_for "agent-tools readiness" curl -fsS --connect-timeout 2 --max-time 5 http://localhost:8085/healthz
 wait_for "developer-self-service readiness" curl -fsS --connect-timeout 2 --max-time 5 http://localhost:8086/healthz
 wait_for "edge control readiness" curl -fsS --connect-timeout 2 --max-time 5 http://localhost:8087/healthz
+wait_for "sandbox control readiness" curl -fsS --connect-timeout 2 --max-time 5 http://localhost:8090/healthz
 for port in 8088 8089; do
   wait_for "edge device ${port} readiness" curl -fsS --connect-timeout 2 --max-time 5 "http://localhost:${port}/healthz"
 done
@@ -38,4 +39,4 @@ for port in 8081 8082; do
 done
 curl -fsS --connect-timeout 2 --max-time 5 http://localhost:3002/api/health | jq -e '.database == "ok"' >/dev/null
 curl -fsS --connect-timeout 2 --max-time 5 http://localhost:8087/edge/v1/devices | jq -e '.devices | length == 2' >/dev/null
-echo 'Smoke passed: MLflow registry, release/remediation controls, delegated agent tools, developer self-service, edge control plus two independent edge agents, two gateways, CPU ONNX targets, Prometheus, Tempo, and Grafana are healthy.'
+echo 'Smoke passed: MLflow registry, release/remediation controls, delegated agent tools, bounded sandbox control, developer self-service, edge control plus two independent edge agents, two gateways, CPU ONNX targets, Prometheus, Tempo, and Grafana are healthy.'

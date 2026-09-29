@@ -20,3 +20,6 @@ scrape_configs:
   - job_name: edge-device-agents
     static_configs:
       - targets: [edge-device-search:8080, edge-device-constrained:8080]
+  - job_name: sandbox-control
+    static_configs:
+      - targets: [sandbox-control:8080]

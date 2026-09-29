@@ -95,6 +95,16 @@ def main() -> None:
             delegated_by="developer-search",
             scopes=["inference.read", "remediation.plan"],
         ),
+        "sandbox_agent": token(
+            private_bytes.decode(),
+            "bounded-coding-agent",
+            "team-search",
+            ["agent.sandbox"],
+            lifetime_seconds=300,
+            principal_type="agent",
+            delegated_by="developer-search",
+            scopes=["sandbox.execute"],
+        ),
         # Device identities are distinct from human, service, and delegated-agent
         # identities. They can register/heartbeat with the local edge adapter but
         # cannot administer releases or use platform operations.

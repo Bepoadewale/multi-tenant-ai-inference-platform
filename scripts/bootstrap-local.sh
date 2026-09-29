@@ -4,7 +4,7 @@ set -euo pipefail
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 command -v docker >/dev/null || { echo 'Docker Desktop is required.' >&2; exit 1; }
 docker info >/dev/null 2>&1 || { echo 'Docker Desktop is not running.' >&2; exit 1; }
-mkdir -p "${repo_root}/.local/mlflow" "${repo_root}/.local/release" "${repo_root}/.local/remediation" "${repo_root}/.local/agent-tools" "${repo_root}/.local/self-service" "${repo_root}/.local/edge"
+mkdir -p "${repo_root}/.local/mlflow" "${repo_root}/.local/release" "${repo_root}/.local/remediation" "${repo_root}/.local/agent-tools" "${repo_root}/.local/self-service" "${repo_root}/.local/edge" "${repo_root}/.local/sandbox"
 "${repo_root}/.venv/bin/python" "${repo_root}/scripts/generate_local_identity.py"
 export LOCAL_UID="$(id -u)"
 export LOCAL_GID="$(id -g)"
@@ -15,5 +15,11 @@ export LOCAL_GID="$(id -g)"
 # Docker Desktop/BuildKit retaining a conflicting partial image after an interrupted
 # bootstrap; base images and any unrelated local workloads are untouched.
 docker compose -f "${repo_root}/docker-compose.yml" down --remove-orphans --rmi local >/dev/null
+docker build --label com.bepoadewale.project=multi-tenant-ai-inference-platform \
+  -t inference-agent-sandbox:local -f "${repo_root}/sandbox/Dockerfile" "${repo_root}"
 docker compose -f "${repo_root}/docker-compose.yml" up --build --wait --wait-timeout 240
+# Local delegated tokens are deliberately short-lived. Reissue them after a potentially
+# long first image build so every demo begins with usable signed identities. The public
+# key is retained, so already-started services do not need a key reload.
+"${repo_root}/.venv/bin/python" "${repo_root}/scripts/generate_local_identity.py"
 MLFLOW_TRACKING_URI=http://localhost:15010 "${repo_root}/.venv/bin/python" "${repo_root}/scripts/register_mlflow_models.py"
