@@ -4,9 +4,8 @@ PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE
 
 # Current Completion Blockers
 
-The inference core is complete locally. The public flagship remains incomplete until
-the vertical slices below are independently executed and integrated into one clean-room
-demonstration. Preserve the existing core while working through them.
+None for the local-first flagship gate. Preserve the executed core and clean-room
+workflow while pursuing production hardening only as P1/P3 work.
 
 # Flagship P0 — Integrated Platform Story
 
@@ -25,7 +24,7 @@ demonstration. Preserve the existing core while working through them.
 - [x] Bounded sandboxed agent execution: short-lived delegated identity, fixed task
   contract, real hardened disposable Docker child, patch/containment proof, durable
   audit, cleanup, and restart recovery.
-- [ ] Integrated clean-room success and failure demonstration with safe teardown.
+- [x] Integrated clean-room success and failure demonstration with safe teardown.
 
 # P0 — Required for Portfolio Claim
 

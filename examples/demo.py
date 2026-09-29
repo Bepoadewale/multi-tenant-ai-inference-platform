@@ -1,4 +1,5 @@
 import asyncio
+
 from inference_gateway.catalog.store import Catalog
 from inference_gateway.models import ChatCompletionRequest, ChatMessage
 from inference_gateway.services.gateway import GatewayService

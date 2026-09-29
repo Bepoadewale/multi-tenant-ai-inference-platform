@@ -45,6 +45,18 @@ tenant request -> signed identity/quota -> simulated-capacity admission
 The failure path is first-class: a candidate that is service-healthy but violates a
 quality, artifact-integrity or latency gate must not become champion.
 
+## Executed cumulative proof
+
+The project-level `make demo-flagship` command runs the preserved tenant-inference
+story plus every currently scoped vertical slice against one Compose stack: admission
+and overload, routing and metering, observability, backend failure/timeout and restart
+recovery, MLflow release control, simulated-capacity policy, evidence/remediation,
+developer self-service, delegated tools, edge policy, and bounded sandbox execution.
+Two clean-room cycles executed `make install`, `make bootstrap-local`, `make smoke`,
+`make demo-flagship`, `make verify`, and project-scoped `make clean-local` on
+2026-09-29. See [validation evidence](VALIDATION.md); this proof does not change the
+production/hardware boundaries below.
+
 ## Local-first boundary
 
 The flagship runs locally with Docker, Redis, MLflow, ONNX CPU fixtures,

@@ -1,7 +1,8 @@
 # Week 3 Goal — Multi-Tenant Inference
 
-Starting maturity: the inference core is `PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE`.
-Current target: continue flagship integration while preserving the completed model
+Starting maturity: `PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE`.
+Current target: preserve the completed flagship while evolving only through validated
+P1 vertical slices; retain the completed model
 release-control, simulated-capacity, operational-evidence, governed-remediation,
 delegated-agent, developer-self-service, edge, and bounded-sandbox slices. Do not
 claim physical GPU scheduling, full edge operations, gVisor/Firecracker, or production
