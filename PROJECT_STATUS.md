@@ -53,9 +53,9 @@ adapters remain explicitly outside this status.
   task and blocked outbound-network probe executed; arbitrary task input is rejected;
   child container/workspace cleanup and control restart recovery were verified.
 - A local Operator Console at port 8091 is served by a scoped backend-for-frontend.
-  It reads real cross-slice local evidence and forwards only fixed release/sandbox
-  actions; its packaged browser assets, full console demo, and Docker UI smoke check
-  passed in two clean-room cycles. Browser-held platform credentials are not used.
+  It provides linked tenant, model/release, incident, agent/sandbox, developer, and
+  edge detail views over real cross-slice local evidence, and forwards only fixed
+  release/sandbox actions. Browser-held platform credentials are not used.
 - Clean-room workflow passed twice: bootstrap, smoke, cumulative flagship demos,
   validation, project-scoped cleanup, then a second bootstrap/demo.
 
@@ -77,12 +77,14 @@ adapters remain explicitly outside this status.
 
 ## Current P0 Objective
 
-Maintain the executed flagship contract and its clean-room workflow; do not regress
-tenant isolation, bounded authority, or truthful evidence labels.
+Complete the two-cycle clean-room validation for the new Operator Console drill-down
+routes; do not regress tenant isolation, bounded authority, or truthful evidence labels.
 
 ## Completion Blockers
 
-None for the local-first flagship gate.
+- The newly implemented Operator Console drill-down views require dedicated two-cycle
+  clean-room evidence before their implementation PR is review-ready. The prior
+  console-foundation completion evidence remains valid only for that earlier scope.
 
 ## Explicitly Unexecuted Production Adapters
 

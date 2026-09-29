@@ -27,6 +27,9 @@ workflow while pursuing production hardening only as P1/P3 work.
 - [x] Operator console foundation: local BFF, packaged browser assets, scoped release/
   sandbox actions, cross-slice evidence view, Docker UI smoke check, and two-cycle
   clean-room validation.
+- [ ] Operator-console drill-downs: complete two-cycle clean-room validation for linked
+  tenant, model/release, incident, agent/sandbox, developer, and edge routes backed by
+  scoped local BFF detail APIs.
 - [x] Integrated clean-room success and failure demonstration with safe teardown.
 
 # P0 — Required for Portfolio Claim

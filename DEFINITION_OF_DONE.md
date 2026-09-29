@@ -38,6 +38,10 @@ evidence and the cross-slice demonstration must pass clean-room validation.
   reads real cross-slice evidence, exposes only fixed scoped release/sandbox actions,
   serves packaged HTML/CSS/JS from the Docker image, and is exercised by the cumulative
   demo in two clean-room cycles. It does not expose platform tokens to the browser.
+- [ ] Operator-console drill-downs have passed their dedicated two-cycle clean-room
+  validation: linked tenant, model/release, incident, agent/sandbox, developer, and
+  edge detail views must all be served from the packaged image and exercised by the
+  local BFF demo before this implementation PR is review-ready.
 - [x] Integrated clean-room success and rollback demonstration: two full clean-room
   cycles ran `make demo-flagship`, including success, policy/failure, recovery,
   rollback and teardown evidence.

@@ -134,7 +134,8 @@ flowchart LR
 | Developer self-service golden path | ✅ EXECUTED LOCALLY | Separate self-service API creates a durable tenant-bound model-integration profile and token-free starter artifacts. The generated client executes a real ONNX request; unauthorized model, tenant, and agent attempts are denied. |
 | Narrow edge routing adapter | ✅ EXECUTED LOCALLY | Two independent edge-agent containers register signed device identities with SQLite control state. Compatible requests use local CPU ONNX; constrained-device public requests use the gateway; restricted and `LOCAL_ONLY` fallback is denied; inventory survives control restart. |
 | Bounded sandboxed agent execution | ✅ EXECUTED LOCALLY | A short-lived signed agent invokes only named fixture tasks. A trusted controller creates disposable hardened Docker children; real fixture tests/patching and an outbound-network probe run, arbitrary command input is rejected, child resources are removed, and SQLite audit survives restart. |
-| Unified operator console | ✅ EXECUTED LOCALLY | Local browser console aggregates live cross-slice evidence and forwards only fixed release/sandbox actions through existing authorization boundaries. Local fixture identities remain server-side. |
+| Unified operator console foundation | ✅ EXECUTED LOCALLY | Local browser console aggregates cross-slice evidence and forwards only fixed release/sandbox actions; fixture identities remain server-side. |
+| Operator-console drill-down views | 🟡 IMPLEMENTED / NOT FULLY EXECUTED | Linked tenant, model/release, incident, agent/sandbox, developer, and edge detail views are live-tested through scoped BFF APIs; this frontend extension still requires two-cycle clean-room evidence before review. |
 | Usage + restart recovery | ✅ EXECUTED LOCALLY | Metadata-only Redis usage survives a gateway restart. |
 | Metrics, traces, dashboards | ✅ EXECUTED LOCALLY | Prometheus, OTel Collector, Tempo, and Grafana receive generated local traffic. |
 | Physical GPU/vLLM/DCGM/Kubernetes | 📐 ARCHITECTURE / CONTRACT ONLY | Simulated capacity is not physical accelerator scheduling; no GPU or cloud execution is claimed. |
@@ -160,7 +161,7 @@ make demo-agent-tools # filtered agent tools → tenant evidence → denied cros
 make demo-self-service # signed developer → durable integration profile → generated token-free client → real ONNX request
 make demo-edge-adapter # registered local device ONNX → constrained public fallback → privacy/LOCAL_ONLY denial → durable inventory restart
 make demo-sandboxed-agent # delegated agent → hardened disposable task → patch + blocked egress probe → cleanup + audit restart
-make demo-operator-console # unified browser-control API → cross-slice evidence → scoped release actions + named sandbox task
+make demo-operator-console # routed tenant/model/agent evidence → scoped release actions + named sandbox task
 make demo-metering       # privacy-safe durable usage
 make demo-observability  # Prometheus + Tempo evidence
 make demo-failure        # unavailable backend → 502

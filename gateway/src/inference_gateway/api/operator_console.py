@@ -89,6 +89,26 @@ async def _snapshot() -> dict:
     return dict(zip(keys, calls, strict=True))
 
 
+def _items(payload: dict, key: str) -> list[dict]:
+    value = payload.get(key, [])
+    return value if isinstance(value, list) else []
+
+
+async def _gateway_snapshot(client: httpx.AsyncClient) -> tuple[str, list[dict], list[dict], list[dict]]:
+    gateway = _url("GATEWAY_URL", "http://gateway-1:8080")
+    tenants, models, deployments = await asyncio.gather(
+        _request(client, "GET", f"{gateway}/platform/v1/tenants", token_key="admin"),
+        _request(client, "GET", f"{gateway}/platform/v1/models", token_key="admin"),
+        _request(client, "GET", f"{gateway}/platform/v1/deployments", token_key="admin"),
+    )
+    return (
+        gateway,
+        tenants if isinstance(tenants, list) else [],
+        models if isinstance(models, list) else [],
+        deployments if isinstance(deployments, list) else [],
+    )
+
+
 @app.get("/healthz")
 def healthz() -> dict[str, str]:
     _tokens()
@@ -111,6 +131,108 @@ def assets(asset: str) -> FileResponse:
 @app.get("/console/v1/overview")
 async def overview() -> dict:
     return await _snapshot()
+
+
+@app.get("/console/v1/tenants/{tenant_id}")
+async def tenant_detail(tenant_id: str) -> dict:
+    async with httpx.AsyncClient(timeout=4.0) as client:
+        gateway, tenants, models, deployments = await _gateway_snapshot(client)
+        tenant = next((item for item in tenants if item.get("id") == tenant_id), None)
+        if tenant is None:
+            raise HTTPException(404, "tenant not found")
+        usage = await _request(client, "GET", f"{gateway}/platform/v1/usage/{tenant_id}", token_key="admin")
+    return {
+        "tenant": tenant,
+        "usage": usage,
+        "models": models,
+        "deployments": deployments,
+    }
+
+
+@app.get("/console/v1/models/{alias}")
+async def model_detail(alias: str) -> dict:
+    gateway = _url("GATEWAY_URL", "http://gateway-1:8080")
+    mlflow = _url("MLFLOW_URL", "http://mlflow:5000")
+    async with httpx.AsyncClient(timeout=4.0) as client:
+        rollout, deployments, registry = await asyncio.gather(
+            _request(client, "GET", f"{gateway}/platform/v1/rollouts/{alias}", token_key="admin"),
+            _request(client, "GET", f"{gateway}/platform/v1/deployments", token_key="admin"),
+            _request(client, "GET", f"{mlflow}/api/2.0/mlflow/registered-models/search?max_results=20"),
+        )
+    if "_error" in rollout:
+        raise HTTPException(404, "model alias not found")
+    return {"rollout": rollout, "deployments": deployments, "registry": registry}
+
+
+@app.get("/console/v1/releases/{plan_id}")
+async def release_detail(plan_id: str) -> dict:
+    release = _url("RELEASE_CONTROL_URL", "http://release-control:8080")
+    async with httpx.AsyncClient(timeout=4.0) as client:
+        result = await _request(client, "GET", f"{release}/release/v1/plans/{plan_id}", token_key="admin")
+    if "_error" in result:
+        raise HTTPException(404, "release plan not found")
+    return result
+
+
+@app.get("/console/v1/incidents/{incident_id}")
+async def incident_detail(incident_id: str) -> dict:
+    remediation = _url("REMEDIATION_CONTROL_URL", "http://remediation-control:8080")
+    async with httpx.AsyncClient(timeout=4.0) as client:
+        incident, timeline = await asyncio.gather(
+            _request(client, "GET", f"{remediation}/remediation/v1/incidents/{incident_id}", token_key="admin"),
+            _request(client, "GET", f"{remediation}/remediation/v1/incidents/{incident_id}/timeline", token_key="admin"),
+        )
+    if "_error" in incident:
+        raise HTTPException(404, "incident not found")
+    return {"incident": incident, "timeline": timeline}
+
+
+@app.get("/console/v1/agents")
+async def agent_detail() -> dict:
+    agent_tools = _url("AGENT_TOOLS_URL", "http://agent-tools:8080")
+    async with httpx.AsyncClient(timeout=4.0) as client:
+        tools, audit = await asyncio.gather(
+            _request(client, "GET", f"{agent_tools}/agent/v1/tools", token_key="delegated_agent"),
+            _request(client, "GET", f"{agent_tools}/agent/v1/audit", token_key="delegated_agent"),
+        )
+    return {"tools": tools, "audit": audit}
+
+
+@app.get("/console/v1/sandbox/tasks/{task_id}")
+async def sandbox_task_detail(task_id: str) -> dict:
+    sandbox = _url("SANDBOX_CONTROL_URL", "http://sandbox-control:8080")
+    async with httpx.AsyncClient(timeout=4.0) as client:
+        tasks = await _request(client, "GET", f"{sandbox}/sandbox/v1/tasks", token_key="sandbox_agent")
+    task = next((item for item in _items(tasks, "tasks") if item.get("id") == task_id), None)
+    if task is None:
+        raise HTTPException(404, "sandbox task not found")
+    return {"task": task}
+
+
+@app.get("/console/v1/developer/integrations/{profile_id}")
+async def developer_profile_detail(profile_id: str) -> dict:
+    self_service = _url("SELF_SERVICE_URL", "http://developer-self-service:8080")
+    async with httpx.AsyncClient(timeout=4.0) as client:
+        result = await _request(
+            client,
+            "GET",
+            f"{self_service}/developer/v1/inference-integrations/{profile_id}",
+            token_key="search",
+        )
+    if "_error" in result:
+        raise HTTPException(404, "developer integration profile not found")
+    return result
+
+
+@app.get("/console/v1/edge/devices/{device_id}")
+async def edge_device_detail(device_id: str) -> dict:
+    edge = _url("EDGE_CONTROL_URL", "http://edge-control:8080")
+    async with httpx.AsyncClient(timeout=4.0) as client:
+        devices = await _request(client, "GET", f"{edge}/edge/v1/devices")
+    device = next((item for item in _items(devices, "devices") if item.get("device_id") == device_id), None)
+    if device is None:
+        raise HTTPException(404, "edge device not found")
+    return {"device": device, "hardware": devices.get("hardware", "SIMULATED")}
 
 
 async def _release_action(plan_id: str | None, action: str, canary_weight: int = 10) -> dict:

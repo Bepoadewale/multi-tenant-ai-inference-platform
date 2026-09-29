@@ -12,14 +12,35 @@ cd "$repo_root"
 
 overview=$(curl -fsS http://localhost:8091/console/v1/overview)
 jq -e '.tenants and .models and .capacity and .release_plans and .devices and .registry' <<<"$overview" >/dev/null
+curl -fsS http://localhost:8091/console/v1/tenants/team-search | jq -e '.tenant.id == "team-search" and .usage' >/dev/null
+curl -fsS http://localhost:8091/console/v1/models/chat-default | jq -e '.rollout.alias == "chat-default" and .registry' >/dev/null
+curl -fsS http://localhost:8091/console/v1/agents | jq -e '.tools and .audit' >/dev/null
+device_id=$(jq -r '.devices.devices[0].device_id // empty' <<<"$overview")
+if [[ -n "$device_id" ]]; then
+  curl -fsS "http://localhost:8091/console/v1/edge/devices/${device_id}" | jq -e ".device.device_id == \"${device_id}\"" >/dev/null
+fi
 
 plan=$(curl -fsS -X POST 'http://localhost:8091/console/v1/releases/create?canary_weight=10')
 plan_id=$(jq -r '.id' <<<"$plan")
+curl -fsS "http://localhost:8091/console/v1/releases/${plan_id}" | jq -e ".id == \"${plan_id}\"" >/dev/null
 curl -fsS -X POST "http://localhost:8091/console/v1/releases/approve?plan_id=${plan_id}" | jq -e '.status == "APPROVED"' >/dev/null
 curl -fsS -X POST "http://localhost:8091/console/v1/releases/canary?plan_id=${plan_id}" | jq -e '.status == "CANARY"' >/dev/null
 curl -fsS -X POST "http://localhost:8091/console/v1/releases/rollback?plan_id=${plan_id}" | jq -e '.status == "ROLLED_BACK"' >/dev/null
 
 task=$(curl -fsS -X POST http://localhost:8091/console/v1/sandbox/fixture_patch)
 jq -e '.task.state == "DESTROYED" and .task.hardening.network_mode == "none"' <<<"$task" >/dev/null
+task_id=$(jq -r '.task.id' <<<"$task")
+curl -fsS "http://localhost:8091/console/v1/sandbox/tasks/${task_id}" | jq -e ".task.id == \"${task_id}\"" >/dev/null
 
-echo 'Operator-console demo passed: one browser control surface retrieved real cross-slice evidence, drove independently scoped release transitions, and ran a fixed hardened sandbox task.'
+# The cumulative flagship run creates these records before this console demo. Keep the
+# standalone console demo useful when no remediation/profile evidence exists yet.
+profile_id=$(jq -r '.integrations.integrations[0].id // empty' <<<"$overview")
+if [[ -n "$profile_id" ]]; then
+  curl -fsS "http://localhost:8091/console/v1/developer/integrations/${profile_id}" | jq -e ".profile.id == \"${profile_id}\"" >/dev/null
+fi
+incident_id=$(jq -r '.incidents.incidents[0].id // empty' <<<"$overview")
+if [[ -n "$incident_id" ]]; then
+  curl -fsS "http://localhost:8091/console/v1/incidents/${incident_id}" | jq -e '.incident and .timeline' >/dev/null
+fi
+
+echo 'Operator-console demo passed: routed tenant/model/agent/device evidence loaded through the local BFF; release and sandbox details loaded after scoped actions; and cumulative runs also verified developer and incident detail routes.'
