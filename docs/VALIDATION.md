@@ -531,7 +531,7 @@ overlapping Compose operations to leave stale project state. The lock records it
 owner PID; an interrupted owner leaves a stale lock that the next project lifecycle
 command safely reclaims. The lock does not affect other Docker Compose projects.
 
-## Operator-console drill-down and model-observability clean-room cycle 1
+## Operator-console drill-down and model-observability clean-room validation
 
 **Date:** 2026-09-29
 
@@ -560,6 +560,10 @@ generated `models/` directory. The cycle therefore exercised the fixed
 Prometheus-backed model detail endpoint and its Grafana dashboard configuration as
 part of the flagship stack.
 
-This is cycle **1 of 2** for the operator-console drill-down revision. It does not
-make the PR review-ready; the second independent clean-start/bootstrap/demo/cleanup
-cycle remains required.
+The second independent cycle began only after that teardown. It repeated the exact
+same sequence from a clean project state, including a rebuild of the project Compose
+images, live smoke checks, the full flagship demo, and verification. Its final cleanup
+again left zero project-labelled containers, volumes, or networks, with `.venv`,
+`.local`, and generated `models/` absent. Both cycles therefore validate the packaged
+operator-console drill-downs and fixed Prometheus-backed model observability without
+depending on prior project state.
