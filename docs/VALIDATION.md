@@ -523,3 +523,9 @@ make clean-local
 ```
 
 All commands passed. The second bootstrap returned real ONNX output and an explicit bounded timeout failure; final cleanup again removed only project-owned resources. This is local platform-flow evidence, not GPU, vLLM, quality, throughput, or cloud evidence.
+## Lifecycle concurrency guard
+
+`bootstrap-local` and `clean-local` use a project-local lifecycle lock. A second
+bootstrap or cleanup fails clearly while the first is active, rather than allowing
+overlapping Compose operations to leave stale project state. The lock does not affect
+other Docker Compose projects.
