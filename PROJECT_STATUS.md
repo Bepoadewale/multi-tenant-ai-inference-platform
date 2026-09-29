@@ -92,8 +92,9 @@ the independently validated core and vertical-slice evidence.
   fixture patch task in a disposable Docker child, an outbound network probe was
   blocked by `network=none`, arbitrary command input returned 422, child containers
   and volumes were absent after each task, Prometheus recorded both outcomes, and the
-  SQLite task audit survived sandbox-control restart. Ruff and `42 passed` pytest
-  tests passed before live validation; a second clean cycle is pending.
+  SQLite task audit survived sandbox-control restart. Two clean container cycles
+  passed; each included Ruff, `42 passed` pytest tests, Compose config validation, and
+  project-scoped cleanup.
 - Edge-adapter slice: two local container recreations passed on 2026-09-29. Each
   proved two independent signed device agents, SQLite inventory, real compatible-device
   local ONNX, constrained-device public gateway fallback, restricted/LOCAL_ONLY denial,

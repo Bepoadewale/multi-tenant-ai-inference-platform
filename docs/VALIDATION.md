@@ -21,10 +21,14 @@ rejected with `422`; no arbitrary command was executed. Prometheus recorded both
 outcomes, child containers and workspace volumes were absent after each task, and the
 metadata-only SQLite audit survived an intentional controller restart.
 
-Static validation before the live run passed Ruff, `42 passed` pytest tests, and
-`docker compose config --quiet`. A second clean container cycle will be recorded before
-review. This does not claim gVisor, Firecracker, Kubernetes sandboxing, or general
-arbitrary-agent-code execution.
+Static validation passed Ruff, `42 passed` pytest tests, and `docker compose config
+--quiet`. A second clean container cycle began after `make clean-local` removed every
+project Compose container, volume, local image, generated model, `.local` state, and
+virtual environment. It then ran `make install`, `make bootstrap-local`, smoke, the
+sandbox demo, Ruff, pytest, Compose configuration validation, and `make clean-local`
+again. The post-cleanup absence of child sandbox containers/volumes was verified. This
+does not claim gVisor, Firecracker, Kubernetes sandboxing, or general arbitrary-agent-
+code execution.
 
 ## Narrow edge-adapter slice
 
