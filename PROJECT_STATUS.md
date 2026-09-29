@@ -52,6 +52,10 @@ adapters remain explicitly outside this status.
   Its trusted controller creates real disposable hardened Docker children: the patch
   task and blocked outbound-network probe executed; arbitrary task input is rejected;
   child container/workspace cleanup and control restart recovery were verified.
+- A local Operator Console at port 8091 is served by a scoped backend-for-frontend.
+  It reads real cross-slice local evidence and forwards only fixed release/sandbox
+  actions; its packaged browser assets, full console demo, and Docker UI smoke check
+  passed in two clean-room cycles. Browser-held platform credentials are not used.
 - Clean-room workflow passed twice: bootstrap, smoke, cumulative flagship demos,
   validation, project-scoped cleanup, then a second bootstrap/demo.
 
@@ -94,7 +98,7 @@ None for the local-first flagship gate.
   admission/overload, routing, metering, observability, backend failure/timeout,
   recovery, MLflow registry/release, simulated capacity, request evidence,
   self-service, delegated tools, remediation, edge policy, and hardened sandbox
-  tasks. `make verify` passed Ruff, `42 passed` pytest tests, dependency audit, and
+  tasks. `make verify` passed Ruff, `44 passed` pytest tests, dependency audit, and
   Compose configuration. After each cleanup there were no project Compose resources,
   project-labelled sandbox children, `.local`, `.venv`, or generated models; cycle 2
   began only after cycle 1 cleanup.

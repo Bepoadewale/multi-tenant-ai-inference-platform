@@ -7,3 +7,8 @@ observability before adding any slice. Do not select cosmetic refactors or copy 
 repository wholesale; integrate through a narrow contract and prove it locally.
 
 As the project approaches completion, clean-room reproducibility becomes P0. Before declaring completion: tear down Project-owned infrastructure; verify teardown; bootstrap clean; smoke; run primary and failure/security demos; validate; clean again; bootstrap a second time; and record evidence. If either rebuild fails, fix it before cosmetic work.
+
+Before certifying any implementation PR as ready for human review, apply the same
+project-scoped clean-room sequence to that change and record exact evidence in
+`docs/VALIDATION.md`. A PR without it remains draft; only documentation-only PRs may
+state that runtime evidence is not applicable.
