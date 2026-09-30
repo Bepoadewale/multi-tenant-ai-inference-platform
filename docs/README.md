@@ -5,9 +5,9 @@ adapters. Start with the [README](../README.md) for the runnable platform story.
 
 | Area | Contents |
 | --- | --- |
-| [Architecture](architecture/) | System overview, flagship direction, tenant model, routing, [full system map/API reference](architecture/flagship-system-map.md) |
-| [Operations](operations/) | Observability, FinOps, autoscaling, performance, benchmarks, failure modes, console |
-| [Delivery](delivery/) | Model rollout, GPU scheduling, AWS adapter, real-workload pilot |
+| [Architecture](architecture/) | [Full system map/API reference](architecture/flagship-system-map.md) and flagship integration direction |
+| [Operations](operations/) | Observability, FinOps, performance, failure modes, console |
+| [Delivery](delivery/) | Model rollout plus consolidated Terraform-managed GPU/cloud pilot guidance |
 | [Security](security/) | Security model, architecture diagram, and threat controls |
 | [Governance](governance/) | Implementation status and executed validation evidence |
 | [Portfolio](portfolio/) | Interview guide and roadmap |

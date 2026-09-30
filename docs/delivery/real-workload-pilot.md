@@ -149,6 +149,21 @@ intentional decision.
 7. Node/runtime interruption and controlled recovery.
 8. Cost report that separates measured cloud usage from local fixture estimates.
 
+## GPU scheduling and autoscaling in the pilot
+
+The local `simulated-l40s` pool is Redis quota accounting, not a Kubernetes scheduler.
+For real GPU placement, use the completed
+[GPU Scheduler Lab](https://github.com/Bepoadewale/gpu-scheduler-lab) as the reference
+for Kueue/Volcano experiments with explicitly simulated resources, then validate actual
+device-plugin/GPU Operator/DCGM behavior only on a real NVIDIA environment.
+
+HPA/KEDA scales serving pods; node groups or Karpenter scale the underlying GPU
+capacity. They act on different delays and must be tested separately. Candidate signals
+include active requests, queue depth/wait, token rate, latency, and—only on real
+hardware—GPU/KV-cache pressure. Keep warm replicas for latency-sensitive models and
+record cold-start behavior. A real multi-GPU model additionally needs an explicit
+tensor-parallel/topology plan, compatible SKU labels, affinity, and an NVLink review.
+
 ## Cost and safety rules
 
 - Do not use a personal/root cloud account for experiments.

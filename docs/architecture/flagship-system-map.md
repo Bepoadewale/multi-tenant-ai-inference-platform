@@ -91,5 +91,19 @@ direct Redis, MLflow, Docker, Kubernetes, cloud, or platform-admin credentials.
 | CPU fallback explicitly allowed | admit to CPU ONNX | policy explicitly permits it |
 | edge request is restricted/`LOCAL_ONLY` with no local model | deny | privacy overrides central fallback |
 
-See [routing](routing.md), [failure modes](../operations/failure-modes.md), and the
+See [failure modes](../operations/failure-modes.md) and the
 [local client examples](../../examples/README.md) for exact local walkthroughs.
+
+## Tenant and routing boundary
+
+Tenant identity comes only from an authenticated credential, never a client-supplied
+header. Each tenant has assigned aliases plus request/token/concurrency/daily-budget
+limits, priority, environment, cost-center, and simulated-capacity allocation. Redis
+Lua keeps those limits shared across gateway replicas.
+
+Aliases decouple a client contract from a concrete model version. Admission runs before
+routing; a model can require simulated capacity or explicitly allow CPU fallback. The
+weighted router selects only healthy targets. If no healthy target exists, it returns a
+controlled `503`; a streaming request is never blindly retried after partial output may
+have reached the caller. Shared pools optimize utilization, while a future dedicated
+pool can trade utilization for stronger isolation and more predictable latency.
