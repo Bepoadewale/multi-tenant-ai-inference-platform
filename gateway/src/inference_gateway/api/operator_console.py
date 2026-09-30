@@ -17,11 +17,29 @@ from uuid import uuid4
 import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
+from pydantic import BaseModel, Field
 
 STATIC = Path(__file__).resolve().parents[1] / "operator_console" / "static"
 TOKENS_PATH = Path(os.getenv("CONSOLE_TOKENS_PATH", "/run/identity/tokens.json"))
 
 app = FastAPI(title="Flagship Operator Console", version="0.1.0")
+
+
+class ConsoleIntegrationRequest(BaseModel):
+    """A deliberately small form forwarded to the existing self-service contract."""
+
+    service_name: str = Field(pattern=r"^[a-z][a-z0-9-]{2,62}$")
+    model: str = Field(min_length=1, max_length=120)
+    owner: str = Field(pattern=r"^[a-z][a-z0-9-]{2,62}$")
+    environment: str = Field(default="development", pattern=r"^(development|staging)$")
+
+
+# These are Compose service names, not browser-provided URLs. The toggle controls
+# only an explicitly simulated local network state for a known fixture device.
+EDGE_AGENT_URLS = {
+    "edge-search-001": "http://edge-device-search:8080",
+    "edge-constrained-001": "http://edge-device-constrained:8080",
+}
 
 
 def _tokens() -> dict[str, str]:
@@ -76,6 +94,7 @@ async def _snapshot() -> dict:
             _request(client, "GET", f"{remediation}/remediation/v1/incidents", token_key="admin"),
             _request(client, "GET", f"{edge}/edge/v1/devices"),
             _request(client, "GET", f"{self_service}/developer/v1/inference-integrations", token_key="search"),
+            _request(client, "GET", f"{agent_tools}/agent/v1/tools", token_key="delegated_agent"),
             _request(client, "GET", f"{agent_tools}/agent/v1/audit", token_key="delegated_agent"),
             _request(client, "GET", f"{sandbox}/sandbox/v1/tasks", token_key="sandbox_agent"),
             _request(client, "GET", f"{prometheus}/api/v1/query?query=sum(inference_gateway_requests_total)"),
@@ -84,7 +103,7 @@ async def _snapshot() -> dict:
         )
     keys = (
         "tenants", "models", "deployments", "capacity", "release_plans", "incidents",
-        "devices", "integrations", "agent_audit", "sandbox_tasks", "requests", "throttles", "registry",
+        "devices", "integrations", "agent_tools", "agent_audit", "sandbox_tasks", "requests", "throttles", "registry",
     )
     return dict(zip(keys, calls, strict=True))
 
@@ -238,7 +257,37 @@ async def incident_detail(incident_id: str) -> dict:
         )
     if "_error" in incident:
         raise HTTPException(404, "incident not found")
-    return {"incident": incident, "timeline": timeline}
+    event_rows = timeline if isinstance(timeline, list) else []
+    plan_ids = {
+        event.get("details", {}).get("plan_id")
+        for event in event_rows
+        if isinstance(event, dict) and isinstance(event.get("details"), dict)
+    }
+    async with httpx.AsyncClient(timeout=4.0) as client:
+        plans = await asyncio.gather(*(
+            _request(client, "GET", f"{remediation}/remediation/v1/plans/{plan_id}", token_key="admin")
+            for plan_id in sorted(plan_id for plan_id in plan_ids if isinstance(plan_id, str))
+        ))
+    return {
+        "incident": incident.get("incident", incident),
+        "timeline": event_rows,
+        "plans": [plan for plan in plans if "_error" not in plan],
+    }
+
+
+@app.get("/console/v1/remediation/plans/{plan_id}")
+async def remediation_plan_detail(plan_id: str) -> dict:
+    remediation = _url("REMEDIATION_CONTROL_URL", "http://remediation-control:8080")
+    async with httpx.AsyncClient(timeout=4.0) as client:
+        result = await _request(
+            client,
+            "GET",
+            f"{remediation}/remediation/v1/plans/{plan_id}",
+            token_key="admin",
+        )
+    if "_error" in result:
+        raise HTTPException(404, "remediation plan not found")
+    return result
 
 
 @app.get("/console/v1/agents")
@@ -328,6 +377,80 @@ async def sandbox_task(task_kind: str) -> dict:
             json_body={"task_kind": task_kind},
             headers={"Idempotency-Key": f"console-{task_kind}-{uuid4()}"},
         )
+    if "_error" in result:
+        raise HTTPException(502, result["_error"])
+    return result
+
+
+@app.post("/console/v1/developer/integrations", status_code=201)
+async def create_developer_integration(request: ConsoleIntegrationRequest) -> dict:
+    """Create a tenant-bound profile through the existing developer service.
+
+    The browser supplies only the constrained integration fields. The BFF supplies
+    the local developer identity and a fresh idempotency key; the downstream service
+    remains authoritative for tenant/model authorization and persistence.
+    """
+
+    self_service = _url("SELF_SERVICE_URL", "http://developer-self-service:8080")
+    async with httpx.AsyncClient(timeout=6.0) as client:
+        result = await _request(
+            client,
+            "POST",
+            f"{self_service}/developer/v1/inference-integrations",
+            token_key="search",
+            json_body=request.model_dump(),
+            headers={"Idempotency-Key": f"console-profile-{uuid4()}"},
+        )
+    if "_error" in result:
+        raise HTTPException(409, result["_error"])
+    return result
+
+
+@app.post("/console/v1/remediation/incidents/{incident_id}/plan")
+async def create_remediation_plan(incident_id: str) -> dict:
+    remediation = _url("REMEDIATION_CONTROL_URL", "http://remediation-control:8080")
+    async with httpx.AsyncClient(timeout=6.0) as client:
+        result = await _request(
+            client,
+            "POST",
+            f"{remediation}/remediation/v1/incidents/{incident_id}/plans",
+            token_key="admin",
+        )
+    if "_error" in result:
+        raise HTTPException(409, result["_error"])
+    return result
+
+
+@app.post("/console/v1/remediation/plans/{plan_id}/{action}")
+async def remediation_plan_action(plan_id: str, action: str) -> dict:
+    if action not in {"approve", "execute"}:
+        raise HTTPException(422, "unknown remediation action")
+    remediation = _url("REMEDIATION_CONTROL_URL", "http://remediation-control:8080")
+    # Release approval and remediation approval are deliberately separate local
+    # identities. Reusing the release approver would fail the remediation policy and
+    # blur the independently auditable approval boundary.
+    token_key = "remediation_approver" if action == "approve" else "admin"
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        result = await _request(
+            client,
+            "POST",
+            f"{remediation}/remediation/v1/plans/{plan_id}/{action}",
+            token_key=token_key,
+        )
+    if "_error" in result:
+        raise HTTPException(409, result["_error"])
+    return result
+
+
+@app.post("/console/v1/edge/devices/{device_id}/network/{state}")
+async def set_simulated_edge_network(device_id: str, state: str) -> dict:
+    if state not in {"online", "offline"}:
+        raise HTTPException(422, "simulated network state must be online or offline")
+    endpoint = EDGE_AGENT_URLS.get(device_id)
+    if endpoint is None:
+        raise HTTPException(404, "fixture edge device not found")
+    async with httpx.AsyncClient(timeout=5.0) as client:
+        result = await _request(client, "POST", f"{endpoint}/edge/v1/network/{state}")
     if "_error" in result:
         raise HTTPException(502, result["_error"])
     return result

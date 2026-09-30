@@ -18,6 +18,10 @@ curl -fsS http://localhost:8091/console/v1/agents | jq -e '.tools and .audit' >/
 device_id=$(jq -r '.devices.devices[0].device_id // empty' <<<"$overview")
 if [[ -n "$device_id" ]]; then
   curl -fsS "http://localhost:8091/console/v1/edge/devices/${device_id}" | jq -e ".device.device_id == \"${device_id}\"" >/dev/null
+  curl -fsS -X POST "http://localhost:8091/console/v1/edge/devices/${device_id}/network/offline" \
+    | jq -e '.simulated == true and .network == "OFFLINE"' >/dev/null
+  curl -fsS -X POST "http://localhost:8091/console/v1/edge/devices/${device_id}/network/online" \
+    | jq -e '.simulated == true and .network == "ONLINE"' >/dev/null
 fi
 
 plan=$(curl -fsS -X POST 'http://localhost:8091/console/v1/releases/create?canary_weight=10')
@@ -38,9 +42,17 @@ profile_id=$(jq -r '.integrations.integrations[0].id // empty' <<<"$overview")
 if [[ -n "$profile_id" ]]; then
   curl -fsS "http://localhost:8091/console/v1/developer/integrations/${profile_id}" | jq -e ".profile.id == \"${profile_id}\"" >/dev/null
 fi
+
+profile_name="console-ui-$(date +%s)"
+created_profile=$(curl -fsS --max-time 10 -X POST http://localhost:8091/console/v1/developer/integrations \
+  -H 'content-type: application/json' \
+  -d "{\"service_name\":\"${profile_name}\",\"model\":\"chat-default\",\"owner\":\"search\",\"environment\":\"staging\"}")
+created_profile_id=$(jq -r '.profile.id' <<<"${created_profile}")
+jq -e --arg name "${profile_name}" '.profile.service_name == $name and (.files["inference_client.py"] | contains("INFERENCE_API_TOKEN"))' <<<"${created_profile}" >/dev/null
+curl -fsS "http://localhost:8091/console/v1/developer/integrations/${created_profile_id}" | jq -e --arg id "${created_profile_id}" '.profile.id == $id' >/dev/null
 incident_id=$(jq -r '.incidents.incidents[0].id // empty' <<<"$overview")
 if [[ -n "$incident_id" ]]; then
-  curl -fsS "http://localhost:8091/console/v1/incidents/${incident_id}" | jq -e '.incident and .timeline' >/dev/null
+  curl -fsS "http://localhost:8091/console/v1/incidents/${incident_id}" | jq -e '.incident and .timeline and .plans' >/dev/null
 fi
 
-echo 'Operator-console demo passed: routed tenant/model/agent/device evidence loaded through the local BFF; fixed Prometheus-backed model telemetry and Grafana deep links loaded without exposing arbitrary query access; release and sandbox details loaded after scoped actions; and cumulative runs also verified developer and incident detail routes.'
+echo 'Operator-console demo passed: routed tenant/model/agent/device evidence loaded through the local BFF; fixed Prometheus-backed model telemetry and Grafana deep links loaded without exposing arbitrary query access; release, sandbox, developer-profile, and explicit simulated edge-network actions completed through scoped APIs; and cumulative runs also verified remediation incident detail routes.'

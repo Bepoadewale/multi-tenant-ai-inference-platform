@@ -67,11 +67,12 @@ network-isolated, resource-limited, and denied both Docker socket and host bind 
 
 The operator-console slice brings the executed local services into one browser control
 surface at **http://localhost:8091**. It shows tenant admission, simulated capacity,
-MLflow models, release plans, incidents, delegated-tool audit, sandbox tasks,
-developer integrations, and edge inventory. Its fixed buttons forward only release
-transitions and named sandbox tasks to the existing scoped APIs; it does not add an
-unrestricted orchestration backdoor. The local console uses synthetic server-side
-fixture identities and is not a claim of production web SSO.
+MLflow models, release plans, incidents, delegated-tool permissions and audit, sandbox
+tasks, developer integrations, and edge inventory. Its guided forms and buttons forward
+only existing scoped release, remediation, developer-profile, sandbox, and explicitly
+simulated edge-network actions through the local BFF; it does not add an unrestricted
+orchestration backdoor. The local console uses synthetic server-side fixture identities
+and is not a claim of production web SSO.
 
 See [flagship direction](docs/flagship-direction.md) for boundaries and the staged
 integration model. Commercial strategy is intentionally not maintained in this public

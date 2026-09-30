@@ -54,8 +54,9 @@ adapters remain explicitly outside this status.
   child container/workspace cleanup and control restart recovery were verified.
 - A local Operator Console at port 8091 is served by a scoped backend-for-frontend.
   It provides linked tenant, model/release, incident, agent/sandbox, developer, and
-  edge detail views over real cross-slice local evidence, and forwards only fixed
-  release/sandbox actions. Browser-held platform credentials are not used.
+  edge detail views over real cross-slice local evidence. It forwards only fixed
+  release, remediation, developer-profile, named sandbox-task, and explicitly
+  simulated edge-connectivity actions. Browser-held platform credentials are not used.
 - Clean-room workflow passed twice: bootstrap, smoke, cumulative flagship demos,
   validation, project-scoped cleanup, then a second bootstrap/demo.
 
@@ -77,14 +78,13 @@ adapters remain explicitly outside this status.
 
 ## Current P0 Objective
 
-Keep the operator-console drill-down path reproducible while maintaining tenant
-isolation, bounded authority, and truthful evidence labels. The dedicated two-cycle
-clean-room validation completed on 2026-09-29.
+No P0 completion blocker remains. Current P1 objective: evaluate a PostgreSQL/outbox
+option for production durability without weakening the executed local-first path.
 
 ## Completion Blockers
 
-None. The Operator Console drill-down revision has two dedicated clean-room cycles
-of bootstrap, smoke, flagship demo, verification, and project-scoped teardown.
+None. The Operator Console workflow revision has two dedicated clean-room cycles of
+bootstrap, smoke, flagship demo, verification, and project-scoped teardown.
 
 ## Explicitly Unexecuted Production Adapters
 
