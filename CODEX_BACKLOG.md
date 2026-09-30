@@ -46,7 +46,7 @@ P0 items block PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE; do not select P1/P2 wor
 # P1 — Production Hardening
 
 - Circuit persistence, request cancellation, durable PostgreSQL/outbox metering, load-test reporting, and richer dashboard provisioning.
-- [ ] Complete the operator-console workflow UI: execute two clean-room cycles proving
+- [x] Complete the operator-console workflow UI: two clean-room cycles proved
   scoped release, remediation, developer-profile, sandbox, and simulated edge-network
   actions through the browser BFF; retain the existing service state machines as the
   authority.

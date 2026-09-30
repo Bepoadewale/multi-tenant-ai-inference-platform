@@ -42,7 +42,7 @@ evidence and the cross-slice demonstration must pass clean-room validation.
   validation: linked tenant, model/release, incident, agent/sandbox, developer, and
   edge detail views must all be served from the packaged image and exercised by the
   local BFF demo before this implementation PR is review-ready.
-- [ ] Operator-console workflow UI is clean-room validated: the packaged browser
+- [x] Operator-console workflow UI is clean-room validated: the packaged browser
   surface must create a governed release plan, expose approval/canary/rollback state,
   drive only the bounded remediation workflow, create a tenant-bound developer profile,
   run named sandbox tasks, and toggle only explicitly simulated known edge devices.

@@ -2,6 +2,38 @@
 
 Validation is local-first. Record hardware, runtime, exact command and result for any benchmark; never infer GPU behavior from the deterministic CPU fixture or fabricate validation.
 
+## Governed operator-workflow clean-room validation
+
+**Date:** 2026-09-30
+**Environment:** macOS, Docker Desktop, Docker Compose, Python 3.12. No cloud account,
+GPU, Kubernetes cluster, or paid API.
+
+Two independent clean-room cycles passed for the governed Operator Console workflow
+revision. Cycle 1 began after `make clean-local`; Cycle 2 began after Cycle 1 cleanup
+verified zero project-labelled containers, volumes, and networks and the absence of
+`.venv`, `.local`, and generated `models`.
+
+Each cycle ran:
+
+```console
+make install
+make bootstrap-local
+make smoke
+make demo-flagship
+make verify
+make clean-local
+```
+
+The cumulative demo exercised the packaged console's fixed release transitions,
+bounded remediation plan/approval/execution path, tenant-bound developer-profile
+creation, named hardened sandbox task, and explicit simulated edge offline/online
+toggle, in addition to the flagship's normal and failure paths. `make verify` passed
+Ruff, pytest, dependency audit, and `docker compose config --quiet`. The final cleanup
+after each cycle left zero project containers, volumes, or networks and no `.venv`,
+`.local`, or generated model artifacts. The console remains a local BFF demo: it does
+not claim enterprise SSO, browser-held platform credentials, arbitrary command
+execution, arbitrary URL proxying, physical GPU scheduling, or cloud deployment.
+
 ## Cumulative flagship clean-room validation
 
 **Date:** 2026-09-29
