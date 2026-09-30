@@ -2,6 +2,35 @@
 
 Validation is local-first. Record hardware, runtime, exact command and result for any benchmark; never infer GPU behavior from the deterministic CPU fixture or fabricate validation.
 
+## Flagship scenario orchestration clean-room validation
+
+**Date:** 2026-09-30
+**Environment:** macOS, Docker Desktop, Docker Compose, Python 3.12. No cloud account,
+GPU, Kubernetes cluster, or paid API.
+
+Two independent clean-room cycles passed for the read-only Flagship Scenario view.
+Each used the same project-scoped sequence:
+
+```console
+make clean-local
+make install
+make bootstrap-local
+make smoke
+make demo-flagship
+make verify
+make clean-local
+```
+
+The cumulative demo created real local evidence for the nine linked stages: signed
+tenant admission, CPU ONNX inference, governed release, metrics/SLO/cost evidence,
+bounded remediation, delegated agent tools, developer self-service, privacy-aware
+edge routing, and hardened sandbox execution. The scenario endpoint was asserted by
+the packaged Operator Console demo. `make verify` passed Ruff, pytest, dependency
+audit, and Compose configuration validation. After each final cleanup, zero project
+containers, volumes, or networks remained and `.venv`, `.local`, and generated models
+were absent. The scenario view is read-only; it does not seed evidence or bypass
+owning service state machines.
+
 ## Governed operator-workflow clean-room validation
 
 **Date:** 2026-09-30
