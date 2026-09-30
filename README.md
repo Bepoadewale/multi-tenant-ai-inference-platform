@@ -163,6 +163,8 @@ make demo-self-service # signed developer → durable integration profile → ge
 make demo-edge-adapter # registered local device ONNX → constrained public fallback → privacy/LOCAL_ONLY denial → durable inventory restart
 make demo-sandboxed-agent # delegated agent → hardened disposable task → patch + blocked egress probe → cleanup + audit restart
 make demo-operator-console # routed tenant/model/agent evidence → scoped release actions + named sandbox task
+make demo-flagship # cumulative cross-slice scenario used by the operator console
+make public-demo # bootstrap + flagship scenario + temporary public Cloudflare Quick Tunnel URL
 make demo-metering       # privacy-safe durable usage
 make demo-observability  # Prometheus + Tempo evidence
 make demo-failure        # unavailable backend → 502
@@ -173,6 +175,15 @@ make clean-local
 ```
 
 The local stack publishes gateways on `:8081` and `:8082`, release control on `:8083`, remediation control on `:8084`, delegated agent tools on `:8085`, developer self-service on `:8086`, edge control on `:8087`, edge devices on `:8088` and `:8089`, sandbox control on `:8090`, the operator console on `:8091`, MLflow on `:15010`, Prometheus on `:9090`, Tempo on `:3200`, and Grafana on `:3002`. `make clean-local` removes only this repository's Compose resources, locally built images, generated artifacts, and local state.
+
+`make public-demo` is a controlled walkthrough helper. It installs `cloudflared` with
+Homebrew when necessary, starts the local stack, runs the flagship demo, creates a
+temporary public Cloudflare Quick Tunnel, and prints its URL. The URL is public and
+short-lived; it is not hosted deployment, does not use a named tunnel or credentials,
+and must never be recorded in repository documentation. `Ctrl-C` stops only the
+tunnel; use `make clean-local` to remove the local platform afterward. See the
+[real-workload pilot guide](docs/delivery/real-workload-pilot.md) for the future,
+Terraform-managed deployment path.
 
 ## Security boundary
 

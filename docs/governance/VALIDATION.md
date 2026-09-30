@@ -2,6 +2,37 @@
 
 Validation is local-first. Record hardware, runtime, exact command and result for any benchmark; never infer GPU behavior from the deterministic CPU fixture or fabricate validation.
 
+## Temporary public walkthrough clean-room validation
+
+**Date:** 2026-09-30
+**Environment:** macOS, Docker Desktop, Docker Compose, Python 3.12, Homebrew
+`cloudflared`. No cloud account, GPU, Kubernetes cluster, paid API, Cloudflare login,
+or named tunnel was used.
+
+Two independent clean-room cycles passed. Each started after `make clean-local` had
+removed project resources and ran:
+
+```console
+PUBLIC_DEMO_EXIT_AFTER_URL=1 make public-demo
+make verify
+make clean-local
+```
+
+`make public-demo` installed its Python environment, bootstrapped the Compose stack,
+ran smoke checks and `make demo-flagship`, then created a temporary Cloudflare Quick
+Tunnel to the local operator console and printed the public `trycloudflare.com` URL.
+The test-only environment variable exited after the URL was issued, which stopped only
+that tunnel; it did not retain credentials or create a named Cloudflare tunnel. The
+actual interactive command remains `make public-demo` and waits until `Ctrl-C` stops
+the temporary tunnel.
+
+Each `make verify` passed Ruff, **50 pytest tests**, dependency audit, and
+`docker compose config --quiet`. After each `make clean-local`, `docker compose ps -aq`
+reported no project resources and `.local`, `.venv`, and generated `models/` were
+absent. Cycle 2 started only after Cycle 1 teardown. This proves a temporary public
+walkthrough of the existing local stack, not persistent hosting, cloud deployment,
+enterprise authentication, physical GPU use, or Terraform execution.
+
 ## Flagship scenario orchestration clean-room validation
 
 **Date:** 2026-09-30

@@ -8,6 +8,11 @@ Nothing in this document is executed evidence yet. GPU, cloud cost, managed serv
 and public hosting remain unexecuted until recorded in
 [validation evidence](../governance/VALIDATION.md).
 
+Terraform is the required authority for future cloud infrastructure provisioning and
+teardown. Do not create or delete pilot resources manually after account bootstrap:
+review a Terraform plan before apply, record its state backend/locking configuration,
+and use Terraform destroy plus provider verification at the end of each experiment.
+
 ## Pilot objective
 
 Prove the same governed path against a real model runtime and real infrastructure:
@@ -33,22 +38,25 @@ keys, recovery codes, or API tokens to Codex.
 | Container registry | Immutable images | Amazon ECR is the AWS option; use least-privilege push/pull roles. |
 | Object storage | Model artifacts and MLflow artifacts | Use an encrypted, versioned bucket with lifecycle expiry. |
 | Domain and Cloudflare account | Later protected public demo | A temporary Quick Tunnel is not a stable deployment. |
+| Terraform state backend | Reproducible cloud lifecycle | Encrypt state, restrict access, and enable locking before any apply. |
 | Model source | Open-weight model artifact | Check licence, size, and any gated-download requirements before use. |
 
 ## Cheapest credible progression
 
 ### Phase 1 — local and temporary public view
 
-Keep the existing local Docker Compose stack. A Cloudflare Quick Tunnel can expose the
-operator console briefly for a controlled demonstration:
+Keep the existing local Docker Compose stack. The supported launcher installs
+`cloudflared` with Homebrew when needed, starts the local stack, creates a temporary
+Cloudflare Quick Tunnel, and prints the operator-console URL:
 
 ```console
-cloudflared tunnel --url http://localhost:8091 --protocol http2
+make public-demo
 ```
 
 Quick Tunnel URLs are temporary and public. Do not place them in README files or use
 them for a persistent product demo. The local console includes bounded actions, so do
-not share one broadly without a read-only mode or access protection.
+not share one broadly without a read-only mode or access protection. `Ctrl-C` stops
+the tunnel; run `make clean-local` separately to remove project-owned local services.
 
 ### Phase 2 — one real GPU VM
 
@@ -103,7 +111,7 @@ intentional decision.
 
 ### Add for the Kubernetes pilot
 
-- [ ] VPC, subnets, security groups, and encrypted remote Terraform state.
+- [ ] Terraform-managed VPC, subnets, security groups, encrypted remote state, and locking.
 - [ ] EKS cluster, CPU nodes, GPU node pool, and node autoscaling policy.
 - [ ] PostgreSQL with backup/recovery plan; Redis with persistence/failover decision.
 - [ ] Ingress/TLS, DNS, and an authenticated operator-console boundary.
@@ -112,6 +120,7 @@ intentional decision.
 - [ ] Kueue admission policy and real GPU workload tests.
 - [ ] GitHub Actions OIDC role, image provenance/SBOM, and protected deployment path.
 - [ ] Disaster/rollback test and project-scoped teardown runbook.
+- [ ] Reviewed Terraform destroy plan and post-destroy provider verification.
 
 ## Real tests to execute
 
@@ -135,6 +144,9 @@ intentional decision.
 - Use one region, one environment, one GPU at a time, and scale GPU capacity to zero
   when idle.
 - Prefer documented teardown over broad account-level deletion commands.
+- Terraform is the sole provision/teardown path for pilot cloud resources: review
+  `terraform plan`, apply approved changes, then use `terraform destroy` and verify
+  that tagged resources and billable dependencies are gone.
 - Record actual instance type, region, model, runtime, driver, traffic, duration, and
   billable resources before publishing any performance or cost claim.
 

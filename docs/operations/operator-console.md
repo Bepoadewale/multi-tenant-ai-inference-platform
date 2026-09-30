@@ -21,6 +21,12 @@ the existing release service; and invoke a named hardened sandbox fixture task. 
 actions are forwarded to the existing services; their state machines and authorization
 checks remain authoritative.
 
+For a short controlled public walkthrough, use `make public-demo`. It runs the local
+flagship scenario and creates a temporary Cloudflare Quick Tunnel, printing the public
+console URL. The Quick Tunnel has no named-tunnel credentials and is not a deployment
+mechanism; anyone with its URL can reach this local demo, so stop it with `Ctrl-C` when
+the walkthrough ends. The local platform remains running until `make clean-local`.
+
 ## What it shows
 
 - overview: tenant admission and Prometheus request/throttle totals;

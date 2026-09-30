@@ -1,9 +1,7 @@
 # Operations
 
-- [Observability](observability.md)
-- [FinOps](finops.md)
+- [Observability, SLOs, and FinOps](observability-finops.md)
 - [Autoscaling](autoscaling.md)
-- [Benchmarking](benchmarking.md)
-- [Inference performance](inference-performance.md)
+- [Performance and benchmarking](performance.md)
 - [Failure modes](failure-modes.md)
 - [Operator console](operator-console.md)
