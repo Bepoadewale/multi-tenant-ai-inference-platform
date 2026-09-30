@@ -15,6 +15,9 @@ correlates Tempo trace ID, release context, local SLO result and a versioned fix
 token-cost estimate. vLLM, enterprise OIDC, durable PostgreSQL/outbox metering, and a
 model deployment controller remain production adapters or roadmap work.
 
+For the full local topology, repository map, versioned API quick reference, and
+admission decision table, see the [flagship system map](flagship-system-map.md).
+
 ## Governed canary remediation
 
 `remediation-control` is a separate FastAPI process with its own SQLite incident,

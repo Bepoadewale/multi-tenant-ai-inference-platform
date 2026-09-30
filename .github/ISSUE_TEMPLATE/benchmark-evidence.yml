@@ -1,0 +1,26 @@
+name: Runtime or benchmark evidence
+description: Add measured runtime evidence without conflating fixtures and production hardware.
+title: "evidence: "
+labels: ["observability", "benchmark"]
+body:
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Commit, hardware, runtime version, model, concurrency, and command.
+    validations:
+      required: true
+  - type: textarea
+    id: results
+    attributes:
+      label: Measured results
+      description: Include raw measurements and limitations; label simulation clearly.
+    validations:
+      required: true
+  - type: textarea
+    id: reproducibility
+    attributes:
+      label: Reproduction and rollback
+      description: Give the repeatable command and any cleanup requirements.
+    validations:
+      required: true

@@ -25,6 +25,21 @@ authenticated tenant -> shared admission -> real GPU model runtime -> metering
 Start with a single GPU virtual machine and synthetic traffic. Move to Kubernetes only
 after that path is measured and cost-controlled.
 
+## Local-first readiness versus production evidence
+
+| Concern | Current local evidence | Before a production claim |
+| --- | --- | --- |
+| tenant inference | two signed gateways, Redis admission, CPU ONNX responses | enterprise identity, durable production stores, capacity test |
+| model release | MLflow fixtures, digests, independent approval, canary/promotion/rollback | real model evaluation policy and protected delivery path |
+| capacity | Redis simulated-pool accounting | actual runtime, GPU metrics, scheduling, and measured saturation |
+| observability/FinOps | OTel, Tempo, Prometheus, Grafana, Decimal fixture pricing | retained production telemetry and cloud billing reconciliation |
+| operator console | local BFF with synthetic fixture identities | SSO/session/CSRF controls, per-user policy, audit retention |
+| infrastructure | Terraform contracts statically validated | reviewed Terraform apply, smoke, rollback, destroy, cost evidence |
+
+The local implementation is a completed control-loop demonstration, not a claim that
+these production conditions have been executed. This table must be updated with
+measured evidence—not marketing language—after a pilot.
+
 ## Accounts and prerequisites
 
 Create or obtain access to the following. Do not give passwords, access keys, private

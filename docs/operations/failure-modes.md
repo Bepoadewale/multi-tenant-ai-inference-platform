@@ -24,3 +24,17 @@ rejects repeat action; and verification failure leaves the incident failed rathe
 claiming recovery. The executed local demo proves a candidate runtime outage,
 independent approval, bounded stable rollback, controller restart recovery, and
 post-action real ONNX inference.
+
+## Local troubleshooting runbook
+
+| Symptom | Check | Safe response |
+| --- | --- | --- |
+| console or gateway refuses connection | `make status` then `make smoke` | run `make bootstrap-local`; do not hand-start partial containers |
+| token is rejected | confirm `.local/identity/tokens.json` exists and rerun `make bootstrap-local` | local tokens are short-lived; never paste them into issues or docs |
+| request is `429` | inspect the tenant's quota and bounded queue evidence in the console | wait for the window or use an assigned tenant; do not bypass Redis admission |
+| request is controlled `502` | run `make demo-failure` or `make demo-timeout` to reproduce | inspect metadata-only analysis/trace; do not replay side-effecting requests |
+| candidate rollout is unhealthy | use release/remediation evidence and the bounded rollback flow | never mutate Redis weights manually |
+| local state seems stale | `make clean-local`, then `make install`, `make bootstrap-local`, `make smoke` | cleanup is project-scoped; it does not prune unrelated Docker resources |
+
+Use readiness checks rather than arbitrary sleeps. If the reproducible sequence fails,
+capture the command output and update validation evidence before changing a claim.

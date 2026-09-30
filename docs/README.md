@@ -5,10 +5,10 @@ adapters. Start with the [README](../README.md) for the runnable platform story.
 
 | Area | Contents |
 | --- | --- |
-| [Architecture](architecture/) | System overview, flagship direction, tenant model, routing |
+| [Architecture](architecture/) | System overview, flagship direction, tenant model, routing, [full system map/API reference](architecture/flagship-system-map.md) |
 | [Operations](operations/) | Observability, FinOps, autoscaling, performance, benchmarks, failure modes, console |
 | [Delivery](delivery/) | Model rollout, GPU scheduling, AWS adapter, real-workload pilot |
-| [Security](security/) | Security model and controls |
+| [Security](security/) | Security model, architecture diagram, and threat controls |
 | [Governance](governance/) | Implementation status and executed validation evidence |
 | [Portfolio](portfolio/) | Interview guide and roadmap |
 | [ADRs](adr/) | Architecture decisions |
@@ -16,3 +16,7 @@ adapters. Start with the [README](../README.md) for the runnable platform story.
 Cloud/GPU instructions are planning or static validation unless a document explicitly
 records executed evidence. The local Docker/CPU ONNX workflow remains the default
 reproducible demonstration.
+
+For a low-level client walkthrough, use the token-free source in
+[`examples/`](../examples/README.md); it calls the executed inference API rather than
+inventing a parallel interface.

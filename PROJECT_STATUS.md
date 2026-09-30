@@ -60,6 +60,10 @@ adapters remain explicitly outside this status.
 - A read-only Flagship Scenario view composes nine fixed, linked evidence stages from
   the existing local services; its cumulative demo creates the evidence, while the
   browser cannot seed state or bypass any owning control-plane boundary.
+- The repository includes unedited operator-console screenshots captured from the
+  running local application, plus an API reference, runnable minimal clients, release
+  contract, security/threat summary, troubleshooting guide, and explicit pilot/production
+  evidence boundaries. These are documentation assets, not additional execution claims.
 - Clean-room workflow passed twice: bootstrap, smoke, cumulative flagship demos,
   validation, project-scoped cleanup, then a second bootstrap/demo.
 
@@ -160,7 +164,9 @@ bootstrap, smoke, flagship demo, verification, and project-scoped teardown.
 ## Last Updated
 
 2026-09-30, temporary public walkthrough clean-room evidence recorded on
-`codex/real-workload-pilot-guide`; GitHub CI is required before review.
+`codex/real-workload-pilot-guide`; flagship reference documentation and real local
+console screenshots added on `codex/flagship-docs-experience`. GitHub CI is required
+before review.
 
 ## Clean-Room Reproducibility
 

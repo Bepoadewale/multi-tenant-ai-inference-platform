@@ -1,0 +1,26 @@
+name: Flagship vertical slice
+description: Propose one bounded integration that preserves the gateway core.
+title: "slice: "
+labels: ["enhancement", "flagship"]
+body:
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Operator outcome
+      description: What end-to-end user or operator flow becomes possible?
+    validations:
+      required: true
+  - type: textarea
+    id: contract
+    attributes:
+      label: Narrow contract
+      description: List the API/event/state boundary; do not propose copying another project wholesale.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Required evidence
+      description: Success path, failure/security path, persistence/recovery, telemetry, and clean-room validation.
+    validations:
+      required: true

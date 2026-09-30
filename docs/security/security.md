@@ -43,3 +43,42 @@ Linux capabilities, no-new-privileges, CPU/memory/PID limits, `network=none`, no
 Docker socket, and no host bind mount. Task records retain metadata and patch hashes,
 not workspace contents. This does not claim gVisor, Firecracker, or Kubernetes sandbox
 execution.
+
+## Security architecture
+
+```mermaid
+flowchart LR
+  Caller[Application / human / delegated agent] -->|Ed25519 JWT| Gateway[Gateway]
+  Gateway -->|derive tenant + role| Policy[model assignment + Redis admission]
+  Policy --> Runtime[CPU ONNX runtime]
+  Gateway --> Metadata[metadata-only usage + trace]
+  Agent[Delegated agent] -->|short-lived scoped JWT| Tools[filtered tools]
+  Tools -->|plan/evidence only| Gateway
+  Human[Independent approver] --> Release[release/remediation approval]
+  Release -->|exact preconditions| Router[shared rollout weights]
+  Device[device JWT] --> Edge[edge-control inventory]
+  SandboxAgent[sandbox JWT] --> Sandbox[named task controller]
+  Sandbox --> Child[non-root, read-only, no-network child]
+```
+
+No browser, tenant client, delegated agent, device, or sandbox child receives a Redis,
+Docker, MLflow, Kubernetes, cloud, or platform-administrator credential. The local
+operator console is a server-side fixture-token BFF for a Compose demo, not an
+enterprise SSO implementation.
+
+## Threat model and controls
+
+| Threat | Executed local control | Boundary / remaining limit |
+| --- | --- | --- |
+| forged, expired, wrong-audience token | Ed25519 signature, issuer, audience, expiry, tenant, and role checks | production OIDC/JWKS remains an adapter |
+| client claims another tenant | tenant is derived from JWT; cross-tenant tests deny reads/actions | no external identity federation executed |
+| one tenant overloads shared inference | Redis Lua request/token/concurrency/bounded-queue limits across two gateways | no real GPU scheduler evidence |
+| unsafe model promotion | immutable digest-bound plan, independent approval, stale-state recheck, rollback | evaluation fixture is not production quality validation |
+| agent privilege escalation | filtered tool discovery, scope checks, plan-only tool, durable hashed audit | this slice is HTTP, not MCP protocol execution |
+| agent code task exfiltration | named tasks only; child no network, Docker socket, host mounts, root privileges | gVisor/Firecracker not executed |
+| privacy-sensitive edge fallback | restricted/`LOCAL_ONLY` request denied when local model unavailable | device properties are simulated profiles |
+| remediation loop or stale rollback | allowlisted action, cooldown/action budget, distinct approver, exact rollout recheck | no live Kubernetes remediation here |
+| prompt/response disclosure in telemetry | metadata-only usage and audit; no raw prompt/output by default | production retention/SIEM controls are roadmap |
+
+Report security concerns through the repository's security process. Never paste a
+token, private key, customer prompt, or exploit payload into a public issue.

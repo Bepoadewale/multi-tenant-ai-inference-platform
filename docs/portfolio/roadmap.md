@@ -39,3 +39,30 @@ are additive vertical slices, each requiring real local execution and a failure 
 - [ ] Terraform-managed real-workload pilot: protected remote state, one time-boxed
   GPU runtime, measured evidence, Terraform destroy, and provider-side teardown
   verification.
+
+## Before the first real cloud/GPU pilot
+
+These are deliberately deferred until a real workload pilot is being prepared. They
+must be implemented through Terraform-managed lifecycle work, not manual cloud setup.
+
+- [ ] Restructure Terraform into pilot-focused modules with protected remote state,
+  plan review, least-privilege roles, and project-scoped destroy.
+- [ ] Add a **local → GPU VM → EKS** reference architecture diagram that identifies
+  what has been executed at each stage.
+- [ ] Replace the CPU-fixture runtime table with a real-runtime compatibility matrix
+  for vLLM, Triton, and SGLang.
+- [ ] Add a benchmark-report format populated only with measured GPU results and the
+  command, hardware, runtime, model, concurrency, and limitations.
+- [ ] Publish a cloud deployment runbook covering Terraform plan, apply, smoke,
+  rollback, destroy, and cost review.
+
+## After the first production deployment
+
+Do not turn design intent into production claims before the following evidence exists:
+
+- [ ] Replace planned runtime support with tested versions and environments.
+- [ ] Publish measured benchmark charts and capacity limits.
+- [ ] Add production screenshots and authenticated-console workflow evidence.
+- [ ] Add operational SLO/error-budget reporting based on real workload data.
+- [ ] Document actual incident, rollback, cost, and Terraform-teardown evidence.
+- [ ] Update the production-readiness page from design intent to measured facts.
