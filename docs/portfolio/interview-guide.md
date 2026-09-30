@@ -1,7 +1,8 @@
 # Interview guide
 
-Flagship context: describe the executed inference core separately from each planned
-integration slice; do not collapse roadmap architecture into execution claims.
+Flagship context: distinguish the executed inference core and completed local slices
+from the remaining production/cloud/hardware adapters; do not collapse roadmap
+architecture into execution claims.
 
 This platform treats inference as a latency-sensitive, shared accelerator service. Discuss why vLLM supplies efficient continuous batching/OpenAI compatibility while the gateway owns identity/fairness/metering. Explain TTFT (prefill/user wait), TPOT (decode cadence), KV cache pressure, throughput-versus-tail-latency, and why CPU autoscaling is insufficient.
 

@@ -58,6 +58,11 @@ P0 items block PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE; do not select P1/P2 wor
 # P3 — Future / Cloud / Hardware
 
 - vLLM on GPUs, DCGM, EKS and production autoscaling.
+- [ ] Execute the staged [real-workload pilot](docs/delivery/real-workload-pilot.md):
+  first add encrypted, locked Terraform state and reviewed provision/destroy plans;
+  then run one time-boxed GPU runtime and a cost-controlled Kubernetes pilot. Record
+  measured evidence and Terraform-verified teardown; do not promote this documentation
+  to execution.
 # Clean-Room Completion Evidence
 
 - [x] Pass the full clean-room reproducibility gate: deterministic bootstrap, smoke, inference and overload/failure demos, safe cleanup, a second clean bootstrap, and recorded evidence.

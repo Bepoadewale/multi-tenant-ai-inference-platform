@@ -73,7 +73,7 @@ adapters remain explicitly outside this status.
 
 ## Architecture / Contracts Only
 
-- GPU serving, Kubernetes/EKS deployment/autoscaling, real cloud model hosting, and production durable metering/outbox.
+- GPU serving, Kubernetes/EKS deployment/autoscaling, real cloud model hosting, and production durable metering/outbox. Future cloud provision and teardown are Terraform-only; no cloud resources are executed by the local walkthrough.
 
 ## Known Failures
 
@@ -95,6 +95,17 @@ bootstrap, smoke, flagship demo, verification, and project-scoped teardown.
 - gVisor/Firecracker/Kubernetes sandbox runtime execution.
 
 ## Last Validation
+
+- **Temporary public walkthrough clean-room validation:** two independent cycles
+  passed on 2026-09-30. Each began with `make clean-local`, then ran
+  `PUBLIC_DEMO_EXIT_AFTER_URL=1 make public-demo`, `make verify`, and
+  `make clean-local`. The launcher installed/used local prerequisites, bootstrapped
+  the full Compose stack, ran the cumulative flagship demo, created and printed a
+  temporary credential-free Cloudflare Quick Tunnel URL, and shut down its tunnel in
+  the test mode. `make verify` passed Ruff, `50 passed` pytest tests, dependency
+  audit, and Compose configuration. Each cleanup left zero project Compose resources,
+  `.local`, `.venv`, and generated models. The Quick Tunnel remains a public,
+  short-lived demonstration aid—not deployment.
 
 - **Cumulative flagship clean-room validation:** two complete clean-room cycles passed
   on 2026-09-29. Each ran `make clean-local`, `make install`,
@@ -148,14 +159,15 @@ bootstrap, smoke, flagship demo, verification, and project-scoped teardown.
 
 ## Last Updated
 
-2026-09-29, cumulative flagship clean-room evidence recorded on
-`codex/flagship-final-cleanroom`; GitHub CI is required before review.
+2026-09-30, temporary public walkthrough clean-room evidence recorded on
+`codex/real-workload-pilot-guide`; GitHub CI is required before review.
 
 ## Clean-Room Reproducibility
 
 **Status: VALIDATED**
 
-Two full cumulative cycles passed on 2026-09-29. Both ended with no project Compose
-resources, project-labelled sandbox children, `.local`, `.venv`, or generated models;
-the second bootstrap ran after the first cleanup. Detailed commands and evidence are in
-`docs/VALIDATION.md`.
+The 2026-09-30 public-walkthrough path and previous cumulative flagship path both
+passed two full clean-room cycles. Both ended with no project Compose resources,
+project-labelled sandbox children, `.local`, `.venv`, or generated models; the second
+bootstrap ran after the first cleanup. Detailed commands and evidence are in
+`docs/governance/VALIDATION.md`.

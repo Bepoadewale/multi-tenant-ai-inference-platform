@@ -28,7 +28,7 @@ Run the complete local proof with `make demo-flagship` after `make bootstrap-loc
 It executes the preserved inference path and each integrated slice's success and
 failure assertions against one live Compose stack; `make clean-local` removes only
 resources owned by this project. Two clean-room cycles of that workflow are recorded
-in [validation evidence](docs/VALIDATION.md).
+in [validation evidence](docs/governance/VALIDATION.md).
 
 The remediation slice extends that path only after evidence exists:
 
@@ -74,7 +74,7 @@ simulated edge-network actions through the local BFF; it does not add an unrestr
 orchestration backdoor. The local console uses synthetic server-side fixture identities
 and is not a claim of production web SSO.
 
-See [flagship direction](docs/flagship-direction.md) for boundaries and the staged
+See [flagship direction](docs/architecture/flagship-direction.md) for boundaries and the staged
 integration model. Commercial strategy is intentionally not maintained in this public
 repository.
 
@@ -163,6 +163,8 @@ make demo-self-service # signed developer → durable integration profile → ge
 make demo-edge-adapter # registered local device ONNX → constrained public fallback → privacy/LOCAL_ONLY denial → durable inventory restart
 make demo-sandboxed-agent # delegated agent → hardened disposable task → patch + blocked egress probe → cleanup + audit restart
 make demo-operator-console # routed tenant/model/agent evidence → scoped release actions + named sandbox task
+make demo-flagship # cumulative cross-slice scenario used by the operator console
+make public-demo # bootstrap + flagship scenario + temporary public Cloudflare Quick Tunnel URL
 make demo-metering       # privacy-safe durable usage
 make demo-observability  # Prometheus + Tempo evidence
 make demo-failure        # unavailable backend → 502
@@ -173,6 +175,15 @@ make clean-local
 ```
 
 The local stack publishes gateways on `:8081` and `:8082`, release control on `:8083`, remediation control on `:8084`, delegated agent tools on `:8085`, developer self-service on `:8086`, edge control on `:8087`, edge devices on `:8088` and `:8089`, sandbox control on `:8090`, the operator console on `:8091`, MLflow on `:15010`, Prometheus on `:9090`, Tempo on `:3200`, and Grafana on `:3002`. `make clean-local` removes only this repository's Compose resources, locally built images, generated artifacts, and local state.
+
+`make public-demo` is a controlled walkthrough helper. It installs `cloudflared` with
+Homebrew when necessary, starts the local stack, runs the flagship demo, creates a
+temporary public Cloudflare Quick Tunnel, and prints its URL. The URL is public and
+short-lived; it is not hosted deployment, does not use a named tunnel or credentials,
+and must never be recorded in repository documentation. `Ctrl-C` stops only the
+tunnel; use `make clean-local` to remove the local platform afterward. See the
+[real-workload pilot guide](docs/delivery/real-workload-pilot.md) for the future,
+Terraform-managed deployment path.
 
 ## Security boundary
 
@@ -228,15 +239,12 @@ identity is denied before profile creation.
 
 ## Documentation
 
-- [Architecture](docs/architecture.md)
-- [Flagship direction](docs/flagship-direction.md)
-- [Multi-tenancy](docs/multi-tenancy.md)
-- [Routing](docs/routing.md)
-- [Observability](docs/observability.md)
-- [FinOps](docs/finops.md)
-- [Security](docs/security.md)
-- [Failure modes](docs/failure-modes.md)
-- [Implementation status](docs/IMPLEMENTATION_STATUS.md)
-- [Validation evidence](docs/VALIDATION.md)
+- [Documentation index](docs/README.md)
+- [Architecture and flagship direction](docs/architecture/)
+- [Operations and observability](docs/operations/)
+- [Delivery and real-workload pilot](docs/delivery/)
+- [Security](docs/security/)
+- [Governance and validation](docs/governance/)
+- [Interview and roadmap material](docs/portfolio/)
 
 See [ai-platform-control-plane](https://github.com/Bepoadewale/ai-platform-control-plane) for governed infrastructure provisioning. This repository governs consumption of shared inference capacity.

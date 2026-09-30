@@ -18,6 +18,9 @@ are additive vertical slices, each requiring real local execution and a failure 
 - [x] F8 integrated clean-room success and rollback demonstration: two full
   bootstrap → smoke → `demo-flagship` → verify → safe-cleanup cycles passed on
   2026-09-29.
+- [x] F9 controlled public walkthrough: two clean-room `make public-demo` cycles
+  issued temporary credential-free Quick Tunnel URLs on 2026-09-30. This is not
+  persistent hosting or cloud deployment.
 
 - [x] M1 gateway, deterministic mock test backend, real CPU ONNX Runtime local backend, OpenAI-compatible chat/streaming, and tests.
 - [x] M2 authenticated fixture identity, tenant authorization, quotas, metering.
@@ -33,3 +36,6 @@ are additive vertical slices, each requiring real local execution and a failure 
 - [x] M12 security, failure-mode, interview documentation.
 - [x] Production contracts: vLLM adapter, Redis Lua admission contract, strong admin endpoint guard, streaming semantics, and API tests.
 - [ ] Environment-dependent hardening: OIDC/JWKS, live Redis/PostgreSQL/outbox, vLLM adapter integration tests, live GPU benchmarks, GitOps controller, Karpenter implementation.
+- [ ] Terraform-managed real-workload pilot: protected remote state, one time-boxed
+  GPU runtime, measured evidence, Terraform destroy, and provider-side teardown
+  verification.

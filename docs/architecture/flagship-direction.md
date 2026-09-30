@@ -18,6 +18,10 @@ Every flagship integration must keep this path working and must not weaken tenan
 isolation, privacy boundaries, clean-room reproducibility or the evidence labels for
 GPU/cloud behavior.
 
+Future cloud infrastructure is a separate, Terraform-managed delivery path: Terraform
+must provision and tear down pilot resources with reviewed plans, protected state, and
+post-destroy verification. It is not part of the executed local proof.
+
 ## Integration model
 
 The flagship consumes proven concepts through narrow contracts; it does not merge ten
@@ -55,7 +59,7 @@ recovery, MLflow release control, simulated-capacity policy, evidence/remediatio
 developer self-service, delegated tools, edge policy, and bounded sandbox execution.
 Two clean-room cycles executed `make install`, `make bootstrap-local`, `make smoke`,
 `make demo-flagship`, `make verify`, and project-scoped `make clean-local` on
-2026-09-29. See [validation evidence](VALIDATION.md); this proof does not change the
+2026-09-29. See [validation evidence](../governance/VALIDATION.md); this proof does not change the
 production/hardware boundaries below.
 
 ## Local-first boundary

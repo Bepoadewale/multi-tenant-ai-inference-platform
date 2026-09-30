@@ -10,5 +10,9 @@ As the project approaches completion, clean-room reproducibility becomes P0. Bef
 
 Before certifying any implementation PR as ready for human review, apply the same
 project-scoped clean-room sequence to that change and record exact evidence in
-`docs/VALIDATION.md`. A PR without it remains draft; only documentation-only PRs may
+`docs/governance/VALIDATION.md`. A PR without it remains draft; only documentation-only PRs may
 state that runtime evidence is not applicable.
+
+For future cloud work, Terraform is the required provision/teardown authority. Keep
+cloud work outside the local evidence boundary until a reviewed Terraform plan, applied
+resources, Terraform destroy, and provider-side post-destroy verification are recorded.
