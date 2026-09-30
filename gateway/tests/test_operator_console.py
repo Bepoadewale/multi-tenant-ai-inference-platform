@@ -42,6 +42,29 @@ def test_operator_console_returns_scoped_tenant_detail(monkeypatch, tmp_path):
     assert response.json()["usage"]["requests"] == 4
 
 
+def test_operator_console_returns_fixed_flagship_scenario(monkeypatch, tmp_path):
+    token_path = tmp_path / "tokens.json"
+    token_path.write_text('{"admin":"token"}')
+    monkeypatch.setattr(operator_console, "TOKENS_PATH", token_path)
+
+    async def fake_snapshot():
+        return {
+            "tenants": [{"id": "team-search"}], "models": [{"name": "chat-default"}],
+            "release_plans": {"plans": [{"id": "plan-1"}]}, "incidents": {"incidents": [{"id": "incident-1"}]},
+            "devices": {"devices": [{"device_id": "edge-search-001"}]}, "integrations": {"integrations": [{"id": "profile-1"}]},
+            "sandbox_tasks": {"tasks": [{"id": "task-1"}]}, "agent_tools": {"tools": [{"name": "evidence"}]},
+            "requests": {"data": {"result": [{"value": [0, "1"]}]}}
+        }
+
+    monkeypatch.setattr(operator_console, "_snapshot", fake_snapshot)
+    response = TestClient(operator_console.app).get("/console/v1/scenario")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["scenario"] == "local-flagship-governed-ai-lifecycle"
+    assert len(body["stages"]) == 9
+    assert all(stage["status"] == "OBSERVED" for stage in body["stages"])
+
+
 def test_operator_console_returns_fixed_model_telemetry(monkeypatch, tmp_path):
     token_path = tmp_path / "tokens.json"
     token_path.write_text('{"admin":"x"}')
