@@ -239,6 +239,12 @@ identity is denied before profile creation.
 
 ## Documentation
 
+- [Flagship system map, APIs, and admission decisions](docs/architecture/flagship-system-map.md)
+- [Operator Console walkthrough and real local screenshots](docs/operations/operator-console.md)
+- [Model artifact/release contract](docs/delivery/model-rollouts.md)
+- [Local versus production/pilot readiness](docs/delivery/real-workload-pilot.md)
+- [Security architecture and threat controls](docs/security/security.md)
+- [Runnable API examples](examples/README.md)
 - [Documentation index](docs/README.md)
 - [Architecture and flagship direction](docs/architecture/)
 - [Operations and observability](docs/operations/)

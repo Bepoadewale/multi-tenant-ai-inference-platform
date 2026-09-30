@@ -27,6 +27,24 @@ console URL. The Quick Tunnel has no named-tunnel credentials and is not a deplo
 mechanism; anyone with its URL can reach this local demo, so stop it with `Ctrl-C` when
 the walkthrough ends. The local platform remains running until `make clean-local`.
 
+## Captured local views
+
+The following are unedited screenshots captured from the running local console on
+2026-09-30. Counts, plan IDs, and active states are runtime evidence and naturally vary
+between clean-room runs; the screenshots are not mockups or production screenshots.
+
+### Flagship scenario
+
+![Flagship scenario showing the nine linked platform stages](../assets/operator-console/flagship-scenario.png)
+
+### Cross-slice overview
+
+![Operator Console overview showing tenant admission, serving routes, releases, and incidents](../assets/operator-console/overview.png)
+
+### Operations and bounded recovery
+
+![Operations view showing remediation incidents and explicitly simulated capacity](../assets/operator-console/operations.png)
+
 ## What it shows
 
 - overview: tenant admission and Prometheus request/throttle totals;
@@ -65,10 +83,22 @@ system; durable audit remains in each owning service and is visible through the 
 detail views.
 
 Every list row links to its scoped detail route, for example
-`#/tenants/team-search`, `#/models/chat-default`, or `#/incidents/<id>`. The console
+`#/tenant/team-search`, `#/model/chat-default`, or `#/incident/<id>`. The console
 has no generic browser proxy, arbitrary PromQL interface, arbitrary command/action
 form, arbitrary URL target, or browser-held platform token. The browser asks only for
 fixed, server-defined views and actions.
+
+## Presentation principles
+
+The console and its documentation deliberately use a restrained operations style:
+
+- dense, legible tables and status labels over decorative charts;
+- explicit “local,” “simulated,” and “not claimed” labels at the point of evidence;
+- links to durable records and real observability rather than synthetic AI summaries;
+- fixed, least-privilege actions rather than free-form administrative controls.
+
+Do not add gradients, invented utilization visuals, fabricated performance numbers, or
+screenshots that were not captured from a running application.
 
 ## Local security boundary
 

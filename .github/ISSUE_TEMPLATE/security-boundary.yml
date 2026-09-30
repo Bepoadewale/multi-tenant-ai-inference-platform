@@ -1,0 +1,24 @@
+name: Security boundary
+description: Report or propose a change to an identity, policy, tenant, secret, or delegation boundary.
+title: "security: "
+labels: ["security"]
+body:
+  - type: textarea
+    id: boundary
+    attributes:
+      label: Boundary and impact
+      description: State the principal, asset, affected tenant scope, and potential impact. Do not include secrets.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Safe reproduction or evidence
+      description: Provide minimal non-sensitive steps or a proposed test.
+    validations:
+      required: true
+  - type: textarea
+    id: mitigation
+    attributes:
+      label: Proposed control
+      description: Describe least-privilege, validation, audit, or rollback considerations.

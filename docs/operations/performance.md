@@ -30,3 +30,20 @@ parallelism adds replicas. High GPU utilization is not automatically good user
 latency—queueing and tail TTFT matter. The executed CPU ONNX fixture validates routing
 and admission behavior, not production model performance; the separate mock benchmark
 must never be compared to GPU vLLM results.
+
+## Runtime support matrix
+
+| Runtime / capability | Status | What the repository actually proves |
+| --- | --- | --- |
+| ONNX Runtime `CPUExecutionProvider` | ✅ EXECUTED LOCALLY | Two Dockerized runtime targets load the generated ONNX fixture and serve real gateway traffic. |
+| OpenAI-compatible chat and SSE | ✅ EXECUTED LOCALLY | Gateway returns non-streaming and streaming fixture responses. |
+| weighted gateway routing | ✅ EXECUTED LOCALLY | Shared Redis weights direct live requests to stable/candidate CPU targets. |
+| vLLM | 📐 ARCHITECTURE / CONTRACT ONLY | Adapter/configuration exists; no vLLM process, GPU, or benchmark ran. |
+| Triton Inference Server | 📋 ROADMAP | Candidate for a future real-runtime pilot; not installed or validated here. |
+| SGLang | 📋 ROADMAP | Candidate for a future real-runtime pilot; not installed or validated here. |
+| GPU/DCGM/KV-cache telemetry | 🔵 SIMULATED / UNEXECUTED | Redis capacity accounting is explicitly not physical hardware telemetry. |
+
+Supported version statements are limited to the versions constrained in
+`pyproject.toml`, `docker-compose.yml`, and the current lock/image references. A
+runtime becomes “supported” only after a reproducible local or pilot validation record
+names the environment, command, model, result, and failure boundary.

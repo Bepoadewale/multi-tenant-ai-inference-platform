@@ -46,6 +46,10 @@ P0 items block PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE; do not select P1/P2 wor
 # P1 — Production Hardening
 
 - Circuit persistence, request cancellation, durable PostgreSQL/outbox metering, load-test reporting, and richer dashboard provisioning.
+- [x] Add an evidence-first flagship reference: system/API maps, model-release
+  contract, real local console screenshots, safe client examples, threat model,
+  troubleshooting, issue templates, release-note policy, and explicitly deferred
+  pilot/production work.
 - [x] Complete the operator-console workflow UI: two clean-room cycles proved
   scoped release, remediation, developer-profile, sandbox, and simulated edge-network
   actions through the browser BFF; retain the existing service state machines as the

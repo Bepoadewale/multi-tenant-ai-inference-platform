@@ -1,0 +1,26 @@
+name: Real workload pilot
+description: Track Terraform-managed cloud/GPU pilot work only after the local contract is stable.
+title: "pilot: "
+labels: ["pilot", "terraform"]
+body:
+  - type: textarea
+    id: hypothesis
+    attributes:
+      label: Pilot hypothesis
+      description: What local-first assumption will this real workload test?
+    validations:
+      required: true
+  - type: textarea
+    id: terraform
+    attributes:
+      label: Terraform lifecycle
+      description: State plan, apply approvals, state protection, smoke, rollback, destroy, and cost ceiling.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Required evidence
+      description: Runtime versions, benchmark methodology, security posture, cost results, and post-destroy verification.
+    validations:
+      required: true

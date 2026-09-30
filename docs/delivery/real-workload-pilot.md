@@ -25,6 +25,21 @@ authenticated tenant -> shared admission -> real GPU model runtime -> metering
 Start with a single GPU virtual machine and synthetic traffic. Move to Kubernetes only
 after that path is measured and cost-controlled.
 
+## Local-first readiness versus production evidence
+
+| Concern | Current local evidence | Before a production claim |
+| --- | --- | --- |
+| tenant inference | two signed gateways, Redis admission, CPU ONNX responses | enterprise identity, durable production stores, capacity test |
+| model release | MLflow fixtures, digests, independent approval, canary/promotion/rollback | real model evaluation policy and protected delivery path |
+| capacity | Redis simulated-pool accounting | actual runtime, GPU metrics, scheduling, and measured saturation |
+| observability/FinOps | OTel, Tempo, Prometheus, Grafana, Decimal fixture pricing | retained production telemetry and cloud billing reconciliation |
+| operator console | local BFF with synthetic fixture identities | SSO/session/CSRF controls, per-user policy, audit retention |
+| infrastructure | Terraform contracts statically validated | reviewed Terraform apply, smoke, rollback, destroy, cost evidence |
+
+The local implementation is a completed control-loop demonstration, not a claim that
+these production conditions have been executed. This table must be updated with
+measured evidence—not marketing language—after a pilot.
+
 ## Accounts and prerequisites
 
 Create or obtain access to the following. Do not give passwords, access keys, private
@@ -133,6 +148,21 @@ intentional decision.
 6. GPU workload admission/rejection with Kueue after the Kubernetes phase begins.
 7. Node/runtime interruption and controlled recovery.
 8. Cost report that separates measured cloud usage from local fixture estimates.
+
+## GPU scheduling and autoscaling in the pilot
+
+The local `simulated-l40s` pool is Redis quota accounting, not a Kubernetes scheduler.
+For real GPU placement, use the completed
+[GPU Scheduler Lab](https://github.com/Bepoadewale/gpu-scheduler-lab) as the reference
+for Kueue/Volcano experiments with explicitly simulated resources, then validate actual
+device-plugin/GPU Operator/DCGM behavior only on a real NVIDIA environment.
+
+HPA/KEDA scales serving pods; node groups or Karpenter scale the underlying GPU
+capacity. They act on different delays and must be tested separately. Candidate signals
+include active requests, queue depth/wait, token rate, latency, and—only on real
+hardware—GPU/KV-cache pressure. Keep warm replicas for latency-sensitive models and
+record cold-start behavior. A real multi-GPU model additionally needs an explicit
+tensor-parallel/topology plan, compatible SKU labels, affinity, and an NVLink review.
 
 ## Cost and safety rules
 
