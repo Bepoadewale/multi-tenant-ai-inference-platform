@@ -77,4 +77,4 @@ evidence and the cross-slice demonstration must pass clean-room validation.
 
 - [x] Clean clone/bootstrap has no hidden state; primary and failure demos pass.
 - [x] Cleanup removes only this project and unrelated resources survive.
-- [x] Post-cleanup absence and second bootstrap/demo are recorded in `docs/VALIDATION.md`.
+- [x] Post-cleanup absence and second bootstrap/demo are recorded in `docs/governance/VALIDATION.md`.

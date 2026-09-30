@@ -158,4 +158,4 @@ bootstrap, smoke, flagship demo, verification, and project-scoped teardown.
 Two full cumulative cycles passed on 2026-09-29. Both ended with no project Compose
 resources, project-labelled sandbox children, `.local`, `.venv`, or generated models;
 the second bootstrap ran after the first cleanup. Detailed commands and evidence are in
-`docs/VALIDATION.md`.
+`docs/governance/VALIDATION.md`.

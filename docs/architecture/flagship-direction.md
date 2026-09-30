@@ -55,7 +55,7 @@ recovery, MLflow release control, simulated-capacity policy, evidence/remediatio
 developer self-service, delegated tools, edge policy, and bounded sandbox execution.
 Two clean-room cycles executed `make install`, `make bootstrap-local`, `make smoke`,
 `make demo-flagship`, `make verify`, and project-scoped `make clean-local` on
-2026-09-29. See [validation evidence](VALIDATION.md); this proof does not change the
+2026-09-29. See [validation evidence](../governance/VALIDATION.md); this proof does not change the
 production/hardware boundaries below.
 
 ## Local-first boundary

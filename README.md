@@ -28,7 +28,7 @@ Run the complete local proof with `make demo-flagship` after `make bootstrap-loc
 It executes the preserved inference path and each integrated slice's success and
 failure assertions against one live Compose stack; `make clean-local` removes only
 resources owned by this project. Two clean-room cycles of that workflow are recorded
-in [validation evidence](docs/VALIDATION.md).
+in [validation evidence](docs/governance/VALIDATION.md).
 
 The remediation slice extends that path only after evidence exists:
 
@@ -74,7 +74,7 @@ simulated edge-network actions through the local BFF; it does not add an unrestr
 orchestration backdoor. The local console uses synthetic server-side fixture identities
 and is not a claim of production web SSO.
 
-See [flagship direction](docs/flagship-direction.md) for boundaries and the staged
+See [flagship direction](docs/architecture/flagship-direction.md) for boundaries and the staged
 integration model. Commercial strategy is intentionally not maintained in this public
 repository.
 
@@ -228,15 +228,12 @@ identity is denied before profile creation.
 
 ## Documentation
 
-- [Architecture](docs/architecture.md)
-- [Flagship direction](docs/flagship-direction.md)
-- [Multi-tenancy](docs/multi-tenancy.md)
-- [Routing](docs/routing.md)
-- [Observability](docs/observability.md)
-- [FinOps](docs/finops.md)
-- [Security](docs/security.md)
-- [Failure modes](docs/failure-modes.md)
-- [Implementation status](docs/IMPLEMENTATION_STATUS.md)
-- [Validation evidence](docs/VALIDATION.md)
+- [Documentation index](docs/README.md)
+- [Architecture and flagship direction](docs/architecture/)
+- [Operations and observability](docs/operations/)
+- [Delivery and real-workload pilot](docs/delivery/)
+- [Security](docs/security/)
+- [Governance and validation](docs/governance/)
+- [Interview and roadmap material](docs/portfolio/)
 
 See [ai-platform-control-plane](https://github.com/Bepoadewale/ai-platform-control-plane) for governed infrastructure provisioning. This repository governs consumption of shared inference capacity.
