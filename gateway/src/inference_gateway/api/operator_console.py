@@ -197,6 +197,54 @@ async def overview() -> dict:
     return await _snapshot()
 
 
+@app.get("/console/v1/scenario")
+async def flagship_scenario() -> dict:
+    """Return the fixed, evidence-linked local flagship narrative.
+
+    This is deliberately a read-only composition of existing service evidence. It
+    cannot seed data, alter rollout state, or proxy an arbitrary query. The
+    reproducible demo scripts remain the authority that create the evidence.
+    """
+
+    snapshot = await _snapshot()
+    plans = _items(snapshot["release_plans"], "plans")
+    incidents = _items(snapshot["incidents"], "incidents")
+    devices = _items(snapshot["devices"], "devices")
+    integrations = _items(snapshot["integrations"], "integrations")
+    tasks = _items(snapshot["sandbox_tasks"], "tasks")
+    tools = _items(snapshot["agent_tools"], "tools")
+    tenant_rows = snapshot["tenants"] if isinstance(snapshot["tenants"], list) else []
+    model_rows = snapshot["models"] if isinstance(snapshot["models"], list) else []
+    tenant_id = next((row.get("id") for row in tenant_rows if row.get("id") == "team-search"), None)
+    model_alias = next((row.get("name") for row in model_rows if row.get("name") == "chat-default"), None)
+    request_count = snapshot["requests"].get("data", {}).get("result", []) if isinstance(snapshot["requests"], dict) else []
+
+    def stage(identifier: str, title: str, description: str, route: str, observed: bool) -> dict[str, str]:
+        return {
+            "id": identifier,
+            "title": title,
+            "description": description,
+            "route": route,
+            "status": "OBSERVED" if observed else "AWAITING_DEMO_EVIDENCE",
+        }
+
+    return {
+        "scenario": "local-flagship-governed-ai-lifecycle",
+        "boundary": "Local Docker/CPU ONNX evidence. Simulated capacity and edge hardware remain labelled.",
+        "stages": [
+            stage("admission", "Signed tenant admission", "team-search is authenticated and admitted through Redis-backed quota policy.", f"#/tenant/{tenant_id}" if tenant_id else "#/tenants", bool(tenant_id)),
+            stage("inference", "Real CPU inference", "The OpenAI-compatible gateway routes a request to a CPU ONNX Runtime target and records metadata-only usage.", f"#/model/{model_alias}" if model_alias else "#/models", bool(model_alias and request_count)),
+            stage("release", "Governed model canary", "An evaluated candidate follows immutable plan, independent approval, canary, then promotion or rollback.", "#/models", bool(plans)),
+            stage("evidence", "Trace, SLO and cost evidence", "Model detail links fixed Prometheus metrics and model-filtered Grafana; local cost is fixture estimation.", f"#/model/{model_alias}" if model_alias else "#/models", bool(model_alias and request_count)),
+            stage("recovery", "Bounded remediation", "A failed canary creates a durable incident. Only a separately approved stable rollback may execute.", "#/operations", bool(incidents)),
+            stage("agent", "Delegated agent boundary", "An agent sees filtered metadata tools and cannot approve or execute remediation.", "#/agents", bool(tools)),
+            stage("developer", "Developer self-service", "A signed developer creates a tenant/model-bound, token-free integration profile.", "#/developers", bool(integrations)),
+            stage("edge", "Privacy-aware edge routing", "Independent signed devices run local ONNX or public-only fallback; restricted traffic is denied.", "#/edge", bool(devices)),
+            stage("sandbox", "Bounded agent execution", "A delegated agent runs named hardened fixture tasks, producing durable audit evidence and cleaned-up children.", "#/agents", bool(tasks)),
+        ],
+    }
+
+
 @app.get("/console/v1/tenants/{tenant_id}")
 async def tenant_detail(tenant_id: str) -> dict:
     async with httpx.AsyncClient(timeout=4.0) as client:

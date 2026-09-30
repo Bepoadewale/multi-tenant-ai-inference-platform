@@ -12,6 +12,7 @@ cd "$repo_root"
 
 overview=$(curl -fsS http://localhost:8091/console/v1/overview)
 jq -e '.tenants and .models and .capacity and .release_plans and .devices and .registry' <<<"$overview" >/dev/null
+curl -fsS http://localhost:8091/console/v1/scenario | jq -e '.scenario == "local-flagship-governed-ai-lifecycle" and (.stages | length == 9)' >/dev/null
 curl -fsS http://localhost:8091/console/v1/tenants/team-search | jq -e '.tenant.id == "team-search" and .usage' >/dev/null
 curl -fsS http://localhost:8091/console/v1/models/chat-default | jq -e '.rollout.alias == "chat-default" and .registry and .telemetry and .grafana_url' >/dev/null
 curl -fsS http://localhost:8091/console/v1/agents | jq -e '.tools and .audit' >/dev/null

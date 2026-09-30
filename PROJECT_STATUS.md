@@ -57,6 +57,9 @@ adapters remain explicitly outside this status.
   edge detail views over real cross-slice local evidence. It forwards only fixed
   release, remediation, developer-profile, named sandbox-task, and explicitly
   simulated edge-connectivity actions. Browser-held platform credentials are not used.
+- A read-only Flagship Scenario view composes nine fixed, linked evidence stages from
+  the existing local services; its cumulative demo creates the evidence, while the
+  browser cannot seed state or bypass any owning control-plane boundary.
 - Clean-room workflow passed twice: bootstrap, smoke, cumulative flagship demos,
   validation, project-scoped cleanup, then a second bootstrap/demo.
 
