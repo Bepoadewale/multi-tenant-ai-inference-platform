@@ -6,7 +6,9 @@ CPU fixtures explicitly non-GPU-performance evidence.
 
 Stack: Python 3.12, FastAPI, Redis contracts, Prometheus, vLLM/Kubernetes contracts.
 
-Commands: `make install`, `make test`, `make lint`, `make demo`, `make load-test`, `make helm-lint`, `make terraform-validate`.
+Commands: `make install`, `make bootstrap-local`, `make smoke`, `make demo-flagship`,
+`make public-demo`, `make verify`, `make clean-local`, `make test`, `make lint`,
+`make load-test`, `make helm-lint`, `make terraform-validate`.
 
 Rules: never claim GPU/vLLM performance without execution; tenant identity is server-side; test cross-tenant limits and failure paths; no secrets/main pushes; update status/backlog and report exact validation. Do not copy other portfolio repositories wholesale: integrate through narrow APIs/events and preserve the working gateway path. Keep commercial/pricing/buyer strategy out of this public repository.
 

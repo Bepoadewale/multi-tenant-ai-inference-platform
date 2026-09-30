@@ -137,8 +137,9 @@ intentional decision.
 ## Cost and safety rules
 
 - Do not use a personal/root cloud account for experiments.
-- Do not expose the current operator console publicly without authentication or a
-  read-only public mode.
+- Do not expose the operator console as a persistent public service without
+  authentication or a read-only public mode. The documented `make public-demo` Quick
+  Tunnel is a brief, operator-controlled exception for a local walkthrough only.
 - Tag every resource: `Project=multi-tenant-ai-platform`, `Environment=pilot`,
   `Owner=bepoadewale`, and an expiry/TTL tag.
 - Use one region, one environment, one GPU at a time, and scale GPU capacity to zero

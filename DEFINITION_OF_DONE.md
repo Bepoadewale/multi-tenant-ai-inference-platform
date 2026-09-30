@@ -75,6 +75,11 @@ evidence and the cross-slice demonstration must pass clean-room validation.
 
 `PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE` requires two executed clean-room cycles: clone → install → bootstrap gateway, Redis, CPU runtime, telemetry → smoke → authenticated inference/quota/queue/routing demo → overload or backend-failure demo → validation → project-scoped cleanup → second clean bootstrap/demo. Executed commands: `make install`, `make bootstrap-local`, `make smoke`, `make demo-flagship`, `make verify`, `make clean-local`.
 
+`make public-demo` is an additional executed walkthrough path: it repeats the local
+bootstrap/demo and prints a temporary public Quick Tunnel URL. It is not persistent
+hosting. Future cloud infrastructure is outside this local gate and must use Terraform
+for both provisioning and teardown, with separate real-workload evidence.
+
 - [x] Clean clone/bootstrap has no hidden state; primary and failure demos pass.
 - [x] Cleanup removes only this project and unrelated resources survive.
 - [x] Post-cleanup absence and second bootstrap/demo are recorded in `docs/governance/VALIDATION.md`.

@@ -18,6 +18,10 @@ Every flagship integration must keep this path working and must not weaken tenan
 isolation, privacy boundaries, clean-room reproducibility or the evidence labels for
 GPU/cloud behavior.
 
+Future cloud infrastructure is a separate, Terraform-managed delivery path: Terraform
+must provision and tear down pilot resources with reviewed plans, protected state, and
+post-destroy verification. It is not part of the executed local proof.
+
 ## Integration model
 
 The flagship consumes proven concepts through narrow contracts; it does not merge ten
