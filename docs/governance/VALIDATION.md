@@ -51,6 +51,24 @@ repository-specific encrypted/versioned S3 state, DynamoDB locking, required tag
 and an actual-cost budget alert. It was not planned or applied, so its resource names,
 provider behavior, and billing remain unexecuted.
 
+## Private AWS runtime-contract static validation
+
+**Date:** 2026-10-08
+**Scope:** CP3 static validation only. No AWS credentials, plan, apply, cloud
+resource, or billing action was used.
+
+```console
+terraform fmt -check -recursive infrastructure/terraform
+make terraform-validate
+```
+
+The AWS contract root validates a private VPC/EKS CPU node group, immutable ECR
+repositories, encrypted RDS PostgreSQL and ElastiCache Redis, versioned private
+artifact storage, empty Secrets Manager containers, and an IRSA role whose trust policy
+names only `system:serviceaccount:platform:inference-gateway`. Validation cannot prove
+AWS provider behavior, deployed network reachability, workload security manifests,
+runtime identity, or cost; all remain unexecuted.
+
 ## Temporary public walkthrough clean-room validation
 
 **Date:** 2026-09-30

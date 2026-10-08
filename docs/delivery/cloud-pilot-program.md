@@ -80,6 +80,12 @@ artifacts, ECR image delivery, Secrets Manager/External Secrets, and least-privi
 IRSA. Define tenant-safe NetworkPolicies, probes, PDBs, non-root execution, and
 resource limits. Optional GPU infrastructure is isolated and disabled by default.
 
+**Status: implemented and statically validated only.** The pilot root now contracts
+private VPC/EKS, immutable ECR repositories, encrypted RDS PostgreSQL and ElastiCache
+Redis, versioned private artifact storage, empty Secrets Manager containers, and a
+service-account-bound gateway IRSA role. It has not been planned or applied against an
+AWS account.
+
 ### CP4 — Delivery and narrow browser access
 
 Define Helm/Kustomize runtime delivery, Argo CD or equivalent GitOps contracts,

@@ -12,7 +12,7 @@ validation alone are not cloud execution evidence.
   repository-specific runtime rather than generic platform boxes.
 - [x] A dedicated Terraform bootstrap root defines an encrypted/versioned S3 state
   bucket, DynamoDB lock table, project tags, and budget guardrail.
-- [ ] Pilot Terraform defines only resources needed for this repository: private VPC,
+- [x] Pilot Terraform defines only resources needed for this repository: private VPC,
   EKS, ECR, required durable stores, IAM/IRSA, secrets boundary, and outputs.
 - [x] Terraform formatting, backend-free initialization, and validation pass without
   creating AWS resources. A reviewed non-applying plan remains part of the future
