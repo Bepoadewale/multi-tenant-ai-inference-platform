@@ -54,6 +54,11 @@ cloud operations guide, security model, and production-evolution page. The diagr
 must show the actual intended gateway, runtime, stores, delivery, identity, and
 observability paths for this repository.
 
+**Status: complete as documentation/static validation only.** See the
+[cloud architecture](../cloud-architecture.md), [cloud operations contract](../cloud-operations.md),
+and [production evolution boundary](../production-evolution.md). No AWS resources
+were created for CP1.
+
 ### CP2 — Terraform foundation
 
 Define a separate bootstrap root for a dedicated encrypted/versioned S3 state bucket,
