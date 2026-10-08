@@ -23,11 +23,12 @@
 | Operator-console workflow UI | ✅ EXECUTED LOCALLY | Guided release, bounded remediation, developer-profile, named sandbox-task, and explicit simulated edge-network controls call only fixed BFF endpoints that forward to existing service state machines. Two clean-room cycles exercised the packaged UI/BFF alongside the cumulative flagship demo. |
 | Flagship scenario orchestration | ✅ EXECUTED LOCALLY | A read-only, linked nine-stage narrative composes evidence from tenant admission, CPU inference, releases, observability, remediation, agents, developer profiles, edge routing, and sandbox execution. Two clean-room cumulative demos generated and asserted the evidence. |
 | Temporary public walkthrough | ✅ EXECUTED LOCALLY | `make public-demo` cleanly bootstraps the local platform, runs the flagship scenario, creates a temporary credential-free Cloudflare Quick Tunnel, prints its URL, and stops only the tunnel on exit. It is not hosted deployment. |
+| Intended AWS cloud-pilot topology and operations contract | 📐 ARCHITECTURE / CONTRACT ONLY | Checked-in icon-based topology, cloud operations guide, trust boundary, and staged acceptance criteria are reviewed documentation; no AWS resources have been created or validated. |
 | gVisor/Firecracker/Kubernetes sandboxing | 📋 ROADMAP | Local Docker child hardening is executed. Stronger runtime isolation and Kubernetes execution are separate adapters and are not claimed. |
 | Edge OTA/fleet rollout/mobile hardware | 📋 ROADMAP | Signed packages, staged OTA, offline buffering, mobile/NPU execution, thermal/battery measurement, and managed fleet control remain in the standalone edge project or production adapters. |
 | CPU model quality, cost, and performance | 🔵 SIMULATED / OUT OF SCOPE | The deterministic fixture validates platform flow, not quality or production economics. |
 | vLLM, physical GPU, DCGM, KV cache | 📐 ARCHITECTURE / CONTRACT ONLY | No accelerator runtime or GPU telemetry was executed; simulated capacity must not be interpreted as hardware scheduling. |
-| Kubernetes/EKS autoscaling | 📋 ROADMAP | Static manifests/Terraform only; not locally deployed. |
+| Kubernetes/EKS autoscaling | 📋 ROADMAP | Static manifests/Terraform only; not locally deployed or cloud-executed. |
 
 ## Clean-room evidence boundary
 

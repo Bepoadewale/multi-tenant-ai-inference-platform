@@ -13,12 +13,12 @@ Cloud work is separate from the completed local-first gate. Do not select an AWS
 apply until the relevant design, Terraform, security, delivery, observability, and
 operator safeguards have been reviewed and statically validated.
 
-- [ ] CP0: establish the cloud architecture, plain-language boundary, and repository-specific acceptance gate.
-- [ ] CP1: add a dedicated encrypted/versioned S3 state backend, DynamoDB lock design, account/region/tag/budget guards, and Terraform foundation validation.
-- [ ] CP2: define the private EKS/ECR/RDS/Redis/S3/MLflow security and state boundaries using least-privilege IAM/IRSA and Secrets Manager.
-- [ ] CP3: define GitOps delivery, a narrow ALB Console/API/identity entry point, and project-scoped bootstrap/smoke/destroy automation.
-- [ ] CP4: define cloud observability, rollback, HA, bounded-load, cost-evidence, and post-destroy verification drills.
-- [ ] CP5: add confirmation-gated GitHub Actions OIDC plan/apply/destroy workflows without stored AWS keys.
+- [x] CP0: establish the cloud architecture, plain-language boundary, and repository-specific acceptance gate.
+- [x] CP1: add the intended icon-based topology, cloud operations contract, trust-boundary documentation, and production-evolution boundary. This is documentation/static evidence only.
+- [ ] CP2: add a dedicated encrypted/versioned S3 state backend, DynamoDB lock design, account/region/tag/budget guards, and Terraform foundation validation.
+- [ ] CP3: define the private EKS/ECR/RDS/Redis/S3/MLflow security and state boundaries using least-privilege IAM/IRSA and Secrets Manager.
+- [ ] CP4: define GitOps delivery, a narrow ALB Console/API/identity entry point, and project-scoped bootstrap/smoke/destroy automation.
+- [ ] CP5: define cloud observability, rollback, HA, bounded-load, cost-evidence, post-destroy verification drills, and confirmation-gated GitHub Actions OIDC plan/apply/destroy workflows without stored AWS keys.
 - [ ] CP6: execute a separately authorized, time-boxed AWS create → validate → destroy pilot and record only measured evidence.
 
 # Flagship P0 — Integrated Platform Story

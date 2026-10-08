@@ -6,9 +6,9 @@ This is deliberately separate from the completed local-first gate. Check an item
 after its stated evidence exists; Terraform code, manifests, diagrams, and static
 validation alone are not cloud execution evidence.
 
-- [ ] Plain-language AWS architecture and trust-boundary documentation identify what
+- [x] Plain-language AWS architecture and trust-boundary documentation identify what
   is planned, private, public, simulated, and intentionally unexecuted.
-- [ ] An icon-based, checked-in cloud topology and source/generator describe the
+- [x] An icon-based, checked-in cloud topology and source/generator describe the
   repository-specific runtime rather than generic platform boxes.
 - [ ] A dedicated Terraform bootstrap root defines an encrypted/versioned S3 state
   bucket, DynamoDB lock table, project tags, and budget guardrail.

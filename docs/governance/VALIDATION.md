@@ -19,6 +19,22 @@ Do not populate this template until a cloud pilot is actually authorized and run
 
 Validation is local-first. Record hardware, runtime, exact command and result for any benchmark; never infer GPU behavior from the deterministic CPU fixture or fabricate validation.
 
+## Cloud-architecture documentation validation
+
+**Date:** 2026-10-08
+**Scope:** CP1 documentation/static-validation slice only. No AWS credentials,
+Terraform apply, cloud resource, runtime, or benchmark was used.
+
+```console
+node scripts/generate-cloud-architecture.mjs
+```
+
+The command regenerated `docs/assets/flagship-cloud-architecture.svg` from a
+checked-in source script. The generated diagram and linked cloud architecture,
+operations, and production-evolution pages describe an intended CPU-first AWS pilot
+and explicitly label it as unexecuted. Runtime clean-room evidence is not applicable
+to this documentation-only change.
+
 ## Temporary public walkthrough clean-room validation
 
 **Date:** 2026-09-30

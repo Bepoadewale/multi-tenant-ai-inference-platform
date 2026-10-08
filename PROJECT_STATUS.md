@@ -10,10 +10,11 @@ adapters remain explicitly outside this status.
 
 ## Cloud-Pilot Readiness
 
-**Status: BASELINE INVENTORIED — NOT YET IMPLEMENTED.**
+**Status: CP1 DOCUMENTED — STATIC ONLY.**
 
-The repository has an initial AWS Terraform contract and a future real-workload guide,
-but it does not yet have the Project-1-equivalent remote-state bootstrap, guarded EKS
+The repository now has an icon-based intended topology, plain-language cloud
+operations contract, trust-boundary documentation, and future-pilot acceptance gate.
+It does not yet have the Project-1-equivalent remote-state bootstrap, guarded EKS
 pilot foundation, cloud runtime manifests, GitHub OIDC delivery workflow, or AWS
 execution evidence. The cloud-readiness sequence is tracked in
 [`docs/delivery/cloud-pilot-program.md`](docs/delivery/cloud-pilot-program.md).
@@ -103,8 +104,8 @@ option for production durability without weakening the executed local-first path
 
 ## Current Cloud-Pilot Objective
 
-Complete the cloud architecture and documentation slice without changing the executed
-local control loop or claiming AWS execution.
+Implement CP2: a repository-specific Terraform state/bootstrap foundation that can be
+statically validated without creating or changing AWS resources.
 
 ## Completion Blockers
 

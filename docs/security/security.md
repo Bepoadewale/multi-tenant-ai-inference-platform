@@ -66,6 +66,16 @@ Docker, MLflow, Kubernetes, cloud, or platform-administrator credential. The loc
 operator console is a server-side fixture-token BFF for a Compose demo, not an
 enterprise SSO implementation.
 
+## Intended cloud trust boundary
+
+The [intended AWS topology](../cloud-architecture.md) preserves this rule in a future
+pilot: Terraform creates a private VPC/EKS foundation; IAM/IRSA and Secrets Manager
+deliver narrow workload credentials; GitHub Actions uses short-lived OIDC credentials;
+and any ALB exposes only the Console, API, and identity paths. Redis, RDS, model
+artifacts, Prometheus, Tempo, Grafana, MLflow, and Kubernetes administration remain
+private. This is an architecture contract only until a separately authorized cloud
+pilot produces plan, apply, runtime, failure, and teardown evidence.
+
 ## Threat model and controls
 
 | Threat | Executed local control | Boundary / remaining limit |

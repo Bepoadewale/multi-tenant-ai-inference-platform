@@ -8,6 +8,21 @@ emits metrics and traces.
 
 It answers a practical platform question: **how can multiple teams use shared model capacity without receiving direct runtime, GPU, Redis, or infrastructure credentials?**
 
+## Intended cloud-pilot architecture
+
+The local-first platform is the only executed deployment scope. The following is the
+reviewable target for a later, separately authorized AWS pilot; it is **not** an AWS
+execution claim.
+
+![Intended AWS cloud-pilot architecture](docs/assets/flagship-cloud-architecture.svg)
+
+The future design keeps model/data/observability services private. A narrow browser
+entry point would expose only the Operator Console, API, and identity route. Terraform
+would be the sole authority for cloud provisioning and teardown, while GitHub OIDC
+would replace stored deployment keys. Read [the cloud architecture](docs/cloud-architecture.md)
+and [the staged cloud-pilot program](docs/delivery/cloud-pilot-program.md) before
+interpreting this topology as anything other than a plan.
+
 ## Flagship direction
 
 The proven inference core stays intact. The platform adds model release control,
@@ -243,6 +258,9 @@ identity is denied before profile creation.
 - [Operator Console walkthrough and real local screenshots](docs/operations/operator-console.md)
 - [Model artifact/release contract](docs/delivery/model-rollouts.md)
 - [Local versus production/pilot readiness](docs/delivery/real-workload-pilot.md)
+- [Intended AWS cloud architecture](docs/cloud-architecture.md)
+- [Cloud-pilot operations and evidence boundary](docs/cloud-operations.md)
+- [Production evolution boundary](docs/production-evolution.md)
 - [Security architecture and threat controls](docs/security/security.md)
 - [Runnable API examples](examples/README.md)
 - [Documentation index](docs/README.md)
