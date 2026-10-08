@@ -93,6 +93,11 @@ immutable ECR image references, and cloud bootstrap/smoke scripts. When a browse
 review path is needed, use an ALB for the Console, API, and identity provider only;
 Redis, MLflow, Prometheus, Grafana, Tempo, Kubernetes, and databases stay private.
 
+**Status: delivery contracts implemented and statically validated only.** The Helm
+chart has an IRSA annotation hook, PDB, immutable-image field, and opt-in ALB Ingress;
+the Argo CD Application is deliberately unconnected. No image was pushed, cluster
+bootstrapped, Argo application synced, ALB created, or smoke/destroy command run.
+
 ### CP5 — Operations and automation
 
 Add OTel, Prometheus, Tempo, Grafana, release/admission metrics, audit evidence,

@@ -45,6 +45,14 @@ bucket, DynamoDB lock table, required tags, and actual-cost alert. It can be che
 without credentials or resource changes through `make terraform-validate`. It has not
 been applied; a non-applying plan and owner-authorized bootstrap remain required.
 
+## Delivery contract now present, but not connected
+
+The Helm chart now renders an immutable-image field, IRSA annotation hook,
+PodDisruptionBudget, and an opt-in ALB ingress. The checked-in Argo CD Application
+describes a protected desired-state delivery path. `make cloud-delivery-validate`
+renders and checks these files without contacting a cluster or AWS. It does not prove
+Argo reconciliation, image delivery, IRSA assumption, ALB routing, or a smoke test.
+
 ## Required future evidence
 
 - Provisioning: Terraform plan/apply summaries, account/region/required-tags check.

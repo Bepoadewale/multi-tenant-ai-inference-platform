@@ -1,6 +1,9 @@
 apiVersion: v1
 kind: ServiceAccount
-metadata: {name: inference-gateway}
+metadata:
+  name: inference-gateway
+  annotations:
+    {{- toYaml .Values.serviceAccount.annotations | nindent 4 }}
 automountServiceAccountToken: false
 ---
 apiVersion: apps/v1
@@ -16,7 +19,7 @@ spec:
       securityContext: {seccompProfile: {type: RuntimeDefault}}
       containers:
         - name: gateway
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}{{ if .Values.image.digest }}@{{ .Values.image.digest }}{{ end }}"
           ports: [{containerPort: 8080}]
           securityContext: {runAsNonRoot: true, allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: ["ALL"]}}
           resources: {{- toYaml .Values.resources | nindent 12 }}
@@ -37,3 +40,34 @@ apiVersion: v1
 kind: ResourceQuota
 metadata: {name: inference-quota}
 spec: {hard: {requests.cpu: "4", requests.memory: 8Gi, pods: "20"}}
+{{- if .Values.podDisruptionBudget.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: {name: inference-gateway}
+spec:
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  selector: {matchLabels: {app: inference-gateway}}
+{{- end }}
+{{- if .Values.ingress.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: inference-platform
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  rules:
+    - {{- if .Values.ingress.host }}
+      host: {{ .Values.ingress.host | quote }}
+      {{- end }}
+      http:
+        paths:
+          {{- toYaml .Values.ingress.paths | nindent 10 }}
+{{- end }}

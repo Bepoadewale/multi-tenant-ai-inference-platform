@@ -20,7 +20,8 @@ validation alone are not cloud execution evidence.
 - [ ] Cloud workloads have non-root/least-privilege settings, probes, resource bounds,
   NetworkPolicies, PDBs where relevant, and no public data-plane/observability paths.
 - [ ] GitOps/image-delivery/bootstrap/smoke/validate/destroy commands are documented,
-  bounded, and project-scoped.
+  bounded, and project-scoped. Static Helm/Argo delivery validation exists; no cloud
+  bootstrap, smoke, or destroy execution is claimed.
 - [ ] GitHub Actions has a future confirmation-gated OIDC plan/apply/destroy workflow
   with no stored AWS access key.
 - [ ] Metrics, traces, dashboards, audit, failure/recovery, bounded-load, cost-query,
