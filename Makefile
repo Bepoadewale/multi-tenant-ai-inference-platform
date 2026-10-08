@@ -1,4 +1,4 @@
-.PHONY: install test lint audit run demo load-test bootstrap-local smoke status public-demo demo-local demo-overload demo-routing demo-failure demo-timeout demo-metering demo-observability demo-recovery demo-model-registry demo-release-control demo-capacity demo-operational-evidence demo-remediation demo-agent-tools demo-self-service demo-edge-adapter demo-sandboxed-agent demo-operator-console demo-flagship verify clean-local destroy-local helm-lint terraform-validate cloud-delivery-validate pilot-cloud-plan pilot-cloud-apply pilot-cloud-destroy
+.PHONY: install test lint audit run demo load-test bootstrap-local smoke status public-demo demo-local demo-overload demo-routing demo-failure demo-timeout demo-metering demo-observability demo-recovery demo-model-registry demo-release-control demo-capacity demo-operational-evidence demo-remediation demo-agent-tools demo-self-service demo-edge-adapter demo-sandboxed-agent demo-operator-console demo-flagship verify clean-local destroy-local helm-lint terraform-validate cloud-delivery-validate pilot-guardrails-plan pilot-cloud-plan pilot-cloud-apply pilot-cloud-push-image pilot-cloud-bootstrap-runtime pilot-cloud-smoke pilot-cloud-validate pilot-cloud-destroy
 PYTHON ?= python3.12
 VENV := .venv
 PY := $(VENV)/bin/python
@@ -95,7 +95,17 @@ cloud-delivery-validate:
 	./scripts/validate-cloud-delivery-contracts.sh
 pilot-cloud-plan:
 	./scripts/pilot-cloud-plan.sh
+pilot-guardrails-plan:
+	./scripts/pilot-guardrails-plan.sh
 pilot-cloud-apply:
 	./scripts/pilot-cloud-apply.sh
+pilot-cloud-push-image:
+	./scripts/pilot-cloud-push-image.sh
+pilot-cloud-bootstrap-runtime:
+	./scripts/pilot-cloud-bootstrap-runtime.sh
+pilot-cloud-smoke:
+	./scripts/pilot-cloud-smoke.sh
+pilot-cloud-validate:
+	./scripts/pilot-cloud-validate.sh
 pilot-cloud-destroy:
 	./scripts/pilot-cloud-destroy.sh

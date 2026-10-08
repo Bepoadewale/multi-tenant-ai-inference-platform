@@ -77,3 +77,7 @@ Before any use, the state bootstrap must already exist and the GitHub OIDC role 
 be created with a repository/branch-bound trust policy and only the reviewed pilot
 permissions. GitHub Environment protection for `aws-pilot` must require appropriate
 human approval.
+
+The complete intended operator sequence, failure/reliability design, and evidence
+requirements are in the [cloud-pilot runbook](cloud-pilot-runbook.md). The Make
+targets are present as guarded contracts, but have not been used against AWS.

@@ -38,3 +38,12 @@ post-action real ONNX inference.
 
 Use readiness checks rather than arbitrary sleeps. If the reproducible sequence fails,
 capture the command output and update validation evidence before changing a claim.
+
+## Cloud-pilot drills — planned, not executed
+
+The cloud pilot must repeat the same safety principles against the deployed runtime:
+delete one gateway pod while the PDB protects availability; create a bounded bad
+candidate or backend-failure condition; observe the unhealthy state through metrics,
+trace, audit, and alert evidence; then use the reviewed known-good recovery path.
+The drill may not mutate Redis weights, Kubernetes objects, or cloud resources outside
+the governed/recorded procedure. See the [cloud-pilot runbook](../cloud-pilot-runbook.md).
