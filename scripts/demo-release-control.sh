@@ -7,7 +7,7 @@ admin_token=$(jq -r '.admin' "${repo_root}/.local/identity/tokens.json")
 approver_token=$(jq -r '.approver' "${repo_root}/.local/identity/tokens.json")
 search_token=$(jq -r '.search' "${repo_root}/.local/identity/tokens.json")
 
-plan=$(curl -fsS --max-time 10 -X POST http://localhost:8083/release/v1/plans \
+plan=$(curl -fsS --max-time 10 -X POST 'http://localhost:8083/release/v1/plans?canary_weight=50' \
   -H "Authorization: Bearer ${admin_token}")
 plan_id=$(jq -r '.id' <<<"${plan}")
 
@@ -21,7 +21,7 @@ curl -fsS --max-time 10 -X POST "http://localhost:8083/release/v1/plans/${plan_i
   -H "Authorization: Bearer ${admin_token}" | jq -e '.status == "CANARY"' >/dev/null
 
 candidate_seen=false
-for _ in $(seq 1 40); do
+for _ in $(seq 1 80); do
   response=$(curl -fsS --max-time 10 http://localhost:8082/v1/chat/completions \
     -H "Authorization: Bearer ${search_token}" -H 'content-type: application/json' \
     -d '{"model":"chat-default","messages":[{"role":"user","content":"canary evidence"}],"max_tokens":4}')
@@ -30,7 +30,10 @@ for _ in $(seq 1 40); do
     break
   fi
 done
-${candidate_seen}
+if ! ${candidate_seen}; then
+  echo "candidate backend was not observed during the 50% canary sample" >&2
+  exit 1
+fi
 
 curl -fsS --max-time 10 -X POST "http://localhost:8083/release/v1/plans/${plan_id}/promote" \
   -H "Authorization: Bearer ${admin_token}" | jq -e '.status == "PROMOTED"' >/dev/null

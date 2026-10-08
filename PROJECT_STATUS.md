@@ -8,6 +8,19 @@ The public flagship's preserved inference core and every currently scoped vertic
 slice have executed together in two clean-room local cycles. Production/cloud/hardware
 adapters remain explicitly outside this status.
 
+## Cloud-Pilot Readiness
+
+**Status: BASELINE INVENTORIED — NOT YET IMPLEMENTED.**
+
+The repository has an initial AWS Terraform contract and a future real-workload guide,
+but it does not yet have the Project-1-equivalent remote-state bootstrap, guarded EKS
+pilot foundation, cloud runtime manifests, GitHub OIDC delivery workflow, or AWS
+execution evidence. The cloud-readiness sequence is tracked in
+[`docs/delivery/cloud-pilot-program.md`](docs/delivery/cloud-pilot-program.md).
+
+No AWS resource was created, changed, or planned for application as part of this
+baseline inventory.
+
 ## Maturity Model
 
 `FOUNDATION` → `PARTIALLY VALIDATED` → `LOCAL END-TO-END VALIDATED` → `PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE`.
@@ -87,6 +100,11 @@ adapters remain explicitly outside this status.
 
 No P0 completion blocker remains. Current P1 objective: evaluate a PostgreSQL/outbox
 option for production durability without weakening the executed local-first path.
+
+## Current Cloud-Pilot Objective
+
+Complete the cloud architecture and documentation slice without changing the executed
+local control loop or claiming AWS execution.
 
 ## Completion Blockers
 
