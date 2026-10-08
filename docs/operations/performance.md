@@ -1,5 +1,12 @@
 # Performance and benchmarking
 
+## In simple terms
+
+This project proves that the gateway can control who uses a model and how requests are
+handled. It does **not** prove laptop or CPU-fixture performance represents a real GPU
+service. Treat the local load tool as a repeatable regression check, not a production
+benchmark.
+
 Flagship context: benchmark evidence must remain tied to the exact local runtime;
 planned registry, capacity and FinOps slices do not turn CPU fixture results into GPU claims.
 

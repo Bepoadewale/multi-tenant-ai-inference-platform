@@ -7,8 +7,9 @@ through Redis admission, model-release controls, telemetry, remediation, delegat
 tools, developer self-service, edge routing, sandbox tasks, and a scoped Operator
 Console.
 
-This program prepares a **separate AWS pilot**. It does not change that evidence into
-an AWS claim. Nothing in this document means that AWS resources have been created.
+This program prepares a **separate AWS pilot**. It does not change local proof into an
+AWS runtime claim. An authenticated no-apply Terraform plan has been reviewed, but no
+AWS resource has been created.
 
 In plain English, the future pilot will check that the same rules still hold when the
 platform runs on cloud infrastructure: one tenant cannot consume another tenant's
@@ -67,10 +68,10 @@ private VPC, EKS, ECR, IAM/IRSA, and only the shared AWS services required below
 Validate with `terraform init -backend=false`, formatting, validation, and reviewed
 non-applying plan output.
 
-**Status: implemented and statically validated only.** The separate
+**Status: implemented, statically validated, and read-only planned.** The separate
 [`bootstrap/`](../../infrastructure/terraform/bootstrap/README.md) root contains the
-state/lock/tag/budget contract. No account, bucket, lock table, or budget has been
-created from this repository.
+state/lock/tag/budget contract. An authenticated plan proposed seven resources. No
+bucket, lock table, budget, or other resource has been created from this repository.
 
 ### CP3 — State and security boundaries
 
@@ -80,11 +81,11 @@ artifacts, ECR image delivery, Secrets Manager/External Secrets, and least-privi
 IRSA. Define tenant-safe NetworkPolicies, probes, PDBs, non-root execution, and
 resource limits. Optional GPU infrastructure is isolated and disabled by default.
 
-**Status: implemented and statically validated only.** The pilot root now contracts
+**Status: implemented, statically validated, and read-only planned.** The pilot root now contracts
 private VPC/EKS, immutable ECR repositories, encrypted RDS PostgreSQL and ElastiCache
 Redis, versioned private artifact storage, empty Secrets Manager containers, and a
-service-account-bound gateway IRSA role. It has not been planned or applied against an
-AWS account.
+service-account-bound gateway IRSA role. An authenticated plan proposed 36 resources;
+it did not apply or create anything.
 
 ### CP4 — Delivery and narrow browser access
 
@@ -108,8 +109,9 @@ provider-side teardown checklist. Add a manually dispatched GitHub OIDC workflow
 **Status: operations and automation contracts are implemented/static only.** Existing
 local OTel/Prometheus/Tempo/Grafana and release/remediation demos define the expected
 cloud evidence. The repository now has account-guarded scripts and a manual GitHub
-OIDC workflow. It has not assumed a cloud role, run a cloud plan/apply/destroy, emitted
-cloud telemetry, or queried Cost Explorer.
+OIDC workflow. A local operator completed an authenticated read-only plan; no GitHub
+OIDC role has been assumed, and no apply/destroy, cloud telemetry, or Cost Explorer
+query has run.
 
 ### CP6 — Separately authorized cloud pilot
 

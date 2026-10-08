@@ -1,28 +1,18 @@
 # Documentation
 
-This repository keeps its local-first execution evidence separate from future cloud
-adapters. Start with the [README](../README.md) for the runnable platform story.
+Start with the [main README](../README.md). It explains what the platform does, what
+has run locally, and what the AWS plan reviewed.
 
-| Area | Contents |
+| If you want to know… | Read… |
 | --- | --- |
-| [Architecture](architecture/) | [Full system map/API reference](architecture/flagship-system-map.md), flagship integration direction, and [intended AWS topology](cloud-architecture.md) |
-| [Operations](operations/) | Observability, FinOps, performance, failure modes, console |
-| [Delivery](delivery/) | Model rollout, the staged [cloud-pilot program](delivery/cloud-pilot-program.md), [cloud operations](cloud-operations.md), and hardware/runtime pilot guidance |
-| [Security](security/) | Security model, architecture diagram, and threat controls |
-| [Governance](governance/) | Implementation status and executed validation evidence |
-| [Portfolio](portfolio/) | Interview guide and roadmap |
-| [ADRs](adr/) | Architecture decisions |
+| how the services fit together and which APIs exist | [Architecture](architecture/) |
+| how to run, observe, or troubleshoot the local platform | [Operations](operations/) |
+| how model releases and a future cloud pilot work | [Delivery](delivery/) |
+| how identity, tenant limits, agent access, and privacy are protected | [Security](security/) |
+| exactly what was tested and what remains only planned | [Governance](governance/) |
+| how to discuss the project in an interview | [Portfolio](portfolio/) |
+| why a major technical choice was made | [ADRs](adr/) |
 
-Cloud/GPU instructions are planning or static validation unless a document explicitly
-records executed evidence. The local Docker/CPU ONNX workflow remains the default
-reproducible demonstration.
-
-[Production evolution](production-evolution.md) states the exact evidence required
-before a cloud or enterprise claim can replace that local-first boundary.
-
-The [cloud-pilot runbook](cloud-pilot-runbook.md) is a future operational contract;
-it is not cloud execution evidence.
-
-For a low-level client walkthrough, use the token-free source in
-[`examples/`](../examples/README.md); it calls the executed inference API rather than
-inventing a parallel interface.
+The local Docker and CPU ONNX demonstration is executed evidence. Cloud/GPU documents
+describe either a read-only plan review or future work unless they explicitly say an
+AWS runtime action was executed.

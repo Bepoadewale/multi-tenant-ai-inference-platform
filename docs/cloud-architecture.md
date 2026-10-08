@@ -1,51 +1,50 @@
-# Intended AWS Cloud Architecture
+# Planned AWS Cloud Architecture
 
-This is the flagship's **planned cloud-pilot topology**. It is a design and
-static-validation target, not evidence that AWS resources or cloud workloads have
-run. The completed local-first platform remains the only executed deployment scope.
+This document explains the cloud pilot we would create with Terraform. It is **not**
+evidence that the platform has run in AWS. The repository has completed a real,
+authenticated Terraform plan review only; no AWS resource was created.
 
-![Intended AWS cloud-pilot topology](assets/flagship-cloud-architecture.svg)
+![Planned AWS cloud-pilot topology](assets/flagship-cloud-architecture.svg)
 
-## In plain English
+## In simple terms
 
-Teams and approved agents call the gateway instead of receiving direct access to a
-model runtime, Redis, Kubernetes, or AWS. The gateway verifies identity, derives the
-tenant, enforces a shared limit, routes a request, records only safe usage metadata,
-and emits evidence. Release, remediation, developer, edge, and sandbox functions
-remain bounded services; they do not become an all-powerful platform administrator.
+Teams call one gateway instead of being handed direct access to models, Redis,
+Kubernetes, or AWS. The gateway checks identity and tenant, applies fair-use limits,
+chooses an approved model route, and records safe operational evidence.
 
-For a future pilot, Terraform would create the AWS foundation. Kubernetes would run
-the CPU-first application services privately. A deliberately narrow ALB would expose
-only the Operator Console, API, and identity route for browser review. It would never
-make Redis, MLflow artifacts, Prometheus, Grafana, Tempo, databases, or Kubernetes
-administration public.
+Terraform would create the AWS foundation. EKS would run platform services in private
+subnets. RDS would keep durable records. Redis would share admission limits. ECR and
+S3 would hold images and model artifacts. Secrets Manager and IAM roles would provide
+only the credentials each workload needs.
 
-## Planned component responsibilities
+## What stays private
 
-| Area | Intended responsibility | Evidence status |
+Only a future operator Console/API/identity route may be exposed for browser review.
+The following remain private: Redis, RDS, S3 artifacts, MLflow, Prometheus, Grafana,
+Tempo, Kubernetes APIs, and secret stores. A browser never receives AWS, Kubernetes,
+Redis, or model-runtime credentials.
+
+## Planned AWS parts
+
+| Part | Why it exists | Evidence today |
 | --- | --- | --- |
-| S3 + DynamoDB | Encrypted, versioned, locked Terraform state for this repository only. | 📐 Architecture / contract only |
-| VPC + EKS | Private application/data workloads with bounded public ingress. | 🟡 Implemented / not fully executed — Terraform validates only |
-| ECR | Immutable images for the platform services. | 🟡 Implemented / not fully executed — Terraform validates only |
-| RDS PostgreSQL | Durable cloud control, release, remediation, and audit records. | 🟡 Implemented / not fully executed — Terraform validates only |
-| ElastiCache Redis | Shared admission, routing, and usage-metadata state. | 🟡 Implemented / not fully executed — Terraform validates only |
-| S3 artifacts | MLflow/model artifacts with integrity evidence. | 🟡 Implemented / not fully executed — Terraform validates only |
-| IAM/IRSA + Secrets Manager | Workload identity and secret delivery without source-controlled credentials. | 🟡 Implemented / not fully executed — Terraform validates only |
-| GitHub OIDC + GitOps | Short-lived delivery identity and reviewed desired-state reconciliation. | 📐 Architecture / contract only |
-| ALB | Narrow browser route to Console/API/identity only; public TLS needs a controlled domain and ACM. | 📐 Architecture / contract only |
+| S3 + DynamoDB | Encrypted, versioned Terraform state and locking for this repository | Authenticated no-apply plan reviewed |
+| VPC + EKS | Private CPU-first application runtime | Authenticated no-apply plan reviewed |
+| ECR | Immutable container images | Authenticated no-apply plan reviewed |
+| RDS PostgreSQL | Durable release, remediation, and audit records | Authenticated no-apply plan reviewed |
+| ElastiCache Redis | Shared tenant limits, routing, and safe usage state | Authenticated no-apply plan reviewed |
+| S3 artifacts | Model and MLflow artifacts | Authenticated no-apply plan reviewed |
+| IAM/IRSA + Secrets Manager | Narrow workload access without committed credentials | Authenticated no-apply plan reviewed |
+| GitHub OIDC + GitOps | Short-lived delivery access and reviewed deployment changes | Code/configuration only |
+| ALB | Narrow browser route only, if an AWS pilot needs it | Code/configuration only |
 
-## Important boundaries
+## Important limits
 
-- The existing CPU ONNX runtime is a real local execution path. It is not a cloud
-  throughput or GPU-performance claim.
-- The simulated capacity pool is not a physical GPU scheduler. Any GPU node group is
-  disabled by default and needs a separately budgeted experiment.
-- Cloud Terraform must be the only provisioning and teardown authority after account
-  bootstrap. No ad-hoc console changes or long-lived keys in GitHub.
-- A future GitHub Actions workflow must use a repository-bound OIDC role and explicit
-  confirmation for apply or destroy.
-- A future browser path must not turn the Console into a direct cloud-credential or
-  Kubernetes-credential holder.
+- CPU ONNX inference is real locally. It is not a cloud throughput or GPU benchmark.
+- Simulated capacity is not a physical GPU scheduler.
+- Terraform is the only allowed cloud create/destroy tool. Do not make ad-hoc console changes.
+- A future GitHub workflow must use short-lived OpenID Connect (OIDC) credentials,
+  not stored AWS keys.
 
-See [cloud-pilot program](delivery/cloud-pilot-program.md) for the staged work and
-[security architecture](security/security.md) for the corresponding trust model.
+See the [cloud-pilot runbook](cloud-pilot-runbook.md) for the exact future sequence
+and [security and privacy](security/security.md) for the trust boundary.

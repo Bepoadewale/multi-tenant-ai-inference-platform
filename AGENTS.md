@@ -13,6 +13,15 @@ Commands: `make install`, `make bootstrap-local`, `make smoke`, `make demo-flags
 
 Rules: never claim GPU/vLLM performance without execution; tenant identity is server-side; test cross-tenant limits and failure paths; no secrets/main pushes; update status/backlog and report exact validation. Do not copy other portfolio repositories wholesale: integrate through narrow APIs/events and preserve the working gateway path. Keep commercial/pricing/buyer strategy out of this public repository.
 
+## Plain-English documentation
+
+Write for a technical leader or new engineer first: explain what the system does,
+who can use it, what it prevents, and what evidence exists before using acronyms or
+implementation detail. Prefer short sentences, tables, and concrete examples. Define
+an acronym on first use. Do not hide an unexecuted boundary behind words such as
+"production-ready", "secure", or "scalable". Keep the accurate technical detail,
+but put it behind a plain-English summary.
+
 Future cloud infrastructure must be provisioned and torn down through Terraform. Do
 not create or delete pilot cloud resources manually after account bootstrap; review
 plans, use encrypted/locked state, run Terraform destroy for teardown, and record

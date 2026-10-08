@@ -1,5 +1,12 @@
 # Model rollouts
 
+## In simple terms
+
+A new model does not become the default model just because its container is healthy.
+This platform records exactly which artifact is being considered, checks the release
+plan, requires a different person to approve it, sends only limited traffic to it,
+then either promotes it or restores the previous working model.
+
 Flagship context: the existing weighted-routing core is preserved. A local MLflow
 registry now stores real stable/candidate ONNX artifacts, SHA-256 digest tags, CPU
 fixture evaluation metrics, and `champion`/`candidate` aliases. Release control binds
