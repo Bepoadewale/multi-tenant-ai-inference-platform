@@ -2,6 +2,13 @@
 
 Run `make lint`, `make test`, and `make helm-lint`. Preserve tenant isolation, prompt privacy, bounded retries, and explicit local-vs-GPU boundaries.
 
+## Documentation style
+
+Write the first paragraph so a technical leader or new engineer understands what
+changed and why it matters. Use plain English, short sentences, and concrete evidence.
+Define acronyms on first use. Keep detailed implementation facts, but never let them
+hide what has not been executed.
+
 ## Dependency and version policy
 
 - Pin or constrain dependencies in `pyproject.toml`, Compose image references, and
