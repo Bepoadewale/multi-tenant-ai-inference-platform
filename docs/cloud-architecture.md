@@ -25,12 +25,12 @@ administration public.
 | Area | Intended responsibility | Evidence status |
 | --- | --- | --- |
 | S3 + DynamoDB | Encrypted, versioned, locked Terraform state for this repository only. | 📐 Architecture / contract only |
-| VPC + EKS | Private application/data workloads with bounded public ingress. | 📐 Architecture / contract only |
-| ECR | Immutable images for the platform services. | 📐 Architecture / contract only |
-| RDS PostgreSQL | Durable cloud control, release, remediation, and audit records. | 📐 Architecture / contract only |
-| ElastiCache Redis | Shared admission, routing, and usage-metadata state. | 📐 Architecture / contract only |
-| S3 artifacts | MLflow/model artifacts with integrity evidence. | 📐 Architecture / contract only |
-| IAM/IRSA + Secrets Manager | Workload identity and secret delivery without source-controlled credentials. | 📐 Architecture / contract only |
+| VPC + EKS | Private application/data workloads with bounded public ingress. | 🟡 Implemented / not fully executed — Terraform validates only |
+| ECR | Immutable images for the platform services. | 🟡 Implemented / not fully executed — Terraform validates only |
+| RDS PostgreSQL | Durable cloud control, release, remediation, and audit records. | 🟡 Implemented / not fully executed — Terraform validates only |
+| ElastiCache Redis | Shared admission, routing, and usage-metadata state. | 🟡 Implemented / not fully executed — Terraform validates only |
+| S3 artifacts | MLflow/model artifacts with integrity evidence. | 🟡 Implemented / not fully executed — Terraform validates only |
+| IAM/IRSA + Secrets Manager | Workload identity and secret delivery without source-controlled credentials. | 🟡 Implemented / not fully executed — Terraform validates only |
 | GitHub OIDC + GitOps | Short-lived delivery identity and reviewed desired-state reconciliation. | 📐 Architecture / contract only |
 | ALB | Narrow browser route to Console/API/identity only; public TLS needs a controlled domain and ACM. | 📐 Architecture / contract only |
 
