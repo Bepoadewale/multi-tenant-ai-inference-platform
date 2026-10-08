@@ -23,7 +23,7 @@ It must not be read as a deploy-now runbook.
 
 ## Future command contract
 
-When CP2–CP5 are implemented, commands should use a consistent, guarded form:
+When CP3–CP5 are implemented, commands should use a consistent, guarded form:
 
 ```console
 AWS_PROFILE=<profile> make pilot-cloud-plan
@@ -37,6 +37,13 @@ AWS_PROFILE=<profile> EXPECTED_AWS_ACCOUNT_ID=<account-id> make pilot-cloud-dest
 
 These names are future contracts only. They must not be added as commands until their
 scripts do exactly what they promise with bounded timeouts and useful failure output.
+
+## State bootstrap now present, but not applied
+
+`infrastructure/terraform/bootstrap/` now defines the repository's separate S3 state
+bucket, DynamoDB lock table, required tags, and actual-cost alert. It can be checked
+without credentials or resource changes through `make terraform-validate`. It has not
+been applied; a non-applying plan and owner-authorized bootstrap remain required.
 
 ## Required future evidence
 

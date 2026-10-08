@@ -10,12 +10,13 @@ validation alone are not cloud execution evidence.
   is planned, private, public, simulated, and intentionally unexecuted.
 - [x] An icon-based, checked-in cloud topology and source/generator describe the
   repository-specific runtime rather than generic platform boxes.
-- [ ] A dedicated Terraform bootstrap root defines an encrypted/versioned S3 state
+- [x] A dedicated Terraform bootstrap root defines an encrypted/versioned S3 state
   bucket, DynamoDB lock table, project tags, and budget guardrail.
 - [ ] Pilot Terraform defines only resources needed for this repository: private VPC,
   EKS, ECR, required durable stores, IAM/IRSA, secrets boundary, and outputs.
-- [ ] Terraform formatting, backend-free initialization, validation, and a reviewed
-  non-applying plan pass without creating AWS resources.
+- [x] Terraform formatting, backend-free initialization, and validation pass without
+  creating AWS resources. A reviewed non-applying plan remains part of the future
+  owner-authorized pilot gate.
 - [ ] Cloud workloads have non-root/least-privilege settings, probes, resource bounds,
   NetworkPolicies, PDBs where relevant, and no public data-plane/observability paths.
 - [ ] GitOps/image-delivery/bootstrap/smoke/validate/destroy commands are documented,
