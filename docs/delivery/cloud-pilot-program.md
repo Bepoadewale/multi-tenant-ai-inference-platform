@@ -105,6 +105,12 @@ failure/rollback drills, bounded-load checks, cost-query instructions, and a
 provider-side teardown checklist. Add a manually dispatched GitHub OIDC workflow with
 `plan`, confirmation-gated `apply`, and confirmation-gated `destroy`.
 
+**Status: operations and automation contracts are implemented/static only.** Existing
+local OTel/Prometheus/Tempo/Grafana and release/remediation demos define the expected
+cloud evidence. The repository now has account-guarded scripts and a manual GitHub
+OIDC workflow. It has not assumed a cloud role, run a cloud plan/apply/destroy, emitted
+cloud telemetry, or queried Cost Explorer.
+
 ### CP6 — Separately authorized cloud pilot
 
 Only after CP0–CP5 merge and a budget/owner authorization, execute a time-boxed

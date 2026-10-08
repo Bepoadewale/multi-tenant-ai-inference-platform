@@ -22,9 +22,9 @@ validation alone are not cloud execution evidence.
 - [ ] GitOps/image-delivery/bootstrap/smoke/validate/destroy commands are documented,
   bounded, and project-scoped. Static Helm/Argo delivery validation exists; no cloud
   bootstrap, smoke, or destroy execution is claimed.
-- [ ] GitHub Actions has a future confirmation-gated OIDC plan/apply/destroy workflow
-  with no stored AWS access key.
-- [ ] Metrics, traces, dashboards, audit, failure/recovery, bounded-load, cost-query,
+- [x] GitHub Actions has a future confirmation-gated OIDC plan/apply/destroy workflow
+  with no stored AWS access key. The role and workflow remain unexecuted.
+- [x] Metrics, traces, dashboards, audit, failure/recovery, bounded-load, cost-query,
   and provider-side destroy evidence are specified for the future pilot.
 - [ ] Applied cloud resources, if later authorized, are Terraform-destroyed and
   provider-side absence is recorded before any cloud-complete claim.
