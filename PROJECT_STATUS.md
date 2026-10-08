@@ -10,20 +10,22 @@ adapters remain explicitly outside this status.
 
 ## Cloud-Pilot Readiness
 
-**Status: CP5 OPERATIONS/AUTOMATION CONTRACTS IMPLEMENTED — STATICALLY VALIDATED ONLY.**
+**Status: CP5 OPERATIONS/AUTOMATION CONTRACTS IMPLEMENTED — STATICALLY VALIDATED,
+WITH AUTHENTICATED READ-ONLY TERRAFORM PLAN REVIEW.**
 
 The repository has an icon-based intended topology, plain-language cloud operations
 contract, a separate Terraform bootstrap root for encrypted/versioned S3 state,
 DynamoDB locking, mandatory tags, and an actual-cost budget alert. Its pilot contract
 now defines private VPC/EKS, ECR, RDS, ElastiCache Redis, S3 artifacts, Secrets
 Manager containers, and a tenant-runtime IRSA boundary. These are statically validated
-only. It has static Helm/Argo delivery contracts, guarded local scripts, and a
+except for a 2026-10-08 authenticated, no-apply Terraform plan review against the
+approved AWS account. It has static Helm/Argo delivery contracts, guarded local scripts, and a
 confirmation-gated GitHub OIDC workflow, but no cloud runtime or AWS execution
 evidence. The cloud-readiness sequence is tracked in
 [`docs/delivery/cloud-pilot-program.md`](docs/delivery/cloud-pilot-program.md).
 
-No AWS resource was created, changed, or planned for application as part of this
-baseline inventory.
+No AWS resource was created or changed. The read-only plans were not saved for
+application and did not create Terraform state.
 
 ## Maturity Model
 

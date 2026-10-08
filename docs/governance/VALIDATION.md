@@ -115,6 +115,32 @@ The repository now has every named pilot command and a runbook describing contro
 success, failure/rollback, HA/PDB, bounded-load, observability, Cost Explorer delay,
 and post-destroy evidence. These are reusable contracts, not completed cloud tests.
 
+## Authenticated AWS Terraform plan review
+
+**Date:** 2026-10-08
+**Scope:** Read-only plan review against the approved AWS account in `us-east-1`.
+No `apply`, image push, state bootstrap, cluster creation, or resource mutation was
+performed.
+
+```console
+aws sts get-caller-identity
+TF_VAR_budget_alert_email=<non-committed address> make pilot-guardrails-plan
+make pilot-cloud-plan
+```
+
+The identity guard accepted account `654654474502`. The ephemeral backend-free
+bootstrap plan proposed **7 to add, 0 to change, 0 to destroy**: an encrypted,
+versioned state bucket; public-access block; ownership controls; DynamoDB lock table;
+and monthly budget notifications. The ephemeral backend-free runtime plan proposed
+**36 to add, 0 to change, 0 to destroy**: private EKS/CPU nodes, VPC/NAT/subnets,
+RDS PostgreSQL, ElastiCache Redis, ECR repositories, Secrets Manager containers,
+and narrowly scoped IAM/IRSA contracts.
+
+The plans use a temporary local copy with the checked-in S3 backend declaration
+removed only because the dedicated state bucket has not been applied yet. The copy is
+deleted on exit; it writes no Terraform state and changes no AWS resource. This is
+real provider plan evidence, not cloud-pilot execution evidence.
+
 ## Temporary public walkthrough clean-room validation
 
 **Date:** 2026-09-30
