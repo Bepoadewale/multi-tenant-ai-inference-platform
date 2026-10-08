@@ -16,3 +16,9 @@ state that runtime evidence is not applicable.
 For future cloud work, Terraform is the required provision/teardown authority. Keep
 cloud work outside the local evidence boundary until a reviewed Terraform plan, applied
 resources, Terraform destroy, and provider-side post-destroy verification are recorded.
+
+When the cloud-pilot program is active, select the next unfinished CP item in
+`CODEX_BACKLOG.md`, following `docs/delivery/cloud-pilot-program.md`. Static cloud
+work must validate without applying AWS resources. Do not combine architecture,
+Terraform foundation, runtime delivery, observability, and execution evidence into one
+unreviewable change set.

@@ -17,6 +17,22 @@ not create or delete pilot cloud resources manually after account bootstrap; rev
 plans, use encrypted/locked state, run Terraform destroy for teardown, and record
 post-destroy verification.
 
+## Cloud-pilot readiness rule
+
+The flagship is currently complete only for its local-first scope. The next delivery
+phase is a **cloud-pilot readiness program**, not an AWS execution claim. Follow the
+staged sequence in `docs/delivery/cloud-pilot-program.md` and preserve the local
+proof while it is built. Each cloud repository must have its own encrypted/versioned
+S3 Terraform state bucket, DynamoDB lock table, state key namespace, required tags,
+and budget guardrail. Until an owner deliberately applies Terraform and records
+provider-side evidence, label those resources `PLANNED / STATICALLY VALIDATED`.
+
+Use `terraform init -backend=false`, `terraform fmt`, `terraform validate`, and a
+reviewed non-applying plan while building the design. Do not place AWS credentials in
+the repository or GitHub secrets. Future CI must use a least-privilege GitHub OIDC
+role, and future browser access must expose only the Console/API/identity paths—not
+Redis, MLflow, Prometheus, Grafana, Tempo, Kubernetes, or data stores.
+
 Completion rule: do not mark this repository **PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE** unless `DEFINITION_OF_DONE.md` has executed evidence for its repository-specific gate. Interfaces, mocks, manifests, architecture, unit tests, static validation, and documentation alone are insufficient. The tenant → admission → real inference → telemetry story must execute locally; unexecuted GPU/cloud integrations stay explicitly labeled.
 
 ## Clean-room reproducibility

@@ -7,7 +7,7 @@ adapters. Start with the [README](../README.md) for the runnable platform story.
 | --- | --- |
 | [Architecture](architecture/) | [Full system map/API reference](architecture/flagship-system-map.md) and flagship integration direction |
 | [Operations](operations/) | Observability, FinOps, performance, failure modes, console |
-| [Delivery](delivery/) | Model rollout plus consolidated Terraform-managed GPU/cloud pilot guidance |
+| [Delivery](delivery/) | Model rollout, the staged [cloud-pilot program](delivery/cloud-pilot-program.md), and hardware/runtime pilot guidance |
 | [Security](security/) | Security model, architecture diagram, and threat controls |
 | [Governance](governance/) | Implementation status and executed validation evidence |
 | [Portfolio](portfolio/) | Interview guide and roadmap |

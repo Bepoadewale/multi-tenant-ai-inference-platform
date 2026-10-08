@@ -1,5 +1,22 @@
 # Validation
 
+## Future Cloud-Pilot Evidence Template
+
+Do not populate this template until a cloud pilot is actually authorized and run.
+
+- Date and commit SHA:
+- AWS account alias/ID, region, and expected-account guard:
+- Terraform state bucket, lock table, state key, required tags, and budget guard:
+- Terraform plan summary and reviewed resources:
+- Apply command/result:
+- Image digest and runtime versions:
+- Bootstrap and readiness results:
+- Identity, tenant, policy, secret-delivery, and GitOps evidence:
+- Success path, failure/rollback, HA, and bounded-load evidence:
+- Metrics, traces, dashboard, alert, and Cost Explorer query results:
+- Destroy command/result and provider-side absence checks:
+- Explicitly unexecuted adapters/claims:
+
 Validation is local-first. Record hardware, runtime, exact command and result for any benchmark; never infer GPU behavior from the deterministic CPU fixture or fabricate validation.
 
 ## Temporary public walkthrough clean-room validation

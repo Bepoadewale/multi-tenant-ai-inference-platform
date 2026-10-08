@@ -1,5 +1,32 @@
 # Definition of Done
 
+## Cloud-Pilot Readiness Gate
+
+This is deliberately separate from the completed local-first gate. Check an item only
+after its stated evidence exists; Terraform code, manifests, diagrams, and static
+validation alone are not cloud execution evidence.
+
+- [ ] Plain-language AWS architecture and trust-boundary documentation identify what
+  is planned, private, public, simulated, and intentionally unexecuted.
+- [ ] An icon-based, checked-in cloud topology and source/generator describe the
+  repository-specific runtime rather than generic platform boxes.
+- [ ] A dedicated Terraform bootstrap root defines an encrypted/versioned S3 state
+  bucket, DynamoDB lock table, project tags, and budget guardrail.
+- [ ] Pilot Terraform defines only resources needed for this repository: private VPC,
+  EKS, ECR, required durable stores, IAM/IRSA, secrets boundary, and outputs.
+- [ ] Terraform formatting, backend-free initialization, validation, and a reviewed
+  non-applying plan pass without creating AWS resources.
+- [ ] Cloud workloads have non-root/least-privilege settings, probes, resource bounds,
+  NetworkPolicies, PDBs where relevant, and no public data-plane/observability paths.
+- [ ] GitOps/image-delivery/bootstrap/smoke/validate/destroy commands are documented,
+  bounded, and project-scoped.
+- [ ] GitHub Actions has a future confirmation-gated OIDC plan/apply/destroy workflow
+  with no stored AWS access key.
+- [ ] Metrics, traces, dashboards, audit, failure/recovery, bounded-load, cost-query,
+  and provider-side destroy evidence are specified for the future pilot.
+- [ ] Applied cloud resources, if later authorized, are Terraform-destroyed and
+  provider-side absence is recorded before any cloud-complete claim.
+
 # Portfolio Complete — Local-First Scope Gate
 
 ## Flagship evolution gate
