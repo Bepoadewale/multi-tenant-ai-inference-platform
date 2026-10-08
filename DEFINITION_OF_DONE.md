@@ -14,9 +14,9 @@ validation alone are not cloud execution evidence.
   bucket, DynamoDB lock table, project tags, and budget guardrail.
 - [x] Pilot Terraform defines only resources needed for this repository: private VPC,
   EKS, ECR, required durable stores, IAM/IRSA, secrets boundary, and outputs.
-- [x] Terraform formatting, backend-free initialization, and validation pass without
-  creating AWS resources. A reviewed non-applying plan remains part of the future
-  owner-authorized pilot gate.
+- [x] Terraform formatting, backend-free initialization, validation, and an
+  authenticated non-applying plan pass without creating AWS resources. Apply remains
+  part of the future owner-authorized pilot gate.
 - [ ] Cloud workloads have non-root/least-privilege settings, probes, resource bounds,
   NetworkPolicies, PDBs where relevant, and no public data-plane/observability paths.
 - [ ] GitOps/image-delivery/bootstrap/smoke/validate/destroy commands are documented,

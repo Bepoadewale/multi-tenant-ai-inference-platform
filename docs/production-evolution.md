@@ -1,31 +1,27 @@
-# Production Evolution Boundary
+# What Is Needed for a Real Cloud Pilot
 
-The repository is **PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE**. That means its central
-multi-tenant inference and integrated vertical-slice story has been run, tested, and
-clean-room reproduced locally. It does not mean an AWS, GPU, or public SaaS deployment
-has been proven.
+The repository is complete for its local-first story. It also has a reviewed AWS plan.
+It is not yet an executed AWS pilot or a hosted SaaS.
 
-## What the next cloud phase must prove
+## The next proof
 
-1. Terraform-managed foundation with repository-specific state, locking, tags, and
-   budget safeguards.
-2. Private EKS runtime with image delivery, durable cloud stores, least-privilege
-   workload identity, and secure secret delivery.
-3. A governed tenant request through real cloud runtime components, with cloud metrics,
-   traces, audit, release rollback, and provider-side teardown.
-4. GitHub Actions OIDC plan/apply/destroy controls without stored AWS credentials.
-5. A narrow ALB only if browser review is needed; trusted public HTTPS remains a later
-   domain-and-ACM decision.
+A real cloud pilot must show all of these with recorded evidence:
 
-## Explicitly outside a first CPU cloud pilot
+1. Terraform creates the approved AWS foundation and later removes it.
+2. The application runs on private EKS using immutable images, durable cloud stores,
+   workload identity, and secret delivery.
+3. A real tenant request passes identity, quota, route, and model-serving checks.
+4. A protected model release requires approval and can safely roll back.
+5. Metrics, traces, audit records, dashboards, an alert, and a bounded load sample
+   explain what happened.
+6. GitHub Actions uses short-lived OIDC access for plan/apply/destroy without stored
+   AWS keys.
 
-- Physical GPU capacity, GPU scheduling performance, vLLM/Triton/SGLang compatibility,
-  DCGM/KV-cache telemetry, and real GPU benchmarks.
-- Enterprise identity-provider validation, public custom-domain TLS, multi-region HA,
-  and settled cloud-billing claims.
-- A commercial hosted-control-plane, customer support, or buyer/pricing strategy.
+## Deliberately not claimed yet
 
-Those are not omissions from the local platform. They are separate claims requiring
-named environments, measured evidence, cost approval, and their own acceptance gates.
+- Physical GPU capacity, vLLM/Triton/SGLang compatibility, DCGM/KV-cache signals, or GPU benchmarks.
+- Enterprise identity-provider validation, custom-domain HTTPS, multi-region high availability, or public SaaS operation.
+- Sustained error-budget evidence, disaster recovery, settled AWS billing, or a commercial hosted control plane.
 
-The authoritative delivery order is the [cloud-pilot program](delivery/cloud-pilot-program.md).
+These are not hidden gaps. Each needs a named environment, a budget, and measured
+evidence before it becomes a claim.

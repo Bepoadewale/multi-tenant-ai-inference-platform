@@ -1,5 +1,9 @@
 # Implementation Status
 
+This table separates things that have actually run from things that have only been
+designed or reviewed. “Authenticated plan reviewed” means Terraform asked AWS what it
+would create; it does not mean anything was created.
+
 | Capability | Status | Validation |
 | --- | --- | --- |
 | Gateway + OpenAI-compatible API | ✅ EXECUTED LOCALLY | Two FastAPI gateways in Docker; authenticated chat and SSE demos. |
@@ -23,11 +27,11 @@
 | Operator-console workflow UI | ✅ EXECUTED LOCALLY | Guided release, bounded remediation, developer-profile, named sandbox-task, and explicit simulated edge-network controls call only fixed BFF endpoints that forward to existing service state machines. Two clean-room cycles exercised the packaged UI/BFF alongside the cumulative flagship demo. |
 | Flagship scenario orchestration | ✅ EXECUTED LOCALLY | A read-only, linked nine-stage narrative composes evidence from tenant admission, CPU inference, releases, observability, remediation, agents, developer profiles, edge routing, and sandbox execution. Two clean-room cumulative demos generated and asserted the evidence. |
 | Temporary public walkthrough | ✅ EXECUTED LOCALLY | `make public-demo` cleanly bootstraps the local platform, runs the flagship scenario, creates a temporary credential-free Cloudflare Quick Tunnel, prints its URL, and stops only the tunnel on exit. It is not hosted deployment. |
-| Intended AWS cloud-pilot topology and operations contract | 📐 ARCHITECTURE / CONTRACT ONLY | Checked-in icon-based topology, cloud operations guide, trust boundary, and staged acceptance criteria are reviewed documentation; no AWS resources have been created or validated. |
-| Terraform state/bootstrap guardrails | 🟡 IMPLEMENTED / NOT FULLY EXECUTED | Separate S3/DynamoDB/budget/tag Terraform root passes backend-free initialization and validation. No plan or apply has created a bucket, lock table, or budget. |
-| Private AWS runtime contracts | 🟡 IMPLEMENTED / NOT FULLY EXECUTED | Terraform contract covers VPC/EKS CPU nodes, ECR, encrypted RDS/Redis/S3, secret containers, and a gateway-only IRSA role. Backend-free validation passes; no cloud plan/apply has run. |
+| Intended AWS cloud-pilot topology and operations contract | 🟡 IMPLEMENTED / NOT FULLY EXECUTED | Checked-in icon-based topology, cloud operations guide, trust boundary, and staged acceptance criteria. An authenticated no-apply Terraform review ran; no AWS runtime has been created or validated. |
+| Terraform state/bootstrap guardrails | 🟡 IMPLEMENTED / NOT FULLY EXECUTED | Separate S3/DynamoDB/budget/tag Terraform root passed an authenticated no-apply plan: 7 resources proposed. No bucket, lock table, or budget was created. |
+| Private AWS runtime contracts | 🟡 IMPLEMENTED / NOT FULLY EXECUTED | Terraform contract covers VPC/EKS CPU nodes, ECR, encrypted RDS/Redis/S3, secret containers, and a gateway-only IRSA role. An authenticated no-apply plan proposed 36 resources; no cloud resource was created. |
 | Cloud GitOps and ingress contracts | 🟡 IMPLEMENTED / NOT FULLY EXECUTED | Helm renders a PDB, IRSA hook, digest field, and opt-in ALB ingress; an Argo Application defines protected desired-state delivery. No cluster, Argo sync, image push, ALB, or browser route has executed. |
-| Cloud operations and GitHub OIDC automation | 🟡 IMPLEMENTED / NOT FULLY EXECUTED | Account-guarded plan/apply/destroy scripts and a manual confirmation-gated GitHub OIDC workflow are present. No OIDC role assumption, workflow run, cloud metric, alert, rollback, cost query, or teardown has executed. |
+| Cloud operations and GitHub OIDC automation | 🟡 IMPLEMENTED / NOT FULLY EXECUTED | Account-guarded plan/apply/destroy scripts and a manual confirmation-gated GitHub OIDC workflow are present. The local operator completed an authenticated read-only plan; no GitHub OIDC role assumption, workflow run, cloud metric, alert, rollback, cost query, or teardown has executed. |
 | gVisor/Firecracker/Kubernetes sandboxing | 📋 ROADMAP | Local Docker child hardening is executed. Stronger runtime isolation and Kubernetes execution are separate adapters and are not claimed. |
 | Edge OTA/fleet rollout/mobile hardware | 📋 ROADMAP | Signed packages, staged OTA, offline buffering, mobile/NPU execution, thermal/battery measurement, and managed fleet control remain in the standalone edge project or production adapters. |
 | CPU model quality, cost, and performance | 🔵 SIMULATED / OUT OF SCOPE | The deterministic fixture validates platform flow, not quality or production economics. |

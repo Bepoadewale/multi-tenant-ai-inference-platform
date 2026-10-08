@@ -1,5 +1,13 @@
 # Security and privacy
 
+## In simple terms
+
+Callers get only the authority they need. A team can call its assigned model; it cannot
+borrow another team's quota or receive infrastructure credentials. An agent can inspect
+safe evidence or prepare a limited plan; it cannot approve, execute, or give itself
+more access. Prompt and response text are not kept in normal usage, audit, or metrics
+records.
+
 Flagship context: remediation, agent-tool, developer-self-service, and narrow edge
 adapters are executed locally; each extends—not bypasses—the existing signed identity,
 tenant authorization and privacy boundary.
