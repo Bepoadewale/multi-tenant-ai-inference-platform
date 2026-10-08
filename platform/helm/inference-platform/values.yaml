@@ -1,4 +1,22 @@
-image: {repository: inference-gateway, tag: dev}
+image:
+  repository: inference-gateway
+  tag: dev
+  digest: ""
 replicas: 2
-resources: {requests: {cpu: 250m, memory: 256Mi}, limits: {cpu: 1, memory: 512Mi}}
+resources:
+  requests: {cpu: 250m, memory: 256Mi}
+  limits: {cpu: 1, memory: 512Mi}
+serviceAccount:
+  annotations: {}
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+ingress:
+  enabled: false
+  className: alb
+  host: ""
+  annotations: {}
+  # Cloud pilot only: exact Console/API/identity routes should be rendered by
+  # dedicated services. Never expose Redis, MLflow, Grafana, Tempo, or databases.
+  paths: []
 serviceMonitor: {enabled: false}

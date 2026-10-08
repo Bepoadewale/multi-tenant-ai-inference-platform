@@ -19,7 +19,7 @@ jobs:
       - run: terraform fmt -check -recursive infrastructure/terraform
       - run: make terraform-validate
       - uses: azure/setup-helm@v4
-      - run: helm lint platform/helm/inference-platform
+      - run: make cloud-delivery-validate
   supply-chain:
     runs-on: ubuntu-24.04
     steps:

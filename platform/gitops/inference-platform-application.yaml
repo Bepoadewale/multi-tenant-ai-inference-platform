@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: multi-tenant-ai-platform
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: multi-tenant-ai-inference-platform
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Bepoadewale/multi-tenant-ai-inference-platform.git
+    targetRevision: main
+    path: platform/helm/inference-platform
+    helm:
+      releaseName: multi-tenant-ai-platform
+      values: |
+        image:
+          # A cloud bootstrap must replace this with an immutable ECR digest.
+          repository: REPLACE_WITH_ECR_REPOSITORY
+          tag: "REPLACE_WITH_IMAGE_TAG"
+          digest: ""
+        serviceAccount:
+          annotations:
+            # eks.amazonaws.com/role-arn: REPLACE_WITH_GATEWAY_IRSA_ROLE_ARN
+        ingress:
+          enabled: false
+          # ALB routes must remain limited to the Console/API/identity services.
+          paths: []
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: platform
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

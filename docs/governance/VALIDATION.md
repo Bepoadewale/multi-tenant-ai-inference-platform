@@ -69,6 +69,20 @@ names only `system:serviceaccount:platform:inference-gateway`. Validation cannot
 AWS provider behavior, deployed network reachability, workload security manifests,
 runtime identity, or cost; all remain unexecuted.
 
+## Cloud delivery-contract static validation
+
+**Date:** 2026-10-08
+**Scope:** CP4 static validation only. No AWS credential, ECR image push, cluster,
+Argo CD instance, ALB, or browser route was used.
+
+```console
+make cloud-delivery-validate
+```
+
+The command ran Helm lint, rendered the flagship chart, verified the rendered gateway
+PDB and service-account hardening, and confirmed the checked-in Argo Application
+contract exists. It cannot prove live GitOps reconciliation or cloud availability.
+
 ## Temporary public walkthrough clean-room validation
 
 **Date:** 2026-09-30
