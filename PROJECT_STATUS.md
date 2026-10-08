@@ -10,13 +10,14 @@ adapters remain explicitly outside this status.
 
 ## Cloud-Pilot Readiness
 
-**Status: CP1 DOCUMENTED — STATIC ONLY.**
+**Status: CP2 FOUNDATION IMPLEMENTED — STATICALLY VALIDATED ONLY.**
 
-The repository now has an icon-based intended topology, plain-language cloud
-operations contract, trust-boundary documentation, and future-pilot acceptance gate.
-It does not yet have the Project-1-equivalent remote-state bootstrap, guarded EKS
-pilot foundation, cloud runtime manifests, GitHub OIDC delivery workflow, or AWS
-execution evidence. The cloud-readiness sequence is tracked in
+The repository has an icon-based intended topology, plain-language cloud operations
+contract, a separate Terraform bootstrap root for encrypted/versioned S3 state,
+DynamoDB locking, mandatory tags, and an actual-cost budget alert. These are
+statically validated only. It does not yet have a guarded EKS pilot foundation, cloud
+runtime manifests, GitHub OIDC delivery workflow, or AWS execution evidence. The
+cloud-readiness sequence is tracked in
 [`docs/delivery/cloud-pilot-program.md`](docs/delivery/cloud-pilot-program.md).
 
 No AWS resource was created, changed, or planned for application as part of this
@@ -104,8 +105,8 @@ option for production durability without weakening the executed local-first path
 
 ## Current Cloud-Pilot Objective
 
-Implement CP2: a repository-specific Terraform state/bootstrap foundation that can be
-statically validated without creating or changing AWS resources.
+Implement CP3: repository-specific private EKS/ECR/RDS/Redis/artifact/security
+contracts that remain statically validated until a separately authorized pilot.
 
 ## Completion Blockers
 

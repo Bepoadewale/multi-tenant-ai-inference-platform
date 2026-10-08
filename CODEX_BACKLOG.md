@@ -15,7 +15,7 @@ operator safeguards have been reviewed and statically validated.
 
 - [x] CP0: establish the cloud architecture, plain-language boundary, and repository-specific acceptance gate.
 - [x] CP1: add the intended icon-based topology, cloud operations contract, trust-boundary documentation, and production-evolution boundary. This is documentation/static evidence only.
-- [ ] CP2: add a dedicated encrypted/versioned S3 state backend, DynamoDB lock design, account/region/tag/budget guards, and Terraform foundation validation.
+- [x] CP2: add a dedicated encrypted/versioned S3 state backend, DynamoDB lock design, account/region/tag/budget guards, and Terraform foundation validation. Static validation only; no AWS apply.
 - [ ] CP3: define the private EKS/ECR/RDS/Redis/S3/MLflow security and state boundaries using least-privilege IAM/IRSA and Secrets Manager.
 - [ ] CP4: define GitOps delivery, a narrow ALB Console/API/identity entry point, and project-scoped bootstrap/smoke/destroy automation.
 - [ ] CP5: define cloud observability, rollback, HA, bounded-load, cost-evidence, post-destroy verification drills, and confirmation-gated GitHub Actions OIDC plan/apply/destroy workflows without stored AWS keys.

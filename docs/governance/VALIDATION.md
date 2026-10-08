@@ -35,6 +35,22 @@ operations, and production-evolution pages describe an intended CPU-first AWS pi
 and explicitly label it as unexecuted. Runtime clean-room evidence is not applicable
 to this documentation-only change.
 
+## Terraform state-bootstrap static validation
+
+**Date:** 2026-10-08
+**Scope:** CP2 static validation only. No AWS credentials, plan, apply, or cloud
+resource was used.
+
+```console
+make terraform-validate
+```
+
+Terraform initialized the bootstrap and legacy AWS-contract roots with
+`-backend=false`, then validated both successfully. The new bootstrap root defines
+repository-specific encrypted/versioned S3 state, DynamoDB locking, required tags,
+and an actual-cost budget alert. It was not planned or applied, so its resource names,
+provider behavior, and billing remain unexecuted.
+
 ## Temporary public walkthrough clean-room validation
 
 **Date:** 2026-09-30

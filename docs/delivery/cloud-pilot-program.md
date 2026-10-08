@@ -67,6 +67,11 @@ private VPC, EKS, ECR, IAM/IRSA, and only the shared AWS services required below
 Validate with `terraform init -backend=false`, formatting, validation, and reviewed
 non-applying plan output.
 
+**Status: implemented and statically validated only.** The separate
+[`bootstrap/`](../../infrastructure/terraform/bootstrap/README.md) root contains the
+state/lock/tag/budget contract. No account, bucket, lock table, or budget has been
+created from this repository.
+
 ### CP3 — State and security boundaries
 
 Add Terraform modules and cloud contracts for the services the platform actually uses:

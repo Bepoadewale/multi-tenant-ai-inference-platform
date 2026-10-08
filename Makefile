@@ -87,5 +87,7 @@ destroy-local:
 helm-lint:
 	helm lint platform/helm/inference-platform
 terraform-validate:
+	terraform -chdir=infrastructure/terraform/bootstrap init -backend=false
+	terraform -chdir=infrastructure/terraform/bootstrap validate
 	terraform -chdir=infrastructure/terraform/environments/aws init -backend=false
 	terraform -chdir=infrastructure/terraform/environments/aws validate
