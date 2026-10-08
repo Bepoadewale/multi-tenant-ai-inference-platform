@@ -10,15 +10,16 @@ adapters remain explicitly outside this status.
 
 ## Cloud-Pilot Readiness
 
-**Status: CP4 DELIVERY CONTRACTS IMPLEMENTED — STATICALLY VALIDATED ONLY.**
+**Status: CP5 OPERATIONS/AUTOMATION CONTRACTS IMPLEMENTED — STATICALLY VALIDATED ONLY.**
 
 The repository has an icon-based intended topology, plain-language cloud operations
 contract, a separate Terraform bootstrap root for encrypted/versioned S3 state,
 DynamoDB locking, mandatory tags, and an actual-cost budget alert. Its pilot contract
 now defines private VPC/EKS, ECR, RDS, ElastiCache Redis, S3 artifacts, Secrets
 Manager containers, and a tenant-runtime IRSA boundary. These are statically validated
-only. It has static Helm/Argo delivery contracts but no cloud runtime, GitHub OIDC
-delivery workflow, or AWS execution evidence. The cloud-readiness sequence is tracked in
+only. It has static Helm/Argo delivery contracts, guarded local scripts, and a
+confirmation-gated GitHub OIDC workflow, but no cloud runtime or AWS execution
+evidence. The cloud-readiness sequence is tracked in
 [`docs/delivery/cloud-pilot-program.md`](docs/delivery/cloud-pilot-program.md).
 
 No AWS resource was created, changed, or planned for application as part of this
@@ -106,8 +107,8 @@ option for production durability without weakening the executed local-first path
 
 ## Current Cloud-Pilot Objective
 
-Implement CP5: cloud observability/recovery/cost drills and confirmation-gated GitHub
-OIDC automation, without an AWS apply.
+CP6 is the remaining cloud-pilot objective: only a separately authorized, time-boxed
+AWS create → validate → destroy exercise can convert these contracts into evidence.
 
 ## Completion Blockers
 

@@ -1,0 +1,63 @@
+name: aws-pilot-oidc
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Terraform operation
+        type: choice
+        required: true
+        options: [plan, apply, destroy]
+      aws_region:
+        description: Approved pilot region
+        required: true
+        default: us-east-1
+      expected_account_id:
+        description: Expected 12-digit AWS account ID
+        required: true
+      role_to_assume:
+        description: Exact pre-created GitHub OIDC Terraform role ARN
+        required: true
+      confirmation:
+        description: Required literal for destructive operations: apply or destroy
+        required: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  terraform:
+    runs-on: ubuntu-24.04
+    environment: aws-pilot
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ inputs.role_to_assume }}
+          aws-region: ${{ inputs.aws_region }}
+      - name: Verify guarded identity
+        env:
+          EXPECTED_AWS_ACCOUNT_ID: ${{ inputs.expected_account_id }}
+        run: ./scripts/pilot-cloud-guard.sh
+      - name: Plan
+        if: inputs.operation == 'plan'
+        env:
+          EXPECTED_AWS_ACCOUNT_ID: ${{ inputs.expected_account_id }}
+        run: ./scripts/pilot-cloud-plan.sh
+      - name: Apply reviewed plan
+        if: inputs.operation == 'apply' && inputs.confirmation == 'apply'
+        env:
+          EXPECTED_AWS_ACCOUNT_ID: ${{ inputs.expected_account_id }}
+          PILOT_CLOUD_CONFIRM: apply
+        run: ./scripts/pilot-cloud-apply.sh
+      - name: Destroy reviewed pilot
+        if: inputs.operation == 'destroy' && inputs.confirmation == 'destroy'
+        env:
+          EXPECTED_AWS_ACCOUNT_ID: ${{ inputs.expected_account_id }}
+          PILOT_CLOUD_CONFIRM: destroy
+        run: ./scripts/pilot-cloud-destroy.sh
+      - name: Reject missing destructive confirmation
+        if: (inputs.operation == 'apply' && inputs.confirmation != 'apply') || (inputs.operation == 'destroy' && inputs.confirmation != 'destroy')
+        run: exit 1

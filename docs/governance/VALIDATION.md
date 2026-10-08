@@ -83,6 +83,22 @@ The command ran Helm lint, rendered the flagship chart, verified the rendered ga
 PDB and service-account hardening, and confirmed the checked-in Argo Application
 contract exists. It cannot prove live GitOps reconciliation or cloud availability.
 
+## Cloud operations/automation static validation
+
+**Date:** 2026-10-08
+**Scope:** CP5 static validation only. No AWS profile, account, GitHub OIDC role,
+workflow dispatch, plan, apply, destroy, or cloud resource was used.
+
+```console
+bash -n scripts/pilot-cloud-guard.sh scripts/pilot-cloud-plan.sh \
+  scripts/pilot-cloud-apply.sh scripts/pilot-cloud-destroy.sh
+```
+
+The shell syntax check covers account guarding and confirmation gates. Existing local
+observability/release/remediation evidence defines the intended future cloud drills;
+it is not cloud observability, cloud HA, cloud load, cloud rollback, cloud cost, or
+cloud teardown evidence.
+
 ## Temporary public walkthrough clean-room validation
 
 **Date:** 2026-09-30

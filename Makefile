@@ -1,4 +1,4 @@
-.PHONY: install test lint audit run demo load-test bootstrap-local smoke status public-demo demo-local demo-overload demo-routing demo-failure demo-timeout demo-metering demo-observability demo-recovery demo-model-registry demo-release-control demo-capacity demo-operational-evidence demo-remediation demo-agent-tools demo-self-service demo-edge-adapter demo-sandboxed-agent demo-operator-console demo-flagship verify clean-local destroy-local helm-lint terraform-validate cloud-delivery-validate
+.PHONY: install test lint audit run demo load-test bootstrap-local smoke status public-demo demo-local demo-overload demo-routing demo-failure demo-timeout demo-metering demo-observability demo-recovery demo-model-registry demo-release-control demo-capacity demo-operational-evidence demo-remediation demo-agent-tools demo-self-service demo-edge-adapter demo-sandboxed-agent demo-operator-console demo-flagship verify clean-local destroy-local helm-lint terraform-validate cloud-delivery-validate pilot-cloud-plan pilot-cloud-apply pilot-cloud-destroy
 PYTHON ?= python3.12
 VENV := .venv
 PY := $(VENV)/bin/python
@@ -93,3 +93,9 @@ terraform-validate:
 	terraform -chdir=infrastructure/terraform/environments/aws validate
 cloud-delivery-validate:
 	./scripts/validate-cloud-delivery-contracts.sh
+pilot-cloud-plan:
+	./scripts/pilot-cloud-plan.sh
+pilot-cloud-apply:
+	./scripts/pilot-cloud-apply.sh
+pilot-cloud-destroy:
+	./scripts/pilot-cloud-destroy.sh

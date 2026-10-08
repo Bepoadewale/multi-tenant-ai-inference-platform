@@ -64,3 +64,16 @@ Argo reconciliation, image delivery, IRSA assumption, ALB routing, or a smoke te
 
 Record exact results in [validation evidence](governance/VALIDATION.md) only after a
 separately authorized pilot has run.
+
+## Guarded automation contract
+
+The repository now includes `pilot-cloud-plan`, `pilot-cloud-apply`, and
+`pilot-cloud-destroy` scripts plus a manually dispatched GitHub Actions workflow.
+Each checks the expected AWS account; apply and destroy require an exact confirmation
+word. The workflow assumes a supplied short-lived GitHub OIDC role rather than using
+stored AWS keys. It has not run against an AWS account.
+
+Before any use, the state bootstrap must already exist and the GitHub OIDC role must
+be created with a repository/branch-bound trust policy and only the reviewed pilot
+permissions. GitHub Environment protection for `aws-pilot` must require appropriate
+human approval.
