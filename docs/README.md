@@ -20,6 +20,9 @@ reproducible demonstration.
 [Production evolution](production-evolution.md) states the exact evidence required
 before a cloud or enterprise claim can replace that local-first boundary.
 
+The [cloud-pilot runbook](cloud-pilot-runbook.md) is a future operational contract;
+it is not cloud execution evidence.
+
 For a low-level client walkthrough, use the token-free source in
 [`examples/`](../examples/README.md); it calls the executed inference API rather than
 inventing a parallel interface.

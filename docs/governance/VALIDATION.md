@@ -99,6 +99,22 @@ observability/release/remediation evidence defines the intended future cloud dri
 it is not cloud observability, cloud HA, cloud load, cloud rollback, cloud cost, or
 cloud teardown evidence.
 
+## Expanded cloud operator-contract static validation
+
+**Date:** 2026-10-08
+**Scope:** PR5/PR6 completion work, static only. No AWS resource, account, cloud
+credential, workflow dispatch, image push, Kubernetes cluster, or billing query was used.
+
+```console
+bash -n scripts/pilot-*.sh
+make cloud-delivery-validate
+make terraform-validate
+```
+
+The repository now has every named pilot command and a runbook describing controlled
+success, failure/rollback, HA/PDB, bounded-load, observability, Cost Explorer delay,
+and post-destroy evidence. These are reusable contracts, not completed cloud tests.
+
 ## Temporary public walkthrough clean-room validation
 
 **Date:** 2026-09-30

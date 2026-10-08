@@ -52,3 +52,21 @@ metadata, but never prompt or completion text. The direct request record is boun
 with a seven-day Redis TTL. Production allocation should incorporate versioned cloud
 prices, GPU-hours, commitments, utilization, replicas, and tenant/model/cost-center
 policy; those inputs are not executed here.
+
+## Planned cloud-pilot evidence — not executed
+
+CP6 must turn the following design into recorded AWS evidence before this repository
+can claim a cloud pilot. It must not be inferred from the local stack or Terraform
+contracts alone.
+
+| Concern | Pilot evidence required |
+| --- | --- |
+| Metrics and dashboards | Prometheus scrapes the deployed gateway and supporting services; Grafana shows tenant admission, queueing, route/version, release state, errors, latency, and availability. |
+| Traces and audit | The deployed request path exports OTel traces to Tempo (or the selected tracing backend) and correlates only metadata-safe request, release, and audit records. |
+| Alerting | A deliberately injected bounded failure causes a defined alert to fire; alert routing and acknowledgement are recorded without claiming an on-call service. |
+| Availability | Two or more gateway replicas and a PDB are deployed. Deleting one pod proves traffic and readiness continue through the remaining replica, then return to the desired replica count. |
+| Recovery | A known-bad candidate image or bounded backend failure produces a visible unhealthy state and uses the governed known-good rollback path. Redis admission remains fail-closed when shared admission is unavailable. |
+| Load | A short bounded authenticated load sample records duration, concurrency, request count, outcomes, and environment. It is availability evidence, not a benchmark or capacity claim. |
+| Cost | Cost Explorer queries include account, region, tag/filter, query time, and result status. Values are labelled estimated until AWS publishes settled billing data, commonly 24–48 hours later. |
+
+The intended operational order is documented in the [cloud-pilot runbook](../cloud-pilot-runbook.md).

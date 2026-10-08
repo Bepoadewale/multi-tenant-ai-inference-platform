@@ -8,7 +8,8 @@ Stack: Python 3.12, FastAPI, Redis contracts, Prometheus, vLLM/Kubernetes contra
 
 Commands: `make install`, `make bootstrap-local`, `make smoke`, `make demo-flagship`,
 `make public-demo`, `make verify`, `make clean-local`, `make test`, `make lint`,
-`make load-test`, `make helm-lint`, `make terraform-validate`.
+`make load-test`, `make helm-lint`, `make terraform-validate`,
+`make cloud-delivery-validate`, and the guarded `make pilot-*` cloud commands.
 
 Rules: never claim GPU/vLLM performance without execution; tenant identity is server-side; test cross-tenant limits and failure paths; no secrets/main pushes; update status/backlog and report exact validation. Do not copy other portfolio repositories wholesale: integrate through narrow APIs/events and preserve the working gateway path. Keep commercial/pricing/buyer strategy out of this public repository.
 
@@ -16,6 +17,12 @@ Future cloud infrastructure must be provisioned and torn down through Terraform.
 not create or delete pilot cloud resources manually after account bootstrap; review
 plans, use encrypted/locked state, run Terraform destroy for teardown, and record
 post-destroy verification.
+
+Cloud execution requires the CP6 sequence in `docs/cloud-pilot-runbook.md`, a
+separately authorized budget, exact account/region/SHA evidence, Terraform-only
+create/destroy, and provider-side absence checks after teardown. Never treat a
+static script check as cloud evidence. Cost Explorer output remains estimated until
+AWS billing data settles.
 
 ## Cloud-pilot readiness rule
 
