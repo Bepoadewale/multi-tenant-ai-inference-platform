@@ -29,6 +29,14 @@ AWS_PROFILE=<profile> EXPECTED_AWS_ACCOUNT_ID=<account-id> PILOT_CLOUD_CONFIRM=d
 `apply` is intentionally not in the ordinary chain. It requires a reviewed plan,
 explicit `PILOT_CLOUD_CONFIRM=apply`, and a separate authorization.
 
+Before bootstrap has created and migrated state, the two plan commands use a deleted
+temporary Terraform working directory with the S3 backend declaration removed. They
+still read the selected AWS account, but create neither state nor resources. Supply
+`TF_VAR_budget_alert_email` for the bootstrap plan; the address is never committed.
+Once the dedicated state bucket exists, `pilot-cloud-plan` uses the remote encrypted
+S3/DynamoDB backend. `pilot-cloud-apply` refuses to proceed until that state bucket
+is present.
+
 ## Required CP6 evidence
 
 1. Tenant A and Tenant B share Redis-backed admission without cross-tenant leakage.
