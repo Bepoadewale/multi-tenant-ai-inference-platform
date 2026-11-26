@@ -16,19 +16,23 @@ flowchart LR
   EC2 -. no NAT Gateway .-> Internet
   Tags[Project tags + expiry guard] -. governs .-> EC2
   TF[Terraform workstation] -->|encrypted state + S3 lock file| State[S3 versioned private state bucket]
+  TF -. repository-required lock .-> Lock[DynamoDB on-demand lock table]
   Expiry[Boot-scheduled bounded shutdown timer] -. instance shutdown terminates EC2 .-> EC2
 ```
 
-The state bucket and boot expiry are proposed controls, not deployed resources. The
-preferred state-lock design is Terraform's S3-native lock file rather than a
-DynamoDB table. A timer on the EC2 guest is a second independent runtime limit; it
-must schedule a machine shutdown while EC2 is configured to terminate after a
-guest-initiated shutdown. Before any paid apply, test the actual startup path and the
-timer expiry behavior. The instance must also delete its encrypted gp3 volume on
-termination. Session Manager access uses an instance role and outbound HTTPS; it
-does not need an inbound SSH rule. The public subnet still has an egress path, so
-limit it to the test window and document that the instance has a public address even
-when no inbound service port is open.
+The state bucket, lock table, and expiry are proposed controls, not deployed
+resources. Use a private versioned bucket with the Terraform S3 lock file and the
+dedicated DynamoDB lock table required by the repository's cloud-pilot rule. HashiCorp
+marks DynamoDB locking deprecated, so the table is a compatibility/policy control
+and can be removed only after that repository rule changes; the two lock mechanisms
+must be configured and tested together. The guest timer is a second independent
+runtime limit; it must shut down the machine while EC2 terminates after a guest-
+initiated shutdown. Before any paid apply, test the actual startup path and expiry
+behavior. The instance must also delete its encrypted gp3 volume on termination.
+Session Manager access uses an instance role and outbound HTTPS; it does not need an
+inbound SSH rule. The public subnet still has an egress path, so limit it to the test
+window and document that the instance has a public address even when no inbound
+service port is open.
 
 ## Proposed host and request path
 

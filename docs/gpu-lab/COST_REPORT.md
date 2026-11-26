@@ -28,17 +28,20 @@ no inbound service rules. One public IPv4 address is billed while allocated.
 | 100 GiB `gp3`, 12 hours | $0.08/GiB-month × 100 × 12/(24×30) | $0.0133 |
 | State bucket and versions, up to 1 GiB-month | $0.023/GB-month planning cap; verify exact regional rate | $0.0230 |
 | S3 state/lock requests | Up to 1,000 write/list requests at $0.005/1,000; GET allowance | $0.0100 |
+| Dedicated DynamoDB lock table | On-demand table; reserve for a bounded set of lock reads/writes | $0.0100 |
 | EventBridge Scheduler expiry | Reserve one invocation even if account free tier applies | $0.0100 |
 | Internet data transfer out | Reserve 1 GiB at $0.90/GB, ten times the current $0.09/GB first-tier published rate; account aggregation and current rate must be checked | $0.9000 |
-| **Estimated pre-tax subtotal** | Sum of listed items | **$10.6739** |
-| Tax contingency | 25% of subtotal; conservative placeholder, not a tax determination | $2.6685 |
+| **Estimated pre-tax subtotal** | Sum of listed items | **$10.6839** |
+| Tax contingency | 25% of subtotal; conservative placeholder, not a tax determination | $2.6710 |
 | General contingency | Fixed reserve for price changes and small unmodeled usage | $5.0000 |
-| **Planning envelope** | Subtotal + contingency | **$18.3424** |
-| **Headroom under $25** | $25 − envelope | **$6.6576** |
+| **Planning envelope** | Subtotal + contingency | **$18.3549** |
+| **Headroom under $25** | $25 − envelope | **$6.6451** |
 
 The 12-hour runtime is a ceiling for all GPU instance time, not a planned target.
 This estimate covers neither an authorization nor a promise that every requested
 phase fits in 12 hours. Do not lengthen the run or add resources to use the headroom.
+For a concise project-status summary, this estimate rounds to `$18.35`; retain the
+unrounded arithmetic above when comparing it with the `$25` ceiling.
 
 ## Pricing sources and limitations
 
@@ -62,6 +65,10 @@ phase fits in 12 hours. Do not lengthen the run or add resources to use the head
   values, not a locked regional quote. A versioned bucket retains prior Terraform
   state versions until explicitly cleaned up, so keep the bucket lifetime short and
   count retained object versions.
+- AWS's [DynamoDB pricing page](https://aws.amazon.com/dynamodb/pricing/) charges
+  on-demand tables by request units and storage. The `$0.01` line is a conservative
+  project allowance for a small number of lock operations, not a quoted bill; verify
+  current `us-east-1` rates and actual requests before the run.
 - The [EventBridge pricing page](https://aws.amazon.com/eventbridge/pricing/) lists
   14 million Scheduler invocations per month in its free tier and $1 per million
   above it. The estimate reserves $0.01 for one invocation rather than relying on
@@ -82,6 +89,14 @@ allowance only. The account billing profile and applicable tax must be reviewed 
 the exact run is accepted. If tax or account-level data transfer makes the full plan
 reach $25, the plan is not eligible to run.
 
+The existing repository's budget pattern requires a notification recipient. AWS
+requires a new direct email recipient to be verified before it receives alerts; do
+not put the address in Git or claim the alert is active until AWS shows it as verified.
+Use the supplied private input only at the later authorized apply. AWS Budgets can
+notify after charges have already accrued, so this alert is an additional signal, not
+a stop mechanism ([recipient verification](https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-email-recipients.html),
+[budget delay and limits](https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html)).
+
 ## Controls that make the estimate reviewable
 
 1. Allow exactly one full L4 type (`g6.xlarge`) and one instance at once. Keep
@@ -89,11 +104,13 @@ reach $25, the plan is not eligible to run.
    it and a new estimate remains within the ceiling.
 2. Limit the EC2 root/data storage to one encrypted 100 GiB gp3 volume. Do not create
    snapshots, extra volumes, Elastic IPs, endpoints, or log archives by default.
-3. Use a short-lived versioned S3 state bucket with server-side encryption and native
-   S3 lock files. Its contents are sensitive; never commit state or saved plans.
-   During approved destroy, remove the project bucket and its versions only after
-   Terraform has safely destroyed the workload and state has been exported only if
-   needed for the documented record.
+3. Use a short-lived versioned S3 state bucket with server-side encryption, S3-native
+   lock files, and a dedicated pay-per-request DynamoDB table because repository
+   policy requires the table. HashiCorp deprecates DynamoDB-based locking, so test the
+   selected Terraform release's dual-lock behavior; do not remove the table unless
+   repository policy changes. State contents are sensitive; never commit state or
+   saved plans. During approved destroy, remove the project bucket and its versions
+   and the project lock table only after Terraform has safely destroyed the workload.
 4. Set an exact UTC expiry in an EventBridge Scheduler one-time call that can
    terminate only this instance. Add a guest-side shutdown timer and set guest
    shutdown to terminate the EC2 instance. Both controls must be independently
