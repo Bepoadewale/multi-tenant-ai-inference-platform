@@ -141,9 +141,11 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Sources consulted:** official HashiCorp S3 backend and state locking guides, AWS
   Session Manager security guidance, S3 pricing page, and EC2 service authorization
   reference.
-- **Findings and decision candidates:** prefer Terraform's versioned, private,
-  encrypted S3 backend with native `use_lockfile=true`; HashiCorp marks DynamoDB
-  locking deprecated, so a lock table is unnecessary. Session Manager itself has no
+- **Findings and decision candidates:** use Terraform's versioned, private, encrypted
+  S3 backend with native `use_lockfile=true` and a dedicated pay-per-request DynamoDB
+  lock table because the repository's `AGENTS.md` requires one per cloud root. HashiCorp
+  marks DynamoDB locking deprecated, so test dual-lock behavior and retain the table
+  only while that repository policy requires it. Session Manager itself has no
   EC2 connection fee; interface VPC endpoints add hourly/data charges, so the current
   minimum-cost candidate is one public IPv4 with no inbound service rules and outbound
   HTTPS, after recording its egress risk. Treat inbound model/image transfers as free
@@ -233,9 +235,9 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   evidence manifest; recorded EventBridge Scheduler as the proposed independent
   expiry mechanism paired with guest shutdown. Marked Phase 1 complete and Phase 2
   static-only preparation active.
-- **Cost model:** provisional 12-hour estimate is `$18.34`, including 12 hours at the
+- **Cost model:** provisional 12-hour estimate is `$18.35`, including 12 hours at the
   2026-11-26 g6.xlarge catalog rate, one IPv4, 100 GiB gp3, temporary S3 state and
-  lock, expiry invocation, a 10x data-egress placeholder, a 25% tax allowance, and a
+  S3/DynamoDB state lock, expiry invocation, a 10x data-egress placeholder, a 25% tax allowance, and a
   `$5` reserve. This is not a quote or authorization. Current G/VT quota is zero.
 - **Validation:** official-source review and documentation inspection only; no cloud
   validation or local runtime started. `git diff --check` will be run before commit.
@@ -245,3 +247,33 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   mechanism is proposed and not yet implemented or tested. The quota is unchanged.
 - **Next action:** finish the static Terraform/expiry design in a focused PR; no AWS
   apply or quota request.
+
+## 2026-11-27 — Repository state-lock policy and cost correction
+
+- **Phase:** Phase 2 — static-only infrastructure preparation.
+- **Branch / PR:** `codex/single-l4-gpu-goal` / PR #30.
+- **Starting state:** PR #30 head `80ca94e`; its two workflow runs were still active
+  when the repository's state-lock requirement was reviewed.
+- **Objective:** align the architecture and cost record with the repository rule that
+  each cloud root has its own DynamoDB lock table, while keeping Terraform's current
+  S3-native lock option documented.
+- **Research and decision:** HashiCorp documents that S3 and DynamoDB backend locking
+  can be configured together, but marks DynamoDB locking deprecated. The repository
+  rule still requires a DynamoDB table. The proposed design therefore retains a
+  small project table and tests the pinned Terraform dual-lock path before use.
+  AWS Budgets direct-email alerts require recipient verification and can lag charges;
+  they are not a runtime stop control.
+- **Changes:** corrected the current rounded 12-hour envelope from `$18.34` to
+  `$18.35`, added a small DynamoDB request allowance, documented email-alert
+  verification, and updated the proposed state architecture, status, backlog, and
+  evidence index. No Terraform resource was created.
+- **Validation:** `git diff --check` passed. The existing PR #30 watcher reported
+  Python, manifests, supply-chain, and local-e2e passing in both runs; `gh pr checks
+  30` confirmed all displayed checks passed at `80ca94e`.
+- **Cloud resources/cost:** none created or changed; AWS spend `$0`; GPU instance-hours
+  `0`; quota remains `0` vCPUs.
+- **Limitations:** estimate remains provisional. Exact price, tax, egress aggregation,
+  state lifetime, resource plan, budget recipient verification, and expiry testing
+  remain open before any apply.
+- **Next action:** commit this documentation correction, then prepare the isolated
+  Phase 2 Terraform root in a separate pull request and keep it static-only.

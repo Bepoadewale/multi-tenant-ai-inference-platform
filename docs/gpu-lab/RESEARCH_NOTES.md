@@ -90,9 +90,13 @@ independent gates.
 
 - HashiCorp's [S3 backend guide](https://developer.hashicorp.com/terraform/language/backend/s3)
   supports native S3 lock files through `use_lockfile = true`, recommends bucket
-  versioning, supports encryption, and marks DynamoDB-based locking deprecated. This
-  project should use the S3 lock file so it does not add a DynamoDB table just for
-  Terraform locking. The exact Terraform minimum, backend bootstrap, permissions, and
+  versioning, supports encryption, and marks DynamoDB-based locking deprecated. The
+  repository's `AGENTS.md` requires every cloud root to use its own DynamoDB lock
+  table. Therefore the GPU root will use a dedicated pay-per-request table to follow
+  repository policy and may add the S3 lock file as a second lock mechanism if the
+  selected Terraform release supports both; validate compatibility and cost in static
+  validation. Do not silently remove the DDB requirement just because newer Terraform
+  supports S3 locking. Exact Terraform minimum, state bootstrap, IAM access, and
   lifecycle still need implementation and validation.
 - AWS [Session Manager guidance](https://docs.aws.amazon.com/prescriptive-guidance/latest/aws-startup-security-baseline/wkld-06.html)
   says Session Manager has no additional EC2 connection charge; interface VPC

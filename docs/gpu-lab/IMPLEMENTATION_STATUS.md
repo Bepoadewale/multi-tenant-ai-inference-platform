@@ -34,7 +34,7 @@
 - Read-only `us-east-1` resource-group tag and EC2 instance lookups for the exact project tag: **no matches**. Untagged or differently tagged leftovers are not excluded.
 - EC2 instance type offerings list G6 in multiple `us-east-1` AZs; this is not a capacity reservation.
 - On-Demand G and VT quota: **0 vCPUs** (`L-DB2E81BA`); G6 launch cannot proceed until increased.
-- Price List API on 2026-11-26: Linux shared On-Demand `g6.xlarge` **$0.8048/hour**. An 8–12 hour instance window costs **$6.44–$9.66** before all other charges. A provisional 12-hour envelope including IPv4, gp3, state, expiry, egress, tax contingency, and reserve is about **$18.34**; see `COST_REPORT.md` for assumptions and exclusions. This is not a final quote or authorization.
+- Price List API on 2026-11-26: Linux shared On-Demand `g6.xlarge` **$0.8048/hour**. An 8–12 hour instance window costs **$6.44–$9.66** before all other charges. A provisional 12-hour envelope including IPv4, gp3, S3/DynamoDB state controls, expiry, egress, tax contingency, and reserve is about **$18.35**; see `COST_REPORT.md` for assumptions and exclusions. This is not a final quote or authorization.
 - Credentials are never recorded here.
 
 ## Current Next Actions

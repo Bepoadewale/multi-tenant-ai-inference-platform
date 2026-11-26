@@ -16,6 +16,9 @@ pull requests must include the repository's clean-room evidence.
 - No AWS resources or GPU instance hours have been used by this goal.
 - The account's On-Demand G and VT quota is zero. No quota increase request has been
   submitted.
+- The existing repository budget uses email notifications. A recipient must be
+  provided outside version control and verified before that alert is active; it is
+  not an enforcement control.
 - The initial USD $25 limit is a hard ceiling. A provisional planning scenario now
   includes compute, public IPv4, gp3, temporary state and lock storage, one expiry
   invocation, data-transfer allowance, tax contingency, and a reserve. It still
@@ -68,9 +71,11 @@ until every cost and quota gate is satisfied.
   instance-count, project-tag, and IMDSv2 guards.
 - [ ] Keep the resource set to a VPC, subnet, route/IGW, minimal security group,
   scoped IAM instance role/profile, one `g6.xlarge`, and encrypted gp3 storage.
-- [ ] Use a private, versioned, encrypted S3 state bucket and native Terraform S3 lock
-  file; define bootstrap and final state-bucket teardown without committing state or
-  saved plans.
+- [ ] Use a private, versioned, encrypted S3 state bucket and a dedicated pay-per-
+  request DynamoDB lock table, as required by the repository's cloud-pilot rule. Add
+  S3 native lock files if supported by the selected Terraform release, and test both
+  locks together. Define bootstrap and final state teardown without committing state
+  or saved plans.
 - [ ] Prefer SSM with no inbound ports. Add only outbound access required for package
   and model downloads; do not add NAT Gateway or endpoints without a demonstrated
   need and priced approval.
@@ -219,9 +224,9 @@ cost status, educational artifacts, and goal closure are complete.
 - The G/VT On-Demand quota is currently zero. Do not request an increase or launch
   until the exact bounded cost and resource plan is ready and the account change is
   authorized.
-- Provisional 12-hour estimate: about `$10.67` before tax for one g6.xlarge, one public
+- Provisional 12-hour estimate: about `$10.68` before tax for one g6.xlarge, one public
   IPv4, 100 GiB gp3, short-lived S3 state and lock objects, one scheduler invocation,
   and 1 GiB of internet egress. A 25% tax allowance plus `$5` general reserve gives
-  about `$18.34`. This is neither a provider quote nor authorization. Confirm current
+  about `$18.35`. This is neither a provider quote nor authorization. Confirm current
   rates, the account tax profile, aggregate data-transfer usage, state retention, and
   exact plan immediately before any paid run.
