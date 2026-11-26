@@ -4,7 +4,7 @@
 
 | Phase | Status | Evidence / next gate |
 | --- | --- | --- |
-| 1. Audit, research, architecture | In progress | Direct source audit and initial research recorded. Baseline `pip-audit` failed; the local repair is in draft PR #31 with clean-room evidence. Finish compatibility/cost research and prioritized backlog. |
+| 1. Audit, research, architecture | In progress | Direct source audit and initial research recorded. Baseline `pip-audit` failed; its local repair is ready for review in PR #31 with clean-room evidence and passing CI. Finish compatibility/cost research and prioritized backlog. |
 | 2. Single-L4 EC2 Terraform | Not started | Separate guarded root and current cost/quota/capacity plan; spend must fit within $25. |
 | 3. Ubuntu/NVIDIA/CUDA/Ansible | Not started | Manual host and container GPU computation, followed by repeat Ansible run. |
 | 4. CUDA performance lab | Not started | Synchronized real-GPU experiments and profiler evidence. |
@@ -23,7 +23,7 @@
 - Local Compose and historical clean-room evidence use CPU ONNX. The current repository does not demonstrate GPU execution.
 - Existing Terraform root is an EKS and managed-services contract; existing Kubernetes vLLM manifests are not the EC2 deployment.
 - Gateway vLLM response accounting and token estimation need direct tests and design review before GPU integration.
-- Baseline on `main` reported 84 advisory records across seven transitive packages and failed `make verify`. Draft PR #31 adds shared minimum-version constraints; on that branch, the full audit passes and the local CPU clean-room cycle is validated. See ticket #31 and `docs/governance/VALIDATION.md`.
+- Baseline on `main` reported 84 advisory records across seven transitive packages and failed `make verify`. PR #31 adds shared minimum-version constraints; local full verification, image build, clean-room evidence, and all four required GitHub check names across two workflow runs passed. Human review/merge remains outstanding. See ticket #31 and `docs/governance/VALIDATION.md`.
 - Historical validation is documented in `docs/governance/VALIDATION.md`; this session's local results are not GPU evidence.
 
 ## Authorization and resource tracking
@@ -45,7 +45,7 @@
    NVIDIA Container Toolkit, Docker, and a pinned vLLM release.
 3. Build a complete resource/runtime/cost estimate and independent expiry/cleanup plan
    under the $25 ceiling. Do not provision while the G/VT quota is 0 vCPUs.
-4. Complete the phase backlog and record PR #31 CI results before marking either PR
-   ready for review.
+4. Continue non-billable Phase 1 work while PRs #30 and #31 await review; watch the
+   required CI run after pushing the next PR #30 documentation commit.
 
 Update this table and the detailed goal after each implementation package. A phase is complete only when its acceptance gate has actual evidence.
