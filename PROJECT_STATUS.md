@@ -187,9 +187,10 @@ bootstrap, smoke, flagship demo, verification, and project-scoped teardown.
 
 ## Last Updated
 
-2026-09-30, temporary public walkthrough clean-room evidence recorded on
-`codex/real-workload-pilot-guide`; flagship reference documentation and real local
-console screenshots added on `codex/flagship-docs-experience`. GitHub CI is required
+2026-11-26, GPU goal baseline audit is recorded in PR #30; the dependency audit
+baseline repair is in progress on `codex/fix-baseline-dependency-audit`. Local
+clean-room and dependency validation are recorded in
+`docs/governance/VALIDATION.md`. No AWS resources were created. GitHub CI is required
 before review.
 
 ## Clean-Room Reproducibility
