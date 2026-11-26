@@ -16,7 +16,7 @@ The project is also a hands-on learning resource. Its documentation must explain
 
 The audited starting revision is `c8f02ed` (`docs: explain the flagship in plain English (#29)`) on a clean `main` tracking `origin/main`. The repository guide requires small PRs, no direct pushes to `main`, honest hardware claims, and executed clean-room evidence before an implementation PR is called ready for human review.
 
-Direct source inspection confirms:
+Direct source inspection confirms; see the [repository audit](../gpu-lab/REPOSITORY_AUDIT.md) for the file-by-file evidence and gaps:
 
 - `gateway/` contains FastAPI APIs, Ed25519 identity verification, server-derived tenant and role, model authorization, Redis Lua-backed shared admission/metering, routing, streaming, OpenTelemetry, and ONNX and vLLM backend adapters.
 - `GatewayService` selects vLLM when a routed target has a `backend_url`; the existing catalog and executed local service use CPU ONNX fixtures. The existing vLLM adapter is a boundary, not evidence that vLLM has run.

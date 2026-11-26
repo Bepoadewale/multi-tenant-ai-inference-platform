@@ -1,0 +1,47 @@
+# Repository Audit — Single-L4 Project Baseline
+
+**Audited revision:** `c8f02ed`, 2026-11-26.  
+**Scope:** direct source, test, container, Terraform, observability, CI, docs, and recorded evidence inspection.  
+**Outcome:** strong local CPU control-plane baseline; no EC2 GPU execution profile exists in this revision.
+
+## Existing components and evidence
+
+| Capability | Source inspected | What exists | Evidence / boundary |
+| --- | --- | --- | --- |
+| FastAPI gateway and OpenAI-shaped chat | `gateway/src/inference_gateway/api/main.py`, `models.py`, `services/gateway.py` | Chat completions, model listing, admin views, metrics, streaming response. | Local API and 50-test baseline passed, but current inference target is CPU ONNX. |
+| Signed caller identity | `auth/service.py`, `auth/admin.py`, `gateway/tests/test_jwt_auth.py` | Ed25519 JWT validation checks signature, issuer, audience, expiration, tenant, and roles; tenant comes from authenticated claims, not a request header. | Direct unit tests passed; local fixture-token mode also exists. No external identity provider is integrated. |
+| Tenant and model catalog | `catalog/store.py`, `models.py` | Static tenant/model assignments and request/token/concurrency/daily quotas; model targets can receive backend URLs through environment variables. | Good lab fixture, not dynamic multi-customer catalog administration. |
+| Shared admission | `limiting/redis_service.py`, `limiting/redis_lua.py`, `limiting/service.py` | Redis Lua atomically checks request/token/concurrency/daily limits and bounded queue; Redis admission errors return 503. A local in-memory implementation supports tests. | Existing demos/tests document Redis behavior across two gateway replicas. Admission uses estimated prompt words plus requested output, not tokenizer counts. |
+| Token reconciliation and leases | Same limiter files | Gateway calls `release(tenant, actual_tokens)`; Redis release currently decrements only the active counter; minute and daily ledgers retain the estimate. The in-memory limiter also does not reconcile estimates in its release method. Active Redis counters have no lease/TTL tied to process survival. | Important gap for actual LLM usage, failures, crashes, and tenant cost attribution. Design and test before GPU traffic. |
+| CPU ONNX runtime | `backends/onnx.py`, `gateway/src/inference_gateway/api/runtime.py`, `gateway/tests/test_onnx_runtime.py`, `test_runtime_api.py` | Real local ONNX Runtime inference and OpenAI-shaped/SSE API for deterministic fixture models. | Executed historical clean-room evidence and current 50 passing tests. Preserve as regression path. |
+| vLLM adapter | `backends/vllm.py`, backend selection in `services/gateway.py` | HTTP adapter sends chat messages, max tokens, temperature, stream flag; backend health calls `/health`; vLLM is selected when a target has a backend URL. | No test file specifically covers `VllmBackend`, no real vLLM process or GPU execution, no model revision/image pinning or vLLM deployment profile in Compose. |
+| vLLM response/accounting behavior | `backends/vllm.py`, `services/gateway.py` streaming path | Nonstreaming reads response `usage`; streaming parses content delta only. Gateway increments completion usage by one for each received content chunk and records a fixed `2.0` ms TTFT for a completed stream. | Chunk count is not token count and fixed TTFT is not measured evidence. Add correct stream usage/finalization and cancellation tests before tenant accounting claims. |
+| Capacity policy | `capacity/`, `catalog/store.py`, `gateway/tests/test_capacity.py` | Redis/in-memory accounting admits, queues, rejects, or allows explicit CPU fallback for a simulated GPU pool. | Documentation and API name this simulated. It performs no hardware scheduling; do not relabel as physical GPU allocation. |
+| MLflow/release control | `release/`, `api/release.py`, `scripts/register_mlflow_models.py`, `gateway/tests/test_release_store.py`, `test_model_artifacts.py` | Local ONNX artifacts, digests, fixture evaluation, immutable plans, independent approval, rollout weights, rollback. | Executed local ONNX release evidence. No LLM quality evaluation, GPU-backed candidate, or real vLLM rollout was found in the audited source. One L4 points toward sequential release and reload. |
+| Application telemetry | `observability/metrics.py`, `observability/tracing.py`, `observability/*` | Prometheus request/token/cost/latency/TTFT/queue and release/remediation metrics; OpenTelemetry traces; local Prometheus/Grafana/Tempo stack. | Existing local gateway telemetry is real; GPU/DCGM/vLLM values are not present in the local Compose service path. Review tenant metric-label cardinality for larger use. |
+| Dashboards | `dashboards/gateway.json`, `dashboards/gpu.json`, `observability/grafana-dashboards.yaml` | Gateway and GPU dashboard JSON definitions. | GPU dashboard contains DCGM and vLLM expressions but no checked local scrape target/exporter; treat as a proposed dashboard until populated with live metrics. |
+| Local containers | `docker-compose.yml`, `gateway/Dockerfile`, `requirements-container.txt` | Multi-service CPU demo with Redis, MLflow, gateway replicas/runtimes, OTel, Tempo, Prometheus, Grafana, and control services. | `docker compose config --quiet` passed. No NVIDIA runtime, vLLM container, GPU profile, or standalone Compose stack was found. Current service exposures are for local development; redesign network binding before EC2. |
+| Existing Terraform | `infrastructure/terraform/bootstrap/`, `infrastructure/terraform/environments/aws/`, `modules/gpu_nodes/` | Bootstrap state/budget contract and AWS EKS/private-managed-services contract. The `gpu_nodes` module only contains a boolean enabled output, not EC2 resources. | `make terraform-validate` passed both roots with backend disabled. Historical authenticated plan was read-only and proposed EKS/RDS/ElastiCache/NAT, which must not be deployed for this goal. |
+| Kubernetes/vLLM contract | `platform/kubernetes/vllm-gpu-deployment.yaml`, `runtimes/vllm/values.yaml`, Helm/Karpenter/Autoscaling files | GPU Operator, Karpenter, KEDA and vLLM manifest examples. The vLLM manifest uses `vllm/vllm-openai:latest` and a Llama 3.2 model. | Not deployed. Keep this future EKS contract separate; the EC2 path needs immutable version/image/model pins. |
+| CI/CD | `.github/workflows/ci.yml`, `.github/workflows/aws-pilot-oidc.yml`, `.github/PULL_REQUEST_TEMPLATE.md` | PR/push local lint, tests, dependency audit, Compose, Terraform/Helm static checks, Docker scan/SBOM, local end-to-end; a separate manually gated EKS-oriented AWS workflow. | Current local dependency audit failure is recorded in `VALIDATION.md`. No paid GPU job should run on normal PRs. Do not reuse EKS workflow for EC2 without a separately gated design. |
+| Historical project evidence | `docs/governance/VALIDATION.md`, `docs/governance/IMPLEMENTATION_STATUS.md`, `PROJECT_STATUS.md`, `DEFINITION_OF_DONE.md` | Two clean-room local CPU cycles and static/read-only AWS planning evidence; explicit GPU/cloud boundary. | Historical evidence remains valuable but does not satisfy GPU, CUDA, inference, incident, cost, or teardown gates. |
+
+## Baseline command results
+
+See [`VALIDATION.md`](VALIDATION.md) for exact results. Current checks showed lint pass, 50 passing tests and one dependency deprecation warning, dependency audit fail with 84 records across seven packages, Compose config pass when separated, Terraform validation pass, and cloud delivery static validation pass.
+
+## Integration plan derived from the audit
+
+1. Keep CPU ONNX and local controls as the default and regression suite.
+2. Add an independent `infrastructure/terraform/environments/gpu-ec2/` root. Do not edit the EKS deployment into an EC2 implementation or launch it.
+3. Add a distinct single-host GPU deployment profile with pinned vLLM image/model artifacts and internal-only services; do not publish Redis/MLflow/Grafana/Prometheus/Tempo or the model endpoint publicly.
+4. Add an explicit runtime/model target configuration and test selection, health/readiness, streaming usage, cancellation, error, Redis reservation/reconciliation, and fail-closed behavior before real use.
+5. Establish tokenizer-aware accounting or clearly separate reserved estimates from true measured usage. Use vLLM-reported usage when available; for streaming, collect a final usage chunk or a documented server-side token metric instead of equating network chunks with tokens.
+6. Track concurrency as a releasable reservation with crash recovery/expiry. Do not leave a permanent active-count key after a worker failure.
+7. Add GPU exporters and dashboards only once real scrape labels and metrics are verified. Keep prompts and completions out of telemetry.
+8. Use existing local release machinery only where artifact/evaluation semantics fit LLMs; default to sequential model reload because one L4 may not hold two candidates.
+9. Correct the dependency audit failure in a separate focused change with compatibility tests and repository-required clean-room evidence.
+
+## Phase 1 not yet complete
+
+This pass did not audit every module implementation line-by-line, every API security edge, or the full current compatibility matrix. Official sources for CUDA, PyTorch, Triton, DCGM, observability, Redis, MLflow, and benchmarking still need to be reviewed before their implementation packages. The AWS zero-quota issue and `$25` end-to-end experiment estimate also need resolution before paid work.
