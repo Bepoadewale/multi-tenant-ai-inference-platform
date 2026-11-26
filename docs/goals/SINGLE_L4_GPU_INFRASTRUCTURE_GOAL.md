@@ -1,10 +1,10 @@
 # Single-L4 GPU Infrastructure Goal
 
-**Status: ACTIVE — Phase 1, repository audit and research**  
+**Status: ACTIVE — Phase 2, isolated EC2 infrastructure (static preparation only)**
 **Source of truth:** this document, the linked execution journal, pull requests, and evidence records.  
-**Last updated:** 2026-11-26  
+**Last updated:** 2026-11-27
 **Current branch:** `codex/single-l4-gpu-goal`  
-**Registration PR:** [#30 — docs: register single-L4 GPU infrastructure goal](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/30) (open, ready for review; checks passed at `690dd91`; the follow-up research documentation commit will have its own CI run).
+**Registration PR:** [#30 — docs: register single-L4 GPU infrastructure goal](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/30) (open, ready for review; all required checks passed at `336c1b4`).
 
 ## Project objective
 
@@ -28,7 +28,14 @@ Direct source inspection confirms; see the [repository audit](../gpu-lab/REPOSIT
 
 **AWS resource inventory:** on 2026-11-26, read-only calls using the designated key profile confirmed the configured account matches the expected account. `resourcegroupstaggingapi get-resources` with the exact project tag and `ec2 describe-instances` with the exact project tag both returned empty lists in `us-east-1`. This is not proof that no untagged or differently tagged resource exists; historical records also say the EKS-oriented plan was no-apply. No AWS mutation occurred.
 
-**GitHub state:** `gh auth status` identified the authenticated account as Bepoadewale. PR #30 registers this goal and PR #31 repairs the dependency-audit baseline; both are open and ready for review. Neither has been merged.
+**GitHub state:** `gh auth status` identified the authenticated account as Bepoadewale. PR #30 registers this goal and PR #31 repairs the dependency-audit baseline; both are open and ready for review. Neither has been merged. Required checks pass on PR #30 head `336c1b4` and PR #31 head `9710932`.
+
+The current package sequence and spending/authorization gates are in the [GPU lab
+implementation backlog](../gpu-lab/IMPLEMENTATION_BACKLOG.md), with the current
+provisional price envelope in the [cost report](../gpu-lab/COST_REPORT.md) and
+evidence classification in the [evidence manifest](../gpu-lab/EVIDENCE_MANIFEST.md).
+The execution journal retains failed attempts and session history; this goal remains
+the durable status page.
 
 ## Scope and architectural constraints
 
@@ -78,18 +85,20 @@ Plan for at most 8–12 cumulative GPU instance hours where feasible. Bundle GPU
 
 ## Current project state
 
-- **Active phase:** Phase 1 — repository audit, research, and architecture.
-- **Current task:** continue the Phase 1 audit by reviewing gateway streaming/token accounting, Redis reservation lifecycle, runtime pinning, and tests; complete official driver/CUDA/PyTorch/vLLM compatibility and total-cost research; finish the prioritized implementation backlog. Do not request quota changes or run an AWS mutation.
-- **Completed:** source audit and initial architecture/risk/research/status/journal records; README and docs index links; read-only AWS identity and exact project-tag inventory checks; G6 offerings and zero quota checks; initial Price List lookup; both existing Terraform roots passed backend-disabled validation; local lint, 50 tests, Compose configuration, and cloud-delivery validation passed on the baseline; first PR #30 CI required checks passed. In dependency PR #31, shared minimum constraints were applied to local and container installs; `make install`, a local image build, Ruff, 50 tests, the audit, Compose config, smoke, and the cumulative CPU/local demo passed. Two successful local clean-room cycles and project-scoped cleanup are documented there. No AWS resource was changed.
-- **Outstanding:** finish detailed source/security audit; complete current official compatibility and full $25 cost calculation; document the prioritized backlog, exact resource/expiry/teardown plan, and evidence format; obtain PR review/approval for #31; continue non-billable implementation packages. GPU work remains ineligible until quota and exact cost controls are resolved.
+- **Active phase:** Phase 2 — isolated EC2 infrastructure, static preparation only; AWS mutation is blocked.
+- **Current task:** prepare the separate, guarded EC2 Terraform root, private/versioned S3 state bootstrap, independently scheduled expiry, and teardown verification as static-only code. Do not request quota changes or run an AWS mutation.
+- **Completed:** source audit and initial proposed architecture with AWS, Linux/GPU stack, request/security/admission/inference/observability/model-release/provision/teardown diagrams; risk/research/status/journal and prioritized implementation backlog; README/docs index links; read-only AWS identity and exact project-tag inventory checks; G6 offerings and zero quota checks; initial Price List lookup; both existing Terraform roots passed backend-disabled validation; baseline local lint, 50 tests, Compose configuration, and cloud-delivery validation passed. In dependency PR #31, shared minimum constraints were applied to local and container installs; `make install`, a local image build, Ruff, 50 tests, the audit, Compose config, smoke, and the cumulative CPU/local demo passed. Two successful local clean-room cycles and project-scoped cleanup are documented there. No AWS resource was changed.
+- **Outstanding:** implement and statically validate isolated infrastructure and expiry controls; recheck exact dated dependency/model pins before each runtime package; obtain human review/approval for #30 and #31; continue non-billable work. GPU work remains ineligible until the zero quota is changed through the authorized process and the exact plan, runtime, total cost, tax, expiry, and teardown gates are reviewed.
 - **Blocked:** G6 launch in `us-east-1` remains blocked by the account's On-Demand G and VT quota of 0 vCPUs (`L-DB2E81BA`). `g6.xlarge` was offered in several zones, not capacity-guaranteed. No quota increase was requested. Independently, no billable apply can happen until full cost, runtime, resource scope, expiry, plan review, and teardown gates are completed within the $25 ceiling.
-- **Open PRs:** #30 (goal registration; ready for review; all Python, manifests, supply-chain, and two local-e2e workflow checks passed at `690dd91`; the new research documentation commit awaits CI); #31 (dependency audit repair; ready for review; all Python, manifests, supply-chain, and two local-e2e workflow checks passed).
+- **Open PRs:** #30 (goal registration; ready for review; Python, manifests, supply-chain, and two local-e2e workflow checks passed at `336c1b4`); #31 (dependency audit repair; ready for review; Python, manifests, supply-chain, and two local-e2e workflow checks passed at `9710932`).
 - **Relevant commits:** baseline `c8f02ed` on `main`; goal registration `754564d`, `914ecaf`, `612e4d3` on `codex/single-l4-gpu-goal`; dependency repair `e1d9aa0`, `9710932` on `codex/fix-baseline-dependency-audit`.
 - **AWS project resources:** no resources created by this goal. Read-only exact-tag and exact-tag EC2 queries in `us-east-1` returned no matches; untagged or differently tagged resources are not ruled out. Historical repo evidence records an authenticated no-apply EKS-oriented Terraform plan on 2026-10-08.
-- **Validation:** baseline on `main`: Ruff and 50 tests passed with one Starlette deprecation warning; `pip-audit` failed with 84 advisory records across seven transitive distributions; separate `docker compose config --quiet`, `make terraform-validate`, and `make cloud-delivery-validate` passed. On PR #31: shared constraints resolved the audit; `make verify` passed Ruff, 50 tests, pip-audit, and Compose config; gateway image build and two successful local clean-room cycles passed. Details and the stateful 429 repeat-demonstration failure are recorded in `docs/governance/VALIDATION.md` and `docs/tickets/ticket31.md`. No GPU validation exists.
+- **Validation:** baseline on `main`: Ruff and 50 tests passed with one Starlette deprecation warning; `pip-audit` failed with 84 advisory records across seven transitive distributions; separate `docker compose config --quiet`, `make terraform-validate`, and `make cloud-delivery-validate` passed. On PR #31: shared constraints resolved the audit; `make verify` passed Ruff, 50 tests, pip-audit, and Compose config; gateway image build and two successful local clean-room cycles passed. Details and the stateful 429 repeat-demonstration failure are recorded in `docs/governance/VALIDATION.md` and `docs/tickets/ticket31.md`. PR #30's four required check names passed in both workflows at `336c1b4`. No GPU validation exists.
 - **Final completion:** all essential phase gates above genuinely executed; local CPU/EKS contracts preserved; actual single-L4 AWS, CUDA, vLLM, tenant, telemetry, benchmark, evaluation, release, incident, reproducibility, teardown, cost, and educational-document evidence cross-checked; all PRs resolved; no secrets in history; final resource absence and limitations recorded.
 
 ## Change log
 
 - 2026-11-26: Registered the persistent goal and began the source audit. No AWS resource was changed.
 - 2026-11-26: Recorded direct audit, read-only AWS findings, dependency-audit repair, clean-room evidence, and current GPU runtime/state/cost research. PRs #30 and #31 are ready for review; checks passed at their recorded commits, and the latest PR #30 research update still requires CI. No AWS resource was changed.
+- 2026-11-27: PR #30 checks completed successfully at `336c1b4`. Completed detailed request/stream/Redis failure-path review, researched an independently scheduled expiry design, and recorded a provisional full-resource cost envelope. The $25 ceiling remains a hard cap; no AWS mutation or quota request occurred.
+- 2026-11-27: Phase 1 audit/research package reached its documentation gate; Phase 2 begins with static-only Terraform and expiry preparation. The preliminary estimate is not an apply authorization. No AWS mutation or quota request occurred.

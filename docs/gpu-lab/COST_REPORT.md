@@ -1,0 +1,137 @@
+# GPU Lab Cost Report — Preliminary Estimate
+
+**Status:** planning estimate only; no cloud resources have been created.  
+**Pricing research date:** 2026-11-27 (recheck before any plan or apply).  
+**Hard initial ceiling:** USD $25 for this project's AWS usage.  
+**Current measured spend:** $0; GPU instance hours: 0.
+
+## What this estimate covers
+
+This estimate models one `g6.xlarge` in `us-east-1` for no more than 12 cumulative
+hours, one temporary public IPv4 address, one encrypted 100 GiB `gp3` volume, a
+short-lived Terraform state bucket, one expiry schedule invocation, and 1 GiB of
+internet data transfer out. It does not include any EKS, database, cache, NAT
+Gateway, load balancer, managed monitoring, or DavDeploy resources.
+
+The VPC, subnet, route table, internet gateway, and security group have no hourly
+charge by themselves. Systems Manager Session Manager has no additional connection
+charge, but its interface endpoints do; the current design avoids both NAT and SSM
+interface endpoints by using outbound internet connectivity from an instance with
+no inbound service rules. One public IPv4 address is billed while allocated.
+
+## Estimate table
+
+| Resource / assumption | Formula | Planning amount |
+| --- | --- | ---: |
+| Linux shared `g6.xlarge`, 12 hours | 12 × $0.8048/hour (AWS Price List API lookup, 2026-11-26) | $9.6576 |
+| In-use public IPv4, 12 hours | 12 × $0.005/hour | $0.0600 |
+| 100 GiB `gp3`, 12 hours | $0.08/GiB-month × 100 × 12/(24×30) | $0.0133 |
+| State bucket and versions, up to 1 GiB-month | $0.023/GB-month planning cap; verify exact regional rate | $0.0230 |
+| S3 state/lock requests | Up to 1,000 write/list requests at $0.005/1,000; GET allowance | $0.0100 |
+| EventBridge Scheduler expiry | Reserve one invocation even if account free tier applies | $0.0100 |
+| Internet data transfer out | Reserve 1 GiB at $0.90/GB, ten times the current $0.09/GB first-tier published rate; account aggregation and current rate must be checked | $0.9000 |
+| **Estimated pre-tax subtotal** | Sum of listed items | **$10.6739** |
+| Tax contingency | 25% of subtotal; conservative placeholder, not a tax determination | $2.6685 |
+| General contingency | Fixed reserve for price changes and small unmodeled usage | $5.0000 |
+| **Planning envelope** | Subtotal + contingency | **$18.3424** |
+| **Headroom under $25** | $25 − envelope | **$6.6576** |
+
+The 12-hour runtime is a ceiling for all GPU instance time, not a planned target.
+This estimate covers neither an authorization nor a promise that every requested
+phase fits in 12 hours. Do not lengthen the run or add resources to use the headroom.
+
+## Pricing sources and limitations
+
+- The `g6.xlarge` rate was retrieved from AWS Price List API on 2026-11-26 for Linux,
+  shared tenancy, and US East (N. Virginia). Refresh it with the same filters before
+  every billable plan; the [EC2 On-Demand pricing page](https://aws.amazon.com/ec2/pricing/on-demand/)
+  explains the pricing model but does not promise this instance rate.
+- AWS's [EC2 On-Demand pricing page](https://aws.amazon.com/ec2/pricing/on-demand/)
+  currently lists $0.09/GB for the first data-transfer-out tier after its shared
+  100-GB monthly allowance. The planning line above deliberately reserves ten times
+  that rate for one GB; account-wide free allowance may already be consumed, and the
+  live regional rate still must be confirmed.
+- AWS's [VPC pricing page](https://aws.amazon.com/vpc/pricing/) lists in-use public
+  IPv4 at $0.005 per hour, billed in seconds with a 60-second minimum.
+- AWS's [EBS pricing page](https://aws.amazon.com/ebs/pricing/) gives a gp3 example
+  rate of $0.08 per GB-month and bills provisioned volume storage by time. The final
+  plan must confirm the `us-east-1` rate and whether the console/API's GiB size maps
+  to the quoted billable unit used in the estimate.
+- AWS's [S3 pricing page](https://aws.amazon.com/s3/pricing/) charges for storage and
+  requests. The $0.023 and request assumptions above are conservative planning
+  values, not a locked regional quote. A versioned bucket retains prior Terraform
+  state versions until explicitly cleaned up, so keep the bucket lifetime short and
+  count retained object versions.
+- The [EventBridge pricing page](https://aws.amazon.com/eventbridge/pricing/) lists
+  14 million Scheduler invocations per month in its free tier and $1 per million
+  above it. The estimate reserves $0.01 for one invocation rather than relying on
+  unused free-tier allowance.
+- AWS's [global infrastructure FAQ](https://aws.amazon.com/about-aws/global-infrastructure/global-network/faqs/)
+  describes a shared 100 GB/month internet data-transfer-out allowance across
+  eligible services and regions. This estimate does not assume that allowance is
+  unused: it reserves one GB at a planning rate. Recheck the live us-east-1 rate and
+  account-level usage. Model, Docker-image, and package downloads are inbound to AWS;
+  keep benchmark output and evidence upload small.
+- AWS [Session Manager security guidance](https://docs.aws.amazon.com/prescriptive-guidance/latest/aws-startup-security-baseline/wkld-06.html)
+  says Session Manager has no additional EC2 connection fee. Interface endpoints
+  have hourly and data-processing charges, which are excluded because none are
+  planned.
+
+AWS pricing pages generally exclude taxes and duties. The 25% line is a planning
+allowance only. The account billing profile and applicable tax must be reviewed before
+the exact run is accepted. If tax or account-level data transfer makes the full plan
+reach $25, the plan is not eligible to run.
+
+## Controls that make the estimate reviewable
+
+1. Allow exactly one full L4 type (`g6.xlarge`) and one instance at once. Keep
+   `g6.2xlarge` out of the first plan unless measured CPU or host-memory needs justify
+   it and a new estimate remains within the ceiling.
+2. Limit the EC2 root/data storage to one encrypted 100 GiB gp3 volume. Do not create
+   snapshots, extra volumes, Elastic IPs, endpoints, or log archives by default.
+3. Use a short-lived versioned S3 state bucket with server-side encryption and native
+   S3 lock files. Its contents are sensitive; never commit state or saved plans.
+   During approved destroy, remove the project bucket and its versions only after
+   Terraform has safely destroyed the workload and state has been exported only if
+   needed for the documented record.
+4. Set an exact UTC expiry in an EventBridge Scheduler one-time call that can
+   terminate only this instance. Add a guest-side shutdown timer and set guest
+   shutdown to terminate the EC2 instance. Both controls must be independently
+   demonstrated before the paid run.
+5. Restrict normal operation to the prepared execution batch. Do not leave the
+   instance running during research, docs, CI, review, or overnight gaps. Record
+   start/stop timestamps and cumulative runtime.
+6. Omit CloudWatch ingestion by default. Keep local Prometheus/Grafana/Tempo data on
+   the temporary encrypted volume, export only sanitized selected evidence, then
+   terminate the host and delete the volume.
+7. Independently verify the instance, volume, public IP, ENI, and project network
+   resources after each batch. A budget alarm is only a notification; it is not a
+   spending cap.
+
+These controls reduce the likelihood and duration of cost overruns but cannot make an
+AWS invoice mathematically hard-capped. In particular, AWS budgets do not stop an EC2
+instance. If either independent expiry mechanism is not implemented or testable, do
+not run the lab.
+
+## Before any billable apply
+
+- Recheck account identity, `us-east-1`, permission boundary, the exact On-Demand G/VT
+  quota, G6 offerings, and current capacity. Current recorded quota is zero vCPUs
+  (`L-DB2E81BA`), so no L4 launch is eligible now.
+- Refresh every Price List input, the current tax profile, state retention, EBS size,
+  data-transfer rate/aggregation, and Scheduler charges.
+- Prepare and inspect one saved Terraform plan: exact resource count, tags, account,
+  region, type, storage, public address, security rules, IAM scope, expiry, and
+  teardown. Keep it out of Git.
+- Confirm the full adjusted estimate is below $25 with the stated reserve. If required
+  execution cannot fit under $25, stop cloud work, finish safe local work, and request
+  more budget through the user's authorization process.
+- No quota request, Terraform apply, or infrastructure mutation has been made in this
+  project. A later quota change and paid apply still require the appropriate explicit
+  authorization and exact reviewed plan.
+
+## Current outcome
+
+The first cost gate is prepared but not passed for launch: the estimate is provisional,
+the exact Terraform plan and expiry mechanism do not yet exist, and the On-Demand G/VT
+quota is zero. AWS spend recorded for this goal remains `$0`.

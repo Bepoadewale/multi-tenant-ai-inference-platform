@@ -1,6 +1,6 @@
 # GPU Lab Research Notes
 
-Research was started on 2026-11-26. This is an initial Phase 1 record, not a final compatibility matrix. Recheck sources immediately before implementation because prices, quota, software releases, and model artifacts change.
+Research was started on 2026-11-26 and updated on 2026-11-27. This remains a Phase 1 design record, not a final compatibility matrix. Recheck sources immediately before implementation because prices, quota, software releases, and model artifacts change.
 
 ## AWS hardware, region and quota
 
@@ -109,11 +109,144 @@ independent gates.
   real plan stage.
 - The AWS [EC2 service-authorization reference](https://docs.aws.amazon.com/service-authorization/latest/reference/list_ec2.html)
   lists `ec2:TerminateInstances` for instance resources with resource-tag condition
-  keys. That allows a tightly scoped self-expiry mechanism if needed; a simpler
-  design candidate is an instance-boot systemd shutdown timer combined with EC2
-  `instance_initiated_shutdown_behavior = "terminate"`, which needs no persistent
-  Lambda or broad terminate role. Validate the boot timer, termination behavior,
-  restart policy, and teardown independently before relying on it.
+  keys. The AWS [Scheduler universal-target guide](https://docs.aws.amazon.com/scheduler/latest/UserGuide/managing-targets-universal.html)
+  allows an AWS SDK API operation as a target, and the [Terraform Scheduler resource](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/scheduler_schedule)
+  supports one-time schedules and automatic deletion after invocation. Candidate
+  independent expiry: exact UTC one-time `ec2:TerminateInstances` call, a Scheduler
+  role limited to the one instance ARN and project tag, and `action_after_completion =
+  "DELETE"`; pair it with a guest systemd shutdown timer and EC2 guest-shutdown-to-
+  terminate behavior. AWS lists 14 million Scheduler invocations/month free and
+  `$1`/million above that on its [pricing page](https://aws.amazon.com/eventbridge/pricing/);
+  reserve a small positive amount rather than counting on account free tier. Test
+  failure, retry, and teardown behavior before relying on either mechanism.
 
 These findings refine the proposed cost architecture only; no AWS resources, budget,
-VPC, or expiry mechanism have been created or tested.
+VPC, or expiry mechanism have been created or tested. The current provisional
+resource/runtime estimate and assumptions are recorded in [`COST_REPORT.md`](COST_REPORT.md).
+
+## Container GPU and monitoring research update (2026-11-26)
+
+- NVIDIA's [Container Toolkit installation guide](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
+  says to install the Linux NVIDIA driver first. Its current Ubuntu apt example
+  documents a `1.20.2-1` package set and a signed package repository. It also calls
+  out a systemd cgroup issue that can remove GPU access after `systemctl daemon reload`.
+  The chosen host/runtime must pin one tested package version and include this failure
+  in the runbook. No package was installed during this research.
+- Docker's [Compose GPU guide](https://docs.docker.com/compose/how-tos/gpu-support/)
+  requires `capabilities: [gpu]` for a service device reservation and supports a
+  `count: 1` assignment. `count` and `device_ids` cannot be set together. This is
+  device visibility to a container, not physical GPU isolation between tenants. A
+  single L4 should be allocated only to the vLLM workload container; other services
+  should not receive GPU access.
+- NVIDIA's [DCGM Exporter releases](https://github.com/NVIDIA/dcgm-exporter/releases)
+  list 4.8.4 as the current release at research time and report tested DCGM 4.6.1
+  components. The [exporter release strategy](https://github.com/NVIDIA/dcgm-exporter/blob/main/RELEASE.md)
+  distinguishes a versioned full image tag from mutable `latest`. The project should
+  pin the complete exporter/image version and digest, inspect the metric field set,
+  and run a live scrape before using any metric name or alert in a dashboard. The
+  exporter is optional only if the selected single-host driver/DCGM compatibility is
+  proven; no Kubernetes installation is implied.
+- OpenTelemetry's [semantic-convention guidance](https://opentelemetry.io/docs/specs/semconv/how-to-write-conventions/)
+  says sensitive, verbose, expensive, or unstable attributes should be opt-in and
+  requirements should be explicit. The GenAI conventions now live in the separate
+  [OpenTelemetry GenAI conventions repository](https://github.com/open-telemetry/semantic-conventions-genai);
+  the former docs URL redirects to a moved notice. Pin a reviewed repository revision
+  or document its schema version. Emit safe model and operation metadata only; never
+  attach prompts, completions, bearer tokens, or sensitive tenant labels by default.
+
+These are source-informed design inputs, not a tested container, exporter, metric,
+trace, or alert configuration. All package versions and image digests must be checked
+again before implementation and the paid run.
+
+## 2026-11-27 — Monitoring, quota-state, model evaluation, and automation research
+
+- [Prometheus overview](https://prometheus.io/docs/introduction/overview/) describes
+  timestamped numeric time series with optional labels and a pull-based scrape model.
+  It also warns that Prometheus is not an authoritative per-request billing ledger.
+  Use it for operational trends; keep usage accounting in the gateway's durable
+  request records and reconcile it separately.
+- [Grafana dashboard documentation](https://grafana.com/docs/grafana/latest/visualizations/dashboards/build-dashboards/create-dashboard/)
+  defines dashboards as panels backed by data-source queries. This supports the
+  planned split between source metrics and dashboard views; expressions must be tested
+  against actual metric names and labels before claiming a live dashboard.
+- OpenTelemetry's [Python instrumentation guide](https://opentelemetry.io/docs/languages/python/instrumentation/)
+  explains that an instrumented application uses the API and SDK, while a library
+  should depend on the API. Python traces and metrics are stable; logs remain in
+  development according to the [language status table](https://opentelemetry.io/docs/languages/).
+  Keep existing gateway spans and export to the local Tempo stack; do not assume
+  trace propagation into vLLM unless headers and spans are observed end to end.
+- Redis's [Lua scripting guide](https://redis.io/docs/latest/interact/programmability/eval-intro/)
+  states scripts execute atomically and block other server activity for their run.
+  Current admission scripts are short and can preserve atomic reserve/settle semantics,
+  but a request-id keyed lease/settlement protocol must keep each script bounded and
+  idempotent. Do not use Redis metrics as exact accounting.
+- MLflow's [Model Registry guide](https://mlflow.org/docs/latest/ml/model-registry/)
+  documents model versioning, lineage, tags, and aliases; its [model registry workflow](https://mlflow.org/docs/latest/ml/model-registry/workflow/)
+  says fixed model stages were deprecated in favor of aliases/tags. The repository's
+  release-plan controls remain authoritative for protected deployment approval; do
+  not confuse a mutable `champion` alias with an immutable approved release plan.
+- MLflow's [GenAI evaluation guide](https://mlflow.org/docs/latest/genai/eval-monitor/)
+  uses scorers and judges for LLM tasks, while [Promptfoo assertions](https://www.promptfoo.dev/docs/configuration/expected-outputs/)
+  include deterministic string and JSON checks. Prefer local deterministic assertions
+  for exact facts/schema constraints; treat model-graded quality as subjective,
+  version the evaluator and prompts, and do not retain sensitive prompt contents.
+- The Qwen 1.5B [model card](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct)
+  currently displays Apache-2.0. The page is mutable; before download, fetch the
+  license file and model metadata at an immutable commit and record file digests.
+  This research does not authorize redistribution of model weights.
+- Docker's [Compose GPU support guide](https://docs.docker.com/compose/how-tos/gpu-support/)
+  requires GPU capability reservation and allows a count of one. Device visibility
+  does not give tenant isolation or partition the L4; only vLLM should receive the
+  device in the lab profile.
+- Ansible's [playbook guide](https://docs.ansible.com/projects/ansible/latest/playbook_guide/playbooks_intro.html)
+  describes desired-state modules as commonly idempotent but warns that not every
+  playbook/module is. Run the configuration twice and inspect the second run for
+  changes rather than assuming idempotency.
+- HashiCorp's [Terraform provider requirements](https://developer.hashicorp.com/terraform/language/providers/requirements),
+  [AWS create tutorial](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/aws-create),
+  and [saved-plan guide](https://developer.hashicorp.com/terraform/tutorials/cli/plan)
+  support pinning provider constraints, committing `.terraform.lock.hcl`, saving one
+  reviewed plan, and applying that plan. Saved plans and state may contain sensitive
+  values and must stay outside public Git.
+- GitHub's [AWS OpenID Connect guide](https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-aws)
+  explains short-lived federated tokens and requires trust conditions for repository
+  identity. This project will not add cloud deploy to normal pull request workflows;
+  any later manual workflow must have an explicit environment gate and narrowly scoped
+  role.
+
+These references inform design only. No monitoring stack, model evaluation, AWS
+automation, GPU runtime, or model download was executed during this research.
+
+## 2026-11-27 — GPU profiling and instrumentation boundaries
+
+- NVIDIA's [CUDA programming guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
+  separates CPU host code from GPU device kernels and organizes work in thread blocks
+  and grids. The planned lab should time host-to-device copies, kernel work, and
+  synchronization separately rather than treating one CPU wall-clock interval as GPU
+  execution time.
+- PyTorch's [profiler guide](https://docs.pytorch.org/docs/stable/profiler.html)
+  can record CPU and CUDA activity, operator timing, memory, and traces. It warns that
+  shape/stack capture can add overhead and retain tensor references; keep profiling
+  captures short and report whether profiling was enabled during each benchmark.
+- NVIDIA [Nsight Systems](https://docs.nvidia.com/nsight-systems/UserGuide/) provides
+  a timeline across CPU threads, CUDA API calls, copies, and kernels; use it first to
+  locate where time is spent. [Nsight Compute](https://docs.nvidia.com/nsight-compute/ProfilingGuide/)
+  collects kernel-level metrics but can serialize launches, replay kernels, flush
+  caches, or adjust clocks. Its reported duration is not directly comparable to
+  ordinary unprofiled end-to-end timings. Keep workload timing and profiler diagnosis
+  as separate records.
+- NVIDIA's [DCGM feature overview](https://docs.nvidia.com/datacenter/dcgm/latest/user-guide/feature-overview.html)
+  documents GPU telemetry and notes that profiling metrics can conflict with Nsight
+  tools on supported hardware. Avoid running DCGM hardware-counter profiling and an
+  Nsight capture at the same time; test each in a separate short run.
+- Grafana's [alerting fundamentals](https://grafana.com/docs/grafana/latest/alerting/fundamentals/)
+  describes periodic rule evaluation over data-source queries and multiple alert
+  instances by time series. Bound label cardinality and verify rule queries against
+  actual scrape data before inducing an alert.
+- The active [OpenTelemetry GenAI convention repository](https://github.com/open-telemetry/semantic-conventions-genai)
+  is separate from the former `opentelemetry.io` GenAI URL. Its current attribute
+  registry warns that input-message and tool content may contain sensitive data.
+  Do not attach content attributes by default; retain only metadata needed to trace
+  request flow.
+
+No profiler, exporter, alert, or live metric was executed during this source review.
