@@ -129,6 +129,8 @@ Those are deliberate future claims with separate evidence requirements in
 
 ## Documentation
 
+- [Single-L4 GPU infrastructure goal](docs/goals/SINGLE_L4_GPU_INFRASTRUCTURE_GOAL.md) · [GPU lab status and execution journal](docs/gpu-lab/IMPLEMENTATION_STATUS.md)
+
 - [Cloud architecture](docs/cloud-architecture.md) · [Cloud operations](docs/cloud-operations.md)
 - [Security and privacy](docs/security/security.md) · [Operator Console](docs/operations/operator-console.md)
 - [Observability and FinOps](docs/operations/observability-finops.md) · [Failure modes](docs/operations/failure-modes.md)
