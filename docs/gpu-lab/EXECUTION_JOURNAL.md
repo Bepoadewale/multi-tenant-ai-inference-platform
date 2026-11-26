@@ -5,7 +5,7 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 ## 2026-11-26 — Goal registration and initial audit
 
 - **Phase:** 1 — repository audit, research, and architecture.
-- **Branch / PR:** `codex/single-l4-gpu-goal` / registration PR not yet opened.
+- **Branch / PR:** `codex/single-l4-gpu-goal` / [#30](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/30), draft and open.
 - **Starting repository:** clean `main`, `c8f02ed`; tracking `origin/main`.
 - **Starting AWS state:** not yet queried in this project. No cloud mutation was performed.
 - **Objective:** register the persistent project charter and inspect baseline implementation before GPU architecture work.
@@ -16,5 +16,6 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Tests / validation:** `make verify`: Ruff passed; 50 tests passed, one Starlette deprecation warning; `make audit` failed with 84 known vulnerability records across seven packages and exit 2 after retries, so full command failed before Compose validation. `docker compose config --quiet` passed when run separately. `make cloud-delivery-validate` and `make terraform-validate` passed. Historical results remain distinct from current results; see `VALIDATION.md`.
 - **Cloud resources/cost:** none created or changed. Read-only project-tagged resource and EC2 instance queries returned no matches in `us-east-1`. G/VT On-Demand quota is 0 vCPUs. AWS Price List API lookup returned g6.xlarge Linux On-Demand `$0.8048/hour` in US East (N. Virginia), giving `$6.4384` for 8 hours and `$9.6576` for 12 hours before storage, IPv4, transfer, state, logging, and taxes. No spend estimate is yet complete or authorized for apply.
 - **Decisions:** favor On-Demand as requested; no Spot plan. Do not request quota increase or apply Terraform during Phase 1. Treat quota increase as a pending AWS account change requiring explicit preparation and authorization review.
+- **Pull request:** created draft PR #30 at commit `754564d`; documentation-only registration. CI status will be recorded after the existing PR checks complete. Per repository policy, no merge or clean-room readiness claim is made here.
 - **Next action:** deepen Phase 1 audit and official source research; identify safe baseline audit remediation as a separate focused package; then open the docs-only goal-registration PR.
 - **Next action:** finish source audit, run `make verify` as explicitly requested, record exact outcomes, then complete read-only AWS inventory and official documentation research.
