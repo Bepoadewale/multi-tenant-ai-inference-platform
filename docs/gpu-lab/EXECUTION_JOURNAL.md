@@ -162,3 +162,86 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   or apply approval. Current G/VT quota remains zero.
 - **Next action:** complete exact price and expiry checklist and static validation of
   the proposed EC2-only root before requesting any paid run or account change.
+
+## 2026-11-26 — Phase backlog and proposed architecture expanded
+
+- **Phase:** Phase 1 — architecture and non-billable preparation.
+- **Branch / PR:** `codex/single-l4-gpu-goal`, PR #30; commit `336c1b4` has been pushed
+  and its required GitHub checks are running.
+- **Starting state:** both PRs #30 and #31 are ready for human review; #31 has passing
+  local and CI evidence. No AWS mutation has occurred.
+- **Objective:** finish the architecture deliverables required for Phase 1 and make
+  the implementation sequence reviewable before any infrastructure work.
+- **Changes:** expanded the proposed architecture with the Linux/GPU software stack,
+  identity and admission sequence, LLM request execution/KV cache, GPU telemetry, and
+  rationale for a single EC2 host instead of EKS. Added the 10-package ordered
+  `IMPLEMENTATION_BACKLOG.md` and linked it from the docs index. The backlog records
+  dependencies, exit gates, cost boundaries, and the zero-quota blocker.
+- **Research used:** official HashiCorp S3-native locking docs, AWS Session Manager and
+  S3 pricing guidance, EC2 tag-scoped terminate authorization, EC2 L4 specs, NVIDIA
+  CUDA compatibility, current vLLM stable GPU guide, and PyTorch installation docs.
+  All architecture is labeled proposed; no diagram is a deployment record.
+- **Validation:** `git diff --check` passed before commit. PR #30 CI is the validation
+  gate for this documentation-only update. No local model or cloud runtime was started.
+- **Cloud resources/cost:** none created or changed; instance-hours remain zero.
+  Current partial estimate remains `$9.7309` for 12 hours of instance + IPv4 + sample
+  100-GiB gp3 only; it is not a total estimate or authorization.
+- **Open items:** remaining API/security source audit, official Docker/Toolkit/DCGM/
+  monitoring/MLflow/Redis/evaluation research, complete cost model, exact expiry tests,
+  quota gate, and eventual PR reviews.
+- **Next action:** finish the remaining code audit and cost analysis before drafting
+  any billable plan. Do not raise the GPU quota or apply infrastructure at this stage.
+
+## 2026-11-26 — Container GPU and telemetry research
+
+- **Phase:** Phase 1 research; no package installation or AWS changes.
+- **Branch / PR:** `codex/single-l4-gpu-goal`; PR #30's documentation commit `336c1b4`
+  is under its existing CI watcher.
+- **Sources consulted:** official NVIDIA Container Toolkit install guide; Docker
+  Compose GPU device reservation guide; NVIDIA DCGM Exporter release notes and release
+  strategy; OpenTelemetry semantic convention writing and GenAI conventions pages.
+- **Findings:** install the NVIDIA driver before Container Toolkit; current toolkit
+  guide documents `1.20.2-1` and a systemd cgroup reload GPU-visibility issue.
+  Compose requires `capabilities: [gpu]` and supports a one-device count but this
+  grants device visibility, not GPU partitioning. DCGM Exporter 4.8.4 currently
+  reports DCGM 4.6.1 components and distinguishes immutable full image tags from
+  mutable `latest`; pin digest and validate actual fields. OpenTelemetry asks for
+  explicit opt-in treatment for sensitive/verbose attributes; do not export prompt
+  or completion content or credentials by default.
+- **Changes:** recorded source/date and implementation implications in
+  `RESEARCH_NOTES.md`. The GPU observability architecture remains proposed.
+- **Validation:** documentation research only; no exporter, GPU container, telemetry,
+  metrics, or alerts were run.
+- **Cloud resources/cost:** none; instance-hours remain zero.
+- **Next action:** continue remaining official references and source audit; then finish
+  an exact total cost and expiry plan before considering any AWS change.
+
+## 2026-11-27 — Phase 1 evidence and cost package completed
+
+- **Phase:** Phase 1 complete as a repository audit/research/architecture gate; Phase 2
+  starts with static-only EC2 infrastructure preparation.
+- **Branch / PR:** `codex/single-l4-gpu-goal`, PR #30. Its pushed head `336c1b4` has
+  passed both required workflow runs; this additional documentation update is not yet
+  committed or checked by CI. PR #31 is open and its required checks have passed.
+- **Starting state:** documentation edits remained uncommitted after the #30 CI
+  watcher ended. Zero AWS resources and zero GPU instance hours for this goal.
+- **Objective:** close the source audit and Phase 1 research record, document current
+  pricing inputs and evidence boundaries, and define the next static-only package.
+- **Changes:** documented concrete API request/stream lifecycle risks, updated the
+  official sources for monitoring, evaluation, model license, Terraform, Ansible,
+  CUDA profiling, and current OpenTelemetry GenAI conventions; added a cost report and
+  evidence manifest; recorded EventBridge Scheduler as the proposed independent
+  expiry mechanism paired with guest shutdown. Marked Phase 1 complete and Phase 2
+  static-only preparation active.
+- **Cost model:** provisional 12-hour estimate is `$18.34`, including 12 hours at the
+  2026-11-26 g6.xlarge catalog rate, one IPv4, 100 GiB gp3, temporary S3 state and
+  lock, expiry invocation, a 10x data-egress placeholder, a 25% tax allowance, and a
+  `$5` reserve. This is not a quote or authorization. Current G/VT quota is zero.
+- **Validation:** official-source review and documentation inspection only; no cloud
+  validation or local runtime started. `git diff --check` will be run before commit.
+- **Cloud resources/cost:** none created/changed; spend `$0`; instance-hours `0`.
+- **Known limitations:** the provisional estimate needs exact AMI, Price List, tax,
+  account-level transfer, state-retention, and saved-plan confirmation. The expiry
+  mechanism is proposed and not yet implemented or tested. The quota is unchanged.
+- **Next action:** finish the static Terraform/expiry design in a focused PR; no AWS
+  apply or quota request.

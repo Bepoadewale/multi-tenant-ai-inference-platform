@@ -8,9 +8,9 @@
 flowchart LR
   Operator[Administrator workstation] -->|SSM Session Manager; no inbound SSH| SSM[AWS Systems Manager]
   SSM --> EC2[One g6.xlarge or justified g6.2xlarge EC2]
-  Internet[Public internet] -->|outbound only| IGW[Internet Gateway]
-  IGW --> Subnet[Single public subnet; no public service ingress]
-  Subnet --> EC2
+  EC2 --> Subnet[Single public subnet; security group has no inbound service rules]
+  Subnet --> IGW[Internet Gateway]
+  IGW -->|outbound HTTPS| Internet[Public internet and AWS public service endpoints]
   EC2 --> Disk[Encrypted gp3 root/data volume]
   EC2 -->|outbound HTTPS| Packages[Ubuntu, Docker, model registry, image registry]
   EC2 -. no NAT Gateway .-> Internet
@@ -54,6 +54,143 @@ flowchart LR
 ```
 
 This is a one-host lab. The gateway, Redis, inference server, and monitoring services may share the same EC2 host if the measured RAM, CPU, disk, and GPU capacity support it. Two processes or containers on one host do not provide infrastructure high availability. Redis admission is logical tenant policy, not physical GPU isolation. The host uses one L4; no GPU partitioning, multi-node execution, Kubernetes, or managed database/cache is part of this design.
+
+## Proposed Linux and GPU software stack
+
+```mermaid
+flowchart BT
+  GPU[NVIDIA L4 device] --> Kernel[NVIDIA kernel driver]
+  Kernel --> DriverAPI[CUDA driver API and device nodes]
+  DriverAPI --> Runtime[Container CUDA runtime libraries]
+  Runtime --> Torch[PyTorch and vLLM CUDA kernels]
+  Toolkit[Optional host CUDA Toolkit and nvcc] -. builds kernels .-> Torch
+  Toolkit -. must match supported driver family .-> DriverAPI
+  NCT[NVIDIA Container Toolkit] --> Docker[Docker Engine with NVIDIA runtime]
+  Docker --> Runtime
+  OS[Ubuntu 24.04 x86_64 + matching kernel headers] --> Kernel
+```
+
+This drawing separates the host driver from CUDA user-space libraries. The final
+vLLM container can supply its own matching CUDA runtime and PyTorch dependencies;
+the host CUDA Toolkit is mainly needed for compiling CUDA C++ experiments. The driver
+must still support the container's CUDA runtime. Exact versions remain unpinned until
+the chosen dated vLLM release and image/wheel are verified against the selected AMI.
+
+## Proposed identity, authorization, and tenant quotas
+
+```mermaid
+sequenceDiagram
+  participant C as Tenant client
+  participant G as Gateway replica
+  participant I as Ed25519 verifier
+  participant K as Model and tenant policy
+  participant R as Shared Redis admission
+  participant V as vLLM
+  C->>G: Request + signed bearer token
+  G->>I: Verify issuer, audience, expiry, signature
+  I-->>G: Server-derived tenant and roles
+  G->>K: Check model grant and route
+  K-->>G: Approved target + quota limits
+  G->>R: Atomically reserve request, tokens, concurrency
+  R-->>G: Admit, bounded queue, or reject
+  G->>V: Forward only admitted model request
+  V-->>G: Tokens and measured usage
+  G->>R: Release concurrency and reconcile usage
+  G-->>C: OpenAI-compatible response or stream
+```
+
+Tenant headers remain untrusted input: only the verified signed identity supplies
+the tenant. Redis is shared across gateway replicas so each replica sees the same
+admission state. A Redis error must fail closed. These are application-level limits;
+all tenants still share one physical GPU.
+
+The existing Redis code is a baseline, not this final lifecycle. Its current release
+does not reconcile actual tokens, and its active request count is not a per-request
+lease. The GPU adapter must not make usage or crash-recovery claims until it can reserve
+by request ID, settle or release that reservation idempotently, and recover abandoned
+concurrency reservations after a bounded lease.
+
+## Proposed request reservation lifecycle
+
+```mermaid
+stateDiagram-v2
+  [*] --> Authenticated
+  Authenticated --> Rejected: invalid identity or model grant
+  Authenticated --> Reserved: atomic Redis reservation
+  Authenticated --> Rejected: quota full or Redis unavailable
+  Reserved --> Running: request reaches vLLM
+  Running --> Settled: final measured usage reconciled once
+  Running --> Cancelled: client or server cancels
+  Cancelled --> Settled: partial usage measured/reconciled
+  Running --> Failed: backend failure or timeout
+  Failed --> Settled: known usage reconciled; otherwise bounded reservation policy
+  Reserved --> Expired: worker dies before start
+  Running --> Expired: lease expires after worker crash
+  Settled --> [*]
+  Rejected --> [*]
+  Expired --> [*]
+```
+
+Every transition must be safe to repeat, so a retry or cleanup path cannot decrement
+concurrency twice or count the same token usage twice. Unknown usage after a process
+crash needs an explicit conservative accounting policy. The detailed design and tests
+belong to the gateway integration package; this diagram is proposed only.
+
+## Proposed LLM request execution on the L4
+
+```mermaid
+flowchart LR
+  Text[Prompt text] --> Tokenizer[Tokenizer creates input token IDs]
+  Tokenizer --> Prefill[Prefill computes prompt attention]
+  Weights[Model weights] --> Prefill
+  Prefill --> KV[KV cache stores prior key/value tensors]
+  KV --> Decode[Decode next token repeatedly]
+  Weights --> Decode
+  Decode --> Sample[Sampling chooses next token]
+  Sample -->|continue| KV
+  Sample -->|stop or max output| Stream[Return token pieces]
+  Prefill --> GPU[NVIDIA L4 compute and VRAM]
+  Decode --> GPU
+```
+
+The KV cache is per-running sequence state on the GPU. It avoids recomputing
+attention projections for earlier input/output tokens, which can lower decode work,
+but consumes more VRAM as context length and concurrent sequences grow. This is why
+model weights alone do not determine whether a request fits on the L4.
+
+## Proposed GPU observability flow
+
+```mermaid
+flowchart LR
+  L4[NVIDIA L4] --> DCGM[DCGM Exporter]
+  Host[Linux host] --> Node[Node Exporter]
+  VLLM[vLLM metrics] --> Prom[Prometheus]
+  Gateway[Gateway metrics] --> Prom
+  Redis[Redis metrics] --> Prom
+  DCGM --> Prom
+  Node --> Prom
+  Prom --> Grafana[Grafana dashboards]
+  Prom --> Alertmanager[Alertmanager]
+  Gateway --> OTel[OpenTelemetry traces]
+  VLLM -. trace headers if supported .-> OTel
+  OTel --> Tempo[Tempo]
+```
+
+This diagram is proposed. The actual metric names, labels, exporter versions, and
+vLLM trace propagation must be discovered and verified against the selected images;
+never assume dashboard expressions are live data. Prompt and completion text must
+not be labels or trace attributes.
+
+## Why one EC2 host instead of Kubernetes
+
+The learning objective is one full L4 and one disposable inference host. A standalone
+EC2 instance exposes the operating-system driver setup, container GPU wiring, and
+single-GPU resource limits directly. Docker Compose already exists in the repository
+and can run one host's services without adding a scheduler. An EKS cluster would add
+a control plane, cluster networking, GPU scheduling/operator setup, and node lifecycle
+that do not help validate one accelerator. The repository's EKS contract remains
+available for a separate future project. This EC2 lab has a single host failure
+domain, no high availability, and no physical tenant isolation.
 
 ## Proposed model lifecycle
 

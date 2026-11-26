@@ -1,11 +1,11 @@
 # GPU Lab Implementation Status
 
-**Overall:** ACTIVE — Phase 1, audit and research. No GPU cloud execution has occurred in this goal.
+**Overall:** ACTIVE — Phase 2, isolated EC2 Terraform preparation. This is static-only work; no GPU cloud execution has occurred in this goal.
 
 | Phase | Status | Evidence / next gate |
 | --- | --- | --- |
-| 1. Audit, research, architecture | In progress | Direct source audit and initial research recorded. Baseline `pip-audit` failed; its local repair is ready for review in PR #31 with clean-room evidence and passing CI. Finish compatibility/cost research and prioritized backlog. |
-| 2. Single-L4 EC2 Terraform | Not started | Separate guarded root and current cost/quota/capacity plan; spend must fit within $25. |
+| 1. Audit, research, architecture | Complete | Baseline, direct request/admission audit, proposed diagrams, official-source research notes, risk register, cost estimate, backlog, evidence manifest, and passing PR checks are recorded. PR human review/merge remains open; exact package versions and cost inputs are rechecked before implementation/apply. |
+| 2. Single-L4 EC2 Terraform | In progress — static only | Prepare separate guarded root, state bootstrap, expiry, and teardown verification. No apply while G/VT quota is zero or until the exact plan and cost gates pass. |
 | 3. Ubuntu/NVIDIA/CUDA/Ansible | Not started | Manual host and container GPU computation, followed by repeat Ansible run. |
 | 4. CUDA performance lab | Not started | Synchronized real-GPU experiments and profiler evidence. |
 | 5. vLLM and Qwen serving | Not started | Pinned artifacts and actual L4 inference/streaming. |
@@ -34,18 +34,17 @@
 - Read-only `us-east-1` resource-group tag and EC2 instance lookups for the exact project tag: **no matches**. Untagged or differently tagged leftovers are not excluded.
 - EC2 instance type offerings list G6 in multiple `us-east-1` AZs; this is not a capacity reservation.
 - On-Demand G and VT quota: **0 vCPUs** (`L-DB2E81BA`); G6 launch cannot proceed until increased.
-- Price List API on 2026-11-26: Linux shared On-Demand `g6.xlarge` **$0.8048/hour**. An 8–12 hour instance window costs **$6.44–$9.66** before all other charges. This is an instance-only estimate, not the total experiment cost.
+- Price List API on 2026-11-26: Linux shared On-Demand `g6.xlarge` **$0.8048/hour**. An 8–12 hour instance window costs **$6.44–$9.66** before all other charges. A provisional 12-hour envelope including IPv4, gp3, state, expiry, egress, tax contingency, and reserve is about **$18.34**; see `COST_REPORT.md` for assumptions and exclusions. This is not a final quote or authorization.
 - Credentials are never recorded here.
 
 ## Current Next Actions
 
-1. Complete review of vLLM gateway schemas, streaming usage accounting, Redis token
-   reservation reconciliation, cancellation, and failure tests.
-2. Finish official version compatibility research for Ubuntu, driver, CUDA, PyTorch,
-   NVIDIA Container Toolkit, Docker, and a pinned vLLM release.
-3. Build a complete resource/runtime/cost estimate and independent expiry/cleanup plan
-   under the $25 ceiling. Do not provision while the G/VT quota is 0 vCPUs.
-4. Continue non-billable Phase 1 work while PRs #30 and #31 await review; watch the
-   required CI run after pushing the next PR #30 documentation commit.
+1. Build the independent EC2 root, static guards, state bootstrap, dual expiry, and
+   exact destroy/inventory verification; never apply it during this static package.
+2. Run Terraform formatting and backend-disabled validation, then review the static
+   plan shape without creating resources.
+3. Continue local gateway correctness and reproducibility work in a separate focused
+   PR before live vLLM tenant integration.
+4. Keep PRs #30 and #31 open for human review; their required checks currently pass.
 
 Update this table and the detailed goal after each implementation package. A phase is complete only when its acceptance gate has actual evidence.
