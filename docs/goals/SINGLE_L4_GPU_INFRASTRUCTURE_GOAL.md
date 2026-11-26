@@ -1,0 +1,95 @@
+# Single-L4 GPU Infrastructure Goal
+
+**Status: ACTIVE — Phase 1, repository audit and research**  
+**Source of truth:** this document, the linked execution journal, pull requests, and evidence records.  
+**Last updated:** 2026-11-26  
+**Current branch:** `codex/single-l4-gpu-goal`  
+**Registration PR:** pending creation; no open PR was found at registration.
+
+## Project objective
+
+Extend `Bepoadewale/multi-tenant-ai-inference-platform` into a reproducible, production-oriented learning lab for a logically multi-tenant language-model service backed by exactly one NVIDIA L4 GPU on AWS EC2. Carry the work from source audit and official research through isolated Terraform infrastructure, manual then automated Ubuntu/NVIDIA/CUDA setup, GPU experiments, vLLM model serving, gateway integration, observability, benchmarks, evaluation and governed releases, incident response, CI, clean-room reproduction, evidence export, and verified teardown.
+
+The project is also a hands-on learning resource. Its documentation must explain the concepts, decisions, commands, expected results, failure modes, diagnosis, recovery, and larger-production implications in plain English so an engineer can reproduce the system without an AI coding agent. Do not involve DavDeploy and do not create another repository.
+
+## Current repository baseline
+
+The audited starting revision is `c8f02ed` (`docs: explain the flagship in plain English (#29)`) on a clean `main` tracking `origin/main`. The repository guide requires small PRs, no direct pushes to `main`, honest hardware claims, and executed clean-room evidence before an implementation PR is called ready for human review.
+
+Direct source inspection confirms:
+
+- `gateway/` contains FastAPI APIs, Ed25519 identity verification, server-derived tenant and role, model authorization, Redis Lua-backed shared admission/metering, routing, streaming, OpenTelemetry, and ONNX and vLLM backend adapters.
+- `GatewayService` selects vLLM when a routed target has a `backend_url`; the existing catalog and executed local service use CPU ONNX fixtures. The existing vLLM adapter is a boundary, not evidence that vLLM has run.
+- The current streaming gateway counts emitted chunks as completion tokens and supplies a fixed streaming TTFT value; token reservation uses a word-count estimate. These are concrete integration items to audit and improve without weakening the CPU path.
+- Tests cover authentication, tenant isolation, quotas, ONNX, API streaming, and other local controls. Existing validation records two clean-room local CPU cycles and static/authenticated read-only AWS plan evidence, not GPU execution.
+- `infrastructure/terraform/environments/aws/` is the separate planned EKS/managed-services contract. Its optional GPU node module is not the requested EC2 environment. `platform/kubernetes/vllm-gpu-deployment.yaml` uses a mutable `latest` image and a different model. Preserve this future EKS contract; do not deploy it or reuse it as the EC2 implementation.
+- Docker Compose, Prometheus, Grafana, Tempo, and local gateway dashboards exist. A GPU dashboard file and Kubernetes GPU manifests are contracts, not live GPU telemetry.
+- Existing local scope is reported complete; GPU/vLLM, DCGM, cloud model hosting, and EKS execution remain unexecuted.
+
+**AWS resource inventory:** on 2026-11-26, read-only calls using the designated key profile confirmed the configured account matches the expected account. `resourcegroupstaggingapi get-resources` with the exact project tag and `ec2 describe-instances` with the exact project tag both returned empty lists in `us-east-1`. This is not proof that no untagged or differently tagged resource exists; historical records also say the EKS-oriented plan was no-apply. No AWS mutation occurred.
+
+**GitHub state:** `gh auth status` identified the authenticated account as Bepoadewale. No open PRs were returned for this repository at registration. This goal-registration PR will be tracked here after GitHub assigns its number.
+
+## Scope and architectural constraints
+
+- AWS only for cloud infrastructure; preferred region `us-east-1`. Use a standard Ubuntu AMI and learn/install the NVIDIA stack manually before writing idempotent Ansible automation.
+- One NVIDIA L4 GPU EC2 instance at a time; start at `g6.xlarge`, consider `g6.2xlarge` only with measured CPU or system-memory justification. No T4, A10G, A100, H100, other accelerator, EKS, self-managed Kubernetes, multi-GPU, RDS, ElastiCache, NAT Gateway, persistent load balancer, or expensive managed monitoring in this project.
+- Keep the local CPU ONNX inference path, its evidence, and the existing EKS contract intact. Add an isolated EC2 GPU profile and adapt shared gateway components only through narrow interfaces.
+- Target model begins with `Qwen/Qwen2.5-1.5B-Instruct`; verify official license, revision, artifact integrity, compatibility, and memory needs before deployment. Try larger/quantized variants only after the first model is stable and within budget.
+- Use Terraform for AWS create/destroy; Ansible for repeatable host configuration after manual learning; Docker Compose for the single-host application stack. Prefer Systems Manager Session Manager and no public inbound service ports. Enforce IMDSv2, encryption, project tags, account/region/instance guards, exact reviewed plans, and independent teardown verification.
+- Tenant identity remains server-side. Redis quotas are logical admission controls, not physical GPU isolation. Never claim GPU partitioning, high availability, distributed computing, zero-downtime releases, bare-metal administration, or production reliability without corresponding evidence.
+- No prompts, completions, credentials, keys, session tokens, raw state, saved plans, or unreviewed environment dumps in public Git. Keep model artifacts and large/raw evidence outside the repository when necessary; publish sanitized summaries and references.
+- Do not use or involve DavDeploy.
+
+## Phases and acceptance gates
+
+Each phase remains incomplete until its execution evidence is recorded. Static code or a diagram alone does not satisfy an execution gate.
+
+1. **Repository audit, research, architecture:** inspect source, tests, Compose, Terraform, runtime abstractions, gateway, admission, identity, registry, telemetry, CI, docs, and historical evidence; run existing validation and record baseline failures; research current official documentation; produce proposed topology, data-flow/security/release/teardown diagrams, risk register, and actionable backlog. Gate: baseline and gaps evidenced; references and decisions recorded.
+2. **Isolated AWS EC2 infrastructure:** separate Terraform root for one L4, minimum VPC/subnet/routes/security/IAM/instance profile, encrypted gp3, IMDSv2, tags, SSM, expiry guard, reviewed exact saved plan, and account/region/instance/one-GPU guards. Gate: within approved spend/time boundary, one authorized L4 is reachable privately through SSM and its exact resources can be destroyed and independently checked.
+3. **Ubuntu, drivers, CUDA, containers:** manually install and verify compatible pinned Ubuntu/kernel/driver/CUDA/Docker/NVIDIA Container Toolkit/PyTorch versions; run a real CUDA container and synchronized PyTorch GPU computation; then implement and repeat Ansible for idempotency. Gate: L4 is visible and real host/container GPU computation succeeds; versions and troubleshooting are recorded.
+4. **GPU performance lab:** repeatable CPU/GPU vector and matrix workloads, transfer/memory/precision/batch experiments, synchronization-correct timing and profiling; Triton/Nsight only if compatible and useful. Gate: actual measurements and profiler evidence, no fabricated numbers.
+5. **vLLM model serving:** pin vLLM and model revision; manually fetch/verify and serve Qwen 1.5B first, then make Docker deployment reproducible; validate real API, stream, health/readiness, startup, GPU telemetry, shutdown and cache behavior. Gate: real L4 inference and evidence.
+6. **Multi-tenant integration:** preserve ONNX; integrate vLLM with authenticated gateway, tenant model grants, shared Redis request/token/concurrency/queue limits, reservation/reconciliation, timeout/cancellation/failure cleanup, privacy-safe metering, and synthetic customer-support/engineering/research tenants. Gate: real GPU requests and cross-tenant/security/failure behaviors proven across replicas.
+7. **GPU and AI observability:** collect available DCGM, node, vLLM, gateway, Redis, Prometheus, Grafana, Alertmanager, OpenTelemetry, and Tempo signals; correlate requests safely and exercise alerts. Gate: live workload data, controlled alert behavior, metric definitions/limits documented.
+8. **Benchmarking and FinOps:** prebuild controlled benchmark scripts; measure latency, throughput, memory, concurrency, startup, contention, overload, model and precision trade-offs; record runtime metadata and raw result references; explain cost formulas and distinguish estimates from settled billing. Gate: reproducible real-GPU report with charts and evidence.
+9. **Evaluation and governed model releases:** version a synthetic evaluation set; use deterministic checks where possible; bind model revision/digest and evaluation to immutable release plans, independent approval, sequential release/reject/rollback for one GPU. Gate: real evaluation, a rejected candidate, and verified rollback; no concurrent canary claim without proof.
+10. **Incident and recovery exercises:** safely inject reversible GPU/driver/container/model/queue/Redis/gateway/metrics failures; preserve real logs and evidence; report diagnosis, root cause, fix, recovery duration and limits. Gate: representative real incidents and independently checked recovery.
+11. **Automation and CI:** Terraform/Ansible/Compose/Make orchestration, local/static CI, security and dependency checks, cloud actions gated and never run on ordinary PRs, repeatable configuration. Gate: clean automation tests and preserved existing validation.
+12. **Clean-room and teardown:** reproduce from clean project state, capture evidence, destroy only authorized project resources, independently verify absence and report estimated/settled costs. Gate: all required lifecycle evidence and no unintended remaining billable project resources.
+
+## Required documentation and evidence
+
+Write documentation with every implementation package. Maintain the goal, PR-numbered tickets (`docs/tickets/pr-<number>.md`), execution journal (`docs/gpu-lab/EXECUTION_JOURNAL.md`), implementation status, validation, architecture diagrams, risk register, sanitized evidence manifest, benchmark/incident/cost records, and phase-specific runbooks as work proceeds.
+
+Final deliverables, when the evidence exists: `FINAL_PROJECT_REPORT.md`, `MANUAL_REPRODUCTION_GUIDE.md`, `AI_INFRASTRUCTURE_HANDBOOK.md`, `BENCHMARK_REPORT.md`, `INCIDENT_RESPONSE_HANDBOOK.md`, `INTERVIEW_PREPARATION.md` (at least 100 substantive Q&As with follow-ups and evidence-based STAR examples), `COST_REPORT.md`, and a searchable, professionally rendered PDF report; editable Word output where practical. These must explain the real implementation and label every proposed, static, simulated, local, AWS-planned, AWS-executed, measured, estimated, or billed claim accurately.
+
+Evidence manifest entries identify filename, capture date, phase, PR, commit, what is and is not demonstrated, and whether evidence is local/simulated/static/real AWS. Use genuine screenshots or genuine sanitized command output. Never synthesize console screenshots or measurement results.
+
+## Research requirements
+
+Before each relevant implementation, consult current official sources for AWS G6, EC2 drivers, SSM, service quotas, budgets/pricing, Terraform/AWS provider, Ubuntu, NVIDIA driver/CUDA/container toolkit/DCGM/Nsight, Docker, PyTorch/Profiler, Triton, vLLM, Qwen licensing/model card, Prometheus, Grafana, Alertmanager, OpenTelemetry/GenAI conventions, Redis, MLflow, evaluation, and GitHub Actions. Record the exact version/date and how the source affected a decision. Do not add a tool merely because it was researched.
+
+## Cost, approval, and resource boundaries
+
+The user set a **maximum initial project AWS budget of USD $25**. This is a ceiling, not a target, and does not grant unlimited spend. Research, source work, static checks, local tests, and preparation happen before paid compute. Before the first billable apply, record a current price/availability/quota check, exact resource list, hourly and full experiment estimate, runtime limit, spend cap, expiry/cleanup mechanism, exact plan review, and teardown procedure. If the exact bounded GPU experiment cannot fit within $25, do not apply; finish safe non-billable work and request additional authorization.
+
+Plan for at most 8–12 cumulative GPU instance hours where feasible. Bundle GPU-dependent tasks, export evidence, and terminate the instance and unneeded support resources immediately after each batch. Never leave it running for writing, review, CI, research, or a waiting period. Budget alerts are notifications, not hard caps. Track instance-hours and estimated spend; retrieve actual billing data when available. No AWS mutation before account/region/permissions/boundary checks and explicit review of the exact saved plan. Keep the local SSO/key profiles private and do not print credentials.
+
+## Current project state
+
+- **Active phase:** Phase 1 — repository audit, research, and architecture.
+- **Current task:** finish direct-source audit and run the existing local validation suite; then record results, official source research, final initial architecture/gaps, and phase backlog in this document and linked records.
+- **Completed:** initial source audit; clean start at `c8f02ed`; goal and initial architecture/status/journal/risk records created; README and documentation index linked; lint passed; 50 tests passed; Compose config passed separately; cloud Helm/manifest contract validation passed; read-only AWS account/resource/quota/availability checks and initial official model/runtime/price research recorded. `g6.xlarge` public On-Demand Linux price lookup returned `$0.8048/hour`; the project account's G/VT On-Demand vCPU quota is `0`; current project-tagged resource queries returned none. No AWS resource was changed.
+- **Completed:** initial source audit; clean start at `c8f02ed`; goal and initial architecture/status/journal/risk/research/validation records created; README and documentation index linked; lint passed; 50 tests passed; Compose config passed separately; both existing Terraform roots validated with backend disabled; cloud Helm/manifest contract validation passed; read-only AWS account/resource/quota/availability checks and initial official model/runtime/price research recorded. `g6.xlarge` Linux On-Demand lookup returned `$0.8048/hour`; the project account's G/VT On-Demand vCPU quota is `0`; current exact project-tag resource queries returned none. No AWS resource was changed.
+- **Outstanding:** deepen code/test/config audit; complete official compatibility and billing research; document detailed phase backlog; identify safe dependency audit remediation in a separate PR; create goal-registration PR and inspect its checks.
+- **Blocked:** G6 launch in `us-east-1` is currently blocked by an On-Demand G and VT quota of 0 vCPUs (quota code `L-DB2E81BA`). The EC2 type is offered in several listed zones, but capacity is not guaranteed. Requesting a quota increase is an AWS account change and has not been submitted. First apply is also gated on exact resources/runtime/cost controls fitting the $25 ceiling.
+- **Open PRs:** none observed at registration; update after creating this goal-registration PR.
+- **Relevant commit:** baseline `c8f02ed` on `main`.
+- **AWS project resources:** current inventory not yet checked. Historical repo evidence records only an authenticated no-apply EKS-oriented Terraform plan on 2026-10-08.
+- **Validation:** `make verify` ran lint successfully and `pytest` passed 50 tests with one Starlette deprecation warning; then failed at `make audit` because pip-audit reported 84 known vulnerability records across seven installed packages (including repeated advisories), exit 2 after retrying the audit command. Compose validation was not reached within `make verify`, then `docker compose config --quiet` passed separately. `make terraform-validate` passed both roots; `make cloud-delivery-validate` passed. Full details are in `docs/gpu-lab/VALIDATION.md`. No GPU validation exists.
+- **Final completion:** all essential phase gates above genuinely executed; local CPU/EKS contracts preserved; actual single-L4 AWS, CUDA, vLLM, tenant, telemetry, benchmark, evaluation, release, incident, reproducibility, teardown, cost, and educational-document evidence cross-checked; all PRs resolved; no secrets in history; final resource absence and limitations recorded.
+
+## Change log
+
+- 2026-11-26: Registered the persistent goal and began the source audit. No AWS resource was changed.
