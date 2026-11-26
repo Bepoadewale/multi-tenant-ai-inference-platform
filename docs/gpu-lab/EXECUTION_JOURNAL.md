@@ -70,3 +70,95 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next action:** review gateway vLLM schema and token/accounting/cancellation paths,
   continue official compatibility and price research, and record the exact dependency
   PR CI outcome before updating the project goal state.
+
+## 2026-11-26 — GPU stack compatibility research
+
+- **Phase:** Phase 1 — official research; no infrastructure or local application
+  runtime was started.
+- **Branch / PR:** `codex/single-l4-gpu-goal` / PR #30, draft.
+- **Starting state:** persistent goal updated to include PR #31, its local evidence,
+  current quota blocker, and prior checks. PR #31's CI watcher was still active; no
+  result was assumed.
+- **Objective:** refine the candidate host/GPU runtime compatibility model from current
+  primary sources, and correct the EC2 L4 memory description to match AWS's units.
+- **Commands / research:** browsed the AWS EC2 accelerated-instance table and public
+  NVIDIA driver guide, NVIDIA CUDA compatibility matrix, PyTorch local-install guide,
+  and current vLLM stable and latest GPU guides.
+- **Findings:** AWS lists `g6.xlarge` as 4 vCPUs/16 GiB system memory and 1 L4 with
+  22 GiB GPU memory; `g6.2xlarge` is 8 vCPUs/32 GiB and the same 22 GiB GPU memory.
+  AWS's Ubuntu 24.04 x86_64 CUDA example installs matching kernel headers and shows
+  CUDA 13.0/driver 580.65.06. NVIDIA's broad minor-compatibility table lists driver
+  family 580+ for CUDA 13 and 525+ for CUDA 12, subject to toolkit-specific requirements
+  and feature limits. Current vLLM stable docs list L4 support, Linux/Python 3.11–3.14,
+  default CUDA 12.9 wheel plus 12.8/13.0 choices, and warn of compiled-kernel binary
+  compatibility. vLLM wheels bundle PyTorch, so serving should use the matching bundled
+  build; a separate PyTorch learning workload should use an isolated environment.
+  Fractional `g6f` L4 slices do not meet the one-full-L4 project constraint.
+- **Changes:** expanded `RESEARCH_NOTES.md` with the sources, version implications,
+  candidate-but-unpinned stack, and open verification gates; corrected memory values;
+  updated the risk register for PR #31 and the exact-tag inventory boundary.
+- **Validation:** research only. These documents do not establish actual runtime
+  compatibility, driver availability for the eventual AMI/kernel, live capacity,
+  inference, or GPU performance.
+- **Cloud resources/cost:** none created or changed; no billable operation.
+- **Next action:** complete source audit and price the full bounded stack; wait for
+  PR #31 CI through its existing watcher. No quota request or apply is authorized.
+
+## 2026-11-26 — PR #31 checks completed
+
+- **Phase:** Phase 1; dependency repair is a local non-billable support package.
+- **Branch / PR:** PR #31, `codex/fix-baseline-dependency-audit`, commits `e1d9aa0`
+  and `9710932`.
+- **Checks:** the single `gh pr checks 31 --watch --interval 120` process completed
+  successfully. Both workflow runs passed Python, manifests, supply-chain, and
+  `local-e2e`; observed run IDs were `45906309837` and `45906313982`.
+- **Decision:** mark the change ready for human review now that the repository-required
+  implementation clean-room evidence and GitHub checks have both passed. Do not merge
+  without the normal approval/review requirements.
+- **Cloud resources/cost:** none created or changed; no GPU time and no AWS spend.
+- **Next action:** continue Phase 1; PR #30's latest docs-only checks remain on their
+  existing watcher.
+
+## 2026-11-26 — Goal registration PR checks completed
+
+- **Phase:** Phase 1 registration documentation; runtime clean-room execution is not
+  applicable to this documentation-only PR.
+- **Branch / PR:** `codex/single-l4-gpu-goal` / PR #30; goal/research documentation
+  current commit will be recorded with this journal update.
+- **Checks:** the single `gh pr checks 30 --watch --interval 120` process completed
+  successfully. Both workflow runs passed Python, manifests, supply-chain, and
+  `local-e2e`; observed run IDs were `45906505681` and `45906511022`.
+- **Decision:** PR #30 and PR #31 are both marked ready for review. No merge has been
+  performed; the normal approval and PR-only workflow remain in force.
+- **Cloud resources/cost:** none created or changed; no GPU time and no AWS spend.
+- **Next action:** continue non-billable Phase 1 source audit, official references,
+  capacity/price review, and exact bounded-cost design while the PRs await review.
+
+## 2026-11-26 — State and expiry cost-control research
+
+- **Phase:** Phase 1; planning only.
+- **Branch / PR:** `codex/single-l4-gpu-goal` / PR #30; no AWS account mutation.
+- **Sources consulted:** official HashiCorp S3 backend and state locking guides, AWS
+  Session Manager security guidance, S3 pricing page, and EC2 service authorization
+  reference.
+- **Findings and decision candidates:** prefer Terraform's versioned, private,
+  encrypted S3 backend with native `use_lockfile=true`; HashiCorp marks DynamoDB
+  locking deprecated, so a lock table is unnecessary. Session Manager itself has no
+  EC2 connection fee; interface VPC endpoints add hourly/data charges, so the current
+  minimum-cost candidate is one public IPv4 with no inbound service rules and outbound
+  HTTPS, after recording its egress risk. Treat inbound model/image transfers as free
+  only where the applicable AWS price rules say so; the final estimate must include
+  S3 state requests/versions, IPv4, EBS, transfer, logs, taxes, and all other actual
+  line items, without relying on free-tier eligibility.
+- **Expiry candidate:** a boot-scheduled systemd shutdown timer plus EC2
+  `instance_initiated_shutdown_behavior = "terminate"` avoids a permanent Lambda or
+  broad terminate role. This design is only proposed. Its scheduling, host clock,
+  cloud-init failure behavior, volume deletion, and actual instance termination must
+  be tested before any GPU batch.
+- **Changes:** refined proposed architecture and research notes; updated the risk
+  register. No Terraform resource or IAM permission was created.
+- **Cost boundary:** current `$9.7309` 12-hour subtotal remains partial (GPU, one
+  public IPv4, 100 GiB gp3 only). It is not a complete estimate, cost authorization,
+  or apply approval. Current G/VT quota remains zero.
+- **Next action:** complete exact price and expiry checklist and static validation of
+  the proposed EC2-only root before requesting any paid run or account change.
