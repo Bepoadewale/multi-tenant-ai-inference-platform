@@ -10,7 +10,7 @@ install:
 	fi
 	$(PYTHON) -m venv $(VENV)
 	$(PY) -m pip install --upgrade pip
-	$(PY) -m pip install -e '.[dev]'
+	$(PY) -m pip install -c constraints.txt -e '.[dev]'
 	$(PY) scripts/create_model.py --output models/tiny-intent-classifier.onnx
 	$(PY) scripts/create_model.py --output models/tiny-intent-classifier-v2.onnx --candidate
 test:
