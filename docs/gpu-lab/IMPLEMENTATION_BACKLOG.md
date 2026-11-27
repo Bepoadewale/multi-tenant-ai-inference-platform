@@ -71,8 +71,9 @@ pull requests must include the repository's clean-room evidence.
   is ready for review; no host execution or AWS/GPU work occurred.
 - The current manual-guide branch adds named GPU tenant profiles and signed
   identities, and documents their bounded gateway checks. Local `make verify` passed
-  with 146 tests (2 skipped); no AWS or GPU work occurred. The branch's PR has not yet
-  been published and needs its one fresh CI clean-room cycle.
+  with 146 tests (2 skipped); no AWS or GPU work occurred. PR #58 is open and stacked
+  on #57. Initial run `46049398387` failed in Trivy setup and at `make smoke`; the
+  Trivy version and failure diagnostics are being fixed for the final CI run.
 
 ## Ordered implementation packages
 
@@ -287,16 +288,21 @@ numbers are fabricated or inferred from CPU fixtures.
 
 ### Package 5 — Manual and containerized vLLM/Qwen serving
 
-**Status:** not started. Exact model license/revision/digest and version tuple remain
-open.
+**Status:** statically prepared in PR #45 and research/runbook updates through PRs
+#47/#50/#57. The current candidate is vLLM 0.34.0 at its reviewed image digest,
+Qwen2.5-1.5B-Instruct at a pinned revision, Ubuntu 24.04 amd64, an R580 host-driver
+candidate, and CUDA 13.0/13.0.3 candidates. The manual guide now uses one named model
+cache volume for the first vLLM launch and later Compose service. This matrix still
+requires live package/license/artifact/runtime verification before use.
 
-- [ ] Pin a dated vLLM release/image digest, compatible CUDA variant, Python ABI, and
-  Qwen 1.5B model revision. Confirm artifact hash, license, memory, context, and
-  tokenizer/template before downloading.
-- [ ] Prepare the exact download, cache, launch, health/readiness, inference, streaming,
-  telemetry, export, and teardown commands before the GPU batch.
-- [ ] Before that batch, use the local verifier from ticket #38 to check the pinned
-  Qwen `model.safetensors` after download; fixture tests are not artifact evidence.
+- [x] Research the dated vLLM image, model revision/license, candidate CUDA/driver
+  versions, model/cache workflow, and host/runtime health checks.
+- [x] Prepare manual and Compose commands for download, cache, launch,
+  health/readiness, inference, streaming, and teardown in the manual guide and GPU
+  batch runbook. Commands are prospective, not executed.
+- [ ] Before the GPU batch, refresh the image digest and model license/revision,
+  confirm architecture and API compatibility, verify actual downloaded snapshot
+  digest, and check memory/context requirements against the L4.
 - [ ] Start manually, verify real L4 inference and streaming, then reproduce with
   Docker Compose without publishing the endpoint or internal services.
 
@@ -322,9 +328,16 @@ tokenizer preflight. None has live GPU inference evidence.
 - [ ] Test Redis failure and cancellation across separate gateway processes.
 - [ ] Verify the stream/admission contract against the pinned live vLLM runtime and
   route real GPU-backed requests.
-- [ ] Preserve ONNX defaults and add vLLM as a separately configured runtime target.
-- [ ] Demonstrate support, engineering, and research tenants with shared quotas,
-  model grants, bounded queueing, and noisy-neighbor controls.
+- [x] Preserve ONNX defaults and add vLLM as a separately configured single-target
+  runtime in the isolated Compose profile; GPU catalog and CPU-default regression
+  tests exist in PR #45.
+- [x] Prepare customer-support, internal-engineering, and research catalog profiles
+  with different model grants, request/token limits, and concurrency, plus signed
+  identity fixtures. Ticket #58 tests application authentication; no physical GPU
+  isolation is claimed.
+- [ ] Demonstrate the named tenants against real vLLM through both gateway replicas,
+  verify shared Redis accounting, model denials, overload, and failure cleanup on the
+  approved L4 host.
 
 **Exit gate:** real gateway-routed GPU calls, policy denials, shared state, failure
 cleanup, and CPU ONNX regression all have evidence.

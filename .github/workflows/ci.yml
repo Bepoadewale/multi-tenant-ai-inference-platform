@@ -62,6 +62,7 @@ jobs:
         with:
           scan-type: fs
           scan-ref: .
+          version: v0.76.2
           severity: "HIGH,CRITICAL"
           exit-code: "1"
       - uses: anchore/sbom-action@v0
@@ -76,7 +77,10 @@ jobs:
       - run: make bootstrap-local
       - if: failure()
         run: docker compose ps -a && docker compose logs --no-color
-      - run: make smoke
+      - id: smoke
+        run: make smoke
+      - if: failure() && steps.smoke.outcome == 'failure'
+        run: docker compose ps -a && docker compose logs --no-color
       - run: make demo-flagship
       - run: make verify
       - if: always()

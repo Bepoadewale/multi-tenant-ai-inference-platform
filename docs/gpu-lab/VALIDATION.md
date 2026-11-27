@@ -355,10 +355,17 @@ access, existing CPU tenants remain available, and generated Ed25519 tokens carr
 expected tenant claims. They also check the signing key and token file are mode `0600`
 and the gateway-readable public key is mode `0644`.
 
-The guide's relative-link and placeholder review, final documentation review, PR
-publication, and CI remain outstanding. No local clean-room flow was run; a single
-fresh-runner cycle is expected from the new implementation PR. No AWS command, model
-download, OCI image pull, container build, GPU operation, or cloud spend occurred.
+The guide's initial relative-link and documented Make-target checks passed; later
+follow-up edits still need the final cross-reference check. PR #58 run `46049398387`
+passed Python, manifests, GPU observability, and Ansible. Supply-chain did not reach
+its scan because the action requested unavailable Trivy release `v0.70.0`. The fresh
+local E2E runner completed bootstrap but failed at `make smoke`; the workflow did not
+collect service logs after that failure, so the specific failing check remains
+unknown. The follow-up pins published Trivy `v0.76.2` and adds failure-only
+project-scoped Compose diagnostics. Its CI result is pending. This first clean-room
+attempt failed; a successful fresh-runner cycle on the final head remains required.
+No AWS command, model download, OCI image pull outside CI, GPU operation, or cloud
+spend occurred.
 
 These checks establish source behavior and document consistency only. They do not
 establish cross-process Redis behavior for these named tenants, a real signed request
