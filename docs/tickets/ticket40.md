@@ -10,9 +10,9 @@ Ubuntu 24.04 amd64 server family.
 ## Current state
 
 The changes are published as [PR #40](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/40)
-on `codex/pin-ubuntu-ami`, based on PR #39. Head `f580217` passed all four required
-checks in run `45949421928`, including local end-to-end. No AWS resource was created
-and no GPU was used. The
+on `codex/pin-ubuntu-ami`, based on PR #39. All four required checks passed in the
+implementation run `45949421928` and documentation follow-up run `45950217355`, each
+including the local end-to-end job. No AWS resource was created and no GPU was used. The
 existing G/VT request was denied by the email supplied by the owner; quota history
 still says `CASE_OPENED`, and applied quota remains zero. The appeal draft remains
 unsent.
@@ -63,6 +63,8 @@ unsent.
 - `git diff --check` — passed before commit.
 - GitHub Actions run `45949421928` passed `python`, `manifests`, `supply-chain`, and
   `local-e2e` for PR #40 head `f580217`.
+- GitHub Actions run `45950217355` passed the same four jobs after the project status
+  and evidence records were updated.
 - Read-only AWS AMI metadata confirmed the selected Canonical image attributes. No Terraform plan, apply, quota change, or other AWS mutation was run.
 
 ## Issues and troubleshooting
