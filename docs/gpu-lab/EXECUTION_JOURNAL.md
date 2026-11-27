@@ -45,8 +45,8 @@
 - **Cloud/cost:** no AWS calls, GPU, or live vLLM; goal-specific spend remains `$0` and
   GPU hours remain `0`.
 - **Follow-up:** pushed PR #35 head `5cd8dfb` with `--force-with-lease`, updated its
-  description, resolved both review threads, and started one CI watcher. The watcher is
-  still running while PR #36 is prepared.
+  description, resolved both review threads, and watched one CI run to success. Run
+  `45937540562` passed all four required jobs.
 
 ## 2026-11-27 — PR #36 carried onto the tokenizer lease fix
 
