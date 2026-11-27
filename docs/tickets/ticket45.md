@@ -45,8 +45,11 @@ local CPU ONNX and did not check the upstream model server.
 - No GPU image was pulled and no vLLM container or AWS resource was started.
 - PR #45 CI run `45982878898` exposed the stale smoke assertion after the readiness
   response became runtime-aware. The failure was in the existing smoke script, not a
-  GPU test. The script is corrected; a new PR run must confirm the fix before this
-  package is considered CI-verified.
+  GPU test. That assertion was corrected and the smoke check passed on a later run.
+- CI run `45990929878` passed all four required jobs on head `31348c3`: local E2E,
+  manifests, Python, and supply-chain. The capacity demo now checks the API's actual
+  simulated-accounting mode and pool fields. This is CPU/local CI evidence only; it
+  does not demonstrate GPU inference.
 
 ## Security and financial considerations
 
@@ -60,14 +63,11 @@ approval gates remain unchanged.
 
 ## Outstanding work
 
-- PR #45 is open against PR #44. Head `65e5cba` adds sanitized failure-stage
-  diagnostics to `demo-capacity`. CI run `45988603667` then identified the stale
-  capacity snapshot assertion: the script expected `.hardware == "SIMULATED"`, while
-  the actual API returns `.mode == "SIMULATED_HARDWARE_QUOTA_ACCOUNTING"`. The HTTP
-  requests, tenant quota rejection, and CPU fallback returned expected results before
-  that assertion. The assertion now matches the implemented API response; the next CI
-  run must confirm the queued-request path. The script is not run locally because it
-  starts with Redis `FLUSHDB`.
+- PR #45 is open against PR #44. Head `31348c3` fixes the stale capacity snapshot
+  assertion identified by diagnostics on run `45988603667`: the API returns
+  `.mode == "SIMULATED_HARDWARE_QUOTA_ACCOUNTING"`, not `.hardware == "SIMULATED"`.
+  The corrected demo and queued-request path passed in `45990929878`. The script was
+  not run locally because it starts with Redis `FLUSHDB`.
 - Recheck the pinned container digest, NVIDIA driver/runtime compatibility, and model
   revision, license, and artifact hash before any paid run.
 - Review the separate GPU observability package in PR #46; its static checks passed

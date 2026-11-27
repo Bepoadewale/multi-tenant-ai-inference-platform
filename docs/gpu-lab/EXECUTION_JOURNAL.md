@@ -1041,3 +1041,18 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Cloud and cost:** no AWS operation, GPU, model, or spend.
 - **Next:** push this correction and watch its one PR #45 run. After it passes, rebase
   PR #46 and the benchmark preparation branch onto the updated PR #45 head.
+
+## 2026-11-27 — Confirm PR #45 capacity fix in CI
+
+- **Phase:** Phase 2 static deployment preparation; CI exercised the existing local
+  CPU-only stack, not a GPU.
+- **Branch / PR / commit:** `codex/single-l4-compose-deployment`, PR #45, `31348c3`.
+- **Starting state:** the stale capacity mode assertion was fixed and pushed. CI run
+  `45990929878` was watched once using `gh pr checks 45 --watch --interval 120`.
+- **Result:** all four required checks passed: local E2E (5m11s), manifests, Python,
+  and supply-chain. The capacity demo including its queue path passed in local E2E.
+- **Evidence:** run `45990929878`; sanitized cause and result are recorded in
+  `docs/tickets/ticket45.md`.
+- **Cloud and cost:** no AWS resources, GPU runtime, model download, or spend.
+- **Next:** rebase the observability branch onto `31348c3`, validate it and its CI,
+  then rebase the benchmark branch onto the updated observability head.
