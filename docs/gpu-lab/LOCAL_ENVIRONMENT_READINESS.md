@@ -10,7 +10,7 @@
 | AWS CLI | 2.32.6 | AWS CLI operations after an explicit identity/quota/authorization preflight |
 | Terraform | 1.14.0 | Repository static Terraform validation; cloud plan/apply still requires its state and cost gates |
 | Docker Compose | v2.40.3-desktop.1 | Local Compose rendering and CPU validation |
-| Python | 3.12.12 | Project scripts and tests |
+| Python runtimes | `python3` resolves to 3.14.0; `python3.12` is available as 3.12.12, and `python3.13` as 3.13.9 | Use the explicit Python 3.12 executable for project locks and checks that target CPython 3.12. Do not assume the default `python3` selects the project runtime. |
 | uv | 0.9.15 | Generate a target Linux/Python 3.12 hash lock; no CUDA packages were installed locally |
 | GitHub CLI | Authenticated as `Bepoadewale` using the local keychain | PR and Actions operations |
 
@@ -31,9 +31,12 @@ workstation as a substitute for L4 validation.
 ## AWS and spending state
 
 - No AWS mutation was performed during this readiness check.
-- The owner reports sending an appeal through the existing AWS support case; no
-  approval is confirmed in this record. The last documented applied G/VT quota is
-  zero, so an L4 launch remains blocked.
+- A fresh read-only identity check using `ai-platform-pilot-key` matched the expected
+  project account. The applied On-Demand G/VT quota in `us-east-1` is still `0.0`.
+  `g6.xlarge` is listed as an instance-type offering in five availability zones, but
+  that listing is not a capacity reservation or quota approval. The owner reports
+  sending an appeal through the existing AWS support case; no appeal decision is
+  confirmed by the API. An L4 launch remains blocked.
 - The project ceiling remains USD $25. Quota approval alone does not authorize an
   apply; the exact plan, current complete cost estimate, runtime, expiry, and teardown
   gates remain required.
@@ -46,7 +49,8 @@ workstation as a substitute for L4 validation.
 2. Before any AWS mutation, verify the expected account using the key-based profile as
    instructed by the project credential map, then recheck region, applied quota, G6
    availability, exact resources, current prices, and the reviewed saved plan. Do not
-   print credentials.
+   print credentials. The latest read-only check found quota `0.0`; G6 offerings are
+   visible in us-east-1 but do not guarantee capacity.
 3. Install Ansible only when its pinned project requirements and role are ready; use a
    project-scoped or isolated environment rather than changing unrelated tools.
 4. After authorized provisioning, install and validate the GPU stack on the Ubuntu
