@@ -66,7 +66,9 @@ Old quota-denial statements below are dated historical snapshots, not current st
   invocation, data-transfer allowance, tax contingency, and a reserve. It still
   requires exact AMI, price, egress, tax-profile, and state-retention confirmation;
   it is not permission to apply.
-- PRs #30–#58 remain open and unmerged; merge authorization is outstanding. PR #53
+- PRs #30–#59 remain open and unmerged; merge authorization is outstanding. PR #59
+  passed all six checks, including local E2E, in run `46069680564` and is ready for
+  review. The gateway benchmark is prepared on a separate unsubmitted branch. PR #53
   code head `e623b75` passed all five checks in `46023306230`, including a Linux AMD64
   gateway image build and CPU end-to-end. PR #56 head `852c873` passed all five checks
   in `46040861818`; PR #57 Ansible head `4795f12` passed all six checks, including a
@@ -374,9 +376,8 @@ captured and described with units and limits.
 
 ### Package 8 — Benchmarking, FinOps, evaluation, release, and rollback
 
-**Status:** PRs #47–#52 prepare static benchmarking, evaluation, private MLflow evidence, and sequential-release design. PR #52 head `55f4d59` passed all five checks in run `46020258170`. Gateway benchmarking, actual GPU performance, live model evaluation, and release/rollback behavior remain outstanding.
+**Status:** PRs #47–#52 prepare static benchmarking, evaluation, private MLflow evidence, and sequential-release design. PR #52 head `55f4d59` passed all five checks in run `46020258170`. PR #60 prepares an authenticated gateway benchmark with privacy-safe metadata and a strict L4 guard; its CI remains outstanding. Actual GPU performance, live model evaluation, and release/rollback behavior remain outstanding.
 
-The current ONNX release API does not support the one-target vLLM profile. The
 The existing ONNX release API still does not support the one-target vLLM profile. PR
 #52 adds a private MLflow tracking service and evaluator report publication, while PR
 #51 documents the separate sequential LLM release path. No candidate has been
@@ -385,9 +386,11 @@ registered or deployed. Immutable release plans and approval enforcement remain 
 - [x] Prepare the official `vllm bench serve` runner, context-bounded synthetic
   workloads, gated high concurrency, repeated aggregates, and hardware/software
   metadata capture. Static dry-run only; no inference request was sent.
-- [ ] Prepare an authenticated gateway benchmark that reports gateway overhead,
-  multi-tenant admission behavior, cancellation, and queueing without logging tokens
-  or prompt/response content.
+- [x] Prepare an authenticated gateway benchmark that reports direct-versus-gateway
+  latency, multi-tenant admission status, client-side queue wait, and bounded requests
+  without logging tokens or prompt/response content. Cancellation remains covered by
+  the separate gateway cancellation drill. Static and mock-transport checks only;
+  actual GPU measurement is outstanding.
 - [ ] Run representative workload/precision/concurrency experiments inside the
   authorized GPU runtime window; compute full request and million-token cost.
 - [x] Prepare versioned synthetic tasks with deterministic quality/format gates and

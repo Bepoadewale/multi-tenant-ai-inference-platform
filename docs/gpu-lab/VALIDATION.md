@@ -379,6 +379,21 @@ These checks establish source behavior and document consistency only. They do no
 establish cross-process Redis behavior for these named tenants, a real signed request
 through either GPU gateway, model denial on live vLLM, or GPU hardware isolation.
 
+## Authenticated gateway benchmark preparation
+
+On 2026-11-27, the non-GPU gateway benchmark client passed three focused tests,
+including an HTTP mock transport that returned a sentinel completion and verified
+the client result record contained neither that completion nor the bearer token.
+`make gpu-gateway-benchmark-plan`, Python compilation, Ruff, and `git diff --check`
+passed. The plan makes no network request. Initial review caught a missing local
+`httpx` import in the dry-run path; the dependency is now loaded only for live requests.
+Ruff also caught an import-order issue, which was corrected before the final passing
+checks. No live gateway request, model output, AWS call, or GPU measurement occurred.
+
+The direct-versus-gateway latency delta is an exploratory comparison, and semaphore
+wait is client-side queueing. Neither is claimed as isolated server overhead or
+server queue depth. Cancellation uses the separate stream-cancellation drill.
+
 ## Future GPU execution template
 
 - Date/time and commit SHA:
