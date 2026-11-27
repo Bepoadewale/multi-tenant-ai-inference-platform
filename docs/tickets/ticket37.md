@@ -32,9 +32,20 @@ download the multi-gigabyte model.
 - Candidate host CUDA Toolkit: 13.0 for the `nvcc` learning exercises. The vLLM
   container supplies its own CUDA user-space libraries; the host toolkit is not
   required merely to run this container.
-- NVIDIA Container Toolkit must follow the host driver. Pin its exact package after
-  checking the NVIDIA apt repository during the bounded preflight; current static
-  documentation does not establish a package installed on the target AMI.
+- NVIDIA Container Toolkit must follow the host driver. The official installation
+  guide and release notes document version 1.20.2. A read-only fetch of NVIDIA's
+  signed-repository AMD64 `Packages` index on 2026-11-27 confirmed the required
+  package set at 1.20.2-1:
+
+  | Package | SHA-256 |
+  | --- | --- |
+  | `nvidia-container-toolkit` | `3ea74794dc7fd88526da6fece9fb142e976efac232892fa4c870a96a9708316b` |
+  | `nvidia-container-toolkit-base` | `a6bd7f3a94b0b53b9748872709e70e810473081de0e836a59405073012c49368` |
+  | `libnvidia-container-tools` | `a0ded4571083019155661eb53b5fd967d9b83bf7c68516d7e6f489c80caf6946` |
+  | `libnvidia-container1` | `466e48e38325bd72ebda9d91653c36f44e71ef9bc261f949689132c892835a4b` |
+
+  Install after the driver and configure Docker with `nvidia-ctk`. Recheck the
+  package index and its signature on the target AMI before encoding the Ansible pin.
 - Candidate inference image: `vllm/vllm-openai:v0.34.0`, CUDA 13.0, PyTorch 2.14.0.
   `docker buildx imagetools inspect` returned OCI index digest
   `sha256:20fdb089454afbb324efa4110a2c025ff7b27cc1a086e07aa580b18df8ad1ce1` and
@@ -77,8 +88,8 @@ with a separately resolved build.
 - [x] Query the registry for the vLLM OCI index and AMD64 child digests.
 - [x] Record one-run clean-room policy remains unchanged; no extra local clean-room
   cycle is part of this research package.
-- [ ] Recheck exact Ubuntu packages, signing keys, CUDA toolkit package, Docker and
-  Container Toolkit versions, and image digests in the GPU preflight.
+- [ ] Recheck exact Ubuntu packages, signing keys, CUDA Toolkit package, Docker and
+  Container Toolkit package availability, and image digests in the GPU preflight.
 - [ ] Validate the full software matrix on one authorized L4 during a consolidated
   paid execution batch after all spending and quota gates pass.
 
@@ -92,6 +103,10 @@ with a separately resolved build.
 - A metadata query was first invoked as `python` and returned `command not found` on
   this workstation. Re-running the same read-only Hugging Face Hub query with
   `python3` succeeded and returned the revision/license/config/LFS fields above.
+- The first guessed NVIDIA package-index URL with `Packages.gz` returned HTTP 404.
+  Reading NVIDIA's repository list showed the signed repo path is flat; querying its
+  `Packages` file succeeded and confirmed all four required 1.20.2-1 AMD64 packages
+  and their hashes. No `.deb` files were downloaded.
 - Official docs checked: NVIDIA R580.196.11 release notes, NVIDIA driver/CUDA
   support matrix and Ubuntu install guide, vLLM v0.34.0 release and model/GPU docs,
   and the Hugging Face model card and pinned revision.
