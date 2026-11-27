@@ -281,3 +281,34 @@ automation, GPU runtime, or model download was executed during this research.
   request flow.
 
 No profiler, exporter, alert, or live metric was executed during this source review.
+
+## 2026-11-27 — vLLM tokenization and shared-server security
+
+- The current vLLM [tokenizer API reference](https://docs.vllm.ai/en/v0.15.1/api/vllm/entrypoints/serve/tokenize/protocol/)
+  defines a chat-tokenization request with the served model and chat messages, and a
+  response with the token count and model context limit. This can count the rendered
+  chat template more accurately than whitespace splitting. The exact request schema
+  must be rechecked against the pinned vLLM release before implementation and live use.
+- vLLM's [security guide](https://docs.vllm.ai/en/stable/usage/security/) says its
+  API key protects only selected path prefixes. `/tokenize`, `/metrics`, and health
+  routes are unprotected; a secret API key does not secure those routes. Keep the vLLM
+  port private to the Compose network, do not publish it to the host or internet, and
+  allow only the gateway and intended telemetry collector to reach its routes. The
+  gateway must authenticate and authorize a tenant before making a tokenizer request.
+- The same guide states that tenants sharing a vLLM process also share runtime state
+  and that prefix caching can create a timing side channel. `cache_salt` can scope
+  cache sharing but is not a full isolation boundary. If supported by the chosen
+  release, the gateway should supply an unpredictable tenant-scoped salt; it must
+  never accept a caller-controlled salt as an isolation guarantee. Measure the cache
+  hit-rate trade-off and keep the project claim at logical tenant admission only.
+- The [vLLM serving guide](https://docs.vllm.ai/en/latest/serving/openai_compatible_server/)
+  documents `/tokenize` as a utility endpoint. A tokenizer call before admission can
+  itself consume CPU and be abused. Before adding exact token preflight, bound request
+  bytes and message count, count the request against the tenant's request rate before
+  tokenization, use a short timeout, and fail closed if tokenization or the subsequent
+  quota reservation fails. The preflight must reserve prompt tokens plus the requested
+  output cap before generation, then reconcile to measured use after the response.
+
+These are current documentation-based design inputs, not validation against a pinned
+server. The vLLM API key and a private network are complementary controls; neither is
+proof of hardware isolation or production availability.

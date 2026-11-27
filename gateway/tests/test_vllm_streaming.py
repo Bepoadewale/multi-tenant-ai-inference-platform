@@ -301,3 +301,181 @@ def test_non_stream_backend_duration_is_not_reported_as_ttft():
     record = service.meter.records[-1]
     assert record.ttft_ms is None
     assert record.usage_source == "gateway_estimate"
+
+
+def test_vllm_tokenizer_uses_chat_template_and_validates_response(monkeypatch):
+    seen = {}
+
+    async def handle(request: httpx.Request) -> httpx.Response:
+        seen["url"] = str(request.url)
+        seen["payload"] = json.loads(request.content)
+        return httpx.Response(200, json={"count": 7, "max_model_len": 4096, "tokens": []})
+
+    real_async_client = httpx.AsyncClient
+
+    def client_with_mock(*args, **kwargs):
+        kwargs["transport"] = httpx.MockTransport(handle)
+        return real_async_client(*args, **kwargs)
+
+    monkeypatch.setattr(vllm.httpx, "AsyncClient", client_with_mock)
+    backend = vllm.VllmBackend("http://model.test", "qwen-test")
+
+    assert asyncio.run(backend.count_tokens(chat_request())) == (7, 4096)
+    assert seen["url"].endswith("/tokenize")
+    assert seen["payload"]["model"] == "qwen-test"
+    assert seen["payload"]["messages"] == [{"role": "user", "content": "hello platform"}]
+    assert seen["payload"]["add_generation_prompt"] is True
+    assert seen["payload"]["return_token_strs"] is False
+
+
+def test_vllm_tokenizer_rejects_malformed_response(monkeypatch):
+    async def handle(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"count": "seven", "max_model_len": 4096})
+
+    real_async_client = httpx.AsyncClient
+
+    def client_with_mock(*args, **kwargs):
+        kwargs["transport"] = httpx.MockTransport(handle)
+        return real_async_client(*args, **kwargs)
+
+    monkeypatch.setattr(vllm.httpx, "AsyncClient", client_with_mock)
+    backend = vllm.VllmBackend("http://model.test", "qwen-test")
+
+    with pytest.raises(RuntimeError, match="vLLM tokenization request failed"):
+        asyncio.run(backend.count_tokens(chat_request()))
+
+
+def test_gateway_reserves_exact_prompt_and_output_cap_before_vllm_inference():
+    service = GatewayService()
+    backend = vllm.VllmBackend("http://model.test", "qwen-test")
+
+    async def count_tokens(_request):
+        return 11, 4096
+
+    async def complete(_request):
+        return "answer", Usage(prompt_tokens=11, completion_tokens=3, total_tokens=14), 1.0
+
+    backend.count_tokens = count_tokens
+    backend.complete = complete
+    service.backend_for = lambda _model, _target: backend
+    tenant = Catalog().tenant("team-search")
+
+    response = asyncio.run(service.chat(tenant, chat_request(stream=False)))
+
+    assert response["usage"]["total_tokens"] == 14
+    assert sum(value for _, _, value in service.limiter.tokens[tenant.id]) == 14
+    assert not service.limiter.active[tenant.id]
+
+
+def test_gateway_rejects_context_overflow_and_releases_preflight_reservation():
+    service = GatewayService()
+    service.catalog.models["chat-default"].max_model_len = 16
+    backend = vllm.VllmBackend("http://model.test", "qwen-test")
+
+    async def count_tokens(_request):
+        return 11, 4096
+
+    backend.count_tokens = count_tokens
+    service.backend_for = lambda _model, _target: backend
+    tenant = Catalog().tenant("team-search")
+
+    with pytest.raises(HTTPException) as rejected:
+        asyncio.run(service.chat(tenant, chat_request(stream=False)))
+
+    assert rejected.value.status_code == 413
+    assert sum(value for _, _, value in service.limiter.tokens[tenant.id]) == 0
+    assert not service.limiter.active[tenant.id]
+    assert service.capacity.pool_allocated == 0
+
+
+def test_gateway_fails_closed_when_vllm_tokenizer_is_unavailable():
+    service = GatewayService()
+    backend = vllm.VllmBackend("http://model.test", "qwen-test")
+
+    async def fail_tokenizer(_request):
+        raise RuntimeError("tokenizer endpoint unavailable")
+
+    backend.count_tokens = fail_tokenizer
+    service.backend_for = lambda _model, _target: backend
+    tenant = Catalog().tenant("team-search")
+
+    with pytest.raises(HTTPException) as rejected:
+        asyncio.run(service.chat(tenant, chat_request(stream=False)))
+
+    assert rejected.value.status_code == 503
+    assert sum(value for _, _, value in service.limiter.tokens[tenant.id]) == 0
+    assert not service.limiter.active[tenant.id]
+    assert service.capacity.pool_allocated == 0
+
+
+def test_gateway_enforces_tenant_prompt_limit_before_inference():
+    service = GatewayService()
+    backend = vllm.VllmBackend("http://model.test", "qwen-test")
+    completed = False
+
+    async def count_tokens(_request):
+        return 21, 4096
+
+    async def complete(_request):
+        nonlocal completed
+        completed = True
+        return "answer", Usage(prompt_tokens=21, completion_tokens=1, total_tokens=22), 1.0
+
+    backend.count_tokens = count_tokens
+    backend.complete = complete
+    service.backend_for = lambda _model, _target: backend
+    tenant = Catalog().tenant("team-search")
+    tenant.quotas.max_input_tokens = 20
+
+    with pytest.raises(HTTPException) as rejected:
+        asyncio.run(service.chat(tenant, chat_request(stream=False)))
+
+    assert rejected.value.status_code == 413
+    assert completed is False
+    assert len(service.limiter.requests[tenant.id]) == 1
+    assert sum(value for _, _, value in service.limiter.tokens[tenant.id]) == 0
+    assert not service.limiter.active[tenant.id]
+    assert service.capacity.pool_allocated == 0
+
+
+def test_gateway_rejects_exact_token_reservation_before_inference():
+    service = GatewayService()
+    backend = vllm.VllmBackend("http://model.test", "qwen-test")
+    completed = False
+
+    async def count_tokens(_request):
+        return 11, 4096
+
+    async def complete(_request):
+        nonlocal completed
+        completed = True
+        return "answer", Usage(prompt_tokens=11, completion_tokens=1, total_tokens=12), 1.0
+
+    backend.count_tokens = count_tokens
+    backend.complete = complete
+    service.backend_for = lambda _model, _target: backend
+    tenant = Catalog().tenant("team-search")
+    tenant.quotas.tokens_per_minute = 18
+
+    with pytest.raises(HTTPException) as rejected:
+        asyncio.run(service.chat(tenant, chat_request(stream=False)))
+
+    assert rejected.value.status_code == 429
+    assert completed is False
+    assert len(service.limiter.requests[tenant.id]) == 1
+    assert sum(value for _, _, value in service.limiter.tokens[tenant.id]) == 0
+    assert not service.limiter.active[tenant.id]
+    assert service.capacity.pool_allocated == 0
+
+
+def test_gateway_enforces_tenant_output_limit_before_admission():
+    service = GatewayService()
+    tenant = Catalog().tenant("team-search")
+    tenant.quotas.max_output_tokens = 4
+
+    with pytest.raises(HTTPException) as rejected:
+        asyncio.run(service.chat(tenant, chat_request(stream=False)))
+
+    assert rejected.value.status_code == 413
+    assert not service.limiter.requests[tenant.id]
+    assert service.capacity.pool_allocated == 0

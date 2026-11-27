@@ -168,6 +168,32 @@ This establishes current local lint/test/static configuration outcomes and read-
 - **Cloud boundary:** no AWS changes; project-specific spend remains `$0` and GPU
   instance-hours remain `0`.
 
+## 2026-11-27 — Model-aware token preflight prework
+
+- **Branch:** `codex/tokenizer-admission-preflight`, based on PR #34.
+- **Scope:** bounded chat input, tenant-specific input/output token limits, vLLM
+  chat-tokenizer adapter, model context validation, request-rate/concurrency admission
+  before tokenization, and atomic exact token reservation before inference. This is
+  local-only preparation; no AWS resource, live vLLM, or GPU was used.
+- **Official research:** vLLM's current protocol describes chat messages and returns
+  token count plus max context length. Its security guide documents that `/tokenize`,
+  metrics, and health endpoints are not covered by the server API key, and shared
+  processes share runtime/cache state. See `RESEARCH_NOTES.md` and `RISK_REGISTER.md`.
+- **Commands/results:** Ruff passed; focused tests reported **22 passed, 2 optional
+  Redis skips**. Full `make verify` passed with **72 passed, 2 optional Redis skips**,
+  one existing Starlette deprecation warning, and `pip-audit` reporting no known
+  vulnerabilities. `docker compose config --quiet` and `git diff --check` passed.
+  Both Redis integration tests passed against disposable local Redis 7.4.
+- **Fixes during validation:** Ruff first reported unsorted imports in the new Redis
+  service and limiter test; Ruff auto-fixed import order and the rerun passed. A
+  gateway test verifies that an exact quota overrun is rejected before backend
+  inference and that reservation/capacity state is released.
+- **Limits:** vLLM responses are mocked; Redis is one local server with two limiter
+  clients. This does not prove live vLLM compatibility, independent gateway processes,
+  private Compose-network enforcement, cache salt behavior, AWS, GPU, or production
+  availability. The request-count/content bounds and token preflight are code evidence
+  only until the runtime is pinned and exercised.
+
 ## Future GPU execution template
 
 - Date/time and commit SHA:

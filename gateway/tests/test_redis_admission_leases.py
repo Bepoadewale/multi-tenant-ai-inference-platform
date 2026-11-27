@@ -31,19 +31,27 @@ def tenant_with_limits(**updates) -> Tenant:
 def test_replicas_share_reservations_and_reconcile_backend_usage(monkeypatch):
     monkeypatch.setenv("INFERENCE_QUEUE_WAIT_SECONDS", "0.01")
     monkeypatch.setenv("INFERENCE_RESERVATION_LEASE_SECONDS", "2")
-    tenant = tenant_with_limits(tokens_per_minute=100, daily_token_quota=100)
+    tenant = tenant_with_limits(
+        tokens_per_minute=100, daily_token_quota=100, concurrent_requests=2
+    )
     first, second = RedisTenantLimiter(REDIS_URL), RedisTenantLimiter(REDIS_URL)
 
     async def exercise():
-        reservation = await first.admit(tenant, estimated_tokens=90, request_id="first")
+        reservation = await first.admit(tenant, estimated_tokens=0, request_id="first")
+        second_reservation = await second.admit(
+            tenant, estimated_tokens=0, request_id="second"
+        )
+        reservation = await first.reserve_usage(tenant, reservation, estimated_tokens=90)
         with pytest.raises(HTTPException) as rejected:
-            await second.admit(tenant, estimated_tokens=20, request_id="blocked")
+            await second.reserve_usage(tenant, second_reservation, estimated_tokens=20)
         assert rejected.value.status_code == 429
         assert await first.release(tenant, reservation, actual_tokens=5) is True
         assert await first.release(tenant, reservation, actual_tokens=5) is False
-        replacement = await second.admit(tenant, estimated_tokens=20, request_id="second")
-        assert replacement.request_id == "second"
-        await second.release(tenant, replacement, actual_tokens=None)
+        second_reservation = await second.reserve_usage(
+            tenant, second_reservation, estimated_tokens=20
+        )
+        assert second_reservation.request_id == "second"
+        await second.release(tenant, second_reservation, actual_tokens=None)
 
     async def run():
         try:

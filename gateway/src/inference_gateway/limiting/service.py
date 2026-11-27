@@ -83,6 +83,37 @@ class TenantLimiter:
         )
         return True
 
+    def reserve_usage(
+        self, tenant: Tenant, reservation: AdmissionReservation, estimated_tokens: int
+    ) -> AdmissionReservation:
+        if estimated_tokens < 0:
+            raise ValueError("estimated_tokens must not be negative")
+        now = datetime.now(UTC)
+        self._prune(tenant.id, now)
+        current = self.reservations[tenant.id].get(reservation.request_id)
+        if current is None:
+            raise HTTPException(503, "admission reservation expired")
+
+        minute_entries, daily_entries = self.tokens[tenant.id], self.daily[tenant.id]
+        minute_total = sum(value for _, _, value in minute_entries) - self._amount(
+            minute_entries, reservation.request_id
+        )
+        if minute_total + estimated_tokens > tenant.quotas.tokens_per_minute:
+            raise HTTPException(429, "tenant tokens-per-minute quota exceeded")
+        daily_total = sum(value for _, _, value in daily_entries) - self._amount(
+            daily_entries, reservation.request_id
+        )
+        if daily_total + estimated_tokens > tenant.quotas.daily_token_quota:
+            raise HTTPException(429, "tenant daily token quota exceeded")
+
+        self._set_amount(minute_entries, reservation.request_id, estimated_tokens, now)
+        self._set_amount(daily_entries, reservation.request_id, estimated_tokens, now)
+        self.reservations[tenant.id][reservation.request_id] = (
+            estimated_tokens,
+            current[1],
+        )
+        return AdmissionReservation(reservation.request_id, estimated_tokens)
+
     def release(
         self,
         tenant: Tenant,
@@ -109,3 +140,20 @@ class TenantLimiter:
                 else:
                     del entries[index]
                 return
+
+    @staticmethod
+    def _amount(entries: deque[tuple[datetime, str, int]], request_id: str) -> int:
+        return next((amount for _, entry_id, amount in entries if entry_id == request_id), 0)
+
+    @staticmethod
+    def _set_amount(
+        entries: deque[tuple[datetime, str, int]],
+        request_id: str,
+        amount: int,
+        now: datetime,
+    ) -> None:
+        for index, (when, entry_id, _old_amount) in enumerate(entries):
+            if entry_id == request_id:
+                entries[index] = (when, request_id, amount)
+                return
+        entries.append((now, request_id, amount))
