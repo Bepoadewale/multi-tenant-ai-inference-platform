@@ -79,3 +79,12 @@ reopen the existing resolved case, an authorized operator needs to use the Suppo
 Center link in the AWS email, or the account must have a Support plan that enables
 the Support API. Continue all non-billable project preparation while the request
 remains unresolved. Do not launch GPU infrastructure with zero applied quota.
+
+## Post-ticket update — owner-reported manual appeal
+
+After the CLI attempt was documented, the owner reported manually submitting the
+appeal through the existing Support Center case. The connected email search has not
+found a new AWS response, and read-only Service Quotas results still show
+`CASE_OPENED` with applied quota `0.0`. This records the owner's report; it does not
+independently prove delivery or acceptance by AWS. No duplicate appeal or quota
+request was sent. Continue non-billable preparation while waiting for AWS.

@@ -894,3 +894,31 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** submit the sanitized plan review in PR #42; continue work on shared remote
   state, current cost assumptions, expiry safeguards, and runtime preparation without
   paid GPU infrastructure.
+
+## 2026-11-27 — Record manual appeal report and remote-lock test coverage
+
+- **Phase:** Phase 2 — static EC2 preparation; GPU execution remains blocked.
+- **Branch / PR:** `codex/test-dual-terraform-locks`, preparing PR #43 on top of PR #42.
+- **Starting state:** PR #42's four required checks passed in run `45977824955`. The
+  owner reports manually submitting the appeal through the existing AWS Support
+  Center case. Read-only quota history remains `CASE_OPENED`, applied quota is `0.0`,
+  and the connected email search has no newer reply.
+- **Objective:** record the appeal status without resubmitting it and add regression
+  coverage for Terraform state-lock configuration.
+- **Changes:** documented the owner-reported appeal in the goal, status, research,
+  appeal record, and ticket #41. Added fake-Terraform assertions that the plan and
+  destroy-plan wrappers pass both S3 lockfile and DynamoDB lock arguments to `init`.
+- **Validation:** focused script tests passed (14 tests), Ruff passed, and
+  `git diff --check` passed. These tests prove argument wiring only; actual remote
+  lock acquisition, contention, and release remain untested. The first `make verify`
+  attempt could not start because this worktree had no `.venv`; using the existing
+  project virtual environment then exposed absent generated CPU ONNX fixtures. After
+  creating both expected local fixtures with `scripts/create_model.py`,
+  `make VENV=<existing-project-virtualenv-path> verify` passed Ruff, 72 tests,
+  pip-audit, and Docker Compose configuration. The model files are generated local
+  fixtures and are not part of this change.
+- **Cloud and cost:** read-only status only; no support message, AWS mutation, resource,
+  GPU hour, or project spend was created during this work.
+- **Next:** publish PR #43, then prepare a consolidated GPU execution runbook covering
+  manual host setup, inference, metrics, experiments, evidence export, and teardown.
+  Runtime commands remain unverified until an authorized GPU run occurs.

@@ -80,8 +80,11 @@ def test_gpu_ec2_plan_and_apply_share_the_default_profile(tmp_path: Path) -> Non
     assert planned.returncode == 0, planned.stderr
     assert "ai-platform-pilot-key" in aws_log.read_text(encoding="utf-8")
     assert "describe-images --image-ids ami-0a951420c495183dc" in aws_log.read_text(encoding="utf-8")
-    plan_profiles = [line.split()[0] for line in terraform_log.read_text(encoding="utf-8").splitlines()]
+    plan_calls = terraform_log.read_text(encoding="utf-8").splitlines()
+    plan_profiles = [line.split()[0] for line in plan_calls]
     assert plan_profiles == ["ai-platform-pilot-key", "ai-platform-pilot-key"]
+    assert "backend-config=dynamodb_table=multi-tenant-ai-inference-platform-pilot-terraform-locks" in plan_calls[0]
+    assert "backend-config=use_lockfile=true" in plan_calls[0]
     assert any("ubuntu_ami_id=ami-0a951420c495183dc" in line for line in terraform_log.read_text(encoding="utf-8").splitlines())
 
     env["GPU_EC2_CONFIRM"] = "apply"
@@ -309,6 +312,8 @@ def test_destroy_plan_uses_only_the_destroy_operation(tmp_path: Path) -> None:
     assert plan_file.read_bytes() == b"fake saved plan"
     terraform_calls = terraform_log.read_text(encoding="utf-8").splitlines()
     assert len(terraform_calls) == 2
+    assert "backend-config=dynamodb_table=multi-tenant-ai-inference-platform-pilot-terraform-locks" in terraform_calls[0]
+    assert "backend-config=use_lockfile=true" in terraform_calls[0]
     assert "plan -destroy" in terraform_calls[1]
     assert terraform_calls[1].split()[0] == "ai-platform-pilot-key"
     assert "ubuntu_ami_id=ami-0a951420c495183dc" in terraform_calls[1]

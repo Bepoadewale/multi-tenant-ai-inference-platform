@@ -148,9 +148,17 @@ GPU memory measurement; measure actual cache use and concurrency on the L4.
   repository's `AGENTS.md` requires repository-scoped state guardrails and unique key
   namespaces. The existing bootstrap defines that bucket and table. Reuse them for
   the GPU root with a unique `gpu-ec2/` state key, and configure an S3 lock file too;
-  validate dual-lock compatibility. Do not silently remove the DDB requirement just
-  because newer Terraform supports S3 locking. Exact Terraform minimum, state
-  bootstrap, IAM access, and lifecycle still need implementation and validation.
+  validate dual-lock compatibility. Terraform's implementation supports attempting
+  the S3 lockfile and DynamoDB lock together, and releases the S3 lock if DDB locking
+  fails ([HashiCorp implementation](https://github.com/hashicorp/terraform/blob/main/internal/backend/remote-state/s3/client.go)).
+  The GPU plan and destroy-plan wrappers pass both `use_lockfile=true` and the shared
+  lock-table name to `terraform init`; fake-CLI regression tests verify that contract.
+  This is configuration evidence only: actual remote lock acquisition, contention,
+  and release remain untested because the shared state bucket and lock table are not
+  present. Do not silently remove the repository DDB requirement just because newer
+  Terraform supports S3 locking. Terraform minimum is pinned to 1.10 or newer, which
+  supports the S3 lockfile. Bootstrap, IAM access, and live lock lifecycle still need
+  validation.
 - The pinned AWS provider configuration in `infrastructure/terraform/environments/gpu-ec2/versions.tf`
   uses `default_tags = local.required_tags`, so taggable resources inherit project,
   environment, owner, expiry, and data-class tags even where the resource block adds
