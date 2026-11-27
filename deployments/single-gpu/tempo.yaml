@@ -1,0 +1,37 @@
+# Single-process Tempo 3.x configuration for an ephemeral lab.
+# Local storage is suitable only for this single-node development environment.
+stream_over_http_enabled: true
+
+server:
+  http_listen_port: 3200
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        http:
+          endpoint: 0.0.0.0:4318
+
+live_store:
+  max_trace_idle: 10s
+  max_block_duration: 5m
+  max_block_bytes: 1000000
+
+backend_scheduler:
+  provider:
+    compaction:
+      compaction:
+        compaction_window: 1h
+        block_retention: 1h
+        compacted_block_retention: 10m
+
+storage:
+  trace:
+    backend: local
+    wal:
+      path: /var/tempo/wal
+    local:
+      path: /var/tempo/blocks
+
+usage_report:
+  reporting_enabled: false

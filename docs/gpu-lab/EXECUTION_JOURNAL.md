@@ -1056,3 +1056,53 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Cloud and cost:** no AWS resources, GPU runtime, model download, or spend.
 - **Next:** rebase the observability branch onto `31348c3`, validate it and its CI,
   then rebase the benchmark branch onto the updated observability head.
+
+## 2026-11-27 — Prepare static GPU observability profile
+
+- **Phase:** Phase 7 preparation; static configuration only. Live GPU observability
+  remains unvalidated until an authorized L4 execution.
+- **Branch / parent:** `codex/gpu-observability-profile`, based on PR #45 head
+  `bb9ad9c`; PR #46 has not yet been created.
+- **Starting state:** PR #45 smoke fix was pushed. Workflow `45983777135` passed the
+  smoke step but failed inside the pre-existing cumulative CPU `demo-capacity` script.
+  Rerunning only the failed job (`140460013629`) failed at the same script. The log
+  does not reveal which internal request/assertion failed. We did not run the script
+  locally because it begins with Redis `FLUSHDB`, which would destroy local project
+  state.
+- **Objective:** prepare the single-GPU profile's metrics, logs/traces, alerting, and
+  dashboards using current official component docs and release-pinned images, without
+  starting services or incurring cloud cost.
+- **Changes:** added DCGM, Node, and Redis exporters; Prometheus; Grafana; Alertmanager;
+  OpenTelemetry Collector; Tempo 3; five lab warning rules; and a focused GPU/inference
+  dashboard. Monitoring ports are loopback-only where published; exporters and model
+  services remain internal. DCGM profiling fields and `SYS_ADMIN` are not enabled.
+  The DCGM exporter and vLLM both see the same physical GPU; the reservation does not
+  isolate devices. Monitoring data is ephemeral and must be exported before stopping.
+- **Validation:** `make gpu-compose-config` passed without starting services.
+  `make gpu-observability-validate` passed: Prometheus 3.16.0 validated the actual
+  mounted scrape config and found five alert rules; Alertmanager 0.35.0 validated its
+  actual mounted config; Tempo 3.1.1 verified its actual mounted config; OpenTelemetry
+  Collector Contrib 0.166.0 validated the profile-specific privacy-filtering config;
+  both dashboard JSON files parsed; Compose config parsed; Bash syntax and `git diff
+  --check` passed. The dedicated GitHub Actions job and `make verify` target are now
+  wired to rerun the same validators. System Python lacked PyYAML; the system Ruby YAML parser rejected
+  valid flow endpoint lists in Compose/Prometheus, which were instead checked by their
+  native parsers. Four config-validator images were downloaded into local Docker
+  cache; no profile containers were started.
+- **Research:** reviewed NVIDIA DCGM exporter installation, metrics fields and v4.9
+  unit/name changes; vLLM current V1 metric names; Prometheus scrape configuration;
+  Node Exporter setup; Tempo 3 migration; and official release manifests. The release
+  digests are recorded in the PR ticket; they must be rechecked at run time.
+- **Failures and troubleshooting:** first Tempo config verification exposed invalid
+  compaction nesting; corrected to the schema accepted by Tempo 3.1.1. A generic YAML
+  check also failed because the available Ruby parser is old and not Compose-aware.
+  Initial PR #45 smoke check was corrected separately; later `demo-capacity` failure
+  remains unresolved and is not attributed to GPU work.
+- **Cloud and cost:** no AWS calls or resources, GPU hours, model downloads, vLLM/DCGM
+  image pulls, or goal-specific AWS spend. The four local validator images occupy
+  Docker cache; the profile has not run.
+- **Evidence:** static files and validator outcomes are indexed in the evidence
+  manifest; no screenshots or real metrics exist yet.
+- **Next:** finish review of Compose security/limits, update this record, publish PR
+  #46 stacked on PR #45, and diagnose the parent PR's opaque capacity-demo failure
+  through non-destructive CI diagnostics.
