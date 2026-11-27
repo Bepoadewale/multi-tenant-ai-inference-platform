@@ -53,7 +53,7 @@ approval gates remain unchanged.
 
 ## Outstanding work
 
-- Finish the full local verification and publish PR #45.
+- PR #45 was opened at `0a16844` against PR #44; its GitHub checks are pending.
 - Recheck the pinned container digest, NVIDIA driver/runtime compatibility, and model
   revision, license, and artifact hash before any paid run.
 - Add DCGM/Node Exporter and a minimal GPU Prometheus configuration in a separate
