@@ -1656,3 +1656,19 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   GPU hours, or project spend were used.
 - **Next:** publish the final #51 restack/status commit, then let the updated PR checks
   complete and fix any failures before describing the static stack as CI-ready.
+
+## 2026-11-27 — Verify quota appeal status without mutation
+
+- **Phase:** Phase 2; AWS mutation remains blocked.
+- **Starting state:** the owner reported manually sending an appeal through the
+  existing Support Center case. No approval had been confirmed.
+- **Commands:** read-only `sts get-caller-identity`, `service-quotas get-service-quota`,
+  and `list-requested-service-quota-change-history-by-quota` with profile
+  `ai-platform-pilot-key`, region `us-east-1`.
+- **Result:** identity matched the expected project account; applied On-Demand G/VT
+  quota `L-DB2E81BA` is `0.0`; the existing 4-vCPU request still reports
+  `CASE_OPENED`. The CLI does not confirm appeal delivery or approval.
+- **Decision:** do not launch, submit another appeal, or create a new quota request.
+- **Cost:** all queries were read-only; no resource, GPU hour, or project spend.
+- **Next:** wait for AWS to update the existing request/case while continuing only
+  non-billable repository work.
