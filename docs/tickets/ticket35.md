@@ -10,7 +10,7 @@ private because it is not protected by vLLM's API key.
 ## Current state
 
 - Branch: `codex/tokenizer-admission-preflight`, based on PR #34.
-- Pull request: [#35 — model-aware token reservations](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/35), open against PR #34's `codex/redis-admission-leases` branch; rebased head `5cd8dfb` is pushed, both review threads are resolved, and CI is running.
+- Pull request: [#35 — model-aware token reservations](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/35), open against PR #34's `codex/redis-admission-leases` branch; rebased head `5cd8dfb` is pushed, both review threads are resolved, and all four required checks passed in run `45937540562`.
 - Phase: non-billable Phase 6 prework. No live vLLM, AWS infrastructure, or GPU was
   used.
 - PR #34 review fixes are at `b51aedd`; all four required checks passed in run
@@ -133,5 +133,5 @@ request completes and releases its reservation. Targeted tests passed (**21 pass
 `make verify` passed Ruff, **87 tests**, pip-audit, and Compose configuration (2
 optional Redis tests skipped); local Redis 7.4 integration passed (**2 tests**). No AWS
 resource, live vLLM, or GPU was used. Code commit `59cca44` was tested locally and
-included in pushed PR head `5cd8dfb`; its fresh CI run was still in progress when this
-record was updated.
+included in pushed PR head `5cd8dfb`; all four required checks passed in the fresh
+workflow run `45937540562`.
