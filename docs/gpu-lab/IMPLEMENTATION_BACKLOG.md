@@ -212,8 +212,8 @@ cleanup, and CPU ONNX regression all have evidence.
 
 ### Package 7 — Metrics, traces, dashboards, and alerting
 
-**Status:** PR #46 contains static configuration and has been rebased onto PR #45's
-passing base. CI for the new PR #46 head and live L4 validation remain outstanding.
+**Status:** PR #46's rebased static configuration passed all five required checks in
+run `45992409372`; live L4 validation remains outstanding.
 
 - [x] Prepare pinned single-host exporters, vLLM/Gateway/Redis scrapes, Prometheus,
   Grafana, Alertmanager, profile-specific OpenTelemetry with sensitive-attribute
@@ -230,9 +230,9 @@ captured and described with units and limits.
 ### Package 8 — Benchmarking, FinOps, evaluation, release, and rollback
 
 **Status:** PR #47 is open on `codex/gpu-benchmark-preparation` against PR #46. The
-direct vLLM serving matrix and capped runner have passed local static validation; its
-timeout cleanup regression test passes. CI, gateway benchmarking, actual results,
-evaluation, and releases remain outstanding.
+direct vLLM serving matrix and capped runner passed local static validation and all
+five required checks in run `45993312156`; its timeout cleanup regression test passes.
+Gateway benchmarking, actual results, evaluation, and releases remain outstanding.
 
 - [x] Prepare the official `vllm bench serve` runner, context-bounded synthetic
   workloads, gated high concurrency, repeated aggregates, and hardware/software

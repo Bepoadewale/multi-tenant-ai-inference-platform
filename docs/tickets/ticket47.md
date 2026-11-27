@@ -69,6 +69,9 @@ GPU benchmark harness.
   per-command bounds. One regression test passed; Ruff, `make gpu-compose-config`, and
   `git diff --check` passed. Make echoes the command before its JSON output, so the
   JSON was parsed from the output after skipping that first echoed line.
+- PR #47 CI run `45993312156` passed all five required jobs: local E2E, manifests,
+  Python, supply-chain, and GPU observability. The Trivy log shows `INPUT_SEVERITY:
+  HIGH,CRITICAL` and no malformed-input warning. This is static/CPU CI evidence only.
 
 ## Security and financial considerations
 
