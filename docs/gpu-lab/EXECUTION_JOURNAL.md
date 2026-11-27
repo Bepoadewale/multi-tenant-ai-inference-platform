@@ -495,3 +495,7 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** continue Phase 2 non-billable cost and remote-state preparation while
   preserving the exact-plan and apply authorization gates. Track the open review and
   quota request without submitting a duplicate or launching infrastructure.
+- The status and backlog refresh was published as head `d3cee0f`; its one PR-triggered
+  workflow `45930498661` passed Python, manifests, supply-chain, and local-e2e. The
+  evidence manifest and PR description record that result. The AWS request is still
+  `CASE_OPENED`; no infrastructure was launched.
