@@ -138,6 +138,24 @@ Run on the **EC2 host through Session Manager**. Capture outputs to a sanitized 
 evidence bundle. These are commands to execute during the future session, not results
 already observed:
 
+Session Manager's Ubuntu shell user can use `sudo`, but Docker's socket is a root-level
+control interface. Do not add the login user to the `docker` group just to avoid
+`sudo`; membership would grant root-equivalent control. For Docker, Compose, and the
+private release files, start a root shell from the repository directory and verify
+the identity before continuing:
+
+```bash
+sudo -s
+cd /path/to/multi-tenant-ai-inference-platform
+id -u
+pwd
+```
+
+`id -u` should print `0`. Replace the repository path with the actual checkout path.
+Run the following host-side Docker and release-controller commands in this shell, and
+type `exit` to leave it. Do not copy AWS or model-service credentials into shell
+history.
+
 ```bash
 uname -a
 lscpu

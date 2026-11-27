@@ -278,17 +278,20 @@ This establishes current local lint/test/static configuration outcomes and read-
 - **Commands:** `.venv/bin/ruff check scripts/gpu_release_controller.py gateway/tests/test_gpu_release_controller.py`;
   `PYTHONPATH=.:gateway/src .venv/bin/pytest -q gateway/tests/test_gpu_release_controller.py`;
   `make gpu-release-controller-help`; `make gpu-compose-config`; `git diff --check`.
-- **Result:** Ruff passed; 15 focused tests passed; CLI help and GPU Compose parsing
+- **Result:** Ruff passed; 16 focused tests passed; CLI help and GPU Compose parsing
   passed; whitespace check passed.
 - **Coverage:** deterministic fake-based tests cover plan approval and bounded config,
   full snapshot digest including Hub cache symlinks, rejection of paths outside cache,
   loopback vLLM/gateway readiness ports, active container image/arguments/cache mount,
   private file writes, redirect rejection for authenticated requests, successful
   candidate deployment, readiness-failure rollback, active restoration, incomplete
-  transaction guard, and non-apply CLI output.
+  transaction guard, integer-only tensor-parallel settings, and non-apply CLI output.
 - **Limit:** no live Compose host, authenticated gateway inference request, AWS,
   model/image download, GPU, rollback after process interruption, or billing evidence.
-  Full `make verify` and PR CI are pending.
+  Full `make verify` passed Ruff, **144 tests** (2 skipped), the dependency audit,
+  Compose and monitoring validation, and benchmark/evaluation/CUDA dry-run plans.
+  Initial head `ad10699` passed all five PR jobs, including one fresh-runner clean-room
+  cycle, in run `46039778508`. A later type-safety fix needs its own required checks.
 
 ## Future GPU execution template
 

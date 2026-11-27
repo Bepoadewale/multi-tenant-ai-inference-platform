@@ -2056,3 +2056,27 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Action:** pushed the focused source/docs branch and opened PR #56 as a draft. It remains draft pending its single GitHub required-check workflow and clean-room local end-to-end job.
 - **Security and scope:** PR describes the static-only guarantees and gaps. No AWS mutation, model/image download, GPU hour, or spend. The $25 cap and zero-quota block remain.
 - **Next:** watch PR #56's one required-check workflow, address any failure, and update the goal and PR based on the terminal result. Do not merge without authorization.
+
+## 2026-11-27 — PR #56 first CI clean-room cycle passed
+
+- **Branch / PR:** draft PR #56, initial head `ad10699`.
+- **Validation:** GitHub run `46039778508` passed all five required jobs. Its single
+  `local-e2e` job completed `make install`, `make bootstrap-local`, `make smoke`,
+  `make demo-flagship`, `make verify`, and project-scoped `make clean-local`; runtime
+  was about five minutes. This is one clean-room cycle, run on a fresh CI host.
+- **Follow-up review:** after that run, a source review found that the single-GPU
+  controller accepted `tensor_parallel_size: 1.0` as equal to integer `1`, although
+  the serving CLI expects an integer. The validator now requires an actual integer,
+  and a focused test covers the rejection. This is a material configuration-safety
+  fix, so the updated PR head needs one revalidation cycle. Also documented the
+  root-level Docker privilege needed in a fresh Session Manager host shell.
+- **Follow-up validation:** the type-safety change passes Ruff and 16 focused tests.
+  Full `make verify` passes Ruff, 144 tests (2 skipped), the dependency audit,
+  Compose/monitoring checks, and benchmark/evaluation/CUDA dry-run plans. Relative
+  Markdown links and whitespace checks pass. No AWS resource, GPU, model download,
+  or cost was used. The updated commit's CI is pending.
+- **Cost/limits:** local hosted CI only; no AWS credentials, infrastructure, GPU,
+  model artifact, or cloud spend.
+- **Next:** run final local validation and let the updated PR head receive its
+  required checks. Do not start another clean-room cycle unless this new cycle fails
+  or another material fix is made.

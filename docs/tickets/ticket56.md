@@ -14,7 +14,8 @@ known champion if candidate readiness fails.
   head `de4c6e7` passed all five required jobs in GitHub run `46034523863`.
 - [PR #56](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/56)
   is open as a draft on `codex/gpu-release-host-controller`, stacked on PR #55's
-  `codex/gpu-llm-release-api` branch. Source commit: `70a0227`.
+  `codex/gpu-llm-release-api` branch. Initial source commit: `70a0227`; a focused
+  type-safety follow-up is being prepared.
 - No AWS resource, EC2 host, GPU, model download, or GPU hour was used.
 - The controller has local fake-based tests only. Deployment, rollback, interruption
   recovery, and GPU behavior remain unverified on a real host.
@@ -70,21 +71,25 @@ inside the planned GPU batch, before the controlled release operation.
 ## Validation
 
 - `.venv/bin/ruff check scripts/gpu_release_controller.py gateway/tests/test_gpu_release_controller.py` — passed.
-- `PYTHONPATH=.:gateway/src .venv/bin/pytest -q gateway/tests/test_gpu_release_controller.py` — 15 passed.
+- `PYTHONPATH=.:gateway/src .venv/bin/pytest -q gateway/tests/test_gpu_release_controller.py` — 16 passed.
 - `make gpu-release-controller-help` — passed; displays commands without Docker or AWS access.
 - `make gpu-compose-config` — passed after adding host-loopback-only model readiness access.
 - Redirects from the authenticated release API are rejected so a bearer token is not
   forwarded to a new host or URL; a focused handler test covers this rule.
 - Initial champion creation uses the host release lock, and candidate restoration
   refuses to overwrite an incomplete transaction without explicit recovery.
-- `make verify` — passed: Ruff, 143 tests (2 skipped), dependency audit with no known
+- Runtime validation rejects a floating-point `tensor_parallel_size` value instead
+  of allowing an invalid CLI argument to reach vLLM.
+- `make verify` — passed after the type-safety follow-up: Ruff, 144 tests (2 skipped), dependency audit with no known
   vulnerabilities, base/GPU Compose parsing, monitoring configuration validation,
   and benchmark/evaluation/CUDA dry-run plans. One existing Starlette/httpx
   deprecation warning remains.
 - Relative Markdown link check across 13 changed documentation files passed;
   `git diff --check` passed.
-- PR #55's latest check run `46034523863` passed all five required jobs. PR #56 CI,
-  including its single local end-to-end clean-room cycle, is pending.
+- PR #55's latest check run `46034523863` passed all five required jobs. PR #56
+  initial head `ad10699` passed all five jobs, including its single clean-room cycle,
+  in run `46039778508`. The follow-up that rejects floating-point tensor-parallel
+  values is a material safety fix and needs its own required CI run.
 - During implementation, Ruff first found unused/reordered imports and a test had
   missing model-artifact environment mapping; these were corrected and the focused
   suite rerun. Review also caught that non-`apply` CLI commands lacked `plan_id` in

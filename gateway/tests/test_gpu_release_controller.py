@@ -19,6 +19,7 @@ from scripts.gpu_release_controller import (
     main,
     model_snapshot_digest,
     update_environment,
+    validate_serving_manifest,
     verify_container_config,
 )
 
@@ -163,6 +164,18 @@ def test_approved_plan_rejects_unsafe_model_paths(tmp_path):
                 "candidate": asdict(candidate),
             }
         )
+
+
+def test_single_gpu_runtime_requires_integer_tensor_parallel_size(tmp_path):
+    champion = _manifest(
+        tmp_path, alias="champion", revision="a" * 40, artifact_digest="b" * 64
+    )
+    invalid = replace(
+        champion,
+        runtime_config={**champion.runtime_config, "tensor_parallel_size": 1.0},
+    )
+    with pytest.raises(ControllerError, match="tensor_parallel_size=1"):
+        validate_serving_manifest(invalid)
 
 
 def test_release_api_token_is_never_sent_to_remote_cleartext_urls():

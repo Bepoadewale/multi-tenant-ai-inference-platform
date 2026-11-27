@@ -154,6 +154,7 @@ def validate_serving_manifest(manifest: ReleaseManifest) -> None:
         raise ControllerError("GPU memory utilization must be between 0.1 and 0.9")
     if (
         isinstance(config.get("tensor_parallel_size"), bool)
+        or not isinstance(config.get("tensor_parallel_size"), int)
         or config.get("tensor_parallel_size") != 1
     ):
         raise ControllerError("single-L4 release must use tensor_parallel_size=1")
