@@ -10,7 +10,7 @@ and record cancellation/error outcomes exactly once.
 ## Current state
 
 - Branch: `codex/gateway-stream-accounting`, based on PR #32 commit `24336cf` (ready for review); implementation commit `1186e30`.
-- Pull request: [#33 — vLLM stream usage and cancellation](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/33), draft and open against `codex/gpu-ec2-foundation`; checks are running.
+- Pull request: [#33 — vLLM stream usage and cancellation](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/33), open and ready for review against `codex/gpu-ec2-foundation`; review follow-up is in progress.
 - Phase: local work supporting Phase 6; Phase 2 remains the active cloud phase.
 - No vLLM server, AWS resource, or GPU was used for this ticket.
 - AWS G/VT request for 4 vCPUs is pending. Applied quota remains zero.
@@ -30,10 +30,16 @@ the final usage-only chunk to the client only when the client requested
 request's start, so it includes routing/admission and downstream startup. Non-streaming
 backend duration is no longer mislabeled as TTFT.
 
+The current vLLM OpenAI chat-serving implementation also emits an in-band error frame
+when a stream fails after HTTP headers have been sent. The adapter must treat that frame
+as a failure so the gateway records `stream_error` rather than a successful empty
+completion. See the [vLLM chat-completion serving implementation](https://github.com/vllm-project/vllm/blob/main/vllm/entrypoints/openai/chat_completion/serving.py).
+
 ## Implementation tasks
 
 - [x] Add an internal content/usage event for streamed backend data.
 - [x] Request, parse, and validate vLLM's final streaming usage chunk.
+- [x] Reject in-band vLLM error events after HTTP 200 rather than silently dropping them.
 - [x] Expose OpenAI-compatible client `stream_options.include_usage` handling.
 - [x] Count fallback output words across the complete emitted text rather than network
   chunks; mark that usage as estimated.
@@ -41,6 +47,8 @@ backend duration is no longer mislabeled as TTFT.
 - [x] Add mock-transport tests for final usage and malformed events, plus gateway tests
   for measured usage, TTFT, client usage chunks, stream failure, and cancellation
   cleanup.
+- [x] Emit the gateway's estimated final usage chunk for usage-less backends when the
+  client requests it, without duplicating usage reported by the backend.
 - [ ] Test with a pinned live vLLM build and verify its actual SSE response.
 - [ ] Add Redis integration tests and crash-safe per-request concurrency leases.
 - [ ] Reconcile actual usage against quota reservations exactly once; define handling
@@ -78,3 +86,16 @@ ceiling and separate apply gate remain in effect.
 Complete the Redis reservation/lease design and tests as a separate focused package,
 then validate this protocol against the pinned vLLM runtime after authorized GPU
 infrastructure is available.
+
+## Review follow-up — 2026-11-27
+
+Automated review identified two correctness gaps. First, an HTTP 200 stream can still
+contain a vLLM `error` object; the adapter now rejects it, allowing the gateway's existing
+error path to record failure. Second, clients requesting `include_usage` received no final
+usage chunk from string-yielding ONNX/mock backends; the gateway now emits its estimated
+usage once after successful recording. Backend-reported usage remains emitted once.
+
+Validation for this follow-up: Ruff passed; the targeted stream suite passed **10 tests**;
+`make verify` passed Ruff, **60 tests**, dependency audit, and Docker Compose validation
+with one existing Starlette/httpx deprecation warning. The test uses mocked SSE and local
+gateway backends; it does not prove behavior against a running vLLM server.

@@ -88,6 +88,36 @@ def test_vllm_stream_rejects_malformed_server_event(monkeypatch):
         asyncio.run(collect())
 
 
+def test_vllm_stream_rejects_upstream_error_event(monkeypatch):
+    async def handle(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            headers={"content-type": "text/event-stream"},
+            content=(
+                b'data: {"choices":[{"delta":{"content":"partial"}}]}\n\n'
+                b'data: {"error":{"message":"engine failed"}}\n\n'
+            ),
+        )
+
+    real_async_client = httpx.AsyncClient
+
+    def client_with_mock(*args, **kwargs):
+        kwargs["transport"] = httpx.MockTransport(handle)
+        return real_async_client(*args, **kwargs)
+
+    monkeypatch.setattr(vllm.httpx, "AsyncClient", client_with_mock)
+    backend = vllm.VllmBackend("http://model.test", "qwen-test")
+    events = []
+
+    async def collect():
+        async for event in backend.stream(chat_request()):
+            events.append(event)
+
+    with pytest.raises(RuntimeError, match="vLLM stream failed"):
+        asyncio.run(collect())
+    assert [event.content for event in events if event.content] == ["partial"]
+
+
 def test_gateway_uses_final_usage_and_measures_first_content_time():
     service = GatewayService()
 
@@ -188,6 +218,29 @@ def test_gateway_hides_usage_chunk_when_client_did_not_request_it():
     body = asyncio.run(consume())
     assert '"usage":' not in body
     assert service.meter.records[-1].usage_source == "backend_reported"
+
+
+def test_gateway_emits_estimated_usage_for_string_stream_backend():
+    service = GatewayService()
+
+    class StringBackend:
+        async def stream(self, _request):
+            yield "hello "
+            yield "world"
+
+    service.backend_for = lambda _model, _target: StringBackend()
+    tenant = Catalog().tenant("team-search")
+
+    async def consume():
+        response = await service.chat(tenant, chat_request(include_usage=True))
+        return "".join([chunk async for chunk in response.body_iterator])
+
+    body = asyncio.run(consume())
+    assert body.count('"choices": [], "usage":') == 1
+    assert body.index('"choices": [], "usage":') < body.index("data: [DONE]")
+    record = service.meter.records[-1]
+    assert record.usage_source == "gateway_estimate"
+    assert record.usage.completion_tokens == 2
 
 
 def test_redis_meter_persists_usage_source():

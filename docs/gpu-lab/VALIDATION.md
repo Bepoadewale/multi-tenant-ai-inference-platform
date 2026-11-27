@@ -125,6 +125,27 @@ This establishes current local lint/test/static configuration outcomes and read-
   reservations/reconciliation, tokenizer-accurate input limits, and real GPU execution
   remain unverified. No AWS resources or spend were created.
 
+## 2026-11-27 — PR #33 streaming review fixes
+
+- **Scope:** addressed two review findings in the local streaming boundary. No live
+  vLLM server, Redis, AWS resource, or GPU was used.
+- **Research:** current vLLM OpenAI chat-completion server code has a streaming error
+  path that can emit an error response after the HTTP stream has started. The adapter
+  now treats a JSON event with an `error` field as a failed stream.
+- **Changes:** added regression coverage for in-band upstream error events and for
+  estimated usage in string-yielding backends. When requested, the gateway now emits
+  one final usage chunk after successful metering if the backend did not report usage.
+  Backend-reported usage continues to be emitted once.
+- **Validation:** Ruff passed; `gateway/tests/test_vllm_streaming.py` reported **10
+  passed**; `make verify` passed Ruff, **60 tests**, `pip-audit` with no known
+  vulnerabilities, and Docker Compose configuration. One existing Starlette/httpx
+  deprecation warning remains.
+- **Limitations:** all upstream streams were mocked. The final usage contract still
+  needs verification against the exact pinned vLLM build before GPU integration.
+- **Cloud boundary:** no AWS resources were created or changed; goal-specific spend is
+  `$0`, GPU instance-hours are `0`, and the quota request remains separate from apply
+  authorization.
+
 ## Future GPU execution template
 
 - Date/time and commit SHA:
