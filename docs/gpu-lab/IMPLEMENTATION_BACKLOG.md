@@ -32,8 +32,15 @@ pull requests must include the repository's clean-room evidence.
 - PR #40 is open against PR #39 to pin the reviewed Canonical Ubuntu AMI
   and fail closed when publisher, image family, architecture, or availability does
   not match. All four required checks passed in the implementation run
-  `45949421928` and documentation follow-up run `45950217355`. No AWS resource or GPU
-  run is part of this package.
+  `45949421928` and documentation follow-up runs `45950217355` and `45951027403`.
+  No AWS resource or GPU run is part of this package.
+- PR #41 records the owner's authorized CLI appeal attempt. The Support API rejected
+  the communication before sending due to the current account plan; no case update
+  occurred. All four required checks passed in run `45976696129`.
+- A refreshed AWS-backed local-state preview uses the exact pinned AMI. It proposes 14
+  creates, including one `g6.xlarge`, IMDSv2, and an encrypted 100-GiB root volume.
+  It is not remote-state locked and must not be applied. Ticket42 records its digest
+  and security review; the remote-state plan remains outstanding.
 - No AWS resources or GPU instance hours have been used by this goal.
 - The applied On-Demand G and VT quota is zero in `us-east-1`, `us-east-2`, and
   `us-west-2`. AWS email reports that the 4-vCPU `us-east-1` request was denied, while
@@ -120,9 +127,12 @@ cost and quota gate passes.
 - [x] Render and parse the cloud-init YAML; actual host behavior remains unverified.
 - [x] Pin the exact Canonical Ubuntu 24.04 amd64 AMI and reject an untrusted or
   unavailable image before plan/apply; keep destroy planning independent of AMI lookup.
+- [x] Refresh and inspect a pinned-AMI local-state preview. Its plan contains 14
+  creates for one `g6.xlarge`; it is ignored locally and is not suitable for apply.
 - [ ] Create and inspect the final remote-state saved plan and confirm the full current
-  cost and budget recipient. A 4-vCPU quota request is already open; track its outcome.
-  Do not apply until the $25 project gate is cleared.
+  cost and budget recipient. The existing quota request was denied by email, remains
+  `CASE_OPENED` in the API, and applied quota is zero. Do not apply until the quota and
+  $25 project gates are cleared.
 
 **Exit gate:** exact plan creates one authorized L4 and only enumerated project
 resources, estimated total remains below $25 with safety margin, expiry is tested,
