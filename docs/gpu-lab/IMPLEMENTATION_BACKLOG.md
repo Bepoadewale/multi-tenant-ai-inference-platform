@@ -13,9 +13,13 @@ pull requests must include the repository's clean-room evidence.
   `04cb5645be7c3182958248a62c22b0a9b9d055f6`; all required checks passed.
 - PR #31 repairs the baseline dependency audit, passed two fresh local clean-room
   cycles and all required GitHub checks, and is ready for review.
+- PR #32 adds the static single-L4 Terraform root and helpers. Its current documented
+  head is `d3cee0f`; all four required jobs passed once on the PR event. Two helper
+  review findings have regression tests and are fixed. Human review remains open.
 - No AWS resources or GPU instance hours have been used by this goal.
 - The account's applied On-Demand G and VT quota is zero. A 4-vCPU quota increase
-  request was submitted on 2026-11-27 and is pending; see the execution journal.
+  request was submitted on 2026-11-27 and AWS reports `CASE_OPENED` (pending); see the
+  execution journal. Do not submit a duplicate.
 - The existing repository budget and Terraform state guardrails use a repository-
   scoped bucket and lock table. GPU state must use a unique key namespace, not create
   duplicate guardrails. The budget uses email notifications. A recipient must be
@@ -66,8 +70,8 @@ phase exit does not authorize payment.
 
 ### Package 2 — Isolated EC2 Terraform and expiry controls
 
-**Status:** draft PR #32 open against PR #30; CI in progress. Billable resources remain prohibited until all gates pass.
-until every cost and quota gate is satisfied.
+**Status:** PR #32 is open and ready for review against PR #30; its latest required CI
+passed. Billable resources remain prohibited until every cost and quota gate passes.
 
 - [x] Create a separate Terraform root with account, region, type, project-tag, and
   IMDSv2 guards. One `aws_instance` resource and a quota/resource preflight limit the
@@ -94,9 +98,9 @@ until every cost and quota gate is satisfied.
 - [x] Enforce the expected AWS account through the provider and fail an instance
   launch when the selected AZ does not offer the approved type.
 - [x] Render and parse the cloud-init YAML; actual host behavior remains unverified.
-- [ ] Create and inspect the final remote-state saved plan, confirm the full current
-  cost and budget recipient, and then request the 4-vCPU quota. Do not apply until the
-  $25 project gate is cleared.
+- [ ] Create and inspect the final remote-state saved plan and confirm the full current
+  cost and budget recipient. A 4-vCPU quota request is already open; track its outcome.
+  Do not apply until the $25 project gate is cleared.
 
 **Exit gate:** exact plan creates one authorized L4 and only enumerated project
 resources, estimated total remains below $25 with safety margin, expiry is tested,
@@ -231,9 +235,9 @@ cost status, educational artifacts, and goal closure are complete.
 - If the complete mandatory work cannot be done under $25, stop paid work, document
   remaining requirements, finish non-billable work, and ask before increasing the
   ceiling or changing the design.
-- The G/VT On-Demand quota is currently zero. Do not request an increase or launch
-  until the exact bounded cost and resource plan is ready and the account change is
-  authorized.
+- The applied G/VT On-Demand quota is currently zero. A user-requested 4-vCPU quota
+  increase is open with AWS; do not submit another request and do not launch until AWS
+  approves it and the exact bounded cost/resource plan and apply gates pass.
 - Provisional 12-hour estimate: about `$10.68` before tax for one g6.xlarge, one public
   IPv4, 100 GiB gp3, short-lived S3 state and lock objects, one scheduler invocation,
   and 1 GiB of internet egress. A 25% tax allowance plus `$5` general reserve gives

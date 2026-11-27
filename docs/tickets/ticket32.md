@@ -10,7 +10,7 @@ or local CPU inference path.
 ## Current state
 
 - Branch: `codex/gpu-ec2-foundation`, based on PR #30 head `04cb564`.
-- Pull request: [#32 — guarded single-L4 EC2 foundation](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/32), open and ready for review against `codex/single-l4-gpu-goal`. Review fixes are at `99b6b84`; evidence is indexed at `d67ec3a`. The current head `528b52c` passed all four required jobs in workflow `45929546262`.
+- Pull request: [#32 — guarded single-L4 EC2 foundation](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/32), open and ready for review against `codex/single-l4-gpu-goal`. Review fixes are at `99b6b84`; current head `d3cee0f` passed all four required jobs in workflow `45930498661`.
 - Phase: 2 of 12, static infrastructure preparation.
 - Terraform describes the proposed environment; it has not been applied.
 - AWS account identity was verified before the quota request. Applied On-Demand G/VT
