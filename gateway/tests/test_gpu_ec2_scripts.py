@@ -104,6 +104,7 @@ def test_clean_verifier_skips_missing_scheduler_group_enumeration(tmp_path: Path
 
     assert result.returncode == 0, result.stderr
     assert "absent: project one-time expiry schedule (schedule group is absent)" in result.stdout
+    assert "outside this verifier's scope" in result.stdout
     assert "scheduler list-schedules" not in aws_log.read_text(encoding="utf-8")
 
 
