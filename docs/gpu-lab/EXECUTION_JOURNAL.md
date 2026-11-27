@@ -5,7 +5,7 @@
 - **Phase:** Phase 2 static-only preflight; no cloud resource creation or spend.
 - **Command:** read-only AWS Service Quotas queries in `us-east-1` checked the existing
   request and applied G/VT quota using `ai-platform-pilot-key`.
-- **Result:** request `34647c8598cb4ac5a8e43b3e956ccd65ikyKx4Qy` remains
+- **Result:** request `[reference redacted]` remains
   `CASE_OPENED`, requested value `4.0`; the applied `Running On-Demand G and VT
   instances` quota is `0.0` vCPUs.
 - **Decision:** do not retry the request or launch infrastructure. This is status
@@ -528,7 +528,7 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   recorded.
 - **Action and result:** submitted an account-level request for 4 On-Demand G/VT vCPUs
   in `us-east-1`, enough for the planned single `g6.xlarge`. Request ID:
-  `34647c8598cb4ac5a8e43b3e956ccd65ikyKx4Qy`. AWS accepted the request and reports
+  `[reference redacted]`. AWS accepted the request and reports
   `PENDING`; an independent `get-requested-service-quota-change` query confirmed the
   status immediately after submission.
 - **Financial/security boundary:** this is a quota control-plane request, not an EC2
