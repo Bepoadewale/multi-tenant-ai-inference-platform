@@ -21,7 +21,7 @@ pull requests must include the repository's clean-room evidence.
   open.
 - PR #37 is open against PR #36 to record the dated Ubuntu/NVIDIA/CUDA, vLLM image,
   and pinned Qwen model compatibility candidates. PRs #38–#51 are stacked one at a
-  time through PR #50. All current required checks on PRs #32–#51 pass. This is
+  time through PR #50. All current required checks on PRs #32–#52 pass. This is
   research and static CI evidence, not proof of GPU execution; exact target-AMI
   packages and real L4 validation remain open.
 - PR #38 is open as a focused model-artifact verification helper based on PR #37.
@@ -59,7 +59,7 @@ pull requests must include the repository's clean-room evidence.
   invocation, data-transfer allowance, tax contingency, and a reserve. It still
   requires exact AMI, price, egress, tax-profile, and state-retention confirmation;
   it is not permission to apply.
-- PRs #32–#51 are still open and unmerged. After restacking PRs #37–#51 behind the
+- PRs #32–#52 are still open and unmerged. After restacking PRs #37–#51 behind the
   gateway safety fixes in #33–#36, every required check passes on current heads. PR
   #51's current-head workflow is `46017455801`. No AWS resources or GPU execution.
 
@@ -254,7 +254,7 @@ captured and described with units and limits.
 
 ### Package 8 — Benchmarking, FinOps, evaluation, release, and rollback
 
-**Status:** PRs #47–#52 prepare static benchmarking, evaluation, private MLflow evidence, and sequential-release design. PR #52's current checks are pending. Gateway benchmarking, actual GPU performance, live model evaluation, and release/rollback behavior remain outstanding.
+**Status:** PRs #47–#52 prepare static benchmarking, evaluation, private MLflow evidence, and sequential-release design. PR #52 head `55f4d59` passed all five checks in run `46020258170`. Gateway benchmarking, actual GPU performance, live model evaluation, and release/rollback behavior remain outstanding.
 
 The current ONNX release API does not support the one-target vLLM profile. The
 The existing ONNX release API still does not support the one-target vLLM profile. PR
