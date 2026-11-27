@@ -120,6 +120,9 @@ class GatewayService:
             await self._release_capacity(tenant, allocation)
             THROTTLES.labels(tenant.id, error.detail).inc()
             raise
+        preflight_lease_task = (
+            self._start_lease_watch(tenant, reservation) if uses_vllm_tokenizer else None
+        )
         if uses_vllm_tokenizer:
             try:
                 prompt_tokens, server_context_limit = await backend.count_tokens(request)
@@ -133,6 +136,7 @@ class GatewayService:
                 )
             except asyncio.CancelledError:
                 ACTIVE.labels(tenant.id).dec()
+                await self._stop_lease_watch(preflight_lease_task)
                 try:
                     await self._release(tenant, reservation, 0)
                 finally:
@@ -140,6 +144,7 @@ class GatewayService:
                 raise
             except HTTPException as error:
                 ACTIVE.labels(tenant.id).dec()
+                await self._stop_lease_watch(preflight_lease_task)
                 try:
                     await self._release(tenant, reservation, 0)
                 finally:
@@ -149,11 +154,14 @@ class GatewayService:
                 raise
             except Exception as error:
                 ACTIVE.labels(tenant.id).dec()
+                await self._stop_lease_watch(preflight_lease_task)
                 try:
                     await self._release(tenant, reservation, 0)
                 finally:
                     await self._release_capacity(tenant, allocation)
                 raise HTTPException(503, "model tokenizer unavailable") from error
+        if preflight_lease_task is not None:
+            await self._stop_lease_watch(preflight_lease_task)
         if request.stream:
             return self._stream(
                 tenant,
@@ -466,7 +474,9 @@ class GatewayService:
                 return
 
     @staticmethod
-    async def _stop_lease_watch(lease_task: asyncio.Task) -> None:
+    async def _stop_lease_watch(lease_task: asyncio.Task | None) -> None:
+        if lease_task is None:
+            return
         lease_task.cancel()
         with suppress(asyncio.CancelledError):
             await lease_task

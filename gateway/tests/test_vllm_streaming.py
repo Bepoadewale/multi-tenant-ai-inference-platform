@@ -3,9 +3,11 @@ import json
 
 import httpx
 import pytest
+from fastapi import HTTPException
 from inference_gateway.backends import vllm
 from inference_gateway.backends.base import BackendStreamChunk
 from inference_gateway.catalog.store import Catalog
+from inference_gateway.limiting.service import TenantLimiter
 from inference_gateway.metering.redis_service import RedisMeter
 from inference_gateway.models import (
     ChatCompletionRequest,
@@ -420,6 +422,30 @@ def test_gateway_rejects_context_overflow_and_releases_preflight_reservation():
     assert sum(value for _, _, value in service.limiter.tokens[tenant.id]) == 0
     assert not service.limiter.active[tenant.id]
     assert service.capacity.pool_allocated == 0
+
+
+def test_gateway_renews_admission_lease_during_slow_tokenizer_preflight():
+    service = GatewayService()
+    service.limiter = TenantLimiter(lease_seconds=0.03)
+    backend = vllm.VllmBackend("http://model.test", "qwen-test")
+
+    async def count_tokens(_request):
+        await asyncio.sleep(0.1)
+        return 2, 4096
+
+    async def complete(_request):
+        return "answer", Usage(prompt_tokens=2, completion_tokens=1, total_tokens=3), 1.0
+
+    backend.count_tokens = count_tokens
+    backend.complete = complete
+    use_vllm_backend(service, backend)
+    tenant = Catalog().tenant("team-search")
+
+    response = asyncio.run(service.chat(tenant, chat_request(stream=False)))
+
+    assert response["usage"]["total_tokens"] == 3
+    assert not service.limiter.active[tenant.id]
+    assert not service.limiter.reservations[tenant.id]
 
 
 def test_gateway_fails_closed_when_vllm_tokenizer_is_unavailable():
