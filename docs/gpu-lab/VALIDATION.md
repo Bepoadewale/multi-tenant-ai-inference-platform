@@ -194,6 +194,23 @@ This establishes current local lint/test/static configuration outcomes and read-
   availability. The request-count/content bounds and token preflight are code evidence
   only until the runtime is pinned and exercised.
 
+## 2026-11-27 — PR #35 CI failure and single-run policy
+
+- **Commit:** `97bfcfc` on `codex/tokenizer-admission-preflight`.
+- **Evidence:** GitHub runs `45921908625` (`push`) and `45921912244`
+  (`pull_request`) ran the same `local-e2e` workflow. Both passed smoke, then failed
+  in `make demo-flagship` → `demo-local`. The prior assertions did not print which
+  expectation failed. These were duplicate CI event runs, not a request for two
+  clean-room reproductions.
+- **Policy:** one complete clean-room cycle is sufficient; repeat only after a failed
+  cycle or a relevant fix. The two successful CPU clean-room cycles under PR #31 are
+  retained as historical evidence and will not be repeated for this goal.
+- **Diagnostics prepared:** `demo-local.sh` now reports the failed stream or HTTP
+  assertion and its synthetic response. CI is configured for pull requests and
+  pushes to `main`, so a feature-branch commit should run once. Bash syntax, workflow
+  YAML parsing, and `git diff --check` pass. The diagnostic commit and its CI result
+  are pending; no clean-room or GPU rerun is claimed.
+
 ## Future GPU execution template
 
 - Date/time and commit SHA:

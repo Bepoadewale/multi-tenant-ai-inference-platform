@@ -83,6 +83,17 @@ inference. Tokenization failure fails closed and releases concurrency.
   including cross-client quota adjustment and lease recovery. The exact container was
   stopped and auto-removed.
 - Tests use mocked vLLM endpoints. No live vLLM, AWS, or GPU was used.
+- The PR's first GitHub validation at `97bfcfc` launched two `local-e2e` runs for
+  the same commit because the workflow listened to both branch pushes and pull
+  requests. Both passed smoke and failed inside `make demo-flagship`'s `demo-local`
+  script. The old script stopped at an assertion without identifying which one.
+  `scripts/demo-local.sh` now reports the expected HTTP/status assertion and
+  sanitized fixture response; the CI workflow now runs on pull requests and on
+  pushes to `main`, avoiding duplicate branch-push/PR runs. This is a diagnostic
+  change, not a passing rerun; the fix and the next single CI result remain pending.
+- `bash -n scripts/demo-local.sh`, Ruby YAML parsing of `.github/workflows/ci.yml`,
+  and `git diff --check` pass after the diagnostics and trigger change. No demo rerun
+  has been performed yet.
 - Evidence and official source notes are indexed in `docs/gpu-lab/VALIDATION.md`,
   `docs/gpu-lab/EVIDENCE_MANIFEST.md`, and `docs/gpu-lab/RESEARCH_NOTES.md`.
 
