@@ -10,7 +10,7 @@ or local CPU inference path.
 ## Current state
 
 - Branch: `codex/gpu-ec2-foundation`, based on PR #30 head `04cb564`.
-- Pull request: [#32 — guarded single-L4 EC2 foundation](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/32), open and ready for review against `codex/single-l4-gpu-goal`. Review fixes are at `99b6b84`; new fail-closed tests are at `7988b8f`. Local `make verify` passes with 56 tests; CI for the new head is pending.
+- Pull request: [#32 — guarded single-L4 EC2 foundation](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/32), open and ready for review against `codex/single-l4-gpu-goal`. Review fixes are at `99b6b84`; create-side tests are at `7988b8f` and teardown-side tests at `ca3706b`. Local `make verify` passes with 60 tests; CI for the new head is pending.
 - Phase: 2 of 12, static infrastructure preparation.
 - Terraform describes the proposed environment; it has not been applied.
 - AWS account identity was verified before the quota request. Applied On-Demand G/VT
@@ -182,3 +182,14 @@ are part of this ticket's current work.
   and `git diff --check` passed.
 - All tests use fake command executables and temporary plan bytes. No credentials,
   AWS API, infrastructure mutation, or GPU runtime were used.
+
+## Teardown authorization test expansion
+
+- Added tests that reject destroy without `GPU_EC2_CONFIRM=destroy`, reject a changed
+  destroy-plan digest before any AWS call, and reject an unexpected account before
+  Terraform. A positive fake-CLI test confirms the destroy-plan helper runs
+  `terraform plan -destroy` and writes only to a temporary test path.
+- `make verify`: passed Ruff, 60 tests, dependency audit, and Compose config. Bash
+  syntax for all six GPU EC2 helper scripts and `git diff --check` passed.
+- These tests validate local guards only. They do not execute a real destroy or
+  establish provider-side cleanup.
