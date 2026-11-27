@@ -45,6 +45,9 @@ command runs, why it is needed, what success looks like, and how to stop safely.
   destroy inputs, documents the separately approved state bootstrap, stops and removes
   the manual container while retaining its model-cache volume, and splits host
   shutdown from workstation Terraform destruction.
+- The three findings were answered and resolved after commit `a1616ec`. Final-head
+  CI run `46055428111` passed all six jobs, including the workflow E2E job. No
+  separate local clean-room run was launched.
 
 ## Research and design
 
@@ -74,9 +77,9 @@ command runs, why it is needed, what success looks like, and how to stop safely.
 - [x] Links from the documentation index and clearly labels unexecuted GPU commands.
 - [x] Final static guide cross-reference, Bash syntax, Make target, and command review,
   including the three automated review findings.
-- [ ] The current CI run passes the scanner and fresh local end-to-end cycle. Runs
-  `46049398387`, `46050614853`, and `46052092657` failed as described above; the
-  third run passed the scanner and named the edge inventory failure.
+- [x] Final-head CI run `46055428111` passed all six jobs, including the scanner and
+  local E2E job. The successful fresh-runner E2E evidence first passed in
+  `46054114999`; a later workflow automatically repeated it after guide corrections.
 - [ ] Human review; do not merge without owner authorization.
 - [ ] After GPU approval, revise any command or package candidate that live evidence
   disproves and rerun the relevant reproduction stage.
@@ -98,9 +101,11 @@ agents silently retry registration but still report healthy. Compose now runs th
 two local-only agents with the `LOCAL_UID`/`LOCAL_GID` already exported by the
 bootstrap script and waits for two registrations before asserting. The manual guide
 was also corrected for Terraform wrapper inputs, private bootstrap, stopping the
-manual vLLM container before Compose, and workstation-only destroy commands. These
-changes were statically checked but have not yet run in CI. Final CI and
-relative Markdown-link validation remain pending.
+manual vLLM container before Compose, and workstation-only destroy commands. All 40
+Bash blocks parsed, all eight Make targets exist, and the manual guide and ticket have
+no broken relative links. The final guide commit `a1616ec` passed all six jobs in CI run
+`46055428111`. Its workflow automatically repeated the local E2E job after the
+review corrections; no separate local clean-room run was launched.
 
 ## Security and financial limits
 

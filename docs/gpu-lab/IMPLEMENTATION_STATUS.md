@@ -1,6 +1,6 @@
 # GPU Lab Implementation Status
 
-**Overall:** ACTIVE — Phase 2 infrastructure is prepared but blocked on quota. The deployment stack is statically prepared through PR #53 and includes PRs #33–#36. PR #53's code head `e623b75` passed all five checks in `46023306230`; its documentation follow-up `2153942` passed all five checks in `46025160292`. PR #54 passed all five required jobs in `46028053505`; PR #55 passed all five in `46034523863`; PR #56 updated head passed all five in `46040861818`. PR #57 head `4795f12` passed all six jobs, including one fresh-runner clean-room cycle, in `46045068200`; PR #57 is ready for review and remains open. PR #58 adds the manual reproduction guide and GPU tenant identities. Run `46052092657` passed the checksum-verified Trivy scan but smoke found the edge-device inventory empty because edge agents could not read the owner-only token file. Commit `d759b8e` matches the two local agents to the bootstrap UID/GID; all six jobs, including the fresh-runner clean-room cycle, passed in `46054114999`. Three automated operator-guide findings have been addressed in uncommitted documentation; the final PR head will still need CI. No GPU cloud execution has occurred in this goal.
+**Overall:** ACTIVE — Phase 2 infrastructure is prepared but blocked on quota. The deployment stack is statically prepared through PR #53 and includes PRs #33–#36. PR #53's code head `e623b75` passed all five checks in `46023306230`; its documentation follow-up `2153942` passed all five checks in `46025160292`. PR #54 passed all five required jobs in `46028053505`; PR #55 passed all five in `46034523863`; PR #56 updated head passed all five in `46040861818`. PR #57 head `4795f12` passed all six jobs, including one fresh-runner clean-room cycle, in `46045068200`; PR #57 is ready for review and remains open. PR #58 adds the manual reproduction guide and GPU tenant identities. Run `46052092657` passed the checksum-verified Trivy scan but smoke found the edge-device inventory empty because edge agents could not read the owner-only token file. Commit `d759b8e` matches the two local agents to the bootstrap UID/GID; all six jobs, including the fresh-runner clean-room cycle, passed in `46054114999`. Commit `a1616ec` addresses three automated operator-guide findings; all review threads are resolved and final-head CI run `46055428111` passed all six jobs, including the workflow E2E job. No GPU cloud execution has occurred in this goal.
 
 | Phase | Status | Evidence / next gate |
 | --- | --- | --- |
@@ -54,9 +54,9 @@ unit-tested; the profile has not run on an L4.
 
 ## Current Next Actions
 
-1. Publish the reviewed Terraform-input, manual-vLLM handoff, and workstation teardown corrections; run the configured PR checks on that documentation head.
+1. Keep PR #58 open for human review; its final-head CI run `46055428111` passed. Do not merge without owner authorization.
 2. Keep AWS work read-only until the manually submitted appeal is decided and applied G/VT quota is nonzero; do not send another appeal or request.
-3. Continue non-billable research and deployment preparation without claiming host execution; manual NVIDIA setup still precedes running Ansible.
+3. Continue non-billable research and deployment preparation without claiming host execution; the 2026-11-27 CLI check found all currently pinned NVIDIA and Docker package candidates in official vendor package indexes, and the documented signing-key/keyring hashes matched downloaded vendor artifacts. Recheck versions before any paid batch; manual NVIDIA setup still precedes running Ansible.
 4. Recheck signed package indexes, image digest, model revision/license/hash, capacity, current prices, and exact bounded plan immediately before any authorized GPU batch.
 5. Obtain human review for the open PR chain. Nothing has been merged; no direct changes to `main` were made.
 

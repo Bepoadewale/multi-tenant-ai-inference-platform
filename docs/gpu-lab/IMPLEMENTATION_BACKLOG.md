@@ -59,21 +59,20 @@ pull requests must include the repository's clean-room evidence.
   invocation, data-transfer allowance, tax contingency, and a reserve. It still
   requires exact AMI, price, egress, tax-profile, and state-retention confirmation;
   it is not permission to apply.
-- PRs #32–#53 are open and unmerged. PR #52 follow-up head `1f02955` passed run
-  `46021471851`. PR #53 tested code head `e623b75` passed all five required checks in
-  run `46023306230`, including a Linux amd64 Docker image build and CPU end-to-end.
-  A documentation-only PR #53 follow-up awaits checks. No AWS resources or GPU
-  execution.
-- PR #56 controller head `852c873` passed all five required checks in run
-  `46040861818`, including its one clean-room local end-to-end cycle. PR #56 is ready
-  for review and remains open. PR #57 Ansible head `4795f12` passed all six required
-  jobs, including one clean-room local end-to-end cycle, in run `46045068200`. PR #57
-  is ready for review; no host execution or AWS/GPU work occurred.
-- The current manual-guide branch adds named GPU tenant profiles and signed
-  identities, and documents their bounded gateway checks. Local `make verify` passed
-  with 146 tests (2 skipped); no AWS or GPU work occurred. PR #58 is open and stacked
-  on #57. Initial run `46049398387` failed in Trivy setup and at `make smoke`; the
-  Trivy version and failure diagnostics are being fixed for the final CI run.
+- PRs #30–#58 remain open and unmerged; merge authorization is outstanding. PR #53
+  code head `e623b75` passed all five checks in `46023306230`, including a Linux AMD64
+  gateway image build and CPU end-to-end. PR #56 head `852c873` passed all five checks
+  in `46040861818`; PR #57 Ansible head `4795f12` passed all six checks, including a
+  clean-room local end-to-end cycle, in `46045068200`. Neither host configuration nor
+  AWS deployment has run.
+- PR #58 adds named tenant identities and the manual guide. Run `46052092657` passed
+  the checksum-verified Trivy scan and identified that owner-only token permissions
+  prevented the local edge agents from registering. Commit `d759b8e` fixed the local
+  container UID/GID and passed all six checks in run `46054114999`, including a fresh
+  local end-to-end cycle. Commit `a1616ec` resolves three automated guide findings
+  about exact Terraform variables, the manual vLLM handoff, and workstation teardown.
+  Its final-head run `46055428111` passed all six jobs. No AWS resource, model, or GPU
+  execution occurred.
 
 ## Ordered implementation packages
 

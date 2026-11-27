@@ -1,7 +1,11 @@
 # Single-L4 GPU Batch Runbook
 
 **Status:** prepared procedure; no host step or GPU command in this document has
-been executed on an L4. **Last source review:** 2026-11-27. Recheck current prices,
+been executed on an L4. **Last source review:** 2026-11-27. A CLI check at 19:23 UTC
+confirmed the pinned candidate package versions in the official NVIDIA CUDA, NVIDIA
+Container Toolkit, and Docker package indexes and matched the recorded SHA-256 values
+for the three vendor signing artifacts. This is metadata/artifact research only, not
+a package installation or a substitute for APT signature verification. Recheck current prices,
 quota, software artifacts, and model revision immediately before any paid session.
 
 This runbook turns the prepared repository into one short, evidence-rich GPU work
