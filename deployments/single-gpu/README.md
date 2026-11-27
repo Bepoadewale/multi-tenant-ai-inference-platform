@@ -44,8 +44,12 @@ workstation.
 The vLLM server uses the stable served model alias `gpu-default`; the gateway passes
 that alias in its OpenAI-compatible request. Model revision, BF16, 8,192-token
 context, two sequences, and 85% vLLM memory utilization are conservative starting
-settings, not verified safe values. Confirm model integrity and compatibility first,
-then inspect GPU memory during real requests before changing limits.
+settings, not verified safe values. The selected v0.34.0 release changes KV-cache
+sizing behavior and recommends letting the runtime size the cache in many cases. The
+profile keeps an explicit 85% cap for the first bounded experiment; confirm the exact
+meaning and behavior against the current release before starting, then inspect GPU
+memory during real requests before changing limits. This setting is not a measured
+capacity guarantee.
 
 ## GPU, host, and inference observability
 

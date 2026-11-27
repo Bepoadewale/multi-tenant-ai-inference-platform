@@ -17,8 +17,11 @@ canary or provide high availability.
   service. The LLM evaluator produces a sanitized report but does not register it.
 - No LLM model release or GPU rollback has run.
 - This is static design preparation on branch `codex/gpu-sequential-release-design`,
-  stacked on PR #50. No LLM release code or runtime behavior has changed. It makes no
-  AWS call and spends no GPU hours.
+  [PR #51](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/51),
+  stacked on PR #50. All five required checks, including local end-to-end, passed
+  on head `b205929` in run `46013204318`. The follow-up research/status documentation
+  update requires a new CI run. No LLM release code or runtime behavior
+  has changed. It makes no AWS call and spends no GPU hours.
 
 ## Research and decisions
 
@@ -32,6 +35,12 @@ canary or provide high availability.
   known-good model if candidate startup or smoke checks fail.
 - Treat host-local SQLite and artifact storage as temporary lab records only; include
   the MLflow service's memory and disk needs in host-fit checks.
+- The current vLLM v0.34.0 release publishes the CUDA 13.0 OpenAI server image. Its
+  release notes require Hugging Face Hub 2.0+ and describe a changed KV-cache sizing
+  default. Preserve the model's 8,192-token context and low initial sequence limit,
+  but explicitly validate the existing 85% memory-utilization setting against the
+  release's sizing behavior before the live load. The official GPU guide lists L4 as
+  supported; this is source compatibility, not runtime evidence.
 
 ## Changes
 
@@ -46,6 +55,11 @@ canary or provide high availability.
   single-GPU Compose profile, and evaluation report schema.
 - Local Markdown links and whitespace checks are required before publication.
 - No model, package, image, or AWS resource was downloaded or installed.
+- Official release and installation documentation were rechecked on 2026-11-27;
+  versioned image digest and all configuration choices still require final preflight.
+- All five required checks, including local end-to-end, passed on design head
+  `b205929` in workflow run `46013204318`. This covers repository tests on CPU-only
+  CI, not model serving or GPU behavior.
 
 ## Security and cost
 

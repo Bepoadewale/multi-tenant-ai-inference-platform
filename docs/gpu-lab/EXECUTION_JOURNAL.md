@@ -1601,3 +1601,34 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Cost/resources:** no AWS calls, model downloads, GPU hours, or spend.
 - **Next:** publish the design as a focused PR, then implement the private MLflow and
   LLM release path with tests before the paid batch.
+
+## 2026-11-27 — Recheck L4 runtime release and host manifest before approval
+
+- **Phase:** Phase 2 remains blocked on quota; static preparation spans Phases 3, 5,
+  and 9.
+- **Branch / PR:** `codex/gpu-sequential-release-design`, PR #51 stacked on PR #50.
+- **Starting state:** PR #50 head `fef4951` had passed all five required jobs in run
+  `46012380712`. PR #51 head `b205929` passed all five required jobs, including the
+  local end-to-end job, in run `46013204318`. No PR was merged.
+- **Research:** rechecked NVIDIA Container Toolkit installation guidance, vLLM's
+  current GPU installation page, the official vLLM v0.34.0 release notes and image
+  publication, the Hugging Face Qwen2.5-1.5B model card, and the current OCI registry
+  manifest. The vLLM documentation lists L4 support and compute capability 7.5+;
+  v0.34.0 publishes CUDA 13.0, requires Hugging Face Hub 2.0+, and changes KV-cache
+  sizing behavior. The image's linux/amd64 digest still matches the candidate pin.
+- **Changes:** corrected the goal, status, evidence, ticket, install manifest, and
+  release notes for the completed PR checks; documented the new vLLM image/runtime
+  preflight; clarified that the 85% memory setting is only a conservative lab cap and
+  has no measured capacity evidence. Added current release notes to the deployment
+  guide. No vLLM configuration behavior changed.
+- **Validation:** local links across seven edited Markdown files resolved; `git diff
+  --check` passed. One local validation snippet used `python` and failed because only
+  `python3` is available; rerunning with `python3` passed. The registry manifest query
+  returned the same OCI index and AMD64 digest; it fetched registry metadata only.
+- **Cloud and cost:** no AWS API call or mutation, package/image layer pull, model
+  download, GPU execution, instance-hour, or project spend occurred. The owner reports
+  that the appeal was manually sent; quota approval remains unconfirmed and no GPU
+  launch is eligible.
+- **Next:** publish the updated PR #51 status/research documentation, watch its new
+  CI run once, then continue non-billable host automation and deployment-readiness
+  review. Manual host configuration must precede any claim that Ansible is validated.
