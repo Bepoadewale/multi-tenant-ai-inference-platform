@@ -1691,5 +1691,36 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Limitations:** the package lock is static until the Docker build and dependency
   audit pass; it does not prove GPU-host behavior. The workstation's default Python
   remains 3.14.0; GPU and project tooling use explicit Python 3.12.
-- **Next:** finish the lock audit, create PR #53 on the PR #52 base, then watch its
-  Linux build and CPU end-to-end checks.
+- **Next:** watch PR #53 run `46023306230` for the Linux image build, lock audit, and
+  CPU end-to-end checks. Review failures before deciding on any follow-up edits.
+
+## 2026-11-27 — Publish shared container reproducibility PR
+
+- **Phase:** Non-billable repeatability work; Phase 2 remains blocked by quota.
+- **Branch / PR:** `codex/gpu-container-build-locks`, [PR #53](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/53), stacked on PR #52.
+- **Commit:** `e623b7512a750c776412c2287547981763aba592`.
+- **Starting infrastructure state:** no goal-owned AWS resources; the existing G/VT quota remains zero. No cloud mutation occurred.
+- **Changes:** published a Python base-image digest, universal hash lock, lock verifier, and CI checks. Updated the goal, status, backlog, ticket, and evidence records to identify the opened PR.
+- **Validation:** local lock coverage and GPU Compose configuration passed; the precise lock passed `pip-audit -s osv`; PR #52 remained green. PR #53 CI run `46023306230` has five jobs in progress (Python, GPU observability, supply chain, local E2E, and manifests).
+- **Cost/security:** no GPU, AWS resources, layers built locally, or cloud spend. GitHub Actions uses repository CI only; no AWS credentials or cloud actions are configured by this PR.
+- **Next:** allow one watcher to monitor run `46023306230`; diagnose any failed job, then continue the next non-billable readiness package.
+
+## 2026-11-27 — Verify container CI and reconcile MLflow install notes
+
+- **Phase:** Non-billable repeatability work; Phase 2 remains blocked by quota.
+- **Branch / PR:** `codex/gpu-container-build-locks`, PR #53.
+- **Validation:** GitHub run `46023306230` completed successfully for head `e623b7512a750c776412c2287547981763aba592`. All five jobs passed. The supply-chain job built the gateway Docker image on Linux amd64, ran Trivy, and generated an SBOM. The Python job passed the hash-lock audit, lint, tests, GPU static plans, and dependency audit. The local E2E job passed `make smoke`, `make demo-flagship`, `make verify`, and `make clean-local` on the disposable CI runner.
+- **Review finding:** the host installation manifest still described MLflow as absent from the GPU Compose profile, although PR #52 added a private MLflow service. Corrected the manifest to explain that it is disposable, uses the encrypted root disk, and requires evidence export before teardown.
+- **Cost/security:** no AWS mutation, GPU execution, or cloud spend. GitHub CI work ran on ephemeral hosted runners.
+- **Next:** validate and publish the documentation correction, then continue local implementation work on sequential LLM model release controls.
+
+## 2026-11-27 — Restore local Python 3.12 validation environment
+
+- **Phase:** Non-billable GPU readiness; Phase 2 remains blocked by quota.
+- **Branch / PR:** `codex/gpu-container-build-locks`, PR #53 documentation follow-up.
+- **Starting state:** the `.venv` directory was absent. The first `make verify` failed immediately because `.venv/bin/python` did not exist; no tests ran in that attempt.
+- **Recovery:** ran the repository's `make install` using Python 3.12.12. It created `.venv`, installed the declared development dependencies, and regenerated the ignored local ONNX fixtures. No tracked model source or cloud resource changed.
+- **Validation:** the subsequent `make verify` passed Ruff, 116 tests (2 skipped), dependency audit with no known vulnerabilities, and base/GPU Compose configuration. GPU observability syntax and dashboard validation passed. Benchmark, evaluation, and CUDA plans ran in dry-run mode with zero GPU operations and zero network requests. `git diff --check` passed.
+- **Warning:** test startup emitted the repository's existing Starlette/httpx deprecation warning; no test failed.
+- **Cost/security:** all work was local; no cloud service, GPU, or AWS resource was used.
+- **Next:** publish the verified documentation correction, then implement and review sequential LLM release controls without assuming that runtime GPU behavior has been proven.

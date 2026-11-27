@@ -31,7 +31,7 @@ repair a missing or broken driver.
 | 10 | Model cache volume | Qwen model files | `Qwen/Qwen2.5-1.5B-Instruct`, revision `989aa7980e4cf806f80c7fef2b1adb7bc71aa306`, Apache-2.0 metadata, expected safetensors SHA-256 recorded in `RESEARCH_NOTES.md`. Recheck license and digest before download. | Provides the first small, open-weight model for measured L4 inference. | Verify the downloaded artifact digest before load; record the exact model revision. |
 | 11 | Docker Compose network | Gateway (2 replicas), Redis, vLLM | Existing gateway image is built from this repository; Redis and vLLM image/model pins must match the reviewed Compose environment. Bind operator interfaces to loopback only. | Reuses existing authentication, tenant admission, shared quota, routing, and CPU/GPU runtime abstraction. | Health/readiness checks, authorized tenant request, denied tenant request, streaming, quota sharing across replicas. |
 | 12 | Docker Compose network | DCGM Exporter, Node Exporter, Prometheus, Grafana, Alertmanager, OpenTelemetry Collector, Tempo, Redis exporter | Use the immutable image digests already in the single-GPU Compose profile; recheck registry manifests at preflight. | Measures GPU, host, gateway, Redis, vLLM, alert, and trace behavior without managed monitoring services. | Prometheus targets are healthy and real GPU/inference series move during a request; dashboard and alert drill use those series. |
-| 13 | Release/evaluation environment | MLflow registry and artifact store integration | The default local Compose includes MLflow, but the single-GPU Compose profile does not. Decide before the release phase whether the GPU batch can securely use the existing registry or whether a bounded local MLflow service must be added. Include memory, storage, and retention in the cost/host fit check. | The project needs model versions, evaluation evidence, release approvals, and rollback records; the local registry is not automatically reachable from EC2. | Verify a model artifact and evaluation run can be linked to an immutable candidate; exercise approval and rollback only after the registry path is implemented. |
+| 13 | Docker Compose network / encrypted instance disk | Private, single-host MLflow tracking server | PR #52 adds MLflow 3.18.0 using SQLite and a named artifact volume on the encrypted 100-GiB root disk. It is an evaluation evidence store, not a durable production registry. Its host port is loopback-only; there is no inbound security-group rule. | Records model version metadata, evaluation aggregates, release evidence, and rollback results within the disposable host. | Check health, write a sanitized evaluation report, verify no prompt/completion text is logged, export required artifacts, and confirm the named volume is removed with the host. Include image size, disk, and memory in the fit check. |
 
 ## What does not belong on the host
 
@@ -39,9 +39,9 @@ repair a missing or broken driver.
   project uses one standalone EC2 instance and Docker Compose.
 - Do not install host Redis, Prometheus, Grafana, Tempo, or vLLM when the pinned Compose
   containers provide those services. Avoid duplicate listeners and storage.
-- The existing MLflow service is in the default local Compose, but not the single-GPU
-  profile. Do not assume it is available to EC2. Finish and cost-check the registry
-  integration choice before the release/evaluation phase.
+- The single-GPU Compose profile has a private, disposable MLflow service from PR #52.
+  It uses SQLite and the encrypted root disk; export evidence before teardown. Do not
+  treat this single-host store as a durable production model registry.
 - Do not install a second independent PyTorch into vLLM's environment. The server
   image owns its Python and CUDA user-space dependencies.
 - Do not install a desktop driver or graphical display stack on this headless host.

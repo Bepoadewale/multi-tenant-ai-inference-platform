@@ -14,6 +14,12 @@
 | uv | 0.9.15 | Generate a target Linux/Python 3.12 hash lock; no CUDA packages were installed locally |
 | GitHub CLI | Authenticated as `Bepoadewale` using the local keychain | PR and Actions operations |
 
+The project `.venv` was absent at the start of the 2026-11-27 PR #53 follow-up.
+Running `make install` created it with Python 3.12.12 and installed the repository's
+development dependencies and generated local ONNX fixtures. The subsequent `make
+verify` passed; details are in the execution journal. This is workstation readiness,
+not GPU readiness.
+
 ## Not installed on this workstation
 
 `ansible-playbook`, `nvcc`, `nvidia-smi`, and `nvidia-container-cli` are absent.
