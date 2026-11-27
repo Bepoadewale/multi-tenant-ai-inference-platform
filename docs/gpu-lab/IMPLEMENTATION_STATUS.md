@@ -1,6 +1,6 @@
 # GPU Lab Implementation Status
 
-**Overall:** ACTIVE — Phase 2 infrastructure is prepared but blocked on quota. The deployment stack is statically prepared through PR #53 and includes PRs #33–#36. PR #53's code head `e623b75` passed all five checks in `46023306230`; its documentation follow-up `2153942` passed all five checks in `46025160292`. PR #54 passed all five required jobs in `46028053505`; PR #55 passed all five in `46034523863`; PR #56 updated head passed all five in `46040861818`. PR #57 head `4795f12` passed all six jobs, including one fresh-runner clean-room cycle, in `46045068200`; PR #57 is ready for review and remains open. PR #58 adds the manual reproduction guide and GPU tenant identities; local validation passed. Runs `46049398387` and `46050614853` each failed before Trivy scanning and at local smoke. The current unrun follow-up verifies Trivy `v0.76.2` against its official archive SHA-256 and gives smoke assertions safe names. No GPU cloud execution has occurred in this goal.
+**Overall:** ACTIVE — Phase 2 infrastructure is prepared but blocked on quota. The deployment stack is statically prepared through PR #53 and includes PRs #33–#36. PR #53's code head `e623b75` passed all five checks in `46023306230`; its documentation follow-up `2153942` passed all five checks in `46025160292`. PR #54 passed all five required jobs in `46028053505`; PR #55 passed all five in `46034523863`; PR #56 updated head passed all five in `46040861818`. PR #57 head `4795f12` passed all six jobs, including one fresh-runner clean-room cycle, in `46045068200`; PR #57 is ready for review and remains open. PR #58 adds the manual reproduction guide and GPU tenant identities. Run `46052092657` passed the checksum-verified Trivy scan and all checks except local smoke's edge-device inventory. Source review traced this to the mode-`0600` token file not being readable by edge-agent containers running as UID `65532`; the unrun follow-up matches those local containers to the bootstrap UID/GID and waits for device registration. No GPU cloud execution has occurred in this goal.
 
 | Phase | Status | Evidence / next gate |
 | --- | --- | --- |
@@ -54,7 +54,7 @@ unit-tested; the profile has not run on an L4.
 
 ## Current Next Actions
 
-1. Complete the guide/script review and run PR #58's next CI cycle; check Trivy actually scans and use the named smoke assertion to identify any remaining failure.
+1. Validate the edge-agent UID fix and run PR #58's next CI cycle; confirm a successful clean-room smoke sequence with the checksum-verified scanner.
 2. Keep AWS work read-only until the manually submitted appeal is decided and applied G/VT quota is nonzero; do not send another appeal or request.
 3. Continue non-billable research and deployment preparation without claiming host execution; manual NVIDIA setup still precedes running Ansible.
 4. Recheck signed package indexes, image digest, model revision/license/hash, capacity, current prices, and exact bounded plan immediately before any authorized GPU batch.

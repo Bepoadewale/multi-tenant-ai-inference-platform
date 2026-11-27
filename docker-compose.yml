@@ -236,6 +236,8 @@ services:
       context: .
       dockerfile: gateway/Dockerfile
     command: ["uvicorn", "inference_gateway.api.edge_agent:app", "--host", "0.0.0.0", "--port", "8080"]
+    # tokens.json is mode 0600; match the local owner so this container can read it.
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
     environment:
       EDGE_DEVICE_ID: edge-search-001
       EDGE_PROFILE: laptop-high
@@ -267,6 +269,8 @@ services:
       context: .
       dockerfile: gateway/Dockerfile
     command: ["uvicorn", "inference_gateway.api.edge_agent:app", "--host", "0.0.0.0", "--port", "8080"]
+    # tokens.json is mode 0600; match the local owner so this container can read it.
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
     environment:
       EDGE_DEVICE_ID: edge-constrained-001
       EDGE_PROFILE: embedded-constrained

@@ -359,15 +359,18 @@ The guide's initial relative-link and documented Make-target checks passed; late
 follow-up edits still need the final cross-reference check. PR #58 runs `46049398387`
 and `46050614853` passed Python, manifests, GPU observability, and Ansible. Their
 supply-chain jobs failed before scanning: first on default Trivy `v0.70.0`, then on
-published Trivy `v0.76.2` because the installer could not resolve its tag. The second
-fresh local E2E run completed bootstrap but failed at `make smoke`. Its project
-container inventory showed healthy services, and application logs showed successful
-gateway/model and edge-device requests, but the script did not name the failed JSON
-assertion. The current unrun follow-up uses the versioned official Trivy archive with
-a pinned SHA-256 and adds secret-safe named smoke assertions. Its CI result is
-pending. Both clean-room attempts failed; a successful fresh-runner cycle on the final
-head remains required. No AWS command, model download, OCI image pull outside CI, GPU
-operation, or cloud spend occurred.
+published Trivy `v0.76.2` because the installer could not resolve its tag. Run
+`46052092657` passed the checksum-verified official Trivy scan and every job except
+local E2E. The new named smoke assertion identified an empty edge-device inventory.
+Source inspection showed that the edge services ran as image UID `65532` while the
+recently secured token file is owner-only (`0600`) and owned by the local bootstrap
+user; the agents caught the resulting file-read error, kept retrying, and still
+reported healthy. The current unrun correction makes only these local simulation
+containers use the bootstrap UID/GID and waits for their registration. `make verify`
+passed Ruff, 146 tests (2 skipped), dependency audit, Compose and monitoring
+validation, and benchmark/evaluation/CUDA dry-run plans. The final script syntax,
+workflow YAML, Compose UID interpolation, and `git diff --check` also passed. No AWS
+command, model download, GPU operation, or cloud spend occurred.
 
 These checks establish source behavior and document consistency only. They do not
 establish cross-process Redis behavior for these named tenants, a real signed request

@@ -44,6 +44,8 @@ wait_for "operator console UI" bash -c "curl -fsS --connect-timeout 2 --max-time
 for port in 8088 8089; do
   wait_for "edge device ${port} readiness" curl -fsS --connect-timeout 2 --max-time 5 "http://localhost:${port}/healthz"
 done
+wait_for "both edge devices registered" bash -c \
+  'curl -fsS --connect-timeout 2 --max-time 5 http://localhost:8087/edge/v1/devices | jq -e ".devices | length == 2" >/dev/null'
 check_json "MLflow registered model" '.registered_model.name == "local-tiny-intent-classifier"' \
   "http://localhost:15010/api/2.0/mlflow/registered-models/get?name=local-tiny-intent-classifier"
 

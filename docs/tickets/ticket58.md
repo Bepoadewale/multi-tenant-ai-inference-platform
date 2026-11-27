@@ -30,6 +30,14 @@ command runs, why it is needed, what success looks like, and how to stop safely.
   gateway/model and edge-device HTTP requests. It did not show which silent JSON
   assertion failed, so the cause remains unconfirmed. The smoke script now names each
   JSON assertion on failure without printing response bodies or identity tokens.
+- Run `46052092657` passed the Trivy scan and every other job except local E2E. The
+  named assertion identified the failing check: the simulated edge-device registry
+  did not contain both devices. The containers ran as image UID `65532`, while
+  `tokens.json` is intentionally owner-only (`0600`); source inspection shows edge
+  agents retry registration after token-read errors, then still return a healthy
+  `/healthz`. The Compose services now run as the host UID/GID supplied by
+  `bootstrap-local`, preserving the owner-only token permissions. The smoke script
+  also waits for both registrations before asserting the inventory.
 
 ## Research and design
 
@@ -58,9 +66,9 @@ command runs, why it is needed, what success looks like, and how to stop safely.
   contain the intended tenant identity.
 - [x] Links from the documentation index and clearly labels unexecuted GPU commands.
 - [ ] Final review commands against actual scripts and files in the repository.
-- [ ] The next CI run passes the scanner and fresh local end-to-end cycle; if smoke
-  still fails, its named assertion should identify the check to fix. Runs
-  `46049398387` and `46050614853` failed as described above.
+- [ ] The next CI run passes the scanner and fresh local end-to-end cycle. Runs
+  `46049398387`, `46050614853`, and `46052092657` failed as described above; the
+  third run passed the scanner and named the edge inventory failure.
 - [ ] Human review; do not merge without owner authorization.
 - [ ] After GPU approval, revise any command or package candidate that live evidence
   disproves and rerun the relevant reproduction stage.
@@ -73,13 +81,15 @@ ran the generator in an isolated temporary directory and checked permissions and
 Ed25519 claims. AWS/GPU commands in the guide remain unexecuted. CI runs
 `46049398387` and `46050614853` both passed Python, manifests, GPU observability, and
 Ansible. The first scanner failed resolving `v0.70.0`; the second failed resolving
-the API-confirmed published `v0.76.2` through the installer's release lookup, so
-neither run executed Trivy. The second local E2E run failed at `make smoke`; its
-service inventory showed healthy containers and logs showed successful gateway/model
-and edge-device requests, but no silent assertion was named. The current follow-up
-uses an official release archive with a checked SHA-256 and makes smoke JSON
-assertions name themselves on failure. It has not run in CI. No smoke root cause is
-claimed. Final CI and relative Markdown-link validation remain pending.
+the API-confirmed published `v0.76.2` through the installer's release lookup. Run
+`46052092657` passed Trivy using the versioned official release archive and checked
+SHA-256; all jobs passed except local E2E. The named check showed an empty edge
+inventory. Source inspection traced this to edge agents running as image UID `65532`
+while the newly restricted token file is owned by the local user at mode `0600`;
+agents silently retry registration but still report healthy. Compose now runs these
+two local-only agents with the `LOCAL_UID`/`LOCAL_GID` already exported by the
+bootstrap script and waits for two registrations before asserting. This fix has not
+yet run in CI. Final CI and relative Markdown-link validation remain pending.
 
 ## Security and financial limits
 

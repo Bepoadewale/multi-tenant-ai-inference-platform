@@ -580,8 +580,12 @@ test "$(stat -c '%a' .local/identity/tokens.json)" = 600
 ```
 
 The script creates the signing key and public verification key locally on the host;
-the gateways mount only `public.pem`. The private key and short-lived tokens never
-need to be copied into a container image.
+the GPU gateways mount only `public.pem`. In the preserved local CPU Compose stack,
+the two simulated edge agents also read their device tokens from this directory.
+Compose runs those two services with the `LOCAL_UID` and `LOCAL_GID` exported by
+`bootstrap-local`, so they can read the owner-only file without making tokens
+world-readable. The private key and short-lived tokens never need to be copied into a
+container image.
 
 **Future GPU execution — after manual vLLM validation, `.env` review, and identity
 generation:**
