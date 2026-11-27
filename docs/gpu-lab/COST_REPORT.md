@@ -165,8 +165,8 @@ not run the lab.
   execution cannot fit under $25, stop cloud work, finish safe local work, and request
   more budget through the user's authorization process.
 - On 2026-11-27, after the user explicitly asked to submit the quota request
-  immediately, a request for 4 On-Demand G/VT vCPUs was submitted. AWS reports it as
-  `PENDING`; the applied quota remains zero. No Terraform apply or infrastructure
+  immediately, a request for 4 On-Demand G/VT vCPUs was submitted. AWS reports its
+  status as `CASE_OPENED` (pending); the applied quota remains zero. No Terraform apply or infrastructure
   mutation has been made. Quota approval does not authorize paid provisioning.
 
 ## Current outcome

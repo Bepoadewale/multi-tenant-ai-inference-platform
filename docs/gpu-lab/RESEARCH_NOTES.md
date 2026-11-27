@@ -6,7 +6,7 @@ Research was started on 2026-11-26 and updated on 2026-11-27. This remains a Pha
 
 - AWS's [G6 product page](https://aws.amazon.com/ec2/instance-types/g6/) and [accelerated instance specification table](https://docs.aws.amazon.com/ec2/latest/instancetypes/ac.html) describe G6 as NVIDIA L4 based. The single-GPU `g6.xlarge` is listed with 4 vCPUs, 16 GiB host memory, one L4, and 22 GiB of listed GPU memory; `g6.2xlarge` has 8 vCPUs, 32 GiB, and one L4 with the same listed GPU memory. The GPU is commonly described as a 24 GB L4; AWS's table expresses the per-instance memory as 22 GiB. Capacity and runtime compatibility still need live validation.
 - Read-only `describe-instance-type-offerings` in `us-east-1` listed `g6.xlarge` in `us-east-1a`, `1b`, `1c`, `1d`, and `1f`; it listed `g6.2xlarge` in `1a`, `1b`, `1c`, `1d`, and `1f`. Offering means the type is supported in that AZ, not that capacity can be launched.
-- Read-only Service Quotas lookup returned `Running On-Demand G and VT instances = 0.0 vCPUs`, quota code `L-DB2E81BA`. AWS [EC2 instance quota documentation](https://docs.aws.amazon.com/ec2/latest/instancetypes/ec2-instance-quotas.html) says this quota is adjustable; AWS's [quota increase procedure](https://docs.aws.amazon.com/servicequotas/latest/userguide/request-quota-increase.html) notes increases require a request and may be reviewed. No increase has been requested. This is the current blocker for an On-Demand L4.
+- Read-only Service Quotas lookup returned `Running On-Demand G and VT instances = 0.0 vCPUs`, quota code `L-DB2E81BA`. AWS [EC2 instance quota documentation](https://docs.aws.amazon.com/ec2/latest/instancetypes/ec2-instance-quotas.html) says this quota is adjustable; AWS's [quota increase procedure](https://docs.aws.amazon.com/servicequotas/latest/userguide/request-quota-increase.html) notes increases require a request and may be reviewed. Following the user's direct request, a 4-vCPU increase was submitted for one `g6.xlarge`; AWS currently reports `CASE_OPENED` (pending), and the applied quota remains zero. This is still a blocker for an On-Demand L4, and the request does not authorize launch.
 - A read-only AWS Price List API query on 2026-11-26, filtered for `g6.xlarge`, Linux, shared tenancy, `US East (N. Virginia)`, returned **$0.8048 per instance-hour**. This is the AWS catalog price, not a settled bill. Instance-only totals are `$6.4384` for 8 hours and `$9.6576` for 12 hours.
 - [Amazon VPC pricing](https://aws.amazon.com/vpc/pricing/) currently lists an in-use public IPv4 address at `$0.005/hour`, billed per second with a 60-second minimum. If the public-subnet/no-inbound design needs one public IPv4 for outbound package/model downloads and SSM, add `$0.06` for a 12-hour window. Avoiding NAT Gateway is material to the small budget.
 - [EBS pricing](https://aws.amazon.com/ebs/pricing/) documents gp3 per-second billing and gives an example regional rate of `$0.08/GiB-month`, with 3,000 baseline IOPS and 125 MiB/s included. At that example rate, 100 GiB for 12 hours is about `$0.0133`; confirm us-east-1's current rate and actual retained duration before apply.
@@ -39,7 +39,7 @@ Continue with current primary documentation before each phase: [AWS G6](https://
 ## Decisions still open
 
 - Whether the `$25` cap can cover the requested GPU-dependent validation with enough runtime to install the driver, download the model, integrate/observe/benchmark it, run safe incident drills, and export evidence. The instance-only estimate leaves room but time-consuming manual setup could use it quickly.
-- How to raise the account's current zero On-Demand G/VT quota; no request submitted.
+- Whether AWS approves the open 4-vCPU On-Demand G/VT request; track its status and do not submit a duplicate.
 - Exact Ubuntu LTS point release/AMI, kernel, driver branch, CUDA compatibility, Docker Toolkit release, PyTorch build, vLLM release, and container image digest.
 - Exact encrypted Terraform state/locking arrangement that follows repository governance without creating long-lived costs above the project cap.
 - Which monitoring components can coexist on 16 GiB host memory without invalidating the inference experiment; measure before selecting `g6.2xlarge`.
@@ -97,6 +97,17 @@ independent gates.
   validate dual-lock compatibility. Do not silently remove the DDB requirement just
   because newer Terraform supports S3 locking. Exact Terraform minimum, state
   bootstrap, IAM access, and lifecycle still need implementation and validation.
+- The pinned AWS provider configuration in `infrastructure/terraform/environments/gpu-ec2/versions.tf`
+  uses `default_tags = local.required_tags`, so taggable resources inherit project,
+  environment, owner, expiry, and data-class tags even where the resource block adds
+  only a `Name`. The official AWS provider docs show tag support for [VPCs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc),
+  [subnets](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet),
+  [IAM roles](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role),
+  and [Scheduler groups](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/scheduler_schedule_group).
+  This matches the teardown verifier's project-tag filters. Associations and
+  non-taggable resources still rely on the tags of their owning resources and exact
+  names; the AWS provider schema query could not run against the configured S3-backend
+  root, so no broader tagability claim is made.
 - AWS [Session Manager guidance](https://docs.aws.amazon.com/prescriptive-guidance/latest/aws-startup-security-baseline/wkld-06.html)
   says Session Manager has no additional EC2 connection charge; interface VPC
   endpoints do incur hourly and data-processing charges. A public subnet with no
