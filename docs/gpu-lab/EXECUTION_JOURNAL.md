@@ -1091,3 +1091,21 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** finish review of Compose security/limits, update this record, publish PR
   #46 stacked on PR #45, and diagnose the parent PR's opaque capacity-demo failure
   through non-destructive CI diagnostics.
+
+
+## 2026-11-27 — Publish observability preparation PR
+
+- **Phase:** Phase 7 static preparation; no live GPU evidence.
+- **Branch / PR / commit:** `codex/gpu-observability-profile`, PR #46 against PR #45,
+  initial head `3f26111`.
+- **Starting state:** native monitoring-config validators and Compose parsing passed;
+  documentation records static-only evidence and no AWS cost.
+- **Action:** pushed the observability package and opened PR #46. The PR explains the
+  configuration, validation, privacy controls, cost boundaries, and remaining runtime
+  checks.
+- **Validation:** PR workflow started after publication; final check result is pending
+  and will be recorded after its single watcher reaches a terminal state.
+- **Cloud and cost:** no AWS resource, GPU runtime, or model was used.
+- **Next:** inspect the #46 CI result, resolve any reviewable validation issue, then
+  continue non-billable deployment preparation while quota and appeal outcome remain
+  unresolved.

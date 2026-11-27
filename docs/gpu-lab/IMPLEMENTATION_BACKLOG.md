@@ -212,7 +212,7 @@ cleanup, and CPU ONNX regression all have evidence.
 
 ### Package 7 — Metrics, traces, dashboards, and alerting
 
-**Status:** static configuration prepared on `codex/gpu-observability-profile`; PR #46 publication and live L4 validation remain outstanding.
+**Status:** PR #46 (`3f26111`) contains static configuration; required CI and live L4 validation remain outstanding.
 
 - [x] Prepare pinned single-host exporters, vLLM/Gateway/Redis scrapes, Prometheus,
   Grafana, Alertmanager, profile-specific OpenTelemetry with sensitive-attribute
