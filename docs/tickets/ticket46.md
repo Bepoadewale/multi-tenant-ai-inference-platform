@@ -79,10 +79,11 @@ and GPU telemetry overhead that must be included in the final $25 cost/runtime p
 
 ## Outstanding work
 
-- PR #45 smoke mismatch is fixed, but the existing CPU `demo-capacity` script failed
-  in two CI attempts. Its logs do not reveal the failed request/assertion. Diagnose
-  through safe CI output before calling the parent deployment package CI-ready.
-- Publish and validate PR #46 against PR #45.
+- PR #45's stale capacity-mode assertion was fixed; all four required checks passed on
+  head `31348c3` in CI run `45990929878`, including the queued-request path. PR #45
+  remains open for review.
+- PR #46 is open and has been rebased onto the passing PR #45 base. Validate the new
+  head in CI before treating the static package as CI-verified.
 - Recheck registry digests and DCGM/vLLM compatibility immediately before launch.
 - On the approved L4, confirm GPU visibility in DCGM Exporter, Node Exporter host
   samples, every Prometheus target, actual GPU/vLLM series, Grafana panels, alert

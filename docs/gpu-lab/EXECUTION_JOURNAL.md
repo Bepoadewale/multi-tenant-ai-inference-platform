@@ -1107,6 +1107,26 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   #46 stacked on PR #45, and diagnose the parent PR's opaque capacity-demo failure
   through non-destructive CI diagnostics.
 
+## 2026-11-27 — Rebase observability preparation on passing deployment base
+
+- **Phase:** Phase 7 static preparation.
+- **Branch / PR:** `codex/gpu-observability-profile`, PR #46, rebased onto PR #45's
+  documented passing head and the follow-up documentation commit.
+- **Starting state:** PR #45 all-checks run `45990929878` passed on `31348c3`; a later
+  docs-only commit `caa9b37` records the result. PR #46 was still based on the older
+  PR #45 head `bb9ad9c`.
+- **Action:** rebased PR #46 onto `caa9b37`. Conflicts in the persistent goal, journal,
+  and PR #45 ticket were reconciled by preserving the newer PR #45 root cause/result
+  and retaining the older observability work-session entry as historical context.
+  Updated ticket46 to point to the actual capacity-demo fix and new CI gate.
+- **Validation:** `make gpu-compose-config`, `make gpu-observability-validate`, and
+  `git diff --check` passed after rebase. This validates static configs only; no
+  monitoring service or GPU was started.
+- **CI / cloud / cost:** new PR #46 checks are pending after the rebase. No AWS calls,
+  GPU hours, model downloads, or spend.
+- **Next:** publish the rebased PR #46 head and watch one check run; then rebase the
+  benchmark preparation branch onto that resulting head.
+
 
 ## 2026-11-27 — Publish observability preparation PR
 
