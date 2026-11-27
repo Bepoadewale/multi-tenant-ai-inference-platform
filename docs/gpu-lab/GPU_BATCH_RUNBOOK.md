@@ -231,12 +231,14 @@ fits with margin. Keep the manual server bound to loopback or an internal-only
 container network.
 
 ```bash
-docker run --rm --name vllm-manual --gpus all --ipc=host \
+docker volume create multi-tenant-ai-inference-platform-gpu-model-cache
+docker run --name vllm-manual --gpus all --ipc=host \
   -p 127.0.0.1:8000:8000 \
-  -v /opt/model-cache:/root/.cache/huggingface \
-  vllm/vllm-openai@sha256:<reviewed-image-digest> \
+  -v multi-tenant-ai-inference-platform-gpu-model-cache:/root/.cache/huggingface \
+  'vllm/vllm-openai@sha256:<reviewed-image-digest>' \
   --model Qwen/Qwen2.5-1.5B-Instruct \
-  --revision <reviewed-model-revision> \
+  --revision '<reviewed-model-revision>' \
+  --served-model-name gpu-default \
   --dtype bfloat16 --max-model-len 8192 --max-num-seqs 2
 ```
 
@@ -249,6 +251,29 @@ send a short streamed prompt. Record first-token time, total response time, toke
 counts, server logs, and `nvidia-smi` before/during/after. Redact prompts and response
 content from public evidence. A healthy HTTP process without a successful CUDA model
 load is not a passing inference check.
+
+After collecting the server log and measurements, stop and remove only this manual
+container before starting Compose. It uses the same named model-cache volume as the
+Compose service, so the pinned model does not need a second download:
+
+```bash
+mkdir -p /var/tmp/gpu-lab/evidence
+docker logs --timestamps vllm-manual \
+  > /var/tmp/gpu-lab/evidence/vllm-manual.log 2>&1
+docker stop vllm-manual
+docker rm vllm-manual
+test -z "$(docker ps -q --filter 'publish=8000')"
+if ss -ltnH 'sport = :8000' | grep -q .; then
+  echo 'Port 8000 is still in use; do not start Compose.' >&2
+  exit 1
+fi
+nvidia-smi
+docker volume inspect multi-tenant-ai-inference-platform-gpu-model-cache
+```
+
+Review and sanitize the saved log before exporting it. Confirm `nvidia-smi` shows no
+active model process. Do not start Compose until the port is free and the cache volume
+is present.
 
 Only after the manual request and stream work should the **single-GPU Docker Compose**
 deployment in `deployments/single-gpu/` be started. It runs one vLLM server, Redis, and
@@ -374,7 +399,7 @@ changes, apply only an approved plan:
 docker compose --env-file deployments/single-gpu/.env \
   -f deployments/single-gpu/compose.yaml up -d --no-deps gateway-1 gateway-2
 python3 scripts/gpu_release_controller.py initialize /path/to/champion-manifest.json
-python3 scripts/gpu_release_controller.py apply <approved-plan-uuid>
+python3 scripts/gpu_release_controller.py apply '<approved-plan-uuid>'
 ```
 
 The apply command prompts for a short-lived `platform.admin` token without echoing or

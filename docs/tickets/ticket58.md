@@ -45,6 +45,7 @@ command runs, why it is needed, what success looks like, and how to stop safely.
   destroy inputs, documents the separately approved state bootstrap, stops and removes
   the manual container while retaining its model-cache volume, and splits host
   shutdown from workstation Terraform destruction.
+- A final cross-check found the batch runbook manual-serving example diverged from the hands-on guide: it used a separate host bind mount, removed the container automatically, and omitted the served alias. The batch runbook now reuses the Compose named cache volume, preserves container logs, sets `gpu-default`, and explicitly stops/removes the manual container after checking that GPU and port 8000 are released. Placeholder arguments are quoted so Bash parses them safely.
 - The three findings were answered and resolved after commit `a1616ec`. Final-head
   CI run `46055428111` passed all six jobs, including the workflow E2E job. No
   separate local clean-room run was launched.
@@ -76,7 +77,8 @@ command runs, why it is needed, what success looks like, and how to stop safely.
   contain the intended tenant identity.
 - [x] Links from the documentation index and clearly labels unexecuted GPU commands.
 - [x] Final static guide cross-reference, Bash syntax, Make target, and command review,
-  including the three automated review findings.
+  including the three automated review findings and matching manual/batch vLLM volume,
+  alias, and stop/remove procedure.
 - [x] Final-head CI run `46055428111` passed all six jobs, including the scanner and
   local E2E job. The successful fresh-runner E2E evidence first passed in
   `46054114999`; later PR workflows automatically repeated the job after guide and
@@ -107,7 +109,9 @@ Bash blocks parsed, all eight Make targets exist, and the manual guide and ticke
 no broken relative links. The final guide commit `a1616ec` passed all six jobs in CI run
 `46055428111`; docs follow-up commit `2d508a9` also passed all six jobs in
 `46056755505`. Those workflows automatically repeated local E2E; no separate local
-clean-room run was launched.
+clean-room run was launched. The runbook follow-up has 50 Bash blocks parsed with
+`bash -n`, zero broken relative links across changed Markdown, and `git diff --check`
+passed.
 
 ## Security and financial limits
 
