@@ -112,4 +112,4 @@ if [[ "$failures" -ne 0 ]]; then
   echo "Project GPU resources remain. Inspect them; this verifier never deletes resources." >&2
   exit 1
 fi
-echo "All queried GPU-environment resources are absent. Shared repository state and budget guardrails are intentionally retained."
+echo "All queried GPU-environment resources are absent. Shared state, locks, and budget guardrails are outside this verifier's scope; it neither checks nor modifies them."
