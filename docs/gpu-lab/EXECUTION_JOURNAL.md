@@ -1735,3 +1735,38 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** add the private MLflow and sanitized evaluation-report path in a focused
   non-billable PR; keep it off public host ports and preserve the existing ONNX release
   flow.
+
+## 2026-11-27 — Add private MLflow evaluation evidence path
+
+- **Phase:** Phase 9 static/local implementation; AWS quota remains zero.
+- **Branch:** `codex/gpu-mlflow-evaluation-records`, based on the restacked PR #51
+  head `855a52d`.
+- **Starting state:** the ONNX release process is local, while the GPU Compose profile
+  had no MLflow service and the LLM evaluation runner did not publish its report.
+  MLflow is already an application dependency in the repository's Python image. The
+  parent PR #51 documentation head `855a52d` passed all five checks in run
+  `46018929290`.
+- **Research:** official MLflow docs separate run metadata (backend store) from run
+  files (artifact store), and describe SQLite plus proxied artifact uploads through
+  `--serve-artifacts` and `--artifacts-destination`. This fits a short single-host lab;
+  production durability and access controls are out of scope.
+- **Changes:** added a private MLflow service with a named volume, SQLite metadata,
+  local artifact destination, and loopback-only host port. Added a one-shot evaluator
+  Compose profile that waits for vLLM and MLflow health. The evaluator publishes only
+  suite/model provenance, aggregate metrics, policy tags, and sanitized JSON; prompts
+  and completions are not sent. Added a fake-client test, ticket #52, research notes,
+  runbook steps, deployment guide, and documentation index link. Existing CPU ONNX
+  release services were not changed.
+- **Validation:** six focused Python 3.12 tests passed; Ruff passed; bytecode compile
+  passed; `make gpu-compose-config` passed; `git diff --check` passed. Earlier in this
+  session, Terraform validation, benchmark/evaluation/CUDA dry-runs passed and the
+  read-only AWS preflight safely rejected quota `0.0`. No containers were started.
+- **Cost/security:** no image build or pull, model download, AWS write, GPU hour, or
+  project spend. MLflow's UI/API binds to `127.0.0.1:15011` only; the Compose network
+  has no public AWS inbound path. The named volume must be exported before authorized
+  host teardown.
+- **Limitations:** no live MLflow server, artifact upload, model registry release,
+  L4 evaluation, release approval, or rollback was executed. SQLite and one-host
+  artifacts are temporary lab storage.
+- **Next:** publish as PR #52 stacked on PR #51, wait for required CI, then continue
+  static work on immutable sequential LLM release-plan controls.

@@ -163,9 +163,10 @@ and teardown/absence commands are ready.
 - [ ] Manually install the driver and run `nvidia-smi`, a CUDA container, and a
   synchronized PyTorch computation on the L4.
 - [ ] Then implement Ansible roles/playbooks and run them twice to test idempotency.
-- [ ] Add a private MLflow tracking service to the dedicated GPU Compose profile and
-  publish only sanitized evaluation metadata/reports to it. The service must have no
-  public host port; the default local MLflow instance is not reachable from EC2.
+- [x] Add a private MLflow tracking service to the dedicated GPU Compose profile and
+  publish only sanitized evaluation metadata/reports to it. PR #52 implements the
+  static/local path; the optional operator UI/API port binds only to loopback. Live
+  artifact upload on the L4 remains unverified.
 
 **Exit gate:** real GPU and container computation passes, exact versions and raw
 sanitized output are retained, and a repeated Ansible run makes no unintended changes.
@@ -253,13 +254,13 @@ captured and described with units and limits.
 
 ### Package 8 — Benchmarking, FinOps, evaluation, release, and rollback
 
-**Status:** PRs #47–#51 prepare static benchmarking, evaluation, and sequential-release design. All required checks pass on their current restacked heads. Gateway benchmarking, actual GPU performance, live model evaluation, and release/rollback behavior remain outstanding.
+**Status:** PRs #47–#52 prepare static benchmarking, evaluation, private MLflow evidence, and sequential-release design. PR #52's current checks are pending. Gateway benchmarking, actual GPU performance, live model evaluation, and release/rollback behavior remain outstanding.
 
 The current ONNX release API does not support the one-target vLLM profile. The
-single-GPU Compose file also lacks MLflow, and the evaluation runner does not publish
-its sanitized report. PR #51 documents a separate sequential LLM release path; no
-candidate has been registered or deployed. Private registry integration and report
-publishing are the next static implementation package.
+The existing ONNX release API still does not support the one-target vLLM profile. PR
+#52 adds a private MLflow tracking service and evaluator report publication, while PR
+#51 documents the separate sequential LLM release path. No candidate has been
+registered or deployed. Immutable release plans and approval enforcement remain open.
 
 - [x] Prepare the official `vllm bench serve` runner, context-bounded synthetic
   workloads, gated high concurrency, repeated aggregates, and hardware/software

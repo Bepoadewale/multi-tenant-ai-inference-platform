@@ -6,6 +6,15 @@ from the local CPU Compose stack and the future EKS contract. The two gateways s
 Redis state; they are not two independent GPU servers or a high-availability
 deployment.
 
+The profile also runs a small MLflow tracking server for sanitized evaluation
+metadata. It uses SQLite and a local artifact directory on the encrypted instance
+volume; this is short-lived lab evidence storage, not a durable production registry.
+MLflow has no public listener. Its optional UI/API host port is bound to `127.0.0.1`
+only, so an administrator can reach it through Systems Manager port forwarding.
+Evaluation runs publish the suite digest, pinned model revision, aggregate checks,
+and sanitized report. They do not publish prompts or completion text. Model weights
+stay in the Hugging Face cache and are not copied into MLflow.
+
 ## Model routing
 
 The profile sets `INFERENCE_VLLM_URL`. When that variable is present, the catalog
@@ -13,6 +22,19 @@ changes only `chat-default` to one 100%-weighted vLLM target and reads the API m
 name from `INFERENCE_GPU_MODEL_ID`. Without this variable, the catalog retains the
 existing ONNX CPU model ID, two weighted targets, and their current behavior. Tenant
 authorization remains in the gateway.
+
+Run the evaluator as a one-shot container after the vLLM and MLflow health checks are
+green:
+
+```bash
+docker compose --env-file deployments/single-gpu/.env \
+  -f deployments/single-gpu/compose.yaml --profile gpu-evaluation run --rm evaluator
+```
+
+The evaluator sends the seven synthetic tasks to the private vLLM service and logs a
+sanitized report to the `single-l4-llm-evaluation` experiment. Check the MLflow run
+before using it in a release plan. A passing automatic gate does not approve a release;
+subjective tasks still require an independent human review.
 
 The gateway `/healthz` response checks the selected inference backend and capacity
 state. It returns HTTP 503 if vLLM or shared Redis admission state is unavailable.
@@ -33,7 +55,8 @@ Redis service.
 provisional candidates. Recheck them before a paid run. Do not replace the immutable
 image digest with a mutable tag. The Compose file requests exactly one NVIDIA GPU,
 keeps Redis and vLLM off host-published ports, and publishes the gateway ports only
-on loopback. Prometheus, Grafana, and Alertmanager also bind only to host loopback.
+on loopback. Prometheus, Grafana, Alertmanager, and the MLflow UI/API also bind only
+to host loopback.
 DCGM Exporter and the OpenTelemetry Collector (OTel Collector) have no published host
 ports. Node Exporter shares the host network so it can observe host network counters;
 it uses a read-only host-root mount, drops Linux capabilities, and publishes no Docker
