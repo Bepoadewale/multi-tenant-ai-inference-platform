@@ -9,8 +9,8 @@ leases. Keep the existing in-memory implementation for local use and tests.
 
 ## Current state
 
-- Branch: `codex/redis-admission-leases`, rebased onto PR #33 head `c5de757`; lease fixes are in code commit `4cffc60`.
-- Pull request: [#34 — request-scoped Redis admission leases](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/34), open against `codex/gateway-stream-accounting` (PR #33); the rebase and review fixes are recorded in the current branch history.
+- Branch: `codex/redis-admission-leases`, rebased onto PR #33 head `c5de757`; lease fixes are in code commit `4cffc60`, documentation head `b51aedd`.
+- Pull request: [#34 — request-scoped Redis admission leases](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/34), open against `codex/gateway-stream-accounting` (PR #33); all four required checks passed in run `45936485832`, and both review threads are resolved.
 - Phase: non-billable Phase 6 prework. The active cloud phase remains Phase 2, with the
   AWS GPU launch gated by the pending quota request and the $25/apply checks.
 - No AWS infrastructure, GPU, or live vLLM server was used.
