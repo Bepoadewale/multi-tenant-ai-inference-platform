@@ -10,7 +10,7 @@ private because it is not protected by vLLM's API key.
 ## Current state
 
 - Branch: `codex/tokenizer-admission-preflight`, based on PR #34.
-- Pull request: implementation is complete locally; a focused PR is being prepared.
+- Pull request: [#35 — model-aware token reservations](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/35), draft and open against PR #34's `codex/redis-admission-leases` branch; head `34782b9`, CI running.
 - Phase: non-billable Phase 6 prework. No live vLLM, AWS infrastructure, or GPU was
   used.
 - PR #34's latest docs head `ae99959` passed all required checks and is ready for
