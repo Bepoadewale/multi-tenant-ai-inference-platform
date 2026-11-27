@@ -27,6 +27,9 @@ local CPU ONNX and did not check the upstream model server.
   store. The response states the selected runtime; health failure returns HTTP 503.
 - Added `make gpu-compose-config` to `make verify` and documented the new profile,
   volume behavior, auth setup, and limitations.
+- Updated the existing end-to-end smoke check to assert the gateway's readiness
+  response fields (`runtime`, backend readiness, and admission readiness). The prior
+  assertion expected the removed `mode=local-cpu-onnx` field.
 
 ## Validation
 
@@ -40,6 +43,10 @@ local CPU ONNX and did not check the upstream model server.
   vulnerabilities, and both base and GPU Compose configuration checks passed.
 - `git diff --check` passed.
 - No GPU image was pulled and no vLLM container or AWS resource was started.
+- PR #45 CI run `45982878898` exposed the stale smoke assertion after the readiness
+  response became runtime-aware. The failure was in the existing smoke script, not a
+  GPU test. The script is corrected; a new PR run must confirm the fix before this
+  package is considered CI-verified.
 
 ## Security and financial considerations
 
@@ -53,7 +60,8 @@ approval gates remain unchanged.
 
 ## Outstanding work
 
-- PR #45 was opened at `0a16844` against PR #44; its GitHub checks are pending.
+- PR #45 is open against PR #44. The current follow-up head updates the smoke
+  assertion; its replacement GitHub run is pending.
 - Recheck the pinned container digest, NVIDIA driver/runtime compatibility, and model
   revision, license, and artifact hash before any paid run.
 - Add DCGM/Node Exporter and a minimal GPU Prometheus configuration in a separate
