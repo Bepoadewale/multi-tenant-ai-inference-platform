@@ -28,8 +28,8 @@ def _fake_cli_bin(tmp_path: Path) -> tuple[Path, Path, Path]:
         "import os, pathlib, sys\n"
         f"pathlib.Path({str(aws_log)!r}).open('a').write(os.getenv('AWS_PROFILE', '<unset>') + ' ' + ' '.join(sys.argv[1:]) + '\\n')\n"
         "args = sys.argv[1:]\n"
-        f"if args[:2] == ['sts', 'get-caller-identity']: print({EXPECTED_ACCOUNT!r})\n"
-        "elif args[:2] == ['service-quotas', 'get-service-quota']: print('4')\n"
+        f"if args[:2] == ['sts', 'get-caller-identity']: print(os.getenv('FAKE_AWS_ACCOUNT', {EXPECTED_ACCOUNT!r}))\n"
+        "elif args[:2] == ['service-quotas', 'get-service-quota']: print(os.getenv('FAKE_AWS_QUOTA', '4'))\n"
         "elif args[:2] == ['ec2', 'describe-instance-type-offerings']: print('g6.xlarge')\n"
         "elif args[:2] == ['budgets', 'describe-budgets']: print('1')\n"
         "elif args[:2] == ['dynamodb', 'describe-table']: print('ACTIVE')\n"
@@ -105,3 +105,84 @@ def test_clean_verifier_skips_missing_scheduler_group_enumeration(tmp_path: Path
     assert result.returncode == 0, result.stderr
     assert "absent: project one-time expiry schedule (schedule group is absent)" in result.stdout
     assert "scheduler list-schedules" not in aws_log.read_text(encoding="utf-8")
+
+
+def test_preflight_stops_before_other_aws_calls_for_wrong_account(tmp_path: Path) -> None:
+    bin_dir, aws_log, terraform_log = _fake_cli_bin(tmp_path)
+    env = _subprocess_env(bin_dir)
+    env["FAKE_AWS_ACCOUNT"] = "000000000000"
+
+    result = subprocess.run(
+        [str(REPO_ROOT / "scripts/gpu-ec2-preflight.sh")],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "authenticated account does not match" in result.stderr
+    assert len(aws_log.read_text(encoding="utf-8").splitlines()) == 1
+    assert not terraform_log.exists()
+
+
+def test_preflight_stops_before_type_lookup_when_quota_is_too_small(tmp_path: Path) -> None:
+    bin_dir, aws_log, terraform_log = _fake_cli_bin(tmp_path)
+    env = _subprocess_env(bin_dir)
+    env["FAKE_AWS_QUOTA"] = "0"
+
+    result = subprocess.run(
+        [str(REPO_ROOT / "scripts/gpu-ec2-preflight.sh")],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "quota is 0 vCPUs; 4 are required" in result.stderr
+    calls = aws_log.read_text(encoding="utf-8").splitlines()
+    assert len(calls) == 2
+    assert "service-quotas get-service-quota" in calls[1]
+    assert not terraform_log.exists()
+
+
+def test_apply_without_explicit_confirmation_never_calls_aws_or_terraform(tmp_path: Path) -> None:
+    bin_dir, aws_log, terraform_log = _fake_cli_bin(tmp_path)
+    env = _subprocess_env(bin_dir)
+
+    result = subprocess.run(
+        [str(REPO_ROOT / "scripts/gpu-ec2-apply.sh")],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "refusing apply" in result.stderr
+    assert not aws_log.exists()
+    assert not terraform_log.exists()
+
+
+def test_apply_rejects_a_changed_plan_before_aws_preflight(tmp_path: Path) -> None:
+    bin_dir, aws_log, terraform_log = _fake_cli_bin(tmp_path)
+    plan_file = tmp_path / "changed.tfplan"
+    plan_file.write_bytes(b"plan that differs from reviewed bytes")
+    env = _subprocess_env(bin_dir)
+    env["GPU_EC2_CONFIRM"] = "apply"
+    env["GPU_EC2_PLAN_FILE"] = str(plan_file)
+    env["GPU_EC2_PLAN_SHA256"] = "not-the-plan-digest"
+
+    result = subprocess.run(
+        [str(REPO_ROOT / "scripts/gpu-ec2-apply.sh")],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "saved plan checksum does not match" in result.stderr
+    assert not aws_log.exists()
+    assert not terraform_log.exists()
