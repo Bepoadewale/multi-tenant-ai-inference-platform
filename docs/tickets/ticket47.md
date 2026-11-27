@@ -94,6 +94,8 @@ GPU benchmark harness.
 - PR #47 CI run `45993312156` passed all five required jobs: local E2E, manifests,
   Python, supply-chain, and GPU observability. The Trivy log shows `INPUT_SEVERITY:
   HIGH,CRITICAL` and no malformed-input warning. This is static/CPU CI evidence only.
+- A follow-up documentation-head run, `45994609421` on `9936e11`, passed all five
+  required jobs again.
 
 ## Security and financial considerations
 
