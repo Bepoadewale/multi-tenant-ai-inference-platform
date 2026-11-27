@@ -52,7 +52,7 @@ No case number, account identifier, credentials, or email headers were added.
 
 ## Outstanding work
 
-- Publish this focused package as a pull request and wait for its CI checks.
+- PR #43 was opened at `d550bee` against PR #42. Its CI checks are pending.
 - Test backend permissions and lock lifecycle only after the shared backend is
   available through its authorized setup.
 - Do not launch a GPU instance until applied quota, the exact saved plan, current
