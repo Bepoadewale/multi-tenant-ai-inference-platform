@@ -43,26 +43,22 @@ them before any mutation.
 **Where:** local workstation, repository root.
 
 Use Python 3.12 explicitly. The workstation may default to another Python version.
-The following checks print the account number only into a shell variable and display
-whether it matched the project account:
+Set the exact variable names consumed by the repository wrappers. Replace the
+placeholders locally; do not save the account ID in Git:
 
 ```bash
+export AWS_PROFILE=ai-platform-pilot-key
+export AWS_REGION=us-east-1
+export EXPECTED_AWS_ACCOUNT_ID='<12-digit project account ID>'
 python3.12 --version
 aws --version
 terraform version
 docker compose version
-AWS_PROFILE=ai-platform-pilot-key aws sts get-caller-identity \
-  --query Account --output text
-```
-
-For a script that avoids printing the account number:
-
-```bash
-expected_account="${AWS_EXPECTED_ACCOUNT_ID:?Set this from your private AWS account record}"
-actual_account="$(AWS_PROFILE=ai-platform-pilot-key aws sts get-caller-identity \
+actual_account="$(aws sts get-caller-identity \
   --query Account --output text)"
-test "$actual_account" = "$expected_account" \
+test "$actual_account" = "$EXPECTED_AWS_ACCOUNT_ID" \
   && echo 'Expected AWS account confirmed'
+unset actual_account
 ```
 
 Check the applied On-Demand G and VT quota in `us-east-1`:
@@ -103,6 +99,82 @@ USD $25 total. It includes the GPU instance, public IPv4 address if assigned, 10
 encrypted gp3 disk, state/lock usage, scheduled termination, storage and network use,
 tax uncertainty, and a contingency. A budget alert is not a hard cap.
 
+The current environment inventory found no GPU instance or project-tagged GPU
+resources. The Terraform state bucket, lock table, and budget alert must exist before
+the GPU preflight can pass. This is a separate, small but billable bootstrap. Review
+its scope and cost independently and obtain explicit approval before applying it; the
+`$25` ceiling is not permission to apply. See the
+[bootstrap instructions](../../infrastructure/terraform/bootstrap/README.md). A local
+preview is available, but it contains a placeholder alert address and must never be
+applied:
+
+```bash
+make gpu-ec2-bootstrap-preview-plan
+```
+
+For the actual bootstrap, create a private work directory and a variables file outside
+the repository. Put the expected account, private budget-alert email, and approved
+monthly alert threshold in that file; set its permissions to `0600`. Then initialize
+without a remote backend, validate, and create a saved plan. These commands do not
+create AWS resources:
+
+```hcl
+expected_account_id = "<12-digit project account ID>"
+budget_alert_email  = "<private alert recipient>"
+monthly_budget_usd  = 10
+```
+
+Save those values only in the private variables file. Do not set the real alert email
+in a shell command or commit it.
+
+```bash
+private_dir="$(mktemp -d)"
+chmod 0700 "$private_dir"
+export PRIVATE_TFVARS_FILE="$private_dir/bootstrap.tfvars"
+export PRIVATE_PLAN_FILE="$private_dir/bootstrap.tfplan"
+# Create PRIVATE_TFVARS_FILE with a local editor, then protect it before planning.
+chmod 0600 "$PRIVATE_TFVARS_FILE"
+terraform -chdir=infrastructure/terraform/bootstrap init -backend=false -input=false
+terraform -chdir=infrastructure/terraform/bootstrap fmt -check
+terraform -chdir=infrastructure/terraform/bootstrap validate
+terraform -chdir=infrastructure/terraform/bootstrap plan -input=false \
+  -var-file="$PRIVATE_TFVARS_FILE" -out="$PRIVATE_PLAN_FILE"
+terraform -chdir=infrastructure/terraform/bootstrap show "$PRIVATE_PLAN_FILE"
+```
+
+Review the exact saved plan, state/lock/budget names, resource count, expiry strategy,
+and cost with the owner. Only after that exact plan is authorized may it be applied.
+Then deliberately migrate the new local bootstrap state to the encrypted S3 backend:
+
+```bash
+terraform -chdir=infrastructure/terraform/bootstrap apply -input=false "$PRIVATE_PLAN_FILE"
+terraform -chdir=infrastructure/terraform/bootstrap init -migrate-state -force-copy \
+  -input=false \
+  -backend-config="bucket=multi-tenant-ai-inference-platform-tfstate-${EXPECTED_AWS_ACCOUNT_ID}" \
+  -backend-config='key=bootstrap/terraform.tfstate' \
+  -backend-config="region=${AWS_REGION}" \
+  -backend-config='dynamodb_table=multi-tenant-ai-inference-platform-pilot-terraform-locks' \
+  -backend-config='encrypt=true' \
+  -backend-config='use_lockfile=true'
+```
+
+Applying the bootstrap is a separately approved billable action; it is not part of
+the later GPU-instance apply. Keep the private variables, plan, and state out of
+public Git and do not delete the shared backend or budget while the GPU root uses it.
+
+Before the GPU preflight, select an offered Availability Zone and the reviewed
+Canonical Ubuntu AMI. Set their exact wrapper inputs and one expiry no more than
+12 hours away. Six hours is the planned maximum instance lifetime:
+
+```bash
+export GPU_EC2_AZ='<offered us-east-1 zone, for example us-east-1a>'
+export GPU_EC2_UBUNTU_AMI_ID='<reviewed Canonical Ubuntu 24.04 amd64 AMI ID>'
+export GPU_EC2_EXPIRES_AT="$(python3.12 -c 'from datetime import datetime, timedelta, timezone; print((datetime.now(timezone.utc) + timedelta(hours=6)).strftime("%Y-%m-%dT%H:%M:%SZ"))')"
+```
+
+The exact zone and AMI must be refreshed before use. Recreate the expiry and plan if
+approval takes long enough for the expiry window to become stale.
+
 ```bash
 make gpu-ec2-preflight
 make gpu-ec2-validate
@@ -113,6 +185,10 @@ make gpu-ec2-plan
 `gpu-ec2-validate` checks the Terraform configuration without creating resources.
 `gpu-ec2-plan` prepares a saved plan for review; it must not apply it automatically.
 Plans and Terraform state may contain sensitive data. Keep them outside public Git.
+The wrapper requires the exported `EXPECTED_AWS_ACCOUNT_ID`, `GPU_EC2_AZ`,
+`GPU_EC2_UBUNTU_AMI_ID`, and `GPU_EC2_EXPIRES_AT` values above. The plan prints a
+SHA-256 digest; record it privately as `GPU_EC2_PLAN_SHA256` after reviewing the
+exact saved plan.
 
 Before proceeding, inspect the exact saved plan and record:
 
@@ -127,7 +203,8 @@ Before proceeding, inspect the exact saved plan and record:
 **Future GPU execution — requires explicit approval:**
 
 ```bash
-make gpu-ec2-apply
+export GPU_EC2_PLAN_SHA256='<reviewed saved-plan SHA-256>'
+GPU_EC2_CONFIRM=apply make gpu-ec2-apply
 ```
 
 The apply wrapper must verify the saved plan digest and AWS account before Terraform
@@ -153,7 +230,7 @@ inventory. Never select an instance by guesswork.
 
 ```bash
 AWS_PROFILE=ai-platform-pilot-key aws ssm start-session \
-  --target <approved-instance-id> --region us-east-1
+  --target '<approved-instance-id>' --region us-east-1
 ```
 
 The Systems Manager agent must show Online. The instance role grants only the
@@ -185,7 +262,7 @@ review. Angle-bracket values in this guide are placeholders, not literal shell s
 cd /opt
 git clone https://github.com/Bepoadewale/multi-tenant-ai-inference-platform.git
 cd multi-tenant-ai-inference-platform
-git checkout <reviewed-commit-sha>
+git checkout '<reviewed-commit-sha>'
 git status --short --branch
 git rev-parse HEAD
 python3.12 -m venv .venv
@@ -454,7 +531,7 @@ model server binds to host loopback only:
 
 ```bash
 docker volume create multi-tenant-ai-inference-platform-gpu-model-cache
-docker run --rm --name vllm-manual --gpus all --ipc=host \
+docker run --name vllm-manual --gpus all --ipc=host \
   -p 127.0.0.1:8000:8000 \
   -v multi-tenant-ai-inference-platform-gpu-model-cache:/root/.cache/huggingface \
   vllm/vllm-openai@sha256:cf5b2fdd087eb4f6d261736967cc5cde974bd22ff4df50365f8fa419b6b4c484 \
@@ -495,6 +572,30 @@ OpenAI-compatible API. Never put confidential prompts or responses in evidence. 
 response should identify the requested served model and return generated text. Check
 `nvidia-smi` before, during, and after the request to correlate GPU memory/utilization
 with actual inference.
+
+**Where:** EC2 host through a second Session Manager shell, after saving the manual
+server's required logs and measurements. The manual container currently owns port
+8000 and the L4. Stop and remove that container before the Compose deployment starts;
+the named model-cache volume remains in place:
+
+```bash
+mkdir -p /var/tmp/gpu-lab/evidence
+docker logs --timestamps vllm-manual \
+  > /var/tmp/gpu-lab/evidence/vllm-manual.log 2>&1
+docker stop vllm-manual
+docker rm vllm-manual
+test -z "$(docker ps -q --filter 'publish=8000')"
+if ss -ltnH 'sport = :8000' | grep -q .; then
+  echo 'Port 8000 is still in use; do not start Compose.' >&2
+  exit 1
+fi
+nvidia-smi
+docker volume inspect multi-tenant-ai-inference-platform-gpu-model-cache
+```
+
+Review and sanitize the saved log before exporting it. A stopped container releases
+its GPU allocation and port; removing this container does not remove the named model
+cache volume. Do not start the Compose model service until the port check passes.
 
 **Common failures:** a model revision/hash mismatch means stop; a CUDA kernel error
 means check driver, image CUDA, precision support, and GPU architecture; out-of-memory
@@ -711,13 +812,39 @@ commit, PR, time, GPU/driver/runtime/model metadata, and exactly what each file 
 Keep raw Terraform plans/state, secrets, model weights, prompts, response text, and
 credential-bearing logs out of public Git.
 
-Stop only the project Compose profile and use only its own Terraform destroy wrapper:
+**Where:** EC2 host, root shell, repository root. Stop only the project Compose
+profile. This preserves named volumes long enough to finish the evidence export. Then
+leave the Session Manager shell; Terraform administration is performed from the
+authorized local workstation, where the AWS profile, Terraform backend, plan files,
+and destroy guards are configured:
 
 ```bash
 docker compose --env-file deployments/single-gpu/.env \
   -f deployments/single-gpu/compose.yaml down
+exit
+```
+
+**Where:** authorized local workstation, repository root. Restore the expected
+account, AWS profile, region, Availability Zone, and exact AMI ID from the deployment
+record. The destroy wrapper requires those inputs to reconstruct and inspect the
+project-scoped plan:
+
+```bash
+export AWS_PROFILE=ai-platform-pilot-key
+export AWS_REGION=us-east-1
+export EXPECTED_AWS_ACCOUNT_ID='<12-digit project account ID>'
+export GPU_EC2_AZ='<Availability Zone recorded at apply>'
+export GPU_EC2_UBUNTU_AMI_ID='<Canonical Ubuntu AMI recorded at apply>'
 make gpu-ec2-destroy-plan
-make gpu-ec2-destroy-apply
+```
+
+Review that plan and the printed SHA-256 digest. Only after the exact project-only
+destroy plan is authorized, set its digest and confirmation literal, then run the
+destroy and independent absence verifier:
+
+```bash
+export GPU_EC2_DESTROY_PLAN_SHA256='<reviewed destroy-plan SHA-256>'
+GPU_EC2_CONFIRM=destroy make gpu-ec2-destroy-apply
 make gpu-ec2-verify-clean
 ```
 

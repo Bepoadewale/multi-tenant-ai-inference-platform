@@ -355,21 +355,24 @@ access, existing CPU tenants remain available, and generated Ed25519 tokens carr
 expected tenant claims. They also check the signing key and token file are mode `0600`
 and the gateway-readable public key is mode `0644`.
 
-The guide's initial relative-link and documented Make-target checks passed; later
-follow-up edits still need the final cross-reference check. PR #58 runs `46049398387`
-and `46050614853` passed Python, manifests, GPU observability, and Ansible. Their
-supply-chain jobs failed before scanning: first on default Trivy `v0.70.0`, then on
-published Trivy `v0.76.2` because the installer could not resolve its tag. Run
-`46052092657` passed the checksum-verified official Trivy scan and every job except
-local E2E. The new named smoke assertion identified an empty edge-device inventory.
-Source inspection showed that the edge services ran as image UID `65532` while the
-recently secured token file is owner-only (`0600`) and owned by the local bootstrap
-user; the agents caught the resulting file-read error, kept retrying, and still
-reported healthy. The current unrun correction makes only these local simulation
-containers use the bootstrap UID/GID and waits for their registration. `make verify`
-passed Ruff, 146 tests (2 skipped), dependency audit, Compose and monitoring
-validation, and benchmark/evaluation/CUDA dry-run plans. The final script syntax,
-workflow YAML, Compose UID interpolation, and `git diff --check` also passed. No AWS
+The guide's initial relative-link and documented Make-target checks passed. PR #58
+runs `46049398387` and `46050614853` passed Python, manifests, GPU observability, and
+Ansible. Their supply-chain jobs failed before scanning: first on default Trivy
+`v0.70.0`, then on published Trivy `v0.76.2` because the installer could not resolve
+its tag. Run `46052092657` passed the checksum-verified official Trivy scan and every
+job except local E2E. Its named smoke assertion identified an empty edge-device
+inventory. Source inspection showed that the edge services ran as image UID `65532`
+while the recently secured token file is owner-only (`0600`) and owned by the local
+bootstrap user; the agents caught the file-read error, kept retrying, and still
+reported healthy. Commit `d759b8e` made only those local simulation containers use the
+bootstrap UID/GID and waits for their registration. All six CI jobs passed on that
+head in run `46054114999`; the fresh local E2E sequence completed install, bootstrap,
+smoke, flagship demo, verification, and scoped cleanup. After that CI run, automated
+review findings led to further documentation-only changes for wrapper inputs, the
+separate billable state bootstrap, manual vLLM handoff, and workstation teardown.
+Static review on this final guide draft parsed all 40 Bash blocks, matched all eight
+documented Make targets, checked relative links, parsed workflow YAML, and passed
+`git diff --check`. The final guide changes still need the normal PR CI. No AWS
 command, model download, GPU operation, or cloud spend occurred.
 
 These checks establish source behavior and document consistency only. They do not

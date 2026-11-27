@@ -38,6 +38,13 @@ command runs, why it is needed, what success looks like, and how to stop safely.
   `/healthz`. The Compose services now run as the host UID/GID supplied by
   `bootstrap-local`, preserving the owner-only token permissions. The smoke script
   also waits for both registrations before asserting the inventory.
+- PR review on head `d759b8e` found three operator-guide gaps: required Terraform
+  wrapper variables were not exported, the foreground manual vLLM container kept
+  port 8000/GPU allocated before Compose, and teardown commands were shown from the
+  EC2 shell instead of the authorized workstation. The guide now names plan/apply/
+  destroy inputs, documents the separately approved state bootstrap, stops and removes
+  the manual container while retaining its model-cache volume, and splits host
+  shutdown from workstation Terraform destruction.
 
 ## Research and design
 
@@ -65,8 +72,9 @@ command runs, why it is needed, what success looks like, and how to stop safely.
 - [x] Tests that new tenant tokens verify with the published Ed25519 public key and
   contain the intended tenant identity.
 - [x] Links from the documentation index and clearly labels unexecuted GPU commands.
-- [ ] Final review commands against actual scripts and files in the repository.
-- [ ] The next CI run passes the scanner and fresh local end-to-end cycle. Runs
+- [x] Final static guide cross-reference, Bash syntax, Make target, and command review,
+  including the three automated review findings.
+- [ ] The current CI run passes the scanner and fresh local end-to-end cycle. Runs
   `46049398387`, `46050614853`, and `46052092657` failed as described above; the
   third run passed the scanner and named the edge inventory failure.
 - [ ] Human review; do not merge without owner authorization.
@@ -88,8 +96,11 @@ inventory. Source inspection traced this to edge agents running as image UID `65
 while the newly restricted token file is owned by the local user at mode `0600`;
 agents silently retry registration but still report healthy. Compose now runs these
 two local-only agents with the `LOCAL_UID`/`LOCAL_GID` already exported by the
-bootstrap script and waits for two registrations before asserting. This fix has not
-yet run in CI. Final CI and relative Markdown-link validation remain pending.
+bootstrap script and waits for two registrations before asserting. The manual guide
+was also corrected for Terraform wrapper inputs, private bootstrap, stopping the
+manual vLLM container before Compose, and workstation-only destroy commands. These
+changes were statically checked but have not yet run in CI. Final CI and
+relative Markdown-link validation remain pending.
 
 ## Security and financial limits
 
