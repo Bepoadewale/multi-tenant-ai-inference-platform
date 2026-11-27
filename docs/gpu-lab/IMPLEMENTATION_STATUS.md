@@ -14,6 +14,10 @@ The fix maps shared rollout read/write failures to 503 and persists weights befo
 local mutation. Ten focused API/rollout tests and Ruff pass locally; this fix awaits
 the next PR run.
 
+**Learning handbook:** draft PR #59 adds `AI_INFRASTRUCTURE_HANDBOOK.md` and links
+it from the documentation index. Local whitespace and relative-link checks passed;
+PR #59 CI is outstanding. The handbook explicitly labels GPU execution as pending.
+
 | Phase | Status | Evidence / next gate |
 | --- | --- | --- |
 | 1. Audit, research, architecture | Complete | Baseline, direct request/admission audit, proposed diagrams, official-source research notes, risk register, cost estimate, backlog, evidence manifest, and passing PR checks are recorded. PR human review/merge remains open; exact package versions and cost inputs are rechecked before implementation/apply. |
