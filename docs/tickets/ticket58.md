@@ -189,6 +189,33 @@ still require their own PR workflow. No separate local clean-room run was launch
 - **AWS / GPU:** none. The existing AWS preflight stopped at quota `0.0`; no cloud
   mutation or spend occurred.
 
+## Fault-drill result and rollout-store fix
+
+- **CI evidence:** run `46066808334` executed the new local drills. The cancellation
+  drill passed ten cancelled SSE requests across both gateways and verified the
+  process-local active gauges and shared Redis leases returned to zero. The Redis
+  outage drill then observed HTTP 500 from gateway 8081 instead of the expected 503.
+  The exit trap restarted Redis and its ping recovery guard completed; the failed
+  assertion meant the test did not reach gateway 8082 or post-recovery readiness.
+- **Root cause:** `GatewayService.chat` reads shared rollout state synchronously
+  before admission; `RolloutStore.get_context` did not translate the Redis connection
+  error, so it escaped as HTTP 500 before the admission layer's existing 503 mapping.
+  Rollout writes also changed local weights before persisting shared state.
+- **Fix:** map Redis rollout reads and writes to HTTP 503; persist a rollout before
+  changing local target weights. Added regressions prove unavailable reads fail
+  closed and failed writes leave local weights and the audit unchanged.
+- **Drill expectation:** because shared rollout lookup runs before admission, the
+  outage test now expects `503 shared rollout state unavailable` from both replicas.
+- **Local validation:** repository-root API and rollout test modules passed **10
+  tests**; Ruff passed. Bash syntax and documentation whitespace checks pass. The
+  fixed cross-process outage plus recovery drill has not run yet.
+- **Incident report:** `docs/gpu-lab/incidents/INCIDENT-LOCAL-REDIS-001.md` preserves
+  the actual failure, detection, limits, root cause, and fix without calling it a
+  production or GPU incident.
+- **Next gate:** publish the fix and run one CI workflow. Require both gateways to
+  return HTTP 503 while Redis is stopped, Redis `PING` to recover, and both gateway
+  readiness checks to pass. Keep PR #58 open; no merge is authorized.
+
 ## Remaining limitations
 
 The guide cannot yet include actual command output or empirically confirmed expected

@@ -45,10 +45,12 @@ for port in 8081 8082; do
     -w '\n%{http_code}' || true)
   status=${response##*$'\n'}
   body=${response%$'\n'*}
-  if [[ "${status}" != 503 ]] || ! jq -e '.detail == "shared admission unavailable"' <<<"${body}" >/dev/null; then
-    echo "Redis outage drill failed: gateway ${port} returned HTTP ${status}; expected fail-closed HTTP 503." >&2
+  detail=$(jq -r '.detail // "unparseable response"' <<<"${body}" 2>/dev/null || true)
+  if [[ "${status}" != 503 ]] || ! jq -e '.detail == "shared rollout state unavailable"' <<<"${body}" >/dev/null; then
+    echo "Redis outage drill failed: gateway ${port} returned HTTP ${status}, detail=${detail}; expected fail-closed HTTP 503." >&2
     exit 1
   fi
+  echo "Observed gateway ${port}: HTTP 503, shared rollout state unavailable."
 done
 
 restore_redis
@@ -66,6 +68,7 @@ for port in 8081 8082; do
     echo "Redis recovery drill failed: gateway ${port} did not restore admission readiness." >&2
     exit 1
   fi
+  echo "Observed gateway ${port}: readiness restored after Redis restart."
 done
 
 echo 'Redis outage drill passed: both independent gateways rejected inference while Redis was unavailable and recovered after Redis restarted.'

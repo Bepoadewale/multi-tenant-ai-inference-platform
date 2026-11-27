@@ -5,10 +5,12 @@
 **Latest Phase 6 evidence:** PR #58 head `56a0493` passed all six checks in run
 `46065078837`, including its automatic local E2E job. The signed-tenant API test
 denies a customer-support request for engineering-only `embeddings`, even when the
-request supplies `X-Tenant: internal-engineering`. The current uncommitted follow-up
-prepares two local CPU-stack drills: client cancellation across both gateways, and
-Redis outage with 503 fail-closed behavior plus restart recovery. They are not yet
-executed; a later PR check must verify them.
+request supplies `X-Tenant: internal-engineering`. Follow-up head `6f73e42` passed
+the cancellation drill across both local gateways, but its outage check caught an
+HTTP 500 instead of 503; five jobs passed and local E2E failed in run `46066808334`.
+The fix maps shared rollout read/write failures to 503 and persists weights before
+local mutation. Ten focused API/rollout tests and Ruff pass locally; this fix awaits
+the next PR run.
 
 | Phase | Status | Evidence / next gate |
 | --- | --- | --- |
@@ -17,12 +19,12 @@ executed; a later PR check must verify them.
 | 3. Ubuntu/NVIDIA/CUDA/Ansible | Prepared — static host automation | PR #50 provides an ordered host-install manifest and 29-package hashed PyTorch lock. PR #57 adds the hash-locked Ansible 2.21.6 controller and host role for pinned Ubuntu/NVIDIA/CUDA/Docker packages, signed repositories, runtime configuration, PyTorch, and post-reboot verification. All six CI jobs passed on head `4795f12` in `46045068200`. No package has been installed on an EC2 host. The manual learning pass and second-run idempotency check remain open. |
 | 4. CUDA performance lab | Prepared — static PR #49 | Bounded CUDA vector-add, synchronized PyTorch experiments, and no-GPU planning are prepared. All five required jobs pass on the current restacked head. The `.cu` source is not compiled and there are no L4 measurements or profiler results. |
 | 5. vLLM and Qwen serving | Prepared — static only | The isolated Compose profile and immutable image/model candidates are prepared. The profile is now stacked after the gateway stream, admission, tokenizer, and cleanup work in PRs #33–#36. No image layer or model weights were downloaded; no L4 load, inference, or streaming result exists. |
-| 6. Multi-tenant GPU gateway | Prepared — static plus CPU-stack integration pending | PRs #33–#36 add stream usage/cancellation handling, request-scoped Redis admission leases, model-aware token reservations, and cleanup tests; PR #45 integrates the GPU profile. PR #58's signed customer-support API denial test passed in run `46065078837`. The current local follow-up adds two-gateway client-cancellation and Redis-outage/recovery drills to flagship E2E; they await first CI execution. No real GPU request, token reconciliation against vLLM, or live GPU cancellation has been verified. |
+| 6. Multi-tenant GPU gateway | Local integration fix in progress; L4 unverified | PR #58's signed customer-support API denial test passed in run `46065078837`. Run `46066808334` proved ten cancellations release active gauges and shared Redis leases, then found rollout-state lookup returned HTTP 500 during Redis outage. The local fix maps Redis rollout read/write errors to 503 and avoids partial local writes; 10 focused tests pass. The corrected outage/recovery drill awaits CI. No real GPU request, token reconciliation against vLLM, or live GPU cancellation has been verified. |
 | 7. GPU/AI observability | Prepared — static only | PR #46 configures pinned exporters, Prometheus, Grafana, Alertmanager, OpenTelemetry, Tempo, rules, and dashboards. All five required jobs pass on the current restacked head. No live device metrics, alert, dashboard, or trace has been observed. |
 | 8. Benchmarks and FinOps | Prepared — static only | PR #47 includes a bounded direct vLLM serving matrix and metadata collection. All five required jobs pass on the current restacked head. No L4 benchmark or measured inference cost exists. |
 | 9. Evaluation and releases | In progress — static implementation | PR #48 has seven synthetic evaluation cases and a privacy-safe dry-run. PR #51 designs sequential LLM release. PR #52 adds private MLflow tracking and report publication. PR #54 adds local manifest/plan controls. PR #55 adds authenticated plan/read/approval routes, checks candidate metadata against a finished MLflow run and sanitized report, and stores manifests in shared single-host SQLite. Latest five-check run `46034523863` passed. PR #56 head `852c873` passed all five checks in `46040861818`, including the required clean-room cycle. Live host/inference/recovery checks remain open. No real LLM evaluation or release has occurred. |
-| 10. Incidents and recovery | Prepared — GPU incidents not executed | Local Redis outage and client-cancellation drills are prepared for two CPU gateway processes; no controlled L4 failure/recovery evidence or incident report exists yet. |
-| 11. Automation and CI | In progress — static/local integration | PR #53 adds a hash-locked container build and a lock coverage check; its Linux image build passed. PR #57's Ansible hash-lock and syntax job passed with the other five jobs. The local drills await their first CI E2E execution. Terraform apply, Ansible host execution, and cloud execution remain unrun. |
+| 10. Incidents and recovery | First local incident recorded; GPU drills pending | `INCIDENT-LOCAL-REDIS-001.md` records the real CI 500, root cause, and incomplete recovery verification. The cancellation drill passed; the outage drill fix awaits CI. No controlled L4 failure/recovery report exists yet. |
+| 11. Automation and CI | In progress — local integration | PR #53 adds a hash-locked container build and lock coverage check; its Linux image build passed. PR #57's Ansible hash-lock and syntax job passed. The `6f73e42` workflow's five static jobs passed; local E2E exposed the rollout-store error, and the focused fix is waiting for the next PR run. Terraform apply, Ansible host execution, and cloud execution remain unrun. |
 | 12. Clean-room and teardown | Not started | Independent recreation, export and provider-side absence checks. |
 
 ## Baseline verified directly
