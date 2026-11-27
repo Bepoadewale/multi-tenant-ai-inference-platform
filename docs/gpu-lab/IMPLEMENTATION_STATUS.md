@@ -37,7 +37,7 @@
   7-resource bootstrap preview; no bootstrap apply has occurred.
 - Read-only `us-east-1` resource-group tag and EC2 instance lookups for the exact project tag: **no matches**. Untagged or differently tagged leftovers are not excluded.
 - EC2 instance type offerings list G6 in multiple `us-east-1` AZs; this is not a capacity reservation.
-- On-Demand G and VT applied quota: **0 vCPUs** (`L-DB2E81BA`) in `us-east-1`, `us-east-2`, and `us-west-2`. One 4-vCPU request was submitted for a single `g6.xlarge`. AWS email reports denial; read-only quota history still reports `CASE_OPENED`. The owner reports manually submitting an appeal through the existing Support Center case; no AWS reply or quota change is confirmed. Do not submit a duplicate request.
+- On-Demand G and VT applied quota: **0 vCPUs** (`L-DB2E81BA`); the latest read-only `us-east-1` check on 2026-11-27 confirmed the expected account, quota `0.0`, and the existing 4-vCPU request still `CASE_OPENED`. AWS email reports denial; the owner reports manually appealing through the existing Support Center case. No API-confirmed appeal result or quota change is available. Do not submit a duplicate request.
 - Price List API on 2026-11-26: Linux shared On-Demand `g6.xlarge` **$0.8048/hour**. An 8–12 hour instance window costs **$6.44–$9.66** before all other charges. A provisional 12-hour envelope including IPv4, gp3, repository S3/DynamoDB state requests, expiry, egress, tax contingency, and reserve is about **$18.35**; see `COST_REPORT.md` for assumptions and exclusions. This is not a final quote or authorization.
 - Credentials are never recorded here.
 
