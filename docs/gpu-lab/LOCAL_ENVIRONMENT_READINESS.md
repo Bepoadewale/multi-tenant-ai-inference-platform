@@ -9,7 +9,7 @@
 | Operating system | macOS 25.6.0, Apple Silicon (`arm64`) | Local code, Terraform static checks, Docker Compose configuration, and GitHub work |
 | AWS CLI | 2.32.6 | AWS CLI operations after an explicit identity/quota/authorization preflight |
 | Terraform | 1.14.0 | Repository static Terraform validation; cloud plan/apply still requires its state and cost gates |
-| Docker Compose | v2.40.3-desktop.1 | Local Compose rendering and CPU validation |
+| Docker Engine / Buildx / Compose | 29.0.1 / v0.29.1-desktop.1 / v2.40.3-desktop.1; daemon responds | Local image build, OCI manifest inspection, Compose rendering, and CPU validation |
 | Python runtimes | `python3` resolves to 3.14.0; `python3.12` is available as 3.12.12, and `python3.13` as 3.13.9 | Use the explicit Python 3.12 executable for project locks and checks that target CPython 3.12. Do not assume the default `python3` selects the project runtime. |
 | uv | 0.9.15 | Generate a target Linux/Python 3.12 hash lock; no CUDA packages were installed locally |
 | GitHub CLI | Authenticated as `Bepoadewale` using the local keychain | PR and Actions operations |

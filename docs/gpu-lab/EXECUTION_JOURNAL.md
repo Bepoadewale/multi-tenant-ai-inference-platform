@@ -1788,3 +1788,40 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** publish the documentation follow-up, wait for its CI, then continue
   non-billable preparation for exact container dependency pins and sequential release
   plan controls. Applied GPU quota remains zero.
+
+## 2026-11-27 — Prepare pinned gateway container build inputs
+
+- **Phase:** Non-billable repeatability work; Phase 2 remains blocked by quota.
+- **Branch:** `codex/gpu-container-build-locks`, based on PR #52 head `1f02955`.
+- **Starting state:** the shared gateway image used `python:3.12-slim` and installed
+  version ranges without artifact hashes. The GPU vLLM image and host packages were
+  pinned separately, but gateway, evaluator, and MLflow dependencies could drift.
+- **Research:** queried the Docker Official Python OCI index metadata. The
+  `python:3.12-slim-bookworm` index digest is
+  `sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64` and
+  advertises Linux amd64/arm64, with image annotation Python 3.12.16. Registry
+  metadata only was read; no layers were downloaded. Official PyPI metadata shows
+  MLflow 3.18.0 as a published release with provenance.
+- **Changes:** generated a universal SHA-256 lock for 124 packages from
+  `requirements-container.txt`; pinned the Dockerfile base image by OCI index digest;
+  switched pip install to `--require-hashes`; added a Python lock coverage validator,
+  Make target, and CI calls. This applies to the existing CPU app and GPU gateway
+  because they share one Dockerfile; the separately pinned vLLM image and CUDA
+  learning lock are unchanged.
+- **Validation:** `make container-dependencies-validate` passed and reported 124
+  pinned packages with hashes; Python 3.12 bytecode compile and Ruff passed; Markdown
+  link scan across 21 documents found no missing local links; `git diff --check`
+  passed. `pip-audit -s osv -r requirements-container.lock` reported no known
+  vulnerabilities. Docker Engine 29.0.1 and Buildx v0.29.1 are available and the
+  daemon responds; the registry metadata inspect completed. The first YAML syntax
+  check passed Ruby 2.6's unsupported `aliases:` keyword and failed; rerunning
+  `YAML.load_file` without that newer keyword parsed the workflow successfully. CI
+  repeats the lock audit and Linux image build.
+- **Cost/security:** no AWS call/write, image layer download/build, model download,
+  GPU hour, or project spend. The Docker metadata query supports both local arm64 and
+  EC2 amd64; CI will test the actual Linux amd64 installation.
+- **Limitations:** the package lock is static until the Docker build and dependency
+  audit pass; it does not prove GPU-host behavior. The workstation's default Python
+  remains 3.14.0; GPU and project tooling use explicit Python 3.12.
+- **Next:** finish the lock audit, create PR #53 on the PR #52 base, then watch its
+  Linux build and CPU end-to-end checks.
