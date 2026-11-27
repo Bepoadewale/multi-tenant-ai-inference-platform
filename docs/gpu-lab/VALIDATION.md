@@ -239,8 +239,24 @@ This establishes current local lint/test/static configuration outcomes and read-
   `git diff --check` pass.
 - **Verified fix:** commit `ee4b46c` passed all four required jobs in one PR-triggered
   workflow (`45923987903`). Its fresh-runner `local-e2e` job passed, including the
-  previously failing streaming demo. This was one local CPU end-to-end execution,
-  not an AWS/GPU clean-room reproduction.
+  previously failing streaming demo. This was local CPU CI evidence, not an AWS/GPU
+  clean-room reproduction.
+- The subsequent documentation head `a8e63b8` also passed all four jobs in one
+  workflow (`45925070365`). This rerun followed a documentation commit; it was not
+  requested as a second clean-room gate.
+
+## 2026-11-27 — Preflight timeout, cancellation, and Redis outage tests
+
+- **Branch:** `codex/vllm-preflight-failure-cleanup`, based on PR #35; PR not yet open.
+- **Scope:** local tests for cancellation during tokenization, an unavailable Redis
+  admission dependency, and tokenizer HTTP read-timeout handling. No service or cloud
+  infrastructure was started.
+- **Commands/results:** `make verify` passed Ruff, **76 tests**, 2 optional Redis
+  skips, pip-audit with no known vulnerabilities, and `docker compose config --quiet`.
+  One existing Starlette deprecation warning remains.
+- **Limits:** Redis outage is tested with a deterministic client double; timeout is
+  simulated through HTTPX `MockTransport`; no live Redis outage or vLLM server was
+  used. No AWS, GPU, or clean-room execution is claimed.
 
 ## Future GPU execution template
 

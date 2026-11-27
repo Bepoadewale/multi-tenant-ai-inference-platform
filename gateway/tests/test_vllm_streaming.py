@@ -352,6 +352,29 @@ def test_vllm_tokenizer_rejects_malformed_response(monkeypatch):
         asyncio.run(backend.count_tokens(chat_request()))
 
 
+def test_vllm_tokenizer_uses_short_timeout_and_wraps_timeout(monkeypatch):
+    seen = {}
+
+    async def handle(request: httpx.Request) -> httpx.Response:
+        raise httpx.ReadTimeout("test tokenizer timeout", request=request)
+
+    real_async_client = httpx.AsyncClient
+
+    def client_with_mock(*args, **kwargs):
+        seen["timeout"] = kwargs["timeout"]
+        kwargs["transport"] = httpx.MockTransport(handle)
+        return real_async_client(*args, **kwargs)
+
+    monkeypatch.setenv("INFERENCE_TOKENIZER_TIMEOUT_SECONDS", "0.2")
+    monkeypatch.setattr(vllm.httpx, "AsyncClient", client_with_mock)
+    backend = vllm.VllmBackend("http://model.test", "qwen-test", timeout_seconds=30)
+
+    with pytest.raises(RuntimeError, match="vLLM tokenization request failed"):
+        asyncio.run(backend.count_tokens(chat_request()))
+
+    assert seen["timeout"] == 0.2
+
+
 def test_gateway_reserves_exact_prompt_and_output_cap_before_vllm_inference():
     service = GatewayService()
     backend = vllm.VllmBackend("http://model.test", "qwen-test")
@@ -465,6 +488,34 @@ def test_gateway_fails_closed_when_vllm_tokenizer_is_unavailable():
     assert rejected.value.status_code == 503
     assert sum(value for _, _, value in service.limiter.tokens[tenant.id]) == 0
     assert not service.limiter.active[tenant.id]
+    assert service.capacity.pool_allocated == 0
+
+
+def test_gateway_cancels_vllm_preflight_and_releases_reservations():
+    service = GatewayService()
+    backend = vllm.VllmBackend("http://model.test", "qwen-test")
+    tokenizer_started = asyncio.Event()
+
+    async def wait_for_cancellation(_request):
+        tokenizer_started.set()
+        await asyncio.Event().wait()
+
+    backend.count_tokens = wait_for_cancellation
+    use_vllm_backend(service, backend)
+    tenant = Catalog().tenant("team-search")
+
+    async def cancel_request():
+        task = asyncio.create_task(service.chat(tenant, chat_request(stream=False)))
+        await asyncio.wait_for(tokenizer_started.wait(), timeout=1)
+        task.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await task
+
+    asyncio.run(cancel_request())
+
+    assert not service.limiter.active[tenant.id]
+    assert not service.limiter.reservations[tenant.id]
+    assert sum(value for _, _, value in service.limiter.tokens[tenant.id]) == 0
     assert service.capacity.pool_allocated == 0
 
 
