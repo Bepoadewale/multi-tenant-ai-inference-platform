@@ -254,6 +254,11 @@ Gateway benchmarking, actual performance results, actual model evaluation, and
 releases remain outstanding. Ticket #48 adds a static synthetic evaluation suite and
 dry-run; its CI and runtime behavior remain pending.
 
+The current ONNX release API does not support the one-target vLLM profile. The
+single-GPU Compose file also lacks MLflow, and the evaluation runner does not publish
+its sanitized report. Ticket #51 documents a separate sequential LLM release path;
+no candidate has been registered or deployed.
+
 - [x] Prepare the official `vllm bench serve` runner, context-bounded synthetic
   workloads, gated high concurrency, repeated aggregates, and hardware/software
   metadata capture. Static dry-run only; no inference request was sent.
