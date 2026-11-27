@@ -14,8 +14,7 @@ claim L4 compatibility.
   has been installed on the workstation and no host was configured.
 - The owner reports manually sending an appeal in the existing AWS support case. The
   last documented applied G/VT quota is zero, so infrastructure remains blocked.
-- This work is based on the open PR #49 branch. It does not authorize an AWS call or
-  spend.
+- This work is [PR #50](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/50), stacked on open PR #49; required checks are pending. It does not authorize an AWS call or spend.
 
 ## Research and decisions
 
