@@ -60,11 +60,14 @@ approval gates remain unchanged.
 
 ## Outstanding work
 
-- PR #45 is open against PR #44. The current follow-up head updates the smoke
-  assertion; its replacement GitHub run is pending.
+- PR #45 is open against PR #44. Head `2688d48` fixes the smoke assertion and adds sanitized failure-stage diagnostics
+  to `demo-capacity`. Runs `45983777135`, `140460013629`, and PR #46 workflow
+  `45987574123` passed smoke but failed in that script; their logs did not identify
+  the failing assertion. The new diagnostic run is pending. The script is not run
+  locally because it starts with Redis `FLUSHDB`.
 - Recheck the pinned container digest, NVIDIA driver/runtime compatibility, and model
   revision, license, and artifact hash before any paid run.
-- Add DCGM/Node Exporter and a minimal GPU Prometheus configuration in a separate
-  reviewed package; do not claim observability is complete yet.
+- Review the separate GPU observability package in PR #46; its static checks passed
+  but live GPU behavior remains unverified.
 - Validate manual inference and stream accounting on a real L4 before claiming the
   gateway integration acceptance criteria.

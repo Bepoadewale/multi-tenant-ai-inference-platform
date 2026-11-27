@@ -983,3 +983,24 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   This profile has no DCGM exporter yet and has not run against actual GPU hardware.
 - **Next:** finish full verification, publish PR #45, and continue GPU observability
   and benchmark preparation in separate packages.
+
+## 2026-11-27 — Add safe capacity-demo CI diagnostics
+
+- **Phase:** Phase 2 static deployment prep; no cloud or GPU execution.
+- **Branch / PR / commit:** PR #45 branch `codex/single-l4-compose-deployment`,
+  commit `2688d48`, pushed to PR #45.
+- **Starting state:** PR #45's fixed smoke check passes. The cumulative local CPU
+  `demo-capacity` demo failed in runs `45983777135` and `140460013629`; the PR #46
+  workflow also failed in the same script. The scripts used bare `test` / `jq` checks,
+  so CI did not identify which request or expected status failed.
+- **Change:** the capacity demo now tracks its current stage and, on error, prints each
+  captured HTTP status plus a restricted JSON summary of error, capacity decision, and
+  usage fields. It does not print bearer tokens, prompts, generated text, or full
+  response bodies.
+- **Validation:** `bash -n scripts/demo-capacity.sh` passed. The script itself was
+  not run locally because it calls `FLUSHDB` on the project Redis service. CI must
+  establish the actual failure cause and verify that diagnostics are sufficient.
+- **Cloud and cost:** none. This only changes local CPU demo diagnostics.
+- **Next:** push to PR #45, run its existing CI once, inspect the new failure detail,
+  and fix the underlying issue if confirmed. CI has not yet been checked for this
+  head at the time of this entry; the observability branch must rebase onto this head.
