@@ -52,7 +52,8 @@ No case number, account identifier, credentials, or email headers were added.
 
 ## Outstanding work
 
-- PR #43 was opened at `d550bee` against PR #42. Its CI checks are pending.
+- PR #43 head `4e62876` passed `python`, `manifests`, `supply-chain`, and `local-e2e`
+  in run `45979618437`. It remains open for human review.
 - Test backend permissions and lock lifecycle only after the shared backend is
   available through its authorized setup.
 - Do not launch a GPU instance until applied quota, the exact saved plan, current
