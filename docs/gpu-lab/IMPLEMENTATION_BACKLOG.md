@@ -156,10 +156,18 @@ sanitized output are retained, and a repeated Ansible run makes no unintended ch
 
 ### Package 4 — CUDA performance laboratory
 
-**Status:** not started. Prepare source and validation locally before GPU runtime.
+**Status:** the `codex/gpu-cuda-lab-preparation` candidate prepares a bounded CUDA C++
+vector-add and synchronized PyTorch matrix/transfer lab; PR #49 is not yet open. The
+no-GPU dry-run and focused tests are static preparation; no kernel has been compiled,
+and no real measurements exist.
 
-- [ ] Implement bounded CPU/GPU vector and matrix operations, copy/memory/precision/
-  batch experiments, timing synchronization, and optional Triton/Nsight exercises.
+- [x] Prepare bounded CPU/GPU vector and matrix operations, separate host/device
+  copies, supported precision checks, and warmup/repeat controls.
+- [x] Use CUDA events plus explicit synchronization for GPU timings; test the dry-run
+  without importing PyTorch or touching a GPU.
+- [ ] Prepare optional Triton/Nsight exercises after runtime compatibility and tool
+  availability are confirmed.
+- [ ] Compile and execute the experiments on the real single L4.
 - [ ] Record design, warm-up, repetitions, hardware/software context, raw values, and
   profiler availability before interpreting results.
 

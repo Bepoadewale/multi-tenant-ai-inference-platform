@@ -1331,3 +1331,35 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   request or mutation. No cost or GPU runtime.
 - **Evidence:** exact tool state and its limits are recorded in
   `LOCAL_ENVIRONMENT_READINESS.md` and the evidence manifest.
+
+## 2026-11-27 — Prepare CUDA and PyTorch performance experiments
+
+- **Phase:** Phase 4 static preparation; no CUDA compilation or GPU execution.
+- **Branch:** `codex/gpu-cuda-lab-preparation`, based on the PR #48 evaluation branch.
+- **Starting state:** the local machine is macOS arm64 without `nvcc`, `nvidia-smi`, or
+  an NVIDIA device. The repository had no CUDA performance lab.
+- **Change:** added a bounded CUDA C++ vector-add example with L4/single-GPU guards,
+  CPU correctness comparison, warmups, CUDA-event kernel timing, and separate transfer
+  timings. Added a PyTorch matrix benchmark comparing CPU FP32 with L4 FP32/FP16 and
+  BF16 only if supported, using synchronized CUDA-event measurements and explicit
+  numerical tolerances. Added a plan-only Make target, static CI wiring, tests, and a
+  learning README. Runtime measurements write aggregate JSON outside Git with owner-only
+  permissions.
+- **Validation:** plan reports sizes 256/512/1024, 3 warmups, 10 repetitions, and zero
+  GPU operations. Three Python 3.12 tests passed; Ruff, bytecode compilation, and
+  `git diff --check` passed. The `.cu` file was not compiled because the local
+  workstation has no CUDA compiler.
+- **Financial/security boundary:** no model, GPU, CUDA container, AWS resource, or spend.
+  Runtime remains prohibited until the full $25 plan/expiry/teardown gates pass.
+- **Next:** open PR #49 after updating docs, validate static CI, and later compile/run on
+  the pinned Ubuntu/L4 environment before using any result in reports.
+
+## 2026-11-27 — Confirm evaluation preparation PR checks
+
+- **Branch / PR / head:** `codex/gpu-evaluation-preparation`, PR #48, `71637d7`.
+- **Result:** all five required checks passed in run `45997259460`, including the
+  local E2E workflow, Python tests and dry-run, Terraform manifests, supply-chain, and
+  GPU observability schema validation.
+- **Evidence limits:** CI did not contact a language model or AWS. The evaluation
+  remains static; no quality score or release approval exists.
+- **Cost:** no AWS resources, GPU hours, model download, or spend.

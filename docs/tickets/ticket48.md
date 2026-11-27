@@ -59,9 +59,12 @@ runtime. No LLM evaluation has run.
 - The first numeric-boundary test caught an overly strict period boundary that rejected
   `4.`; the matcher now allows sentence punctuation while rejecting `14` and `4.5`.
 - An initial Ruff run found one unused import; it was removed before the passing run.
-- No GPU, model, or AWS resource is used. PR CI remains pending.
+- No GPU, model, or AWS resource is used.
 - The code and status-document head `24b149c` passed all five required CI jobs in run
   `45996207684`. A follow-up documentation-only head `5af5562` is running through CI.
+- The latest documentation head `71637d7` passed all five required jobs in run
+  `45997259460`; the local environment inventory and evaluation evidence index are
+  therefore CI-verified as repository changes.
 
 ## Security and financial considerations
 
