@@ -91,13 +91,12 @@ independent gates.
 - HashiCorp's [S3 backend guide](https://developer.hashicorp.com/terraform/language/backend/s3)
   supports native S3 lock files through `use_lockfile = true`, recommends bucket
   versioning, supports encryption, and marks DynamoDB-based locking deprecated. The
-  repository's `AGENTS.md` requires every cloud root to use its own DynamoDB lock
-  table. Therefore the GPU root will use a dedicated pay-per-request table to follow
-  repository policy and may add the S3 lock file as a second lock mechanism if the
-  selected Terraform release supports both; validate compatibility and cost in static
-  validation. Do not silently remove the DDB requirement just because newer Terraform
-  supports S3 locking. Exact Terraform minimum, state bootstrap, IAM access, and
-  lifecycle still need implementation and validation.
+  repository's `AGENTS.md` requires repository-scoped state guardrails and unique key
+  namespaces. The existing bootstrap defines that bucket and table. Reuse them for
+  the GPU root with a unique `gpu-ec2/` state key, and configure an S3 lock file too;
+  validate dual-lock compatibility. Do not silently remove the DDB requirement just
+  because newer Terraform supports S3 locking. Exact Terraform minimum, state
+  bootstrap, IAM access, and lifecycle still need implementation and validation.
 - AWS [Session Manager guidance](https://docs.aws.amazon.com/prescriptive-guidance/latest/aws-startup-security-baseline/wkld-06.html)
   says Session Manager has no additional EC2 connection charge; interface VPC
   endpoints do incur hourly and data-processing charges. A public subnet with no
@@ -105,6 +104,12 @@ independent gates.
   Gateway, but it still exposes a public IP and must be reviewed as an egress-only
   lab design. Package/model downloads flow out from the instance, so model and image
   pulls must be completed inside a bounded runtime.
+- AWS documents SSM Agent as preinstalled on typical Ubuntu Server 24.04 AMIs and
+  provides separate systemd service names for Snap and Debian packages ([Ubuntu
+  setup](https://docs.aws.amazon.com/systems-manager/latest/userguide/agent-install-ubuntu.html),
+  [AMI verification](https://docs.aws.amazon.com/systems-manager/latest/userguide/ami-preinstalled-agent.html)).
+  The static root enables either known service and fails cloud-init if neither is
+  present; real managed-instance registration still needs live validation.
 - AWS's [S3 pricing page](https://aws.amazon.com/s3/pricing/) describes pay-for-use
   storage and requests and says internet ingress is not charged. It also lists the
   first 100 GB/month of internet egress across eligible AWS services as free; the

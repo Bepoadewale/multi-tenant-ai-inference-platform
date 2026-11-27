@@ -47,6 +47,49 @@ adds a shared constraints file to local and gateway-container installs. On that 
 These are local CPU-platform results only. PR #31 GitHub checks must reach a terminal
 state before review; no AWS, GPU, CUDA, or vLLM execution is claimed.
 
+## 2026-11-27 — Phase 2 static Terraform root
+
+- **Branch:** `codex/gpu-ec2-foundation`, based on PR #30 head `04cb564`.
+- **Scope:** isolated, proposed `g6.xlarge` environment, scheduled expiry, state key,
+  guarded plan/apply/destroy scripts, and inventory-only teardown verifier. No final
+  remote-state plan, apply, quota request, or resource mutation was run.
+- **`make terraform-validate`:** passed for bootstrap, the existing EKS contract,
+  and the new GPU EC2 root using backend-disabled initialization.
+- **Formatting and shell syntax:** `terraform fmt` completed; preflight, plan, apply,
+  destroy-plan, destroy-apply, and verify-clean scripts passed `bash -n`.
+- **`git diff --check`:** passed.
+- **Account and AZ enforcement review:** initial Terraform `check` blocks were not
+  suitable as hard mutation guards because failed check assertions are warnings.
+  Replaced the account check with AWS provider `allowed_account_ids` in the GPU root
+  and prerequisite bootstrap root. The type-offering test is now an EC2 lifecycle
+  precondition. Backend-free validation and the updated AWS-backed read-only preview
+  passed; no apply was run.
+- **Earlier failed validation:** AWS provider `5.100.0` rejected
+  `action_after_completion` for `aws_scheduler_schedule`. The optional field was
+  removed instead of upgrading the provider. The one-time schedule has no recurrence
+  and is removed by the normal Terraform destroy. The final three-root validation
+  then passed.
+- **Template inspection:** an attempted `terraform console` in the S3-backend root
+  stopped with “Backend initialization required”; it made no AWS request and changed
+  no state. The local-state preview copy was then used to render cloud-init, and the
+  rendered YAML passed Ruby `YAML.safe_load(File.read(...))`. The first Ruby attempt
+  used unavailable `safe_load_file`; switching to the supported API passed. This is
+  static parsing only: cloud-init execution, Systems Manager registration, guest timer
+  activation, and scheduled termination still require a real host.
+- **Limits:** source/static validation does not prove a valid AWS plan, SSM online
+  status, EC2 capacity, driver setup, GPU availability, or Scheduler execution. The
+  quota remains 0 vCPUs, so no GPU apply is eligible.
+
+- **AWS-backed preview:** separate local-state plans read AWS identity, Ubuntu AMI,
+  and the selected type offering. The bootstrap preview proposed 7 creates; the latest
+  source-updated GPU preview (`.local/gpu-ec2-preview-r3.tfplan`, SHA-256
+  `5a0574c21199d11e6af5ccbb8226240cf7a7b672ddd9ebbb5f6c64f6814658e1`) proposed 14
+  creates with one `g6.xlarge` in `us-east-1c`. The AMI resolved to
+  `ami-0a951420c495183dc`. The GPU preview includes the revised SSM unit detection.
+  Both preview plans removed the S3 backend in a local copy, and the bootstrap used
+  `operator@example.invalid`; neither plan is apply-ready. The bootstrap plan SHA-256
+  is `e1cd8a88e803b8cd15c1dd20fc9896aba03ffe40013d879cd6aff5928f69aaed`.
+
 ### What this evidence does and does not establish
 
 This establishes current local lint/test/static configuration outcomes and read-only account/quota/resource queries. It does not establish absence of untagged AWS resources, successful GPU launch, a quota increase, instance capacity, driver/CUDA compatibility, inference performance, actual billed cost, or cloud cleanup.

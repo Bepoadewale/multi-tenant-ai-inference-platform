@@ -5,7 +5,7 @@
 | Phase | Status | Evidence / next gate |
 | --- | --- | --- |
 | 1. Audit, research, architecture | Complete | Baseline, direct request/admission audit, proposed diagrams, official-source research notes, risk register, cost estimate, backlog, evidence manifest, and passing PR checks are recorded. PR human review/merge remains open; exact package versions and cost inputs are rechecked before implementation/apply. |
-| 2. Single-L4 EC2 Terraform | In progress — static only | Prepare separate guarded root, state bootstrap, expiry, and teardown verification. No apply while G/VT quota is zero or until the exact plan and cost gates pass. |
+| 2. Single-L4 EC2 Terraform | In progress — static only | Separate root, account/quota/AZ preflight, checksum-gated plan/apply/destroy scripts, guest plus AWS expiry, and read-only cleanup verifier are drafted. Provider account enforcement and AZ precondition are in place. Backend-free validation passed; latest AWS-backed local-state preview proposed 14 creates for one `g6.xlarge` in `us-east-1c`. It is not an apply plan. Quota remains zero. |
 | 3. Ubuntu/NVIDIA/CUDA/Ansible | Not started | Manual host and container GPU computation, followed by repeat Ansible run. |
 | 4. CUDA performance lab | Not started | Synchronized real-GPU experiments and profiler evidence. |
 | 5. vLLM and Qwen serving | Not started | Pinned artifacts and actual L4 inference/streaming. |
@@ -31,18 +31,21 @@
 - Initial project ceiling: **USD $25 maximum**. No billable apply is authorized until the full bounded execution estimate and exact resource plan fit under that ceiling and the expiry/teardown controls are ready.
 - GPU instance-hours used: **0 verified in this goal**.
 - AWS resources created by this goal: **none**.
+- Exact-name read-only checks on 2026-11-26 found the planned repository state bucket,
+  DynamoDB lock table, and `$10` budget were all absent. They appear as creates in the
+  7-resource bootstrap preview; no bootstrap apply has occurred.
 - Read-only `us-east-1` resource-group tag and EC2 instance lookups for the exact project tag: **no matches**. Untagged or differently tagged leftovers are not excluded.
 - EC2 instance type offerings list G6 in multiple `us-east-1` AZs; this is not a capacity reservation.
-- On-Demand G and VT quota: **0 vCPUs** (`L-DB2E81BA`); G6 launch cannot proceed until increased.
-- Price List API on 2026-11-26: Linux shared On-Demand `g6.xlarge` **$0.8048/hour**. An 8–12 hour instance window costs **$6.44–$9.66** before all other charges. A provisional 12-hour envelope including IPv4, gp3, S3/DynamoDB state controls, expiry, egress, tax contingency, and reserve is about **$18.35**; see `COST_REPORT.md` for assumptions and exclusions. This is not a final quote or authorization.
+- On-Demand G and VT quota: **0 vCPUs** (`L-DB2E81BA`); G6 launch cannot proceed until increased. The planned request is 4 vCPUs for one `g6.xlarge`, submitted only after the exact plan/cost and expiry/teardown gates are ready.
+- Price List API on 2026-11-26: Linux shared On-Demand `g6.xlarge` **$0.8048/hour**. An 8–12 hour instance window costs **$6.44–$9.66** before all other charges. A provisional 12-hour envelope including IPv4, gp3, repository S3/DynamoDB state requests, expiry, egress, tax contingency, and reserve is about **$18.35**; see `COST_REPORT.md` for assumptions and exclusions. This is not a final quote or authorization.
 - Credentials are never recorded here.
 
 ## Current Next Actions
 
-1. Build the independent EC2 root, static guards, state bootstrap, dual expiry, and
-   exact destroy/inventory verification; never apply it during this static package.
-2. Run Terraform formatting and backend-disabled validation, then review the static
-   plan shape without creating resources.
+1. Complete the final source and documentation review, publish PR #32 against PR #30,
+   and wait for its required checks.
+2. Prepare the exact read-only plan and full resource/cost summary, then request a
+   four-vCPU G/VT quota only after those review gates are ready. Do not apply.
 3. Continue local gateway correctness and reproducibility work in a separate focused
    PR before live vLLM tenant integration.
 4. Keep PRs #30 and #31 open for human review; their required checks currently pass.
