@@ -1581,3 +1581,23 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Cost/resources:** no AWS calls, GPU use, or spend.
 - **Next:** add the lock to the focused host-install PR, update installation steps,
   then validate the package and scripts only on an authorized Ubuntu/L4 host.
+
+## 2026-11-27 — Document the single-L4 LLM release gap
+
+- **Phase:** Phase 9 non-billable design; no model or GPU operation.
+- **Branch:** `codex/gpu-sequential-release-design`, based on host-install PR #50.
+- **Inspection:** compared `gateway/api/release.py`, the ONNX model catalog, the
+  single-GPU Compose profile, and the sanitized LLM evaluation report.
+- **Finding:** the existing API is tied to the ONNX stable/candidate pair and writes
+  weighted Redis rollouts. The GPU profile has one vLLM endpoint and no MLflow service,
+  while the evaluator does not publish its report. Reusing those ONNX canary weights
+  would misrepresent two routes to the same model server as a real canary.
+- **Change:** drafted a separate sequential LLM release design with a manifest,
+  independent approval, stale-plan checks, vLLM restart, readiness/smoke checks, and
+  verified rollback. The design explicitly records the service interruption and the
+  local SQLite/artifact-store limits.
+- **Validation:** source inspection only; all runtime release behavior remains
+  unimplemented and unverified.
+- **Cost/resources:** no AWS calls, model downloads, GPU hours, or spend.
+- **Next:** publish the design as a focused PR, then implement the private MLflow and
+  LLM release path with tests before the paid batch.
