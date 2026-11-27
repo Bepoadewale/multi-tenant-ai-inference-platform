@@ -104,9 +104,12 @@ class GatewayService:
         # deliberately exhaust a tenant's valid workload budget.
         target = self.router.choose(tenant, model, request_id)
         backend = self.backend_for(model, target)
+        uses_vllm_tokenizer = model.runtime == "vllm"
+        if uses_vllm_tokenizer and not isinstance(backend, VllmBackend):
+            raise HTTPException(503, "vLLM backend unavailable")
         if request.max_tokens > tenant.quotas.max_output_tokens:
             raise HTTPException(413, "tenant output-token limit exceeded")
-        estimate = 0 if isinstance(backend, VllmBackend) else (
+        estimate = 0 if uses_vllm_tokenizer else (
             sum(len(message.content.split()) for message in request.messages) + request.max_tokens
         )
         allocation = await self._admit_capacity(tenant, model)
@@ -117,7 +120,7 @@ class GatewayService:
             await self._release_capacity(tenant, allocation)
             THROTTLES.labels(tenant.id, error.detail).inc()
             raise
-        if isinstance(backend, VllmBackend):
+        if uses_vllm_tokenizer:
             try:
                 prompt_tokens, server_context_limit = await backend.count_tokens(request)
                 if prompt_tokens > tenant.quotas.max_input_tokens:
