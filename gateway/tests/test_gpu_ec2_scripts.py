@@ -186,3 +186,90 @@ def test_apply_rejects_a_changed_plan_before_aws_preflight(tmp_path: Path) -> No
     assert "saved plan checksum does not match" in result.stderr
     assert not aws_log.exists()
     assert not terraform_log.exists()
+
+
+def test_destroy_apply_requires_explicit_confirmation_before_aws(tmp_path: Path) -> None:
+    bin_dir, aws_log, terraform_log = _fake_cli_bin(tmp_path)
+    env = _subprocess_env(bin_dir)
+
+    result = subprocess.run(
+        [str(REPO_ROOT / "scripts/gpu-ec2-destroy-apply.sh")],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "refusing destroy" in result.stderr
+    assert not aws_log.exists()
+    assert not terraform_log.exists()
+
+
+def test_destroy_apply_rejects_a_changed_plan_before_aws(tmp_path: Path) -> None:
+    bin_dir, aws_log, terraform_log = _fake_cli_bin(tmp_path)
+    plan_file = tmp_path / "changed-destroy.tfplan"
+    plan_file.write_bytes(b"destroy plan differs from reviewed bytes")
+    env = _subprocess_env(bin_dir)
+    env["GPU_EC2_CONFIRM"] = "destroy"
+    env["GPU_EC2_DESTROY_PLAN_FILE"] = str(plan_file)
+    env["GPU_EC2_DESTROY_PLAN_SHA256"] = "not-the-plan-digest"
+
+    result = subprocess.run(
+        [str(REPO_ROOT / "scripts/gpu-ec2-destroy-apply.sh")],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "saved-plan checksum does not match" in result.stderr
+    assert not aws_log.exists()
+    assert not terraform_log.exists()
+
+
+def test_destroy_apply_checks_account_before_terraform(tmp_path: Path) -> None:
+    bin_dir, aws_log, terraform_log = _fake_cli_bin(tmp_path)
+    plan_file = tmp_path / "destroy.tfplan"
+    plan_file.write_bytes(b"reviewed destroy plan")
+    env = _subprocess_env(bin_dir)
+    env["GPU_EC2_CONFIRM"] = "destroy"
+    env["GPU_EC2_DESTROY_PLAN_FILE"] = str(plan_file)
+    env["GPU_EC2_DESTROY_PLAN_SHA256"] = hashlib.sha256(plan_file.read_bytes()).hexdigest()
+    env["FAKE_AWS_ACCOUNT"] = "000000000000"
+
+    result = subprocess.run(
+        [str(REPO_ROOT / "scripts/gpu-ec2-destroy-apply.sh")],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "authenticated account does not match" in result.stderr
+    assert len(aws_log.read_text(encoding="utf-8").splitlines()) == 1
+    assert not terraform_log.exists()
+
+
+def test_destroy_plan_uses_only_the_destroy_operation(tmp_path: Path) -> None:
+    bin_dir, aws_log, terraform_log = _fake_cli_bin(tmp_path)
+    plan_file = tmp_path / "destroy.tfplan"
+    env = _subprocess_env(bin_dir)
+    env["GPU_EC2_DESTROY_PLAN_FILE"] = str(plan_file)
+
+    result = subprocess.run(
+        [str(REPO_ROOT / "scripts/gpu-ec2-destroy-plan.sh")],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert plan_file.read_bytes() == b"fake saved plan"
+    terraform_calls = terraform_log.read_text(encoding="utf-8").splitlines()
+    assert len(terraform_calls) == 2
+    assert "plan -destroy" in terraform_calls[1]
+    assert terraform_calls[1].split()[0] == "ai-platform-pilot-key"
