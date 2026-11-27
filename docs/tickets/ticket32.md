@@ -10,7 +10,7 @@ or local CPU inference path.
 ## Current state
 
 - Branch: `codex/gpu-ec2-foundation`, based on PR #30 head `04cb564`.
-- Pull request: [#32 — guarded single-L4 EC2 foundation](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/32), open and ready for review against `codex/single-l4-gpu-goal`. Review fixes are at `99b6b84`; current head `d3cee0f` passed all four required jobs in workflow `45930498661`.
+- Pull request: [#32 — guarded single-L4 EC2 foundation](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/32), open and ready for review against `codex/single-l4-gpu-goal`. Review fixes are at `99b6b84`; new fail-closed tests are at `7988b8f`. Local `make verify` passes with 56 tests; CI for the new head is pending.
 - Phase: 2 of 12, static infrastructure preparation.
 - Terraform describes the proposed environment; it has not been applied.
 - AWS account identity was verified before the quota request. Applied On-Demand G/VT
@@ -170,3 +170,15 @@ are part of this ticket's current work.
   duplicate CI executions caused by the old trigger, not two manual clean-room runs.
 - CI on the initial updated head passed; the corrected workflow ran once on head
   `528b52c` and all four required jobs passed. The PR body records these results.
+
+## Fail-closed preflight test expansion
+
+- Added four tests for a mismatched AWS account, insufficient G/VT quota, missing
+  `GPU_EC2_CONFIRM=apply`, and a changed saved-plan checksum. Each asserts refusal
+  occurs before an unintended Terraform call; early identity/quota failures also
+  stop additional AWS calls.
+- `make verify`: passed Ruff, 56 tests, dependency audit, and Compose config; one
+  existing Starlette deprecation warning remains. `bash -n` for the guarded scripts
+  and `git diff --check` passed.
+- All tests use fake command executables and temporary plan bytes. No credentials,
+  AWS API, infrastructure mutation, or GPU runtime were used.

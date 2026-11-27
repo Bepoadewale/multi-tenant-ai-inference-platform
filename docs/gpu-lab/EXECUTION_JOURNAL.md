@@ -499,3 +499,31 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   workflow `45930498661` passed Python, manifests, supply-chain, and local-e2e. The
   evidence manifest and PR description record that result. The AWS request is still
   `CASE_OPENED`; no infrastructure was launched.
+
+## 2026-11-27 — Expand EC2 fail-closed tests and recheck account inventory
+
+- **Phase:** Phase 2 — static-only EC2 infrastructure and non-billable validation.
+- **Branch / PR:** `codex/gpu-ec2-foundation`, PR #32; code commit `7988b8f` is local
+  and awaits publication with its documentation update.
+- **Changes:** added fake-CLI tests that verify preflight stops on a wrong account or
+  insufficient G/VT quota; apply refuses before AWS/Terraform if the operator has not
+  set `GPU_EC2_CONFIRM=apply`; and a modified plan fails checksum review before cloud
+  preflight. Together with earlier tests, six fail-closed cases cover the wrapper and
+  cleanup paths.
+- **Validation:** `make verify` passed Ruff, 56 tests, pip-audit, and Compose config.
+  One existing Starlette deprecation warning remains. Bash syntax and `git diff
+  --check` passed. The first lint issue was resolved earlier in this package; no new
+  lint failures occurred.
+- **AWS state reconciliation:** verified the caller matches the expected project
+  account in `us-east-1`; the account number is omitted from this public journal.
+  Exact project-tag Resource Groups and EC2 queries returned no resources
+  or non-terminated GPU instance. S3 `HeadBucket` returned 404 for the expected state
+  bucket; DynamoDB returned `ResourceNotFoundException` for the expected lock table;
+  the exact project budget query returned no budget. This confirms the bootstrap
+  guardrails are not present yet. No API mutation was made.
+- **Quota and cost:** the 4-vCPU request is already open (`CASE_OPENED`); applied quota
+  remains zero. No duplicate request, Terraform plan/apply, resource, GPU hour, or
+  goal-specific spend was created.
+- **Next:** publish code plus records to PR #32; let its single PR workflow validate
+  the current head. Continue preparing the remote-state and full-cost gates without
+  applying the bootstrap or GPU roots.
