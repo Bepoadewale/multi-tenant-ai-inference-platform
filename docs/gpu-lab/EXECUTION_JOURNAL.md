@@ -32,8 +32,30 @@
   cycles remain evidence.
 - **Cloud/cost:** no AWS calls, GPU, or live vLLM; goal-specific spend remains `$0` and
   GPU hours remain `0`.
-- **Next action:** finish PR #35 evidence, push the rebased branch with
-  `--force-with-lease`, resolve the lease-review finding, and watch its CI once.
+- **Follow-up:** pushed PR #35 head `5cd8dfb` with `--force-with-lease`, updated its
+  description, resolved both review threads, and started one CI watcher. The watcher is
+  still running while PR #36 is prepared.
+
+## 2026-11-27 — PR #36 carried onto the tokenizer lease fix
+
+- **Phase:** Phase 6 non-billable gateway tests. The active cloud phase remains Phase 2.
+- **Branch / PR:** `codex/vllm-preflight-failure-cleanup`, PR #36 stacked on PR #35.
+  Local source commit `ec5dcd1`; local documentation commit `a8d3278`.
+- **Starting state:** PR #36 targeted the earlier #35 branch at `a8e63b8`; #35 had
+  moved to `5cd8dfb` after the tokenizer lease fix.
+- **Action:** ran `git rebase --onto origin/codex/tokenizer-admission-preflight
+  a8e63b8 codex/vllm-preflight-failure-cleanup`. Two commits replayed. Shared goal,
+  status, backlog, journal, evidence, and validation docs conflicted; retained the newer
+  #35 state and preserved the #36 ticket, test additions, and validation entry.
+- **Validation:** `make verify` passed Ruff, **90 tests**, pip-audit, and Compose
+  configuration; 2 optional Redis tests were skipped, with one existing Starlette
+  warning. `git diff --check` passed. No full clean-room run was started because the
+  existing PR CI cycle is the relevant reproduction gate.
+- **Limits:** cancellation and Redis outage use deterministic local doubles; tokenizer
+  timeout uses `MockTransport`. No real Redis failure, live vLLM, AWS, or GPU was used.
+- **Cloud / cost:** no AWS resource or spend; GPU hours remain `0`.
+- **Next action:** publish this rebased PR #36 branch with `--force-with-lease`, update
+  the PR evidence, then watch its CI once.
 
 ## 2026-11-27 — Redis lease review fixes and branch recovery
 

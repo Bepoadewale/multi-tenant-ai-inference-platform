@@ -10,10 +10,11 @@ private because it is not protected by vLLM's API key.
 ## Current state
 
 - Branch: `codex/tokenizer-admission-preflight`, based on PR #34.
-- Pull request: [#35 — model-aware token reservations](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/35), open against PR #34's `codex/redis-admission-leases` branch; rebased code head `59cca44` is validated locally and awaits publication/CI.
+- Pull request: [#35 — model-aware token reservations](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/35), open against PR #34's `codex/redis-admission-leases` branch; rebased head `5cd8dfb` is pushed, both review threads are resolved, and CI is running.
 - Phase: non-billable Phase 6 prework. No live vLLM, AWS infrastructure, or GPU was
   used.
-- PR #34 review fixes are at `b51aedd`; run `45936485832` is still in progress.
+- PR #34 review fixes are at `b51aedd`; all four required checks passed in run
+  `45936485832` and both review threads are resolved.
 
 ## Research findings
 
@@ -131,5 +132,6 @@ A regression test uses a 30 ms lease and a 100 ms tokenizer delay. It verifies t
 request completes and releases its reservation. Targeted tests passed (**21 passed**);
 `make verify` passed Ruff, **87 tests**, pip-audit, and Compose configuration (2
 optional Redis tests skipped); local Redis 7.4 integration passed (**2 tests**). No AWS
-resource, live vLLM, or GPU was used. Code commit `59cca44` was tested locally; push
-and CI remained to be done.
+resource, live vLLM, or GPU was used. Code commit `59cca44` was tested locally and
+included in pushed PR head `5cd8dfb`; its fresh CI run was still in progress when this
+record was updated.
