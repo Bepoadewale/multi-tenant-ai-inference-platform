@@ -1,4 +1,4 @@
-.PHONY: install test lint audit run demo load-test bootstrap-local smoke status public-demo demo-local demo-overload demo-routing demo-failure demo-timeout demo-metering demo-observability demo-recovery demo-model-registry demo-release-control demo-capacity demo-operational-evidence demo-remediation demo-agent-tools demo-self-service demo-edge-adapter demo-sandboxed-agent demo-operator-console demo-flagship verify clean-local destroy-local helm-lint terraform-validate cloud-delivery-validate pilot-guardrails-plan pilot-cloud-plan pilot-cloud-apply pilot-cloud-push-image pilot-cloud-bootstrap-runtime pilot-cloud-smoke pilot-cloud-validate pilot-cloud-destroy gpu-ec2-preflight gpu-ec2-validate gpu-compose-config gpu-observability-validate gpu-benchmark-plan gpu-benchmark gpu-ec2-bootstrap-preview-plan gpu-ec2-preview-plan gpu-ec2-plan gpu-ec2-apply gpu-ec2-destroy-plan gpu-ec2-destroy-apply gpu-ec2-verify-clean
+.PHONY: install test lint audit run demo load-test bootstrap-local smoke status public-demo demo-local demo-overload demo-routing demo-failure demo-timeout demo-metering demo-observability demo-recovery demo-model-registry demo-release-control demo-capacity demo-operational-evidence demo-remediation demo-agent-tools demo-self-service demo-edge-adapter demo-sandboxed-agent demo-operator-console demo-flagship verify clean-local destroy-local helm-lint terraform-validate cloud-delivery-validate pilot-guardrails-plan pilot-cloud-plan pilot-cloud-apply pilot-cloud-push-image pilot-cloud-bootstrap-runtime pilot-cloud-smoke pilot-cloud-validate pilot-cloud-destroy gpu-ec2-preflight gpu-ec2-validate gpu-compose-config gpu-observability-validate gpu-benchmark-plan gpu-benchmark gpu-evaluation-plan gpu-ec2-bootstrap-preview-plan gpu-ec2-preview-plan gpu-ec2-plan gpu-ec2-apply gpu-ec2-destroy-plan gpu-ec2-destroy-apply gpu-ec2-verify-clean
 PYTHON ?= python3.12
 VENV := .venv
 PY := $(VENV)/bin/python
@@ -16,7 +16,7 @@ install:
 test:
 	PYTHONPATH=gateway/src $(PY) -m pytest -q
 lint:
-	$(PY) -m ruff check gateway/src gateway/tests benchmarks scripts
+	$(PY) -m ruff check gateway/src gateway/tests benchmarks evaluations scripts
 audit:
 	@for attempt in 1 2 3; do \
 		$(PY) -m pip_audit -s osv --skip-editable && exit 0; \
@@ -83,6 +83,7 @@ verify:
 	$(MAKE) gpu-compose-config
 	$(MAKE) gpu-observability-validate
 	$(MAKE) gpu-benchmark-plan
+	$(MAKE) gpu-evaluation-plan
 clean-local:
 	./scripts/clean-local.sh
 destroy-local:
@@ -128,6 +129,8 @@ gpu-benchmark-plan:
 	$(PYTHON) benchmarks/gpu_inference/run_vllm_matrix.py --dry-run
 gpu-benchmark:
 	$(PYTHON) benchmarks/gpu_inference/run_vllm_matrix.py
+gpu-evaluation-plan:
+	$(PYTHON) evaluations/gpu_llm/run_evaluation.py --dry-run
 gpu-ec2-bootstrap-preview-plan:
 	./scripts/gpu-ec2-bootstrap-preview-plan.sh
 gpu-ec2-preview-plan:

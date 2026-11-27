@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "suite_id": "single-l4-qwen-smoke-v1",
+  "cases": [
+    {
+      "id": "factual-arithmetic",
+      "category": "factual-question-answering",
+      "messages": [
+        {"role": "user", "content": "What is 2 + 2? Reply with the answer."}
+      ],
+      "check": {"type": "exact_number", "value": "4"}
+    },
+    {
+      "id": "structured-json",
+      "category": "structured-output",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Return only a JSON object with exactly these fields: name is Ada and role is engineer."
+        }
+      ],
+      "check": {
+        "type": "json_object",
+        "expected": {"name": "Ada", "role": "engineer"}
+      }
+    },
+    {
+      "id": "three-instructions",
+      "category": "instruction-following",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Give exactly three numbered steps for checking whether a local HTTP service is healthy. Keep each step to one line."
+        }
+      ],
+      "check": {"type": "numbered_lines", "count": 3}
+    },
+    {
+      "id": "short-summary",
+      "category": "summarization",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Summarize in one sentence: A service accepted requests until its queue filled. New requests were then rejected quickly. The operator reduced the incoming rate, drained the queue, and restored normal service."
+        }
+      ],
+      "check": {"type": "manual_review"}
+    },
+    {
+      "id": "word-problem",
+      "category": "basic-reasoning",
+      "messages": [
+        {
+          "role": "user",
+          "content": "There are 3 boxes with 4 items in each box. How many items are there in total? Give the number."
+        }
+      ],
+      "check": {"type": "exact_number", "value": "12"}
+    },
+    {
+      "id": "technical-explanation",
+      "category": "technical-explanation",
+      "messages": [
+        {
+          "role": "user",
+          "content": "In two short sentences, explain why a web service should use a timeout when calling another service."
+        }
+      ],
+      "check": {"type": "required_terms", "values": ["timeout", "wait"]}
+    },
+    {
+      "id": "invalid-json-request",
+      "category": "invalid-input-handling",
+      "request_kind": "malformed_json",
+      "check": {"type": "http_status", "accepted": [400, 422]}
+    }
+  ]
+}

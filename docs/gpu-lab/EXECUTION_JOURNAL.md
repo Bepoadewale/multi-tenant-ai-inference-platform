@@ -1,8 +1,6 @@
 # GPU Lab Execution Journal
 
-<<<<<<< HEAD
 ## 2026-11-27 — Quota status rechecked without mutation
-=======
 ## 2026-11-27 — Attempt the authorized quota-case update with AWS CLI
 
 - **Phase:** Phase 2 — static-only EC2 preparation; GPU execution remains blocked.
@@ -35,7 +33,6 @@
   cost, expiry, and automation work that does not require GPU runtime.
 
 ## 2026-11-27 — PR #40 status follow-up checks passed
->>>>>>> e837919 (docs: record quota case CLI blocker)
 
 - **Phase:** Phase 2 static-only preflight; no cloud resource creation or spend.
 - **Command:** read-only AWS Service Quotas queries in `us-east-1` checked the existing
@@ -1298,3 +1295,52 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   GPU benchmark. No GPU hours or project spend were incurred.
 - **Next:** rebase the evaluation preparation on the current PR #47 head and continue
   the static review queue.
+## 2026-11-27 — Prepare a deterministic LLM evaluation suite
+
+- **Phase:** Phase 9 static preparation; no model evaluation.
+- **Branch:** `codex/gpu-evaluation-preparation`, based on the passing PR #47 stack.
+- **Starting state:** the repository had governed ONNX model-release demos but no
+  versioned evaluation suite for the planned Qwen/vLLM runtime.
+- **Change:** added seven synthetic cases covering arithmetic/factual response,
+  structured JSON, instruction following, subjective summarization, simple reasoning,
+  technical explanation, and malformed JSON input. Added a stdlib Python evaluator,
+  deterministic check helpers, a no-network dry-run, owner-only aggregate output
+  outside the repository, and a required model-revision field for actual execution.
+  Prompts and response text are not written to the report; a response digest and token
+  counts are recorded when available. The subjective summary remains a human-review
+  item and does not become an automatic pass.
+- **Troubleshooting:** the first exact-number matcher rejected a correct answer ending
+  with sentence punctuation. A focused test caught this; the expression now allows
+  punctuation while not accepting a larger number or a decimal prefix. Ruff also
+  identified one unused import, which was removed.
+- **Validation:** `make gpu-evaluation-plan` reported seven cases and zero network
+  requests. Four Python 3.12 tests passed; Ruff, bytecode compilation, JSON parsing,
+  and `git diff --check` passed. No vLLM, model, Docker evaluation service, AWS
+  resource, or GPU was used.
+- **Security and cost:** optional API credentials are read only from the environment;
+  reports are excluded from public Git by default. No AWS spend or GPU hours.
+- **Next:** publish the evaluation-preparation PR and validate its CI. On the L4,
+  confirm actual OpenAI response shape, usage fields, malformed-input status, and
+  candidate report output before connecting evaluation to governed release decisions.
+
+## 2026-11-27 — Tighten evaluation review and report safeguards
+
+- **Phase:** Phase 9 static preparation; no request to the model.
+- **Branch:** `codex/gpu-evaluation-preparation`, based on PR #47 head `9936e11`.
+- **Finding and change:** an evaluation with all deterministic checks passing could
+  still need a person to inspect the subjective summary. The CLI now returns exit
+  code 2 for that state, so an automated release step cannot treat it as approved. A
+  separate `--show-subjective-response` flag allows an operator to inspect the
+  synthetic answer interactively; by default it is not printed or saved. Reports are
+  created with owner-only mode from the initial file descriptor, not chmodded only
+  after writing.
+- **Troubleshooting:** five focused tests pass after the numeric punctuation fix. A
+  shell-quoted f-string used only to summarize dry-run output failed to parse; the
+  reporting command was changed to `str.format`, and the dry-run then confirmed seven
+  cases and zero network requests. No evaluation behavior depended on that shell
+  one-liner.
+- **Validation:** targeted Python 3.12 tests: 5 passed; Ruff across repository Python
+  source/test/benchmark/evaluation/script paths passed; bytecode compilation,
+  `make gpu-evaluation-plan`, and `git diff --check` passed.
+- **Cloud and cost:** no model, Docker evaluation service, AWS operation, GPU hour, or
+  spend. PR #48 CI remains pending.
