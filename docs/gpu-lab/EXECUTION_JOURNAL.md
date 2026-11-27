@@ -1395,3 +1395,32 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Cost/resources:** no AWS calls, GPU time, resources, or spend in this update.
 - **Next:** continue preparation; check the appeal outcome and applied quota before
   any launch preflight, and do not launch with zero applied quota.
+
+## 2026-11-27 — Prepare ordered GPU host install manifest
+
+- **Phase:** Phase 3 static preparation; no GPU host or package install.
+- **Branch:** `codex/gpu-host-install-manifest`, based on PR #49 documentation head
+  `a7afcdf`.
+- **Objective:** make the exact install order and the host/container split easy to
+  review before the short paid execution window.
+- **Work:** added `GPU_HOST_INSTALL_MANIFEST.md` covering Ubuntu, SSM, matched kernel
+  headers, compute-only NVIDIA driver, Toolkit-only CUDA compiler, Docker, NVIDIA
+  Container Toolkit, isolated PyTorch, pinned vLLM, Qwen artifact, gateway/Redis, and
+  the local observability stack. Linked it from the documentation index and status.
+- **Research boundary:** version candidates are copied from dated official-source
+  research; Docker packages and standalone PyTorch still require an exact refreshed
+  selection. The full matrix remains unverified on L4.
+- **Validation:** documentation links, status consistency, and whitespace checks are
+  to be completed before the PR is published.
+- **Security/cost:** no AWS calls, infrastructure, model/image downloads, or spend.
+- **Next:** finish local documentation checks, open the focused PR, and keep the GPU
+  work behind quota, exact-plan, $25, runtime, expiry, and teardown gates.
+
+## 2026-11-27 — Confirm CUDA preparation PR checks
+
+- **PR / head:** PR #49, docs follow-up head `a7afcdf`.
+- **Result:** all five required jobs passed in run `45999972463`, including Python,
+  manifests, supply-chain, local end-to-end, and GPU observability validation.
+- **Evidence limit:** the workflow used a CPU-only runner; it did not compile CUDA,
+  contact AWS, download a model, or demonstrate L4 behavior.
+- **Cost:** no AWS resources, GPU hours, model or image downloads, or spend.

@@ -141,11 +141,16 @@ and teardown/absence commands are ready.
 
 ### Package 3 — Manual Linux, NVIDIA, CUDA, Docker, and Ansible
 
-**Status:** not started.
+**Status:** non-billable install manifest prepared on `codex/gpu-host-install-manifest`; no GPU host has been configured. The documented candidate stack is not a final pin or a runtime-verified combination.
 
 - [ ] Select and pin a standard Ubuntu 24.04 x86_64 AMI, kernel, NVIDIA driver,
   CUDA Toolkit, Docker Engine, NVIDIA Container Toolkit, Python, and PyTorch after
   verifying the exact version matrix against the pinned vLLM build.
+- [x] Record ordered host/container components, candidate versions, verification
+  points, stop conditions, and items deliberately kept off the host in
+  `GPU_HOST_INSTALL_MANIFEST.md`.
+- [ ] Recheck signed package indexes and exact package versions against the pinned AMI
+  and live Ubuntu kernel before launch; retain the reviewed package metadata.
 - [ ] Prepare scripts, packages, commands, output capture, and recovery steps before
   launching paid compute.
 - [ ] Manually install the driver and run `nvidia-smi`, a CUDA container, and a
