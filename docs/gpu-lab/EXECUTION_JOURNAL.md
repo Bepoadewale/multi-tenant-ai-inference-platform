@@ -1004,3 +1004,25 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** push to PR #45, run its existing CI once, inspect the new failure detail,
   and fix the underlying issue if confirmed. CI has not yet been checked for this
   head at the time of this entry; the observability branch must rebase onto this head.
+
+
+## 2026-11-27 — Fix stale capacity snapshot assertion
+
+- **Phase:** Phase 2 static deployment preparation; local E2E is CPU-only.
+- **Branch / PR:** `codex/single-l4-compose-deployment`, PR #45.
+- **Starting state:** CI run `45988603667` on head `65e5cba` passed smoke, then failed
+  at the capacity demo's administrative snapshot check. The diagnostic reported that
+  the preceding search quota request returned 429 as expected, search and payments
+  requests returned 200, and the analytics CPU fallback returned 200.
+- **Root cause:** the capacity API returns `mode: SIMULATED_HARDWARE_QUOTA_ACCOUNTING`
+  and the pools list; the demo checked an obsolete `hardware: SIMULATED` property.
+  This was a stale assertion, not a GPU failure.
+- **Change:** updated the demo to compare the returned `mode` and pool slot count. The
+  snapshot body/status are now stored in the temporary diagnostic directory, so a
+  future failure can report the relevant fields.
+- **Validation:** `bash -n scripts/demo-capacity.sh` and `git diff --check` passed. The
+  demo was not run locally because it executes Redis `FLUSHDB`; a fresh GitHub Actions
+  run is needed to verify the assertion and reveal any later queue-path failure.
+- **Cloud and cost:** no AWS operation, GPU, model, or spend.
+- **Next:** push this correction and watch its one PR #45 run. After it passes, rebase
+  PR #46 and the benchmark preparation branch onto the updated PR #45 head.
