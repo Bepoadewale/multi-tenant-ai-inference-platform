@@ -792,3 +792,36 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** validate documentation formatting, commit the focused research package,
   push its branch, open PR #37 against PR #32, and let its required checks reach a
   terminal state. Continue using the existing PR #36 watcher only.
+
+## 2026-11-27 — Quota denial and support-path investigation
+
+- **Phase:** Phase 2 remains static-only; GPU execution is blocked.
+- **Starting state:** PR #38 head `5256060` is under its one active CI watcher. No GPU
+  resources exist or were created. The existing quota request ID is recorded in the
+  project ledger; do not create another request.
+- **New evidence:** the owner provided an AWS email stating that the 4-vCPU On-Demand
+  G/VT quota increase was denied and that the case may be reopened with a detailed use
+  case. A read-only Service Quotas history query still reports `CASE_OPENED` for the
+  same request; the applied quota remains `0.0`. Treat the email as the denial notice
+  and the API status as inconsistent until reconciled.
+- **Commands / checks:** queried Service Quotas request history and applied quota in
+  `us-east-1`; checked the applied G/VT quota and `g6.xlarge` regional offering in
+  `us-east-2` and `us-west-2`. All three regions report zero applied quota; G6 is
+  offered in each, which does not prove AZ capacity. A read-only AWS Support
+  `describe-cases` call failed with `SubscriptionRequiredException`; no support case
+  or quota request was created or changed.
+- **Research:** AWS states that a denied quota request should be taken to Support and
+  that resolved cases can be reopened through the Support Center console. The account
+  profile cannot use the Support API. Official references are in
+  [`QUOTA_APPEAL_DRAFT.md`](QUOTA_APPEAL_DRAFT.md).
+- **Alternatives considered:** checked two other US regions; their applied quotas are
+  also zero, so switching regions alone does not solve the issue. No alternative GPU
+  family is allowed by project constraints. A duplicate quota request is unsafe while
+  the existing request still appears open.
+- **Changes:** created a sanitized appeal draft with the single-instance use case,
+  four-vCPU request, hard $25 ceiling, 8–12 hour target, private access, automatic
+  expiry, and teardown safeguards. The draft has not been submitted.
+- **Next action:** keep non-billable repo work moving. The owner must reopen the
+  existing case from AWS Support Center if they choose to appeal; no GPU launch is
+  possible until the quota is approved and the cost/apply gates pass.
+- **Cost:** no AWS resources, GPU hours, or charges were created.
