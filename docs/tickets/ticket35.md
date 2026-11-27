@@ -90,7 +90,8 @@ inference. Tokenization failure fails closed and releases concurrency.
   `scripts/demo-local.sh` now reports the expected HTTP/status assertion and
   sanitized fixture response; the CI workflow now runs on pull requests and on
   pushes to `main`, avoiding duplicate branch-push/PR runs. This is a diagnostic
-  change, not a passing rerun; the fix and the next single CI result remain pending.
+  change, not a passing rerun; the code fix and next CI result were still pending at
+  this point in the work.
 - `bash -n scripts/demo-local.sh`, Ruby YAML parsing of `.github/workflows/ci.yml`,
   and `git diff --check` pass after the diagnostics and trigger change. No demo rerun
   has been performed yet.
@@ -103,7 +104,11 @@ inference. Tokenization failure fails closed and releases concurrency.
 - After correcting a positional `Usage` fixture in the new regression test,
   `make verify` passed: **73 passed, 2 optional Redis skips**, one existing
   deprecation warning, no known dependency vulnerabilities, and Compose configuration
-  passed. The code fix is not pushed yet; its one PR CI run remains outstanding.
+  passed. This was the local result before the code fix was pushed.
+- Commit `ee4b46c` passed all four jobs in the single PR-triggered workflow
+  `45923987903`, including the fresh-runner `local-e2e` job. The streaming demo that
+  previously failed now passed. This verifies one local CPU end-to-end cycle; it does
+  not claim live vLLM, AWS, or GPU execution.
 - Evidence and official source notes are indexed in `docs/gpu-lab/VALIDATION.md`,
   `docs/gpu-lab/EVIDENCE_MANIFEST.md`, and `docs/gpu-lab/RESEARCH_NOTES.md`.
 

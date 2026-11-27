@@ -218,8 +218,11 @@ This establishes current local lint/test/static configuration outcomes and read-
 - **Next CI:** `demo-local.sh` now reports the failed stream or HTTP assertion and its
   synthetic response. CI is configured for pull requests and pushes to `main`, so
   feature-branch commits run once. Bash syntax, workflow YAML parsing, and
-  `git diff --check` pass. The code fix still needs its single PR CI run; no clean-room
-  or GPU rerun is claimed.
+  `git diff --check` pass.
+- **Verified fix:** commit `ee4b46c` passed all four required jobs in one PR-triggered
+  workflow (`45923987903`). Its fresh-runner `local-e2e` job passed, including the
+  previously failing streaming demo. This was one local CPU end-to-end execution,
+  not an AWS/GPU clean-room reproduction.
 
 ## Future GPU execution template
 
