@@ -9,7 +9,7 @@
 | 3. Ubuntu/NVIDIA/CUDA/Ansible | Not started | Manual host and container GPU computation, followed by repeat Ansible run. |
 | 4. CUDA performance lab | Not started | Synchronized real-GPU experiments and profiler evidence. |
 | 5. vLLM and Qwen serving | Not started | Pinned artifacts and actual L4 inference/streaming. |
-| 6. Multi-tenant GPU gateway | Local correctness work in progress; no GPU integration | PR #33's latest code commit is `635f61d`; local tests cover vLLM final usage, in-band errors, gateway usage estimates, and cancellation. CI is rerunning after the rebase and evidence update. Shared Redis lease/reconciliation design and real GPU routing remain outstanding. |
+| 6. Multi-tenant GPU gateway | Local correctness work in progress; no GPU integration | PR #33 has stream fixes; PR #34 code commit `4cffc60` adds bounded renewal, expired-lease checks, and orphan metadata cleanup. `make verify`: 75 passed, 2 optional Redis skips; Redis 7.4 integration: 7 passed. PR #34 CI/review is pending. Live vLLM, independent gateway-process failure, and GPU routing remain outstanding. |
 | 7. GPU/AI observability | Not started | Live metrics, dashboards, alert, trace correlation. |
 | 8. Benchmarks and FinOps | Not started | Reproducible measured report with raw evidence references and cost method. |
 | 9. Evaluation and releases | Not started | Actual evaluation, candidate rejection and rollback. |

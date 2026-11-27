@@ -1,5 +1,40 @@
 # GPU Lab Execution Journal
 
+## 2026-11-27 — Redis lease review fixes and branch recovery
+
+- **Phase:** Phase 6 non-billable gateway correctness prework. The active cloud
+  implementation phase remains Phase 2; no cloud resource was created or changed.
+- **Branch / PR:** `codex/redis-admission-leases`, PR #34 stacked on PR #33. Code fix
+  commit: `4cffc60`. The PR remote branch had not yet been updated at the start of this
+  work; this entry will be refreshed with the pushed documentation commit and CI run.
+- **Starting state:** local branch was rebased onto PR #33 head `c5de757`, while the
+  GitHub PR branch still pointed to `ae99959940b217495ae5a2e231656965b2a4ce2f`.
+  Five validation and goal documents contained local updates that had not been committed.
+- **Objective:** close two lease-lifecycle review findings, record actual test evidence,
+  and make the reviewed branch reflect the rebased source.
+- **Commands / troubleshooting:** inspected `git status`, branch history and PR state;
+  the local and remote histories diverged after the first rebase. An initial rebase
+  replayed PR #33 ancestors and produced conflicts; it was aborted. The corrected
+  `git rebase --onto origin/codex/gateway-stream-accounting e87753c
+  codex/redis-admission-leases` replayed only PR #34 commits. Documentation conflicts
+  were resolved by retaining the newer PR #33 documentation and PR #34 ticket/code.
+- **Changes:** bounded asynchronous lease renewal and request cancellation before
+  expiry; reject renewal after expiry; prune stale reservation metadata on later
+  admissions while retaining conservative token-ledger entries through their windows.
+  Added regression tests for an unresponsive renewal and repeated crash cleanup.
+- **Validation:** `make verify` passed Ruff, 75 tests, pip-audit and Compose config; two
+  optional Redis integration tests were skipped in the no-Redis run. A disposable
+  local Redis 7.4 container ran the relevant lease suite with 7 passing tests. The
+  container was stopped after the test. The evidence and test limitations are in
+  `VALIDATION.md` and `EVIDENCE_MANIFEST.md`.
+- **Failed approaches:** the first rebase attempt replayed the wrong ancestor range and
+  caused conflicts in files already changed by PR #33. It was aborted before any push;
+  the `--onto` rebase used the old PR #34 base commit to replay only its own work.
+- **Cloud / cost:** no AWS API, GPU, or live vLLM was used in this package. Goal-specific
+  spend remains `$0`; GPU instance-hours remain `0`.
+- **Next action:** publish the updated PR #34 branch with `--force-with-lease`, respond
+  to the two review threads, and run one PR check watcher on the new head.
+
 ## 2026-11-27 — Clean-room run count clarified
 
 - **Scope:** verified the repository's clean-room requirements after the owner clarified
