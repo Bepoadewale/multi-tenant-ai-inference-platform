@@ -829,15 +829,15 @@ so the second run's `changed=0` can be checked.
 The earlier manual Compose start is the first deployment. To build and deploy the
 reviewed profile again, the root shell must have a reviewed `.env` with exact mode
 `0600`, the owner-only tenant identity file, a verified 64-character model artifact
-SHA-256, the 40-character source commit, and a unique Grafana password at least 32
-characters long:
+SHA-256, the current checkout's exact 40-character source commit, and a unique Grafana
+password at least 32 characters long:
 
 ```bash
 GPU_EC2_DEPLOY_CONFIRM=deploy make gpu-ec2-deploy
 ```
 
-The preflight rejects symlinks, duplicate keys, placeholders, invalid provenance
-lengths, and weak passwords without printing values. This gives the Compose
+The preflight rejects symlinks, duplicate keys, placeholders, invalid or stale
+provenance, and weak passwords without printing values. This gives the Compose
 image build/start operation a 45-minute limit, then waits for
 vLLM and both gateways for at most 20 minutes. If build/start fails or readiness does
 not arrive, it stops vLLM and both gateways and exits with failure. The script does

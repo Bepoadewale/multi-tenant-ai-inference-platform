@@ -101,7 +101,9 @@ def _deploy_environment(tmp_path: Path, **overrides: str) -> Path:
 
 
 def test_deploy_preflight_accepts_private_complete_provenance(tmp_path):
-    gpu_ec2_deploy_preflight.validate_environment(_deploy_environment(tmp_path))
+    gpu_ec2_deploy_preflight.validate_environment(
+        _deploy_environment(tmp_path), expected_source_commit="b" * 40
+    )
 
 
 @pytest.mark.parametrize(
@@ -123,6 +125,13 @@ def test_deploy_preflight_requires_exact_private_file_mode(tmp_path):
 
     with pytest.raises(ValueError, match="mode 0600"):
         gpu_ec2_deploy_preflight.validate_environment(path)
+
+
+def test_deploy_preflight_rejects_stale_source_commit(tmp_path):
+    with pytest.raises(ValueError, match="match the checked-out source commit"):
+        gpu_ec2_deploy_preflight.validate_environment(
+            _deploy_environment(tmp_path), expected_source_commit="d" * 40
+        )
 
 
 def test_gpu_smoke_checks_readiness_tenant_permissions_and_inference(monkeypatch, tmp_path):

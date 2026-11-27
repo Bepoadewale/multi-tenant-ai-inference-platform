@@ -42,6 +42,8 @@ host or project AWS resource has been created.
 - [x] Add private sanitized host evidence output and fake-based unit tests.
 - [x] Validate the deployment `.env` file is a regular mode-`0600` file with unique
   keys, verified-format model digest/source commit, and a sufficiently long password.
+- [x] Reject a deployment source commit that is stale relative to the checked-out
+  code, so evaluation provenance cannot silently name a different revision.
 - [x] Document the manual-to-automated handoff, confirmations, locations, timeouts,
   evidence limits, and Terraform-only teardown in the reproduction and batch guides.
 - [x] Align Ansible validation with the hash-locked local environment and keep a CI
@@ -93,7 +95,7 @@ the exact-plan, project-scoped Terraform process from the local workstation.
 
 ## Evidence collected
 
-Sixteen focused tests passed; Ruff passed for all new Python files; both shell scripts
+Seventeen focused tests passed; Ruff passed for all new Python files; both shell scripts
 passed `bash -n`; Make previews showed only the intended wrapper commands; a local
 negative check confirmed host configuration stops before metadata access without its
 confirmation; `git diff --check` passed. Seventy-eight local Markdown links across
