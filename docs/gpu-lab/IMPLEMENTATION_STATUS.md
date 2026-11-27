@@ -9,7 +9,7 @@
 | 3. Ubuntu/NVIDIA/CUDA/Ansible | Not started | Manual host and container GPU computation, followed by repeat Ansible run. |
 | 4. CUDA performance lab | Not started | Synchronized real-GPU experiments and profiler evidence. |
 | 5. vLLM and Qwen serving | Not started | Pinned artifacts and actual L4 inference/streaming. |
-| 6. Multi-tenant GPU gateway | Local correctness work in progress; no GPU integration | PR #33 checks passed. PR #34 head `b51aedd` passed all four checks in run `45936485832`; both review threads are resolved. PR #35 head `5cd8dfb` has both findings resolved; CI is running. PR #36 failure-path tests are rebased locally. Latest `make verify`: 90 passed, 2 optional Redis skips; PR #35 Redis 7.4 integration: 2 passed. No live vLLM, separate gateway-process failure, or GPU routing evidence exists. |
+| 6. Multi-tenant GPU gateway | Local correctness work in progress; no GPU integration | PR #33 checks passed. PR #34 head `b51aedd` passed all four checks in run `45936485832`; both review threads are resolved. PR #35 head `5cd8dfb` has both findings resolved; CI is running. PR #36 head `e0e86c5` is pushed on the updated stack; fresh CI is running. Latest `make verify`: 90 passed, 2 optional Redis skips; PR #35 Redis 7.4 integration: 2 passed. No live vLLM, separate gateway-process failure, or GPU routing evidence exists. |
 | 7. GPU/AI observability | Not started | Live metrics, dashboards, alert, trace correlation. |
 | 8. Benchmarks and FinOps | Not started | Reproducible measured report with raw evidence references and cost method. |
 | 9. Evaluation and releases | Not started | Actual evaluation, candidate rejection and rollback. |

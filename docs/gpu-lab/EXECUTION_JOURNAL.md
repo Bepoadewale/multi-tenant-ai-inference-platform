@@ -1,5 +1,17 @@
 # GPU Lab Execution Journal
 
+## 2026-11-27 — Quota status rechecked without mutation
+
+- **Phase:** Phase 2 static-only preflight; no cloud resource creation or spend.
+- **Command:** read-only AWS Service Quotas queries in `us-east-1` checked the existing
+  request and applied G/VT quota using `ai-platform-pilot-key`.
+- **Result:** request `34647c8598cb4ac5a8e43b3e956ccd65ikyKx4Qy` remains
+  `CASE_OPENED`, requested value `4.0`; the applied `Running On-Demand G and VT
+  instances` quota is `0.0` vCPUs.
+- **Decision:** do not retry the request or launch infrastructure. This is status
+  evidence only; quota approval would still not authorize Terraform apply.
+- **Cost:** no AWS resources or spend; GPU instance-hours remain `0`.
+
 ## 2026-11-27 — PR #35 lease held during tokenizer preflight
 
 - **Phase:** Phase 6 non-billable gateway correctness work. Phase 2 remains the active
