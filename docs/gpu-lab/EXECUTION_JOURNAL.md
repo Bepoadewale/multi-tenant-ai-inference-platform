@@ -433,3 +433,32 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next action:** allow the single PR-check watcher to reach terminal state, resolve
   any failures, and continue the remote-state/cost/expiry preparation while AWS
   processes the quota request.
+
+## 2026-11-27 — Resolve PR #32 script review findings
+
+- **Phase:** Phase 2 — static-only EC2 infrastructure preparation.
+- **Branch / PR:** `codex/gpu-ec2-foundation`, PR #32, stacked on PR #30.
+- **Starting state:** PR #32's review identified that the plan/apply parent processes
+  did not inherit the profile default set by their child preflight, and that the
+  teardown verifier enumerated Scheduler schedules even when their group was absent.
+  AWS confirms the requested 4-vCPU quota change remains open (`CASE_OPENED`); applied
+  quota is still zero. No GPU instance or infrastructure exists from this goal.
+- **Changes:** plan/apply now export `AWS_PROFILE` before preflight, defaulting to
+  `ai-platform-pilot-key` and preserving an explicit profile. The cleanup verifier
+  now skips schedule enumeration when its group is already absent. Added subprocess
+  tests with fake AWS/Terraform binaries to check profile propagation and the missing
+  group path.
+- **Validation:** first lint attempt found import ordering, an unused import, and a
+  datetime style issue in the new test; Ruff auto-fixed these. `make verify` then
+  passed Ruff, 52 tests, the dependency audit, and Compose configuration. All 52 tests
+  passed with one existing Starlette deprecation warning. `bash -n` for the three
+  changed scripts and `git diff --check` passed.
+- **Cloud / cost:** only read the AWS caller identity and quota request history; did
+  not request a duplicate, run Terraform, or create/change AWS resources. Spend and
+  L4 instance-hours remain `$0` and `0` in this goal.
+- **Evidence limits:** fake CLI subprocess tests prove local wrapper branching and
+  environment propagation only. They do not prove actual AWS authentication,
+  Scheduler behavior, infrastructure deployment, or clean teardown.
+- **Next:** review the complete diff, commit and push one package to PR #32, then let
+  its single PR-triggered workflow finish before updating PR status and the evidence
+  manifest.

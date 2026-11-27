@@ -20,6 +20,7 @@ actual="$(python3 -c 'import hashlib,pathlib,sys; print(hashlib.sha256(pathlib.P
   exit 1
 }
 
+export AWS_PROFILE="${AWS_PROFILE:-ai-platform-pilot-key}"
 export AWS_REGION="${AWS_REGION:-us-east-1}"
 export GPU_EC2_INSTANCE_TYPE="g6.xlarge"
 "$root/scripts/gpu-ec2-preflight.sh"
