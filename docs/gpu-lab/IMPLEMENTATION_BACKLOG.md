@@ -141,7 +141,7 @@ and teardown/absence commands are ready.
 
 ### Package 3 — Manual Linux, NVIDIA, CUDA, Docker, and Ansible
 
-**Status:** non-billable install manifest is in open PR #50 (`codex/gpu-host-install-manifest`); checks are pending and no GPU host has been configured. The documented candidate stack is not a final pin or a runtime-verified combination.
+**Status:** PR #50 contains a non-billable ordered install manifest and hashed PyTorch lock; its prior head passed all five required checks in run `46012380712`. The restacked head now includes the gateway fixes from PRs #33–#36 and needs fresh CI. No GPU host has been configured; candidate versions are not runtime-verified.
 
 - [ ] Select and pin a standard Ubuntu 24.04 x86_64 AMI, kernel, NVIDIA driver,
   CUDA Toolkit, Docker Engine, NVIDIA Container Toolkit, Python, and PyTorch after
@@ -166,10 +166,11 @@ sanitized output are retained, and a repeated Ansible run makes no unintended ch
 
 ### Package 4 — CUDA performance laboratory
 
-**Status:** PR #49 (`codex/gpu-cuda-lab-preparation`) is open and its current CI run
-`45998860857` passed all five required jobs on code head `ce8bbba`. The bounded CUDA C++ vector-add and synchronized PyTorch
-matrix/transfer lab is static preparation. No kernel has been compiled and no real
-measurements exist.
+**Status:** PR #49 (`codex/gpu-cuda-lab-preparation`) is open. Its prior head
+`ce8bbba` passed all five required jobs in run `45998860857`; the branch is now
+restacked after the gateway fixes, so the new head needs fresh CI. The bounded CUDA
+C++ vector-add and synchronized PyTorch matrix/transfer lab is static preparation.
+No kernel has been compiled and no real measurements exist.
 
 - [x] Prepare bounded CPU/GPU vector and matrix operations, separate host/device
   copies, supported precision checks, and warmup/repeat controls.
@@ -247,17 +248,12 @@ captured and described with units and limits.
 
 ### Package 8 — Benchmarking, FinOps, evaluation, release, and rollback
 
-**Status:** PR #47 is open on `codex/gpu-benchmark-preparation` against PR #46. The
-direct vLLM serving matrix and capped runner passed local static validation and all
-five required checks in run `45994609421`; its timeout cleanup regression test passes.
-Gateway benchmarking, actual performance results, actual model evaluation, and
-releases remain outstanding. Ticket #48 adds a static synthetic evaluation suite and
-dry-run; its CI and runtime behavior remain pending.
+**Status:** PRs #47–#51 prepare static benchmarking, evaluation, and sequential-release design. Their previous heads passed the recorded checks, but all were restacked after gateway fixes and require fresh CI. Gateway benchmarking, actual GPU performance, live model evaluation, and release/rollback behavior remain outstanding.
 
 The current ONNX release API does not support the one-target vLLM profile. The
 single-GPU Compose file also lacks MLflow, and the evaluation runner does not publish
 its sanitized report. PR #51 documents a separate sequential LLM release path; no
-candidate has been registered or deployed. Its static CI is pending.
+candidate has been registered or deployed. Its static CI on the restacked branch is pending.
 
 - [x] Prepare the official `vllm bench serve` runner, context-bounded synthetic
   workloads, gated high concurrency, repeated aggregates, and hardware/software

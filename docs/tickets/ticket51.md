@@ -18,9 +18,9 @@ canary or provide high availability.
 - No LLM model release or GPU rollback has run.
 - This is static design preparation on branch `codex/gpu-sequential-release-design`,
   [PR #51](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/51),
-  stacked on PR #50. All five required checks, including local end-to-end, passed
-  on head `b205929` in run `46013204318`. The follow-up research/status documentation
-  update requires a new CI run. No LLM release code or runtime behavior
+  stacked on PR #50. All five required checks, including local end-to-end, passed on the prior head
+  `b205929` in run `46013204318`. PR #51 has since been rebased onto the updated PR #50
+  branch, which now includes PRs #33–#36. Fresh checks on the restacked head are required. No LLM release code or runtime behavior
   has changed. It makes no AWS call and spends no GPU hours.
 
 ## Research and decisions
@@ -57,9 +57,9 @@ canary or provide high availability.
 - No model, package, image, or AWS resource was downloaded or installed.
 - Official release and installation documentation were rechecked on 2026-11-27;
   versioned image digest and all configuration choices still require final preflight.
-- All five required checks, including local end-to-end, passed on design head
-  `b205929` in workflow run `46013204318`. This covers repository tests on CPU-only
-  CI, not model serving or GPU behavior.
+- All five required checks, including local end-to-end, passed on the prior design head
+  `b205929` in run `46013204318`. Fresh CPU-only CI is pending on the restacked head.
+  Neither run demonstrates model serving or GPU behavior.
 
 ## Security and cost
 

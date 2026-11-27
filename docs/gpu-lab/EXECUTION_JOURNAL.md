@@ -1632,3 +1632,27 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** publish the updated PR #51 status/research documentation, watch its new
   CI run once, then continue non-billable host automation and deployment-readiness
   review. Manual host configuration must precede any claim that Ansible is validated.
+
+## 2026-11-27 — Restack GPU deployment PRs after gateway correctness work
+
+- **Phase:** Non-billable integration work across Phases 5–11; Phase 2 remains blocked
+  by zero applied On-Demand G/VT quota.
+- **Starting state:** PRs #33–#36 held the stream accounting, request-scoped Redis
+  admission leases, model-aware token reservations, and preflight cleanup fixes, but
+  the GPU infrastructure chain beginning at PR #37 was based directly on PR #32 and
+  omitted them. Earlier CI on PRs #33–#36 passed.
+- **Changes:** changed PR #37's base to PR #36 and rebased each child branch #38–#51
+  onto its immediately preceding PR. Preserved each PR as a separate review unit and
+  kept its unique code, tests, tickets, and research. Shared status/journal conflicts
+  were resolved by retaining the current parent records and carrying forward package-
+  specific evidence entries. Updated branches #37–#50 were pushed with
+  `--force-with-lease`; PR #51's final status update is being committed on the same
+  branch before its updated head is pushed.
+- **Validation:** GitHub PR metadata confirms the sequential base chain from #36
+  through #51. PRs #33–#36 retain their passing checks. The old CI results for #37–#51
+  apply to earlier branch heads only; each restacked head needs a fresh workflow run.
+  No merge was performed and `main` was not modified.
+- **Cloud and cost:** no AWS calls, resources, packages, image layers, model weights,
+  GPU hours, or project spend were used.
+- **Next:** publish the final #51 restack/status commit, then let the updated PR checks
+  complete and fix any failures before describing the static stack as CI-ready.

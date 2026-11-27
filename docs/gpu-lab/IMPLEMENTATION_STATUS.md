@@ -1,18 +1,18 @@
 # GPU Lab Implementation Status
 
-**Overall:** ACTIVE — Phase 2 infrastructure is prepared but blocked on quota; Phase 4 CUDA lab is in static PR review. No GPU cloud execution has occurred in this goal.
+**Overall:** ACTIVE — Phase 2 infrastructure is prepared but blocked on quota. The deployment stack is statically prepared through PR #51 and now includes PRs #33–#36; fresh CI is pending on the restacked heads. No GPU cloud execution has occurred in this goal.
 
 | Phase | Status | Evidence / next gate |
 | --- | --- | --- |
 | 1. Audit, research, architecture | Complete | Baseline, direct request/admission audit, proposed diagrams, official-source research notes, risk register, cost estimate, backlog, evidence manifest, and passing PR checks are recorded. PR human review/merge remains open; exact package versions and cost inputs are rechecked before implementation/apply. |
-| 2. Single-L4 EC2 Terraform | In progress — static only; quota blocked | Separate root, account/quota/AZ/AMI preflight, checksum-gated plan/apply/destroy scripts, guest plus AWS expiry, and read-only cleanup verifier are drafted. PR #40 pins the reviewed Canonical Ubuntu 24.04 AMI; preflight checks owner, image family, x86_64 architecture, and availability. Local validation passed; all four required checks passed in runs `45949421928`, `45950217355`, and `45951027403`. A fresh AWS-backed local-state preview proposes 14 creates for one `g6.xlarge` in `us-east-1c` (plan digest in ticket42); it is not a remote-state or apply-ready plan. Regression tests cover passing both remote-lock settings to Terraform init, but real lock behavior is untested. AWS email says the 4-vCPU request was denied, while quota history still says `CASE_OPENED`. The owner reports manually submitting an appeal through the existing Support Center case; no AWS reply is confirmed. Applied quota remains zero. |
-| 3. Ubuntu/NVIDIA/CUDA/Ansible | Prepared — static PR #50 checks passed | The install manifest, Docker/PyTorch candidate versions, and a 29-package hash lock for CPython 3.12/Linux x86_64 are prepared. No host package was installed. All five required PR #50 checks passed in run `46012380712`. Still required: refresh signatures/versions, manual install and real GPU/container/PyTorch computation, then Ansible implementation and repeated idempotency run. |
-| 4. CUDA performance lab | Prepared — static PR #49 open | CUDA vector-add and synchronized PyTorch matrix experiments, bounded sizes, a no-GPU plan, tests, and instructions are prepared on `codex/gpu-cuda-lab-preparation`. All five required CI checks passed in run `45998860857` on code head `ce8bbba`. The `.cu` source is not compiled; L4 measurements and profiler evidence remain outstanding. |
-| 5. vLLM and Qwen serving | Prepared — static only | Separate one-GPU Compose profile and pinned image/model candidates exist; no image pull, model download, L4 load, or inference has occurred. |
-| 6. Multi-tenant GPU gateway | Prepared — static integration | Opt-in catalog selection routes `chat-default` to one vLLM endpoint; existing ONNX defaults remain. Gateway readiness checks backend and shared capacity state. No real GPU requests, quota accounting, or cancellation behavior has been verified. |
-| 7. GPU/AI observability | Prepared — static only | PR #46 passed all five required checks after rebasing, run `45992409372`. It configures digest-pinned exporters, Prometheus, Grafana, Alertmanager, a privacy-filtered OTel Collector, Tempo, rules, and dashboards. It has not started on a GPU; current metric names/units, PromQL, exporter compatibility, host access, alerts, and trace propagation still need runtime validation. |
-| 8. Benchmarks and FinOps | In progress — static PR #47 | A direct vLLM matrix and bounded runner are prepared on `codex/gpu-benchmark-preparation`; its cleanup regression test and all five required CI checks passed in run `45994609421` on head `9936e11`. No L4 measurements exist. |
-| 9. Evaluation and releases | In progress — static PR #51 design | Seven synthetic cases, deterministic checks, a human-review marker, metadata-safe report output, and a no-network dry-run passed all five required checks on head `71637d7` in run `45997259460`. PR #51 documents that the existing ONNX release API and GPU profile are not yet integrated for sequential LLM releases; all five required checks including local end-to-end passed on head `b205929` in run `46013204318`. No LLM evaluation, candidate decision, or rollback has run. |
+| 2. Single-L4 EC2 Terraform | In progress — static only; quota blocked | Dedicated Terraform root, one-instance/account/region/AMI guards, encrypted gp3, IMDSv2, SSM, one-time expiry, plan digest checks, destroy safeguards, and read-only cleanup verification are prepared. The pinned-AMI local-state preview proposes 14 creates for one `g6.xlarge`; it is not a remote-state or apply-ready plan. Real state locking, SSM registration, expiry, provisioning, and teardown remain untested. AWS denied the initial quota request by email; the owner reports manually appealing through the existing case. Applied quota remains zero. |
+| 3. Ubuntu/NVIDIA/CUDA/Ansible | Prepared — static install plan | PR #50 provides an ordered host-install manifest and 29-package hashed PyTorch lock. The prior head passed all five required checks in run `46012380712`; the restacked head requires fresh CI. No packages were installed on an EC2 host. Manual L4 setup and CUDA/PyTorch computation must occur before Ansible implementation and a second idempotency run. |
+| 4. CUDA performance lab | Prepared — static PR #49 | Bounded CUDA vector-add, synchronized PyTorch experiments, and no-GPU planning are prepared. Prior head `ce8bbba` passed five checks in run `45998860857`; the restacked head needs new CI. The `.cu` source is not compiled and there are no L4 measurements or profiler results. |
+| 5. vLLM and Qwen serving | Prepared — static only | The isolated Compose profile and immutable image/model candidates are prepared. The profile is now stacked after the gateway stream, admission, tokenizer, and cleanup work in PRs #33–#36. No image layer or model weights were downloaded; no L4 load, inference, or streaming result exists. |
+| 6. Multi-tenant GPU gateway | Prepared — static integration | PRs #33–#36 add stream usage/cancellation handling, request-scoped Redis admission leases, model-aware token reservations, and cleanup tests; PR #45 integrates the GPU profile on top of that chain. Their earlier checks passed, but the restacked GPU branches require fresh CI. No real GPU request, quota reconciliation, or client cancellation has been verified on vLLM. |
+| 7. GPU/AI observability | Prepared — static only | PR #46 configures pinned exporters, Prometheus, Grafana, Alertmanager, OpenTelemetry, Tempo, rules, and dashboards. Its prior checks passed in run `45992409372`; the restacked head requires fresh CI. No live device metrics, alert, dashboard, or trace has been observed. |
+| 8. Benchmarks and FinOps | Prepared — static only | PR #47 includes a bounded direct vLLM serving matrix and metadata collection. Its prior checks passed in run `45994609421`; the restacked head requires fresh CI. No L4 benchmark or measured inference cost exists. |
+| 9. Evaluation and releases | In progress — static design | PR #48 has seven synthetic evaluation cases and a privacy-safe dry-run. PR #51 documents the missing sequential LLM registry/release path. Prior checks passed on the old heads in runs `45997259460` and `46013204318`; updated heads require fresh CI. No real LLM evaluation, candidate decision, approval, or rollback has occurred. |
 | 10. Incidents and recovery | Not started | Safe real fault injection, diagnosis and verified recovery reports. |
 | 11. Automation and CI | In progress — static only | `make verify` validates the dedicated single-GPU Compose file. PR #45's latest full run `45990929878` passed all four required checks, including the capacity demo and queue path. Terraform apply, Ansible roles, and cloud execution remain unrun. |
 | 12. Clean-room and teardown | Not started | Independent recreation, export and provider-side absence checks. |
@@ -54,19 +54,10 @@ unit-tested; the profile has not run on an L4.
 
 ## Current Next Actions
 
-1. Validate the rebased PR #46 observability branch in CI after the parent PR #45
-   capacity demo passed all four required checks in run `45990929878`.
-2. Preserve the accurate owner-reported appeal status; quota remains zero and no
-   follow-up should duplicate the submitted appeal.
-3. Continue remote-state, expiry, cost, and local gateway correctness work without
-   applying infrastructure or duplicating the submitted appeal.
-4. Complete the non-billable Ansible playbook and host bootstrap preparation with
-   strict target and package-version guards; do not treat idempotency as proven until
-   it has been run twice on the manually configured L4 host. Recheck official source
-   signatures, registry digests, model revision/license/hash, and current price/quota
-   immediately before the one authorized execution batch.
-5. Keep work in the PR-only workflow. All current project PRs remain unmerged; human
-   review is outstanding. PR #46 contains the rebased, static GPU observability
-   preparation; live GPU validation remains outstanding.
+1. Watch the updated PR #37–#51 CI results once and fix any failures introduced by the restack.
+2. Keep AWS work read-only until the existing quota appeal is approved and applied G/VT quota is nonzero. Do not send another appeal or request.
+3. Complete non-billable Ansible and release preparation only after the current manual-install and safety constraints are documented; never claim host idempotency before running it on the L4.
+4. Recheck signed package indexes, image digest, model revision/license/hash, capacity, current prices, and the exact bounded plan immediately before the authorized GPU batch.
+5. Keep all changes in focused PRs. Nothing has been merged; no direct changes to `main` were made.
 
 Update this table and the detailed goal after each implementation package. A phase is complete only when its acceptance gate has actual evidence.
