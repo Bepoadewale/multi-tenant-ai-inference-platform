@@ -9,7 +9,7 @@
 **GPU quota:** the latest read-only CLI check confirms the existing request is `CASE_CLOSED` with desired value 4.0 and applied On-Demand G/VT quota is 4.0 vCPUs in `us-east-1`, sufficient numerically for one `g6.xlarge`. This does not reserve AZ capacity or authorize provisioning. Do not submit another quota request.
 **Launch gates still open:** exact project remote state and locking, a valid private Budget-alert recipient and project Budget, exact saved-plan/cost review, fresh regional capacity validation, independent expiry verification, and a separate explicit apply authorization. No GPU instance or other project AWS resources exist.
 
-**Latest progress (2026-11-28):** PR #58's current guide head is `59925fd`; its earlier six-job CI result predates that head. PR #59 and PR #60 were rebased onto it. PR #60 head `9a8bd28` has fresh CI in progress after passing 8 focused tests, Ruff, and the no-network plan locally. PR #61 head `bfd3449` was rebased onto #60; its 106 interview questions and links pass structural checks, and fresh CI is pending. PR #62 adds evidence-based benchmark and incident handbooks and is being restacked onto #61. No AWS resources, L4 execution, or spend.
+**Latest progress (2026-11-28):** PR #58 current guide head is `59925fd`. PR #60 head `9a8bd28` has fresh six-job CI in progress after local focused checks. PR #61 head `bfd3449` was rebased onto #60 and needs fresh CI. PR #62 head `90e4aca` adds benchmark and incident handbooks, rebased onto #61, and needs fresh CI. PR #63's evidence-labeled report draft is being restacked onto #62. No AWS resources, L4 execution, or spend.
 
 ## Project objective
 
