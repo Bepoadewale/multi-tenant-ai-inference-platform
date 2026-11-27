@@ -212,7 +212,8 @@ cleanup, and CPU ONNX regression all have evidence.
 
 ### Package 7 — Metrics, traces, dashboards, and alerting
 
-**Status:** PR #46 (`3f26111`) contains static configuration; required CI and live L4 validation remain outstanding.
+**Status:** PR #46 contains static configuration and has been rebased onto PR #45's
+passing base. CI for the new PR #46 head and live L4 validation remain outstanding.
 
 - [x] Prepare pinned single-host exporters, vLLM/Gateway/Redis scrapes, Prometheus,
   Grafana, Alertmanager, profile-specific OpenTelemetry with sensitive-attribute
