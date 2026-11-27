@@ -74,13 +74,28 @@ def test_active_lease_renewal_and_expiry_recover_crashed_requests(monkeypatch):
         accepted = await second.admit(tenant, estimated_tokens=1, request_id="after-release")
         await second.release(tenant, accepted, actual_tokens=None)
 
-        crashed = await first.admit(tenant, estimated_tokens=2, request_id="crashed")
+        keys = first._keys(tenant.id)
+        crashed = await first.admit(tenant, estimated_tokens=2, request_id="crashed-renew")
         assert isinstance(crashed, AdmissionReservation)
         await asyncio.sleep(0.1)
+        assert await first.renew(tenant, crashed) is False
+        assert await first.client.hget(keys[5], "crashed-renew") is None
         recovered = await second.admit(tenant, estimated_tokens=1, request_id="recovered")
         assert recovered.request_id == "recovered"
-        await first.release(tenant, crashed, actual_tokens=None)
+        assert await first.release(tenant, crashed, actual_tokens=None) is False
         await second.release(tenant, recovered, actual_tokens=None)
+
+        for index in range(3):
+            request_id = f"orphan-{index}"
+            crashed = await first.admit(tenant, estimated_tokens=2, request_id=request_id)
+            await asyncio.sleep(0.1)
+            recovered = await second.admit(
+                tenant, estimated_tokens=1, request_id=f"recovered-{index}"
+            )
+            assert await second.client.hget(keys[5], request_id) is None
+            assert await first.release(tenant, crashed, actual_tokens=None) is False
+            await second.release(tenant, recovered, actual_tokens=None)
+        assert await first.client.hlen(keys[5]) == 0
 
     async def run():
         try:
