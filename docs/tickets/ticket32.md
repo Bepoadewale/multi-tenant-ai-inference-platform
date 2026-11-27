@@ -10,6 +10,7 @@ or local CPU inference path.
 ## Current state
 
 - Branch: `codex/gpu-ec2-foundation`, based on PR #30 head `04cb564`.
+- Pull request: [#32 — guarded single-L4 EC2 foundation](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/32), draft and open against `codex/single-l4-gpu-goal`; checks are running.
 - Phase: 2 of 12, static infrastructure preparation.
 - Terraform describes the proposed environment; it has not been applied.
 - AWS account identity was verified before the quota request. Applied On-Demand G/VT
@@ -136,7 +137,6 @@ or local CPU inference path.
 
 ## Outstanding work and next step
 
-Update the execution journal and evidence manifest with the latest preview and rendered
-template evidence, finish the final static review, and open this package as a focused
-PR. Prepare the exact remote-state plan and full cost review while the quota request
-is pending. No apply or GPU hours are part of this ticket's current work.
+Resolve CI and review feedback on PR #32. While the quota request is pending, prepare
+the remote-state plan and refreshed full cost/expiry/teardown review. No apply or GPU
+hours are part of this ticket's current work.

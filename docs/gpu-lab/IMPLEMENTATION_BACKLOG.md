@@ -66,7 +66,7 @@ phase exit does not authorize payment.
 
 ### Package 2 — Isolated EC2 Terraform and expiry controls
 
-**Status:** static design/implementation in review preparation; billable resources prohibited
+**Status:** draft PR #32 open against PR #30; CI in progress. Billable resources remain prohibited until all gates pass.
 until every cost and quota gate is satisfied.
 
 - [x] Create a separate Terraform root with account, region, type, project-tag, and

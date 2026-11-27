@@ -416,3 +416,20 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next action:** record this request in PR #32, create the focused stacked PR, and
   continue the remote plan, price, expiry, teardown, and non-billable work while AWS
   reviews the request.
+
+## 2026-11-27T00:06Z — Phase 2 pull request opened
+
+- **Phase:** Phase 2 — static-only infrastructure foundation.
+- **Branch and commits:** `codex/gpu-ec2-foundation`; `8f3bb44` adds the root and
+  safeguards; `80d0d47` records the quota request and evidence.
+- **Pull request:** [#32 — guarded single-L4 EC2 foundation](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/32), opened as a draft against PR #30's `codex/single-l4-gpu-goal` branch.
+- **CI state:** both repository CI workflow runs started. At the last read-only PR
+  query, Python, supply-chain, and local-e2e checks were running; one manifests check
+  had passed. The other manifests check was still running.
+- **Quota:** the 4-vCPU request remains `PENDING`; applied quota remains zero. The
+  request ID and pre-request verification are indexed above.
+- **Cloud cost:** no Terraform apply or other infrastructure mutation; AWS spend
+  remains `$0`, and GPU instance-hours remain `0`.
+- **Next action:** allow the single PR-check watcher to reach terminal state, resolve
+  any failures, and continue the remote-state/cost/expiry preparation while AWS
+  processes the quota request.
