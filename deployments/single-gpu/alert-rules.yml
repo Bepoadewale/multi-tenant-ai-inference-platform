@@ -1,0 +1,43 @@
+groups:
+  - name: single-gpu-lab
+    rules:
+      - alert: VLLMTargetUnavailable
+        expr: up{job="vllm"} == 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: vLLM metrics endpoint is unavailable
+          description: Prometheus has failed to scrape vLLM for at least one minute.
+      - alert: DCGMExporterUnavailable
+        expr: up{job="dcgm"} == 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: DCGM exporter is unavailable
+          description: GPU telemetry is unavailable; this can mean a driver, GPU-container, or exporter issue.
+      - alert: RedisTargetUnavailable
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: Redis exporter cannot collect from Redis
+          description: Check the private Redis endpoint and exporter logs; Redis is an admission-control dependency.
+      - alert: GPUMemoryNearConfiguredCapacity
+        expr: DCGM_FI_DEV_FB_USED_BYTES / DCGM_FI_DEV_FB_CAPACITY_BYTES > 0.90
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: GPU framebuffer use is above 90 percent
+          description: This laboratory threshold is an early diagnostic signal, not a production SLO.
+      - alert: VLLMKVCacheNearFull
+        expr: vllm:kv_cache_usage_perc > 0.90
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: vLLM KV cache use is above 90 percent
+          description: Check active sequences, context lengths, queueing, and preemption before increasing capacity.

@@ -1,0 +1,9 @@
+# Non-profiling hardware telemetry. Values and support still require runtime checks.
+DCGM_FI_DEV_GPU_UTIL_RATIO, gauge, GPU busy-time ratio from 0 to 1.
+DCGM_FI_DEV_FB_USED_BYTES, gauge, GPU framebuffer memory in use in bytes.
+DCGM_FI_DEV_FB_CAPACITY_BYTES, gauge, GPU framebuffer capacity in bytes.
+DCGM_FI_DEV_GPU_TEMP_CELSIUS, gauge, GPU temperature in degrees Celsius.
+DCGM_FI_DEV_BOARD_POWER_WATTS, gauge, GPU board power in watts.
+DCGM_FI_DEV_SM_CLOCK_HERTZ, gauge, GPU streaming multiprocessor clock in hertz.
+DCGM_FI_DEV_MEMORY_CLOCK_HERTZ, gauge, GPU memory clock in hertz.
+DCGM_FI_DEV_XID_ERROR, gauge, Most recent NVIDIA XID error code.

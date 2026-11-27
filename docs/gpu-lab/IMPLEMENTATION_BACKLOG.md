@@ -212,11 +212,14 @@ cleanup, and CPU ONNX regression all have evidence.
 
 ### Package 7 — Metrics, traces, dashboards, and alerting
 
-**Status:** not started. First identify actual metric names and exporter versions.
+**Status:** static configuration prepared on `codex/gpu-observability-profile`; PR #46 publication and live L4 validation remain outstanding.
 
-- [ ] Integrate DCGM Exporter, Node Exporter, vLLM/Gateway/Redis metrics, Prometheus,
-  Grafana, Alertmanager, OpenTelemetry, and Tempo only where they fit the host and
-  budget.
+- [x] Prepare pinned single-host exporters, vLLM/Gateway/Redis scrapes, Prometheus,
+  Grafana, Alertmanager, profile-specific OpenTelemetry with sensitive-attribute
+  deletion, and Tempo configuration. Pinned config-validator images were pulled
+  locally; no profile service or GPU image was started.
+- [ ] Validate exporter/device access, every metric name and unit, rule expressions,
+  dashboard panels, and trace propagation against the real L4 batch.
 - [ ] Set alert thresholds from measured behavior; do not publish prompts, completions,
   credentials, or raw tenant identifiers in telemetry.
 

@@ -1,0 +1,22 @@
+{
+  "uid": "gpu-inference-lab",
+  "title": "Single GPU Inference Lab",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "time": { "from": "now-30m", "to": "now" },
+  "panels": [
+    { "id": 1, "title": "GPU utilization (%)", "type": "timeseries", "gridPos": { "h": 7, "w": 12, "x": 0, "y": 0 }, "targets": [{ "expr": "100 * DCGM_FI_DEV_GPU_UTIL_RATIO", "legendFormat": "GPU {{gpu}}" }] },
+    { "id": 2, "title": "GPU memory used (GiB)", "type": "timeseries", "gridPos": { "h": 7, "w": 12, "x": 12, "y": 0 }, "targets": [{ "expr": "DCGM_FI_DEV_FB_USED_BYTES / 1073741824", "legendFormat": "GPU {{gpu}}" }] },
+    { "id": 3, "title": "GPU temperature (C)", "type": "timeseries", "gridPos": { "h": 7, "w": 8, "x": 0, "y": 7 }, "targets": [{ "expr": "DCGM_FI_DEV_GPU_TEMP_CELSIUS", "legendFormat": "GPU {{gpu}}" }] },
+    { "id": 4, "title": "GPU board power (W)", "type": "timeseries", "gridPos": { "h": 7, "w": 8, "x": 8, "y": 7 }, "targets": [{ "expr": "DCGM_FI_DEV_BOARD_POWER_WATTS", "legendFormat": "GPU {{gpu}}" }] },
+    { "id": 5, "title": "vLLM running requests", "type": "timeseries", "gridPos": { "h": 7, "w": 8, "x": 16, "y": 7 }, "targets": [{ "expr": "vllm:num_requests_running", "legendFormat": "{{model_name}}" }] },
+    { "id": 6, "title": "vLLM waiting requests", "type": "timeseries", "gridPos": { "h": 7, "w": 8, "x": 0, "y": 14 }, "targets": [{ "expr": "vllm:num_requests_waiting", "legendFormat": "{{model_name}}" }] },
+    { "id": 7, "title": "vLLM KV cache use (%)", "type": "timeseries", "gridPos": { "h": 7, "w": 8, "x": 8, "y": 14 }, "targets": [{ "expr": "100 * vllm:kv_cache_usage_perc", "legendFormat": "{{model_name}}" }] },
+    { "id": 8, "title": "vLLM time to first token p95 (s)", "type": "timeseries", "gridPos": { "h": 7, "w": 8, "x": 16, "y": 14 }, "targets": [{ "expr": "histogram_quantile(0.95, sum by (le, model_name) (rate(vllm:time_to_first_token_seconds_bucket[5m])))", "legendFormat": "{{model_name}}" }] },
+    { "id": 9, "title": "Gateway requests per second", "type": "timeseries", "gridPos": { "h": 7, "w": 12, "x": 0, "y": 21 }, "targets": [{ "expr": "sum by (tenant, outcome) (rate(inference_gateway_requests_total[5m]))", "legendFormat": "{{tenant}} / {{outcome}}" }] },
+    { "id": 10, "title": "Host CPU busy (%)", "type": "timeseries", "gridPos": { "h": 7, "w": 12, "x": 12, "y": 21 }, "targets": [{ "expr": "100 * (1 - avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])))", "legendFormat": "{{instance}}" }] },
+    { "id": 11, "title": "Redis used memory (MiB)", "type": "timeseries", "gridPos": { "h": 7, "w": 12, "x": 0, "y": 28 }, "targets": [{ "expr": "redis_memory_used_bytes / 1048576", "legendFormat": "Redis" }] },
+    { "id": 12, "title": "Redis connected clients", "type": "timeseries", "gridPos": { "h": 7, "w": 12, "x": 12, "y": 28 }, "targets": [{ "expr": "redis_connected_clients", "legendFormat": "Redis" }] }
+  ]
+}
