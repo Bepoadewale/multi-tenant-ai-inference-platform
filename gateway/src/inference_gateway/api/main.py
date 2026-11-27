@@ -12,8 +12,11 @@ configure_tracing(app, "inference-gateway")
 
 
 @app.get("/healthz")
-def healthz():
-    return {"status": "ok", "mode": "local-cpu-onnx"}
+async def healthz():
+    status = await service.readiness()
+    if status["status"] != "ok":
+        raise HTTPException(503, "inference service is not ready")
+    return status
 
 
 @app.get("/metrics")
@@ -42,11 +45,13 @@ async def usage(tenant_id: str, admin: str = Depends(platform_admin)):
 @app.get("/platform/v1/capacity")
 async def capacity(admin: str = Depends(platform_admin)):
     snapshot = await service.capacity_snapshot()
+    readiness = await service.readiness()
+    model = service.catalog.model("chat-default")
     return {
-        "state": "HEALTHY",
-        "runtime": "local-cpu-onnx",
-        "hardware": "SIMULATED",
-        "warning": "Capacity is Redis quota accounting only; no physical GPU scheduling occurred.",
+        "state": readiness["status"].upper(),
+        "runtime": model.runtime,
+        "hardware": "NOT_PROBED",
+        "warning": "Capacity is logical admission accounting only; it does not isolate GPU hardware or confirm device health.",
         **snapshot,
     }
 

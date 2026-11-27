@@ -945,3 +945,41 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Cost:** no infrastructure, GPU hour, or spend.
 - **Next:** validate and publish PR #44; continue preparing scripts and datasets
   locally while quota and the Support Center response remain pending.
+
+## 2026-11-27 — PR #44 published
+
+- **Branch / PR / commit:** `codex/gpu-batch-readiness`, PR #44 against PR #43,
+  initial head `868e11d`.
+- **Checks:** CI is pending; no AWS changes or GPU hours.
+- **Next:** finish recording this publication and wait for the existing PR #43 and
+  #44 CI runs, then continue non-billable code readiness work.
+
+## 2026-11-27 — PR #43 and #44 checks passed
+
+- PR #43 head `4e62876`: run `45979618437` passed Python, manifests, supply-chain, and
+  local end-to-end checks.
+- PR #44 head `02247c8`: run `45980633787` passed the same four required checks.
+- Both PRs remain open for human review. No AWS or GPU execution occurred.
+- Continue static deployment integration in PR #45.
+
+## 2026-11-27 — Build the opt-in single-L4 Compose runtime path
+
+- **Phase:** static preparation for Phases 5, 6, and 11; no GPU execution.
+- **Branch:** `codex/single-l4-compose-deployment`, based on PR #44 head `02247c8`.
+- **Objective:** connect the existing gateway vLLM adapter to a standalone EC2 Compose
+  profile while keeping the CPU ONNX path as the default.
+- **Changes:** added an opt-in catalog target/model ID, single-GPU Compose profile,
+  candidate image/model env file, and readiness checks for the selected backend and
+  shared capacity state. The Compose file exposes only loopback gateway ports; vLLM
+  and Redis are private to the Compose network. Added `make gpu-compose-config` to
+  the standard verification target.
+- **Validation:** `make VENV=<existing-project-virtualenv-path> verify` passed Ruff,
+  76 tests (one existing Starlette deprecation warning), pip-audit with no known
+  vulnerabilities, and both base/GPU Compose config checks. Nine focused tests also
+  passed for catalog defaults/profile, unhealthy vLLM readiness, and the API health
+  endpoint. `git diff --check` passed.
+- **Cloud/cost:** no image pull, GPU allocation, AWS write, instance hour, or spend.
+- **Limitations:** simulated Redis capacity remains a logical accounting mechanism.
+  This profile has no DCGM exporter yet and has not run against actual GPU hardware.
+- **Next:** finish full verification, publish PR #45, and continue GPU observability
+  and benchmark preparation in separate packages.

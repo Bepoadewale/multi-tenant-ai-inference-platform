@@ -63,7 +63,8 @@ raw plan, or account identifier is added to the public repository.
 
 ## Outstanding work
 
-- PR #44 was opened at `868e11d` against PR #43; CI is pending.
+- PR #44 head `02247c8` passed `python`, `manifests`, `supply-chain`, and `local-e2e`
+  in run `45980633787`. It remains open for human review.
 - Recheck service quota, regional capacity, prices, package pins, image digest, and
   model integrity immediately before any authorized GPU batch.
 - Establish the reviewed shared backend and budget through their separate guarded

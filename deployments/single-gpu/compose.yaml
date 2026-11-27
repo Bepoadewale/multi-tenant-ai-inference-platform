@@ -1,0 +1,136 @@
+name: multi-tenant-ai-inference-platform-gpu
+
+services:
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  vllm:
+    image: ${VLLM_IMAGE:?set VLLM_IMAGE to an immutable image digest}
+    command:
+      - --model
+      - ${GPU_MODEL_ID:?set GPU_MODEL_ID}
+      - --revision
+      - ${GPU_MODEL_REVISION:?set GPU_MODEL_REVISION}
+      - --served-model-name
+      - ${GPU_SERVED_MODEL_NAME:-gpu-default}
+      - --dtype
+      - bfloat16
+      - --max-model-len
+      - "8192"
+      - --max-num-seqs
+      - "2"
+      - --max-num-batched-tokens
+      - "8192"
+      - --gpu-memory-utilization
+      - "0.85"
+      - --tensor-parallel-size
+      - "1"
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+    environment:
+      HF_HOME: /root/.cache/huggingface
+    volumes:
+      - model-cache:/root/.cache/huggingface
+    shm_size: 8gb
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"
+      interval: 10s
+      timeout: 5s
+      start_period: 180s
+      retries: 30
+    restart: unless-stopped
+
+  gateway-1:
+    build:
+      context: ../..
+      dockerfile: gateway/Dockerfile
+    command: ["uvicorn", "inference_gateway.api.main:app", "--host", "0.0.0.0", "--port", "8080"]
+    environment: &gateway-environment
+      INFERENCE_VLLM_URL: http://vllm:8000
+      INFERENCE_GPU_MODEL_ID: ${GPU_SERVED_MODEL_NAME:-gpu-default}
+      INFERENCE_GPU_POOL: single-l4-logical
+      SIMULATED_GPU_POOL: single-l4-logical
+      SIMULATED_GPU_POOL_SLOTS: "2"
+      SIMULATED_GPU_QUEUE_CAPACITY: "2"
+      SIMULATED_GPU_QUEUE_WAIT_SECONDS: "1.0"
+      REDIS_URL: redis://redis:6379/0
+      INFERENCE_AUTH_MODE: jwt
+      JWT_PUBLIC_KEY_PATH: /run/identity/public.pem
+      JWT_ISSUER: https://local.inference.platform
+      JWT_AUDIENCE: inference-gateway
+      INFERENCE_QUEUE_CAPACITY: "2"
+      INFERENCE_QUEUE_WAIT_SECONDS: "1.0"
+      INFERENCE_BACKEND_TIMEOUT_SECONDS: "120"
+    volumes:
+      - ../../.local/identity/public.pem:/run/identity/public.pem:ro
+    depends_on:
+      redis:
+        condition: service_healthy
+      vllm:
+        condition: service_healthy
+    ports:
+      - 127.0.0.1:8081:8080
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/healthz', timeout=3)"
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  gateway-2:
+    build:
+      context: ../..
+      dockerfile: gateway/Dockerfile
+    command: ["uvicorn", "inference_gateway.api.main:app", "--host", "0.0.0.0", "--port", "8080"]
+    environment: *gateway-environment
+    volumes:
+      - ../../.local/identity/public.pem:/run/identity/public.pem:ro
+    depends_on:
+      redis:
+        condition: service_healthy
+      vllm:
+        condition: service_healthy
+    ports:
+      - 127.0.0.1:8082:8080
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/healthz', timeout=3)"
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+volumes:
+  model-cache:
+    name: multi-tenant-ai-inference-platform-gpu-model-cache
+  redis-data:
+    name: multi-tenant-ai-inference-platform-gpu-redis
