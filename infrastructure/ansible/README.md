@@ -14,7 +14,8 @@ the workstation running Ansible.
 
 ## What it changes
 
-- Checks Ubuntu 24.04 amd64 and exactly one L4 device exposed by `lspci`.
+- Checks Ubuntu 24.04 amd64, installs only `pciutils` if the base image lacks it,
+  then requires exactly one L4 in `lspci` before changing the GPU stack.
 - Installs matching kernel headers, build tools, and repository helpers.
 - Adds the official NVIDIA CUDA and NVIDIA Container Toolkit repositories using
   pinned key checksums and package versions.
@@ -25,6 +26,8 @@ the workstation running Ansible.
 - Checks the driver, `nvcc`, Docker runtime, and pending reboot state.
 - After reboot, runs a small synchronized matrix multiplication through the separate
   PyTorch environment and confirms exactly one L4 is visible.
+- Check mode still executes read-only inventory and verification commands so the L4
+  and active runtime can be checked while APT and file changes are only previewed.
 
 Package and repository key values are dated candidates, not a promise that those
 versions will still be available. Before any paid batch, refresh the package index,

@@ -7,7 +7,20 @@
       - ansible_architecture == gpu_host_architecture
     fail_msg: >-
       This playbook only configures Ubuntu {{ gpu_host_ubuntu_release }} on
-      {{ gpu_host_architecture }}. No packages were changed.
+      {{ gpu_host_architecture }}. GPU packages were not changed.
+
+- name: Check whether the PCI inventory utility is installed
+  ansible.builtin.stat:
+    path: /usr/bin/lspci
+  register: gpu_host_lspci_binary
+
+- name: Install the small PCI inventory utility if the base AMI lacks it
+  ansible.builtin.apt:
+    name: pciutils
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+  when: not gpu_host_lspci_binary.stat.exists
 
 - name: Confirm that one L4 is exposed by the virtual machine
   ansible.builtin.command:
@@ -16,6 +29,7 @@
       - -D
   register: gpu_host_lspci
   changed_when: false
+  check_mode: false
 
 - name: Stop unless the EC2 host exposes exactly one NVIDIA L4
   ansible.builtin.assert:

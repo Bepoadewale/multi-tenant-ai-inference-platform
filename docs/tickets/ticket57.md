@@ -26,7 +26,9 @@ and runtime configuration on the same host.
   host virtual environment, keeping its libraries out of vLLM's container.
 - Run Ansible locally on the EC2 host through a Systems Manager Session Manager root
   shell. This avoids public SSH ingress and avoids giving Ansible AWS credentials.
-- Refuse to configure any machine except Ubuntu 24.04 amd64 exposing exactly one L4.
+- Refuse to configure any machine except Ubuntu 24.04 amd64 exposing exactly one L4;
+  install `pciutils` only if the base image lacks the required read-only inventory
+  command.
 - Do not reboot automatically. A driver change is a manual reboot checkpoint, followed
   by a second Ansible run and independent GPU validation.
 
@@ -35,14 +37,17 @@ and runtime configuration on the same host.
 - [x] Pinned Ansible controller and universal hash lock.
 - [x] Host playbook and role use exact reviewed version candidates and repository key
   checksums.
-- [x] Role checks Ubuntu and exposed L4 before package changes.
+- [x] Role checks Ubuntu and the exposed L4 before changing the GPU stack, installing
+  only `pciutils` first if the AMI has no `lspci` command.
 - [x] Runtime configuration changes restart Docker only when needed.
 - [x] PyTorch uses the existing Linux x86_64 hash lock in a separate Python 3.12
   environment and runs a synchronized one-GPU matrix check after reboot.
 - [x] The role skips runtime verification while a reboot is pending and reports the
   operator checkpoint.
 - [x] CI installs dependencies by hash and syntax-checks the playbook.
-- [ ] CI checks pass for this PR head.
+- [ ] CI checks pass for the latest PR head. The initial head passed Ansible,
+  observability, manifests, Python, and supply-chain checks; its local end-to-end job
+  was still pending when the safety follow-up was prepared.
 - [ ] Human review; no merge without the owner's authorization.
 - [ ] After manual installation on the approved host, run in check mode, review,
   configure, reboot through SSM if needed, rerun, and record second-run idempotency.
@@ -72,6 +77,11 @@ git diff --check
 Compose checks, monitoring validation, and benchmark/evaluation/CUDA dry-run plans.
 The Ansible syntax check and task-list command also passed. No task was run against a
 host.
+
+Final review added a conditional `pciutils` install for a stock AMI that lacks
+`lspci`, and set read-only hardware/runtime inspection commands to run during Ansible
+check mode. The playbook syntax check passed again; the updated source needs its own
+CI run because these are execution-safety changes.
 
 Syntax validation and `--list-tasks` parse the playbook; neither executes a task or
 proves package/driver/GPU compatibility. One initial validation shell command ran
