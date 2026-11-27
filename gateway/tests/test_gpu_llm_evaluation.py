@@ -129,8 +129,15 @@ def test_mlflow_publication_logs_only_sanitized_evaluation_metadata(tmp_path, mo
         "human_review_required": True,
         "passed_count": 6,
         "failed_count": 0,
+        "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
         "schema_version": 1,
         "started_at": "2026-11-27T00:00:00+00:00",
+        "provenance": {
+            "source_commit": "a" * 40,
+            "model_artifact_sha256": "b" * 64,
+            "vllm_image": "vllm/vllm-openai@sha256:" + "c" * 64,
+            "runtime_config_sha256": "d" * 64,
+        },
     }
 
     run_id = publish_report_to_mlflow(artifact, report, "http://mlflow:5000", "lab")

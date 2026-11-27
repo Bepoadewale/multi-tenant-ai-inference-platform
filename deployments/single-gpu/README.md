@@ -41,6 +41,24 @@ state. It returns HTTP 503 if vLLM or shared Redis admission state is unavailabl
 This makes Docker's health check reflect the actual configured runtime; it does not
 replace a real inference smoke request.
 
+## LLM release planning
+
+The authenticated gateway provides a preparation API for a single-model sequential
+release. A `platform.admin` identity can submit a finished MLflow evaluation run and
+the current champion manifest to `POST /gpu-release/v1/plans`. The gateway downloads
+the sanitized evaluation report and checks that its underlying model ID and revision,
+artifact digest, source commit, serving image, runtime configuration, and suite digests
+match the run metadata. The exact champion and candidate manifests are stored with the
+immutable plan in a local SQLite database on the encrypted root disk.
+
+A different identity with the signed `release.approve` role can approve the plan at
+`POST /gpu-release/v1/plans/{plan_id}/approve`. The shared SQLite volume lets the two
+gateway containers read the same plan on this one host. It is not a distributed lock
+or a durable multi-host registry. The API does not have the Docker socket, does not
+verify the live champion against an independent active-deployment record, and does not
+switch vLLM. A separate host-side controller is still required before deployment or
+rollback can be claimed.
+
 `SIMULATED_GPU_POOL` and the existing `SIMULATED_GPU_POOL_SLOTS` setting name a
 Redis-backed **logical admission counter** retained from the local capacity feature.
 It does not schedule CUDA work, measure VRAM, reserve physical GPU memory, or isolate

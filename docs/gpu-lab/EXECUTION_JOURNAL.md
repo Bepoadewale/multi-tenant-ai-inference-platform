@@ -1,6 +1,10 @@
 # GPU Lab Execution Journal
 
 ## 2026-11-27 — Quota status rechecked without mutation
+<<<<<<< HEAD
+=======
+
+>>>>>>> eb01cf0 (feat: add authenticated single-GPU release planning)
 ## 2026-11-27 — Attempt the authorized quota-case update with AWS CLI
 
 - **Phase:** Phase 2 — static-only EC2 preparation; GPU execution remains blocked.
@@ -1888,3 +1892,54 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   establish authenticated identity, live artifact trust, deployment, or rollback.
 - **Next:** publish after restacking on the current predecessor, run PR CI, then reply
   to and resolve the two review threads with the passing evidence.
+
+## 2026-11-27 — Prepare authenticated LLM release API
+
+- **Phase:** Phase 9 static release integration; Phase 2 remains blocked by zero
+  applied On-Demand G/VT quota.
+- **Branch / PR:** `codex/gpu-llm-release-api`; PR #55 is not yet published. Base is
+  PR #54 head `69f0b39`. No PR has been merged and no change was made to `main`.
+- **Starting state:** PR #54's five required checks passed in run `46028053505`. The
+  local Python 3.12 virtual environment exists. No project-owned AWS resource is
+  known to exist, and no GPU instance has been used.
+- **Objective and research:** connect the existing role checks and private MLflow
+  evaluation service to immutable sequential LLM release records. Preserve the
+  ONNX release route. Keep vLLM restart/deployment outside the gateway because it
+  requires a separately scoped host controller.
+- **Changes:** added API routes to create/read plans and independently approve them;
+  validate a finished MLflow run, sanitized report, underlying model ID/revision,
+  serving alias, source commit, declared artifact digest, pinned image, runtime
+  configuration, suite digest, and deterministic gate; store champion/candidate
+  manifests with the plan; enable SQLite write-ahead logging and migration of the
+  manifest table. The GPU Compose profile mounts the same named SQLite volume into
+  both gateway replicas and passes the exact serving configuration and provenance to
+  the evaluator. The base gateway defaults to writable ephemeral `/tmp` storage; the
+  GPU profile overrides it with persistent-for-the-host shared storage. The model ID
+  is now recorded separately from the served API alias. Documentation, status, risk,
+  evidence, and ticket #55 were updated.
+- **Troubleshooting history:** system `ruff` was not on PATH; reran using
+  `.venv/bin/ruff`. The first focused test command used only `PYTHONPATH=gateway/src`
+  and failed to import the root `evaluations` namespace; Makefile and pytest paths
+  now include `.`. The first model-ID mismatch test failed earlier at the missing
+  model-revision comparison; the fake run fixture was corrected to reach the target
+  assertion. Ruff found a duplicate `model` key in a report fixture; removed it.
+  Review also identified that the original default `.local` SQLite path could not be
+  created by the non-root container user; changed the default to `/tmp` and retained
+  `/gpu-release` as the GPU Compose override.
+- **Validation:** focused release/API/evaluation tests passed (18); full `make verify`
+  passed Ruff and 128 tests (2 skipped), dependency audit with no known vulnerabilities,
+  base/GPU Compose parsing, Prometheus and Alertmanager validation, dashboard parsing,
+  and benchmark/evaluation/CUDA dry runs. `git diff --check` passed. The test run has
+  one existing Starlette/httpx deprecation warning. Cloud and GPU actions remained
+  disabled; dry runs made zero model requests and GPU operations.
+- **Security and limits:** actor IDs are derived from existing role dependencies;
+  self-approval is rejected by the store. MLflow report content remains sanitized.
+  The API does not have Docker access. Champion manifest and model-file digest are
+  still caller supplied; no independent running-state/file-byte verification exists.
+  SQLite is shared by two containers only on one EC2 host, not a distributed database.
+  No signed-token HTTP call to a live MLflow instance or real model artifact was tested.
+- **Cost:** no AWS API mutation, model/image download, GPU hour, or project cloud
+  spend. The $25 cap and zero-quota stop remain unchanged.
+- **Next:** finish review, commit and publish PR #55 stacked on PR #54, wait on one
+  CI watcher, resolve failures, then continue non-billable preparation on a narrowly
+  scoped host-side release controller.

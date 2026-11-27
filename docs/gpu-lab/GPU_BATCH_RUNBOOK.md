@@ -234,6 +234,25 @@ isolation. Test readiness, shutdown, and restart once, then continue to multi-te
 work without leaving duplicate model servers active. GPU Compose parsing is checked
 locally with `make gpu-compose-config`.
 
+For release preparation, set `GPU_SOURCE_COMMIT` to the exact deployed source SHA and
+`GPU_MODEL_ARTIFACT_SHA256` to the digest produced by the verified model-file
+manifest. `GPU_MODEL_ID` identifies the underlying model; the evaluator records it
+separately from the API's served-model alias. The evaluator captures these values, the pinned vLLM image, and a digest of
+the vLLM runtime settings that Compose passes to both vLLM and the evaluator. The API
+checks these values against the finished sanitized MLflow run before creating a plan.
+The model digest must come from artifact verification; do not fill it from memory or
+copy an unverified value.
+
+The authenticated gateway exposes `POST /gpu-release/v1/plans` for an operator with
+the `platform.admin` role and `POST /gpu-release/v1/plans/{plan_id}/approve` for a
+different identity with the `release.approve` role. Send no bearer token to shell
+history or logs. The API records the plan, its champion/candidate manifests, and the
+approver in a shared single-host SQLite volume. It does not deploy a model, validate
+the actually running champion against an independently managed active record, or
+restart Docker. Do not mark the candidate as deployed or claim release/rollback
+acceptance until a separate host-side deployment controller verifies current state,
+performs the sequential restart, and proves recovery.
+
 ## Gateway, telemetry, measurements, and recovery
 
 Use the prepared test tenants: customer support, internal engineering, and research.

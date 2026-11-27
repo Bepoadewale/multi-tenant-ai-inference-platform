@@ -21,7 +21,7 @@ where = ["gateway/src"]
 inference_gateway = ["operator_console/static/*.html", "operator_console/static/*.css", "operator_console/static/*.js"]
 
 [tool.pytest.ini_options]
-pythonpath = ["gateway/src"]
+pythonpath = [".", "gateway/src"]
 testpaths = ["gateway/tests"]
 
 [tool.ruff]

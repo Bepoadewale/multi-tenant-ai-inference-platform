@@ -58,17 +58,17 @@ services:
       - --served-model-name
       - ${GPU_SERVED_MODEL_NAME:-gpu-default}
       - --dtype
-      - bfloat16
+      - ${GPU_DTYPE:-bfloat16}
       - --max-model-len
-      - "8192"
+      - ${GPU_MAX_MODEL_LEN:-8192}
       - --max-num-seqs
-      - "2"
+      - ${GPU_MAX_NUM_SEQS:-2}
       - --max-num-batched-tokens
-      - "8192"
+      - ${GPU_MAX_BATCHED_TOKENS:-8192}
       - --gpu-memory-utilization
-      - "0.85"
+      - ${GPU_MEMORY_UTILIZATION:-0.85}
       - --tensor-parallel-size
-      - "1"
+      - ${GPU_TENSOR_PARALLEL_SIZE:-1}
       - --host
       - 0.0.0.0
       - --port
@@ -119,8 +119,11 @@ services:
       INFERENCE_QUEUE_WAIT_SECONDS: "1.0"
       INFERENCE_BACKEND_TIMEOUT_SECONDS: "120"
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      GPU_RELEASE_DB_PATH: /gpu-release/release.sqlite
+      MLFLOW_TRACKING_URI: http://mlflow:5000
     volumes:
       - ../../.local/identity/public.pem:/run/identity/public.pem:ro
+      - gpu-release-data:/gpu-release
     depends_on:
       redis:
         condition: service_healthy
@@ -149,6 +152,7 @@ services:
     environment: *gateway-environment
     volumes:
       - ../../.local/identity/public.pem:/run/identity/public.pem:ro
+      - gpu-release-data:/gpu-release
     depends_on:
       redis:
         condition: service_healthy
@@ -186,7 +190,17 @@ services:
     environment:
       GPU_EVAL_BASE_URL: http://vllm:8000/v1
       GPU_EVAL_MODEL: ${GPU_SERVED_MODEL_NAME:-gpu-default}
+      GPU_EVAL_MODEL_ID: ${GPU_MODEL_ID:?set GPU_MODEL_ID}
       GPU_EVAL_MODEL_REVISION: ${GPU_MODEL_REVISION:?set GPU_MODEL_REVISION}
+      GPU_EVAL_SOURCE_COMMIT: ${GPU_SOURCE_COMMIT:?set GPU_SOURCE_COMMIT to the evaluated commit}
+      GPU_EVAL_MODEL_ARTIFACT_SHA256: ${GPU_MODEL_ARTIFACT_SHA256:?set the verified model artifact digest}
+      GPU_EVAL_VLLM_IMAGE: ${VLLM_IMAGE:?set VLLM_IMAGE to an immutable digest}
+      GPU_EVAL_DTYPE: ${GPU_DTYPE:-bfloat16}
+      GPU_EVAL_MAX_MODEL_LEN: ${GPU_MAX_MODEL_LEN:-8192}
+      GPU_EVAL_MAX_NUM_SEQS: ${GPU_MAX_NUM_SEQS:-2}
+      GPU_EVAL_MAX_BATCHED_TOKENS: ${GPU_MAX_BATCHED_TOKENS:-8192}
+      GPU_EVAL_MEMORY_UTILIZATION: ${GPU_MEMORY_UTILIZATION:-0.85}
+      GPU_EVAL_TENSOR_PARALLEL_SIZE: ${GPU_TENSOR_PARALLEL_SIZE:-1}
       GPU_EVAL_OUTPUT: /tmp/gpu-evaluation/results.json
       MLFLOW_TRACKING_URI: http://mlflow:5000
       GPU_EVAL_MLFLOW_EXPERIMENT: single-l4-llm-evaluation
@@ -298,6 +312,8 @@ services:
 volumes:
   mlflow-data:
     name: multi-tenant-ai-inference-platform-gpu-mlflow
+  gpu-release-data:
+    name: multi-tenant-ai-inference-platform-gpu-release
   model-cache:
     name: multi-tenant-ai-inference-platform-gpu-model-cache
   redis-data:

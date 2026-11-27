@@ -14,7 +14,7 @@ install:
 	$(PY) scripts/create_model.py --output models/tiny-intent-classifier.onnx
 	$(PY) scripts/create_model.py --output models/tiny-intent-classifier-v2.onnx --candidate
 test:
-	PYTHONPATH=gateway/src $(PY) -m pytest -q
+	PYTHONPATH=.:gateway/src $(PY) -m pytest -q
 lint:
 	$(PY) -m ruff check gateway/src gateway/tests benchmarks evaluations scripts
 audit:
