@@ -7,6 +7,7 @@ execution. A document that describes a proposed component is not proof that it r
 ## Evidence entries
 
 | `docs/gpu-lab/INTERVIEW_PREPARATION.md` and ticket #61 | 2026-11-27 | Portfolio documentation / PR #61 | Static documentation review; 106 numbered Q&A items | Organizes project-specific interview preparation across 18 technical areas, explains trade-offs and failure modes, and labels local evidence separately from planned L4 work. | Does not demonstrate new runtime behavior, AWS/GPU execution, production experience, or a measured performance result. |
+| `BENCHMARK_REPORT.md`, `INCIDENT_RESPONSE_HANDBOOK.md`, and ticket #62 | 2026-11-27 | Phases 8/10 preparation / PR #62 | Documentation framework; no GPU run | Provides accurate experiment fields, cost formulas, safe diagnostics, recovery steps, and a truthful placeholder for data not yet measured. | No L4 benchmark values, GPU incident, alert, or AWS recovery evidence. |
 
 | Item | Captured | Phase / PR / commit | Type | Demonstrates | Does not demonstrate |
 | --- | --- | --- | --- | --- | --- |
@@ -144,6 +145,7 @@ execution. A document that describes a proposed component is not proof that it r
 | [PR #59 CI run `46069680564`](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/actions/runs/46069680564) | 2026-11-27 | Learning documentation / PR #59 / `79e712d` | GitHub Actions | All six jobs passed, including local E2E. The handbook clearly labels L4 work as pending. | CI validates repository jobs and local behavior; it does not prove GPU execution or hardware behavior. |
 | [PR #60 CI run `46072579851`](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/actions/runs/46072579851) | 2026-11-27 | Phase 8 preparation / PR #60 former head `2e2d177` | GitHub Actions | All six jobs passed, including local E2E, on the former stack. | The run does not validate the rebased head, benchmark execution, AWS, GPU performance, real vLLM tenant admission, or gateway overhead. |
 | `docs/gpu-lab/INTERVIEW_PREPARATION.md` and ticket #61 | 2026-11-28 | Portfolio documentation / PR #61 rebased onto #60 head `9a8bd28` | Structural question count and relative-link checks | The guide contains 106 numbered Q&A items across 18 areas and labels local evidence separately from planned L4 work. Fresh PR CI is pending. | Does not demonstrate new runtime behavior, AWS/GPU execution, production experience, or measured performance. |
+| `docs/gpu-lab/BENCHMARK_REPORT.md`, `INCIDENT_RESPONSE_HANDBOOK.md`, and ticket #62 | 2026-11-28 | Phase 8/10 preparation / PR #62 | Documentation structure and relative-link checks | Provides measurement methods, honest empty result tables, cost formulas, safe troubleshooting paths, and a report template; separates the local Redis incident from unexecuted GPU drills. Current rebase needs fresh PR CI. | Does not supply GPU benchmark measurements, live alerts, or L4 incident evidence. |
 
 As of the 2026-11-28 read-only check, this goal has created no AWS resources, used
 zero GPU instance hours, and recorded `$0` goal-specific AWS spend. There are no genuine GPU console or
