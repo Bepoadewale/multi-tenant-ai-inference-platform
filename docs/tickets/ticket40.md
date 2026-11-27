@@ -9,8 +9,10 @@ Ubuntu 24.04 amd64 server family.
 
 ## Current state
 
-The changes are prepared on `codex/pin-ubuntu-ami`, based on PR #39. PR #40 is not
-yet committed or published. No AWS resource was created and no GPU was used. The
+The changes are published as [PR #40](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/40)
+on `codex/pin-ubuntu-ami`, based on PR #39. Head `f580217` passed all four required
+checks in run `45949421928`, including local end-to-end. No AWS resource was created
+and no GPU was used. The
 existing G/VT request was denied by the email supplied by the owner; quota history
 still says `CASE_OPENED`, and applied quota remains zero. The appeal draft remains
 unsent.
@@ -48,7 +50,7 @@ unsent.
 - [x] Ensure Terraform plan helpers pass the exact AMI input.
 - [x] Keep destroy planning independent of dynamic AMI discovery.
 - [x] Run local and static validation.
-- [ ] Open PR #40 and pass required GitHub checks.
+- [x] Open PR #40 and pass all four required GitHub checks.
 - [ ] Verify the AMI and GPU host compatibility during the approved real-L4 batch.
 
 ## Commands and validation
@@ -58,7 +60,9 @@ unsent.
 - `terraform -chdir=infrastructure/terraform/environments/gpu-ec2 validate` — passed.
 - `bash -n` on the GPU EC2 preflight, plan, preview-plan, destroy-plan, destroy-apply, and apply scripts — passed.
 - `make verify` — passed Ruff, 72 tests, pip-audit, and Docker Compose configuration. One existing Starlette deprecation warning remains.
-- `git diff --check` — passed before the final documentation updates; rerun before commit.
+- `git diff --check` — passed before commit.
+- GitHub Actions run `45949421928` passed `python`, `manifests`, `supply-chain`, and
+  `local-e2e` for PR #40 head `f580217`.
 - Read-only AWS AMI metadata confirmed the selected Canonical image attributes. No Terraform plan, apply, quota change, or other AWS mutation was run.
 
 ## Issues and troubleshooting
