@@ -91,8 +91,11 @@ image build, dependency audit, and existing CPU local end-to-end flow passed.
 
 **Status:** PR #54 adds local manifest/plan digest validation, stale-input protection,
 and independent-approver state in SQLite. PR #55 adds the authenticated plan and
-approval API, MLflow evaluation checks, and shared single-host manifest storage. Both
-remain open and unmerged; the PR #55 worktree is being validated before publication.
+approval API, MLflow evaluation checks, and shared single-host manifest storage; all
+five checks passed on latest head `de4c6e7` in run `46034523863`. PR #56 prepares a
+host-only deployment controller and currently has 15 focused local tests passing.
+The PR #55 and #56 changes remain open and unmerged; PR #56 full validation and CI
+are pending.
 
 - [x] Bind full model revision, artifact digest, license, serving image/configuration,
   evaluation suite/report digests, and source commit.
@@ -101,12 +104,18 @@ remain open and unmerged; the PR #55 worktree is being validated before publicat
 - [x] Connect plan approval and request identity to existing signed role dependencies.
 - [x] Link the candidate to a finished MLflow run, sanitized report, and declared
   model/runtime/source provenance.
-- [ ] Independently verify the active champion and model file bytes on the host.
-- [ ] Implement and test the host-side sequential restart and verified rollback path.
+- [x] Implement local checks for active champion state, running container image,
+  command, model-cache mount, readiness, and full model snapshot digest.
+- [x] Implement the host-only sequential restart, private transaction journal, and
+  simulated success/failure rollback tests.
+- [ ] Complete full repository validation and CI for the controller package.
+- [ ] Verify active champion, model bytes, sequential restart, inference, rollback,
+  and interrupted-transaction recovery on the authorized L4 host.
 
 **Exit gate:** an authenticated independent approval binds to the exact candidate and
-runtime; a bounded host controller verifies live state and model bytes, then deploys,
-checks readiness, or restores the known-good model on one L4.
+runtime; the host controller verifies live state and model bytes, then deploys, checks
+real gateway inference, or restores the known-good model on one L4. Local fake tests
+do not satisfy the live exit gate.
 
 ### Package — authenticated LLM release planning and approval API
 

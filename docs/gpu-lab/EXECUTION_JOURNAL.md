@@ -12,6 +12,7 @@
 ## 2026-11-27 — Quota status rechecked without mutation
 
 
+<<<<<<< HEAD
 ## 2026-11-27 — Quota status rechecked without mutation
 
 - **Phase:** Phase 2 static-only EC2 preparation; no AWS mutation.
@@ -51,6 +52,8 @@
 
 ## 2026-11-27 — PR #40 status follow-up checks passed
 
+=======
+>>>>>>> 7eb0400 (feat: add host-side sequential LLM release controller)
 - **Phase:** Phase 2 static-only preflight; no cloud resource creation or spend.
 - **Command:** read-only AWS Service Quotas queries in `us-east-1` checked the existing
   request and applied G/VT quota using `ai-platform-pilot-key`.
@@ -1989,3 +1992,58 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** record this CI result in the PR and status documents, then continue the
   non-billable host-side release-controller work as a separate PR package. Human review
   and merge remain pending; no merge is authorized by this task.
+
+- 2026-11-27: PR #55 documentation head `de4c6e7` passed all five required jobs in
+  run `46034523863` (Python, manifests, GPU observability, supply-chain, and
+  local end-to-end). PR #55 remains open and unmerged.
+
+## 2026-11-27 — Prepare host-only sequential release controller
+
+- **Phase:** Phase 9 static release preparation; Phase 2 remains blocked by zero
+  applied On-Demand G/VT quota. No AWS mutation or GPU operation occurred.
+- **Branch / PR:** `codex/gpu-release-host-controller`, based on PR #55 head
+  `de4c6e7`; PR #56 is being prepared.
+- **Starting state:** PR #55's latest documentation head passed all five required jobs
+  in run `46034523863`. The release API still accepted caller-supplied champion and
+  artifact metadata and could not verify a running model.
+- **Objective:** add a host-only release tool so the gateway does not receive Docker
+  access. Verify approved release inputs and the current model before replacing the
+  single vLLM container; recover the known champion if the candidate fails.
+- **Changes:** added a controller with commands for model-snapshot digest,
+  manifest-from-report, initial champion verification, approved sequential apply,
+  interrupted-transaction recovery, and restoration after candidate-only evaluation.
+  It validates independent approval, bounded one-GPU settings, host active-state
+  digest, live container image/arguments/cache mount, vLLM/gateway readiness, and each
+  file in the pinned Hugging Face cache snapshot. State and transaction files plus
+  `.env` updates use private atomic writes. API tokens are prompted without echoing.
+- **Troubleshooting:** the initial focused test run exposed three missing model
+  artifact fields in the environment mapping; those fields were added and tests
+  passed. Ruff found import-order and unused-code issues, which were fixed. A review
+  found non-apply CLI commands could fail after success because the final status line
+  assumed a `plan_id`; added command-specific messages and a regression test. A
+  second wiring review found the Compose gateway host ports are 8081/8082 rather than
+  8080, and vLLM had no host endpoint although the host controller checks its API.
+  Updated the controller to check both gateway replicas, added a vLLM port bound only
+  to `127.0.0.1`, and added a readiness test for those exact ports. Compose still has
+  no public inbound rule; verify these bindings in the plan/run before launch.
+- **Validation:** Ruff passed on controller/tests; focused pytest passed **15 tests**;
+  `make gpu-release-controller-help`, `make gpu-compose-config`, and
+  `git diff --check` passed. Full `make verify` passed Ruff, **143 tests** (2 skipped),
+  dependency audit with no known vulnerabilities, base/GPU Compose parsing,
+  monitoring validation, and benchmark/evaluation/CUDA dry-run plans. One existing
+  Starlette/httpx warning remains. A relative Markdown-link check across 13 changed
+  docs passed. Tests use fake subprocess results and fake HTTP responses, not live
+  Docker or an L4 host. PR #56 CI is pending.
+- **Documentation:** created ticket #56; updated release design, runbook, Compose
+  profile guide, backlog, status, risk register, goal, documentation index, and
+  evidence records. The runbook now distinguishes first-champion initialization from
+  later candidate restoration and calls for a real authenticated gateway smoke
+  request after deployment. The controller itself checks readiness, not tenant
+  inference; it does not update an MLflow champion alias.
+- **Security follow-up:** bearer-token API calls reject HTTP redirects so credentials
+  are not forwarded by the client to a new host or URL.
+- **Cost/security:** no AWS API call, model/image download, GPU hour, or cloud cost.
+  The owner's manually submitted appeal remains unconfirmed by AWS; applied quota is
+  still zero. $25 remains a hard project ceiling; no apply is authorized.
+- **Next:** run full local validation, inspect the complete diff and links, publish
+  PR #56 as a focused stack on #55, and watch its single required-check workflow.

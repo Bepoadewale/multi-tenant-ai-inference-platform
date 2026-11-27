@@ -77,6 +77,8 @@ verify live state and model bytes before it acts on an approved plan.
 - `git diff --check` passed.
 - PR #55 head `b94fc27` passed all five required jobs in run `46033196309`, including
   Python, manifests, GPU observability, supply-chain, and local end-to-end.
+- PR #55 documentation follow-up head `de4c6e7` passed all five required jobs in run
+  `46034523863`.
 
 ## Security and financial considerations
 

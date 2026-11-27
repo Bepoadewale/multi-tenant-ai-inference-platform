@@ -272,6 +272,24 @@ This establishes current local lint/test/static configuration outcomes and read-
   (`45926383360`), including local-e2e. This is routine CI validation; the project
   still requires one final clean-room reproduction in Phase 12.
 
+## 2026-11-27 — PR #56 host release-controller focused validation
+
+- **Branch:** `codex/gpu-release-host-controller`, stacked on PR #55.
+- **Commands:** `.venv/bin/ruff check scripts/gpu_release_controller.py gateway/tests/test_gpu_release_controller.py`;
+  `PYTHONPATH=.:gateway/src .venv/bin/pytest -q gateway/tests/test_gpu_release_controller.py`;
+  `make gpu-release-controller-help`; `make gpu-compose-config`; `git diff --check`.
+- **Result:** Ruff passed; 15 focused tests passed; CLI help and GPU Compose parsing
+  passed; whitespace check passed.
+- **Coverage:** deterministic fake-based tests cover plan approval and bounded config,
+  full snapshot digest including Hub cache symlinks, rejection of paths outside cache,
+  loopback vLLM/gateway readiness ports, active container image/arguments/cache mount,
+  private file writes, redirect rejection for authenticated requests, successful
+  candidate deployment, readiness-failure rollback, active restoration, incomplete
+  transaction guard, and non-apply CLI output.
+- **Limit:** no live Compose host, authenticated gateway inference request, AWS,
+  model/image download, GPU, rollback after process interruption, or billing evidence.
+  Full `make verify` and PR CI are pending.
+
 ## Future GPU execution template
 
 - Date/time and commit SHA:

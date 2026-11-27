@@ -1,6 +1,6 @@
 # GPU Lab Implementation Status
 
-**Overall:** ACTIVE — Phase 2 infrastructure is prepared but blocked on quota. The deployment stack is statically prepared through PR #53 and includes PRs #33–#36. PR #53's code head `e623b75` passed all five checks in `46023306230`; its documentation follow-up `2153942` passed all five checks in `46025160292`. PR #54's five required CI checks passed in run `46028053505`. PR #55 head `b94fc27` passed all five required checks in run `46033196309`; local `make verify` passed 128 tests (2 skipped). No GPU cloud execution has occurred in this goal.
+**Overall:** ACTIVE — Phase 2 infrastructure is prepared but blocked on quota. The deployment stack is statically prepared through PR #53 and includes PRs #33–#36. PR #53's code head `e623b75` passed all five checks in `46023306230`; its documentation follow-up `2153942` passed all five checks in `46025160292`. PR #54's five required CI checks passed in run `46028053505`. PR #55 documentation head `de4c6e7` passed all five required checks in run `46034523863`. PR #56 local `make verify` passed 143 tests (2 skipped); its CI is pending publication. No GPU cloud execution has occurred in this goal.
 
 | Phase | Status | Evidence / next gate |
 | --- | --- | --- |
@@ -12,7 +12,7 @@
 | 6. Multi-tenant GPU gateway | Prepared — static integration | PRs #33–#36 add stream usage/cancellation handling, request-scoped Redis admission leases, model-aware token reservations, and cleanup tests; PR #45 integrates the GPU profile on top of that chain. Required CI passes on the current restacked heads through PR #50. No real GPU request, quota reconciliation, or client cancellation has been verified on vLLM. |
 | 7. GPU/AI observability | Prepared — static only | PR #46 configures pinned exporters, Prometheus, Grafana, Alertmanager, OpenTelemetry, Tempo, rules, and dashboards. All five required jobs pass on the current restacked head. No live device metrics, alert, dashboard, or trace has been observed. |
 | 8. Benchmarks and FinOps | Prepared — static only | PR #47 includes a bounded direct vLLM serving matrix and metadata collection. All five required jobs pass on the current restacked head. No L4 benchmark or measured inference cost exists. |
-| 9. Evaluation and releases | In progress — static implementation | PR #48 has seven synthetic evaluation cases and a privacy-safe dry-run. PR #51 designs sequential LLM release. PR #52 adds private MLflow tracking and report publication. PR #54 adds local manifest/plan controls. Open PR #55 adds authenticated plan/read/approval routes, compares candidate metadata with a finished MLflow run and sanitized report, and stores manifests in a shared single-host SQLite volume. All five required CI checks pass in run `46033196309`; local tests use a fake MLflow client. Live champion and model-file checks, vLLM deployment, and rollback remain outstanding. No real LLM evaluation or release has occurred. |
+| 9. Evaluation and releases | In progress — static implementation | PR #48 has seven synthetic evaluation cases and a privacy-safe dry-run. PR #51 designs sequential LLM release. PR #52 adds private MLflow tracking and report publication. PR #54 adds local manifest/plan controls. PR #55 adds authenticated plan/read/approval routes, checks candidate metadata against a finished MLflow run and sanitized report, and stores manifests in shared single-host SQLite. Latest five-check run `46034523863` passed. PR #56 prepares host-side active-state, live container/cache and full model-snapshot verification, sequential vLLM restart, and attempted rollback; 15 focused fake-based tests and full `make verify` pass locally. PR CI clean-room evidence and all live host/inference/recovery checks remain open. No real LLM evaluation or release has occurred. |
 | 10. Incidents and recovery | Not started | Safe real fault injection, diagnosis and verified recovery reports. |
 | 11. Automation and CI | In progress — static only | PR #53 adds a hash-locked container build and a lock coverage check; its Linux image build and all five required CI jobs pass. Terraform apply, Ansible roles, and cloud execution remain unrun. |
 | 12. Clean-room and teardown | Not started | Independent recreation, export and provider-side absence checks. |
@@ -54,11 +54,10 @@ unit-tested; the profile has not run on an L4.
 
 ## Current Next Actions
 
-1. Obtain human review and resolve any feedback on PR #55; do not merge without authorization.
-2. Implement a bounded host controller that independently verifies the live champion and model files before sequential deployment or rollback.
-3. Keep AWS work read-only until the existing quota appeal is approved and applied G/VT quota is nonzero. Do not send another appeal or request.
-4. Complete non-billable preparation that does not contradict the requirement to perform manual NVIDIA host setup before Ansible.
-5. Recheck signed package indexes, image digest, model revision/license/hash, capacity, current prices, and the exact bounded plan immediately before any authorized GPU batch.
-6. Keep all changes in focused PRs. Nothing has been merged; no direct changes to `main` were made.
+1. Commit and open PR #56 with host-controller evidence and limitations; run one CI clean-room cycle.
+2. Keep AWS work read-only until the manually submitted appeal is decided and applied G/VT quota is nonzero; do not send another appeal or request.
+3. Continue non-billable research and deployment preparation without claiming host execution; manual NVIDIA setup still precedes Ansible.
+4. Recheck signed package indexes, image digest, model revision/license/hash, capacity, current prices, and exact bounded plan immediately before any authorized GPU batch.
+5. Obtain human review for the open PR chain. Nothing has been merged; no direct changes to `main` were made.
 
 Update this table and the detailed goal after each implementation package. A phase is complete only when its acceptance gate has actual evidence.
