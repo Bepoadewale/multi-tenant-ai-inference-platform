@@ -265,11 +265,18 @@ concurrency 16 behind an explicit operator flag. Check measured GPU memory and a
 tokenizer/context behavior before enabling that level. A separate authenticated
 gateway benchmark is still required to measure gateway overhead and tenant admission.
 
-Run deterministic model evaluations and release checks only after inference is
-stable. Demonstrate candidate rejection and sequential known-good rollback. With one
-L4, do not claim concurrent zero-downtime canary traffic. Perform the incident drills
-only when their fault and recovery procedures are staged and reversible. Store each
-real incident's failure and recovery evidence separately.
+Run deterministic model evaluations only after inference is stable and MLflow/vLLM
+health checks pass. Use the one-shot `evaluator` Compose profile to send the versioned
+synthetic tasks to vLLM and upload the suite digest, model revision, aggregate gate
+metrics, and sanitized report to the private MLflow tracking server. The MLflow
+service uses SQLite and a local artifact directory on the encrypted instance volume;
+its host port is loopback-only and reachable for review through Session Manager
+forwarding. It is disposable, so export the evaluation artifact and run metadata before
+teardown. Check that no prompt or completion text was logged. Demonstrate candidate
+rejection and sequential known-good rollback. With one L4, do not claim concurrent
+zero-downtime canary traffic. Perform incident drills only when their fault and
+recovery procedures are staged and reversible. Store each real incident's failure and
+recovery evidence separately.
 
 ## Evidence export and teardown
 

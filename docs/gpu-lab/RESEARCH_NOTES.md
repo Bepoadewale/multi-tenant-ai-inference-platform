@@ -564,3 +564,28 @@ The successful resolution placed the official PyTorch index first and used the
 hash-locked output. No wheel was installed, and no model or container image was
 downloaded. The temporary research command and its failure are recorded in the
 execution journal.
+
+## Private MLflow storage for the single-host lab — 2026-11-27
+
+The official MLflow tracking-server guide describes separate backend metadata and
+artifact storage. A server can use SQLite via `--backend-store-uri` and proxy artifact
+uploads using `--serve-artifacts` with `--artifacts-destination`. This fits the short
+single-host lab: run the tracking server on the private Compose network, persist its
+SQLite database and sanitized reports in one named volume on encrypted gp3, and keep
+model weights in the Hugging Face cache. The optional browser/API mapping binds to
+host loopback only and is intended for Systems Manager forwarding. Delete this local
+registry with the disposable host after evidence export; production needs durable
+metadata and artifact stores, authentication, access control, and backup/recovery.
+
+The container uses the repository's existing Python image and MLflow dependency. The
+evaluation runner publishes only a model revision, suite digest, aggregate gate
+metrics, policy tags, and a sanitized JSON file. If publication is configured but
+fails, the run reports failure instead of silently discarding its evidence. This
+integration is statically configured; it has not yet run against a live MLflow server
+or L4.
+
+Sources: [MLflow tracking server architecture](https://mlflow.org/docs/latest/self-hosting/architecture/tracking-server/),
+[MLflow backend stores](https://mlflow.org/docs/latest/self-hosting/architecture/backend-store/),
+and [MLflow artifact stores](https://mlflow.org/docs/latest/self-hosting/architecture/artifact-store/).
+Recheck flags and storage behavior against the pinned MLflow package before the GPU
+batch.

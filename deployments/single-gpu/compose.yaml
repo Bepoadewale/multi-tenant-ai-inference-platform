@@ -1,6 +1,41 @@
 name: multi-tenant-ai-inference-platform-gpu
 
 services:
+  mlflow:
+    build:
+      context: ../..
+      dockerfile: gateway/Dockerfile
+    command:
+      - mlflow
+      - server
+      - --host
+      - 0.0.0.0
+      - --port
+      - "5000"
+      - --workers
+      - "1"
+      - --allowed-hosts
+      - mlflow:5000,localhost:15011,127.0.0.1:15011
+      - --backend-store-uri
+      - sqlite:////mlflow/mlflow.db
+      - --serve-artifacts
+      - --artifacts-destination
+      - /mlflow/artifacts
+    volumes:
+      - mlflow-data:/mlflow
+    ports:
+      - 127.0.0.1:15011:5000
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=3)"
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
   redis:
     image: redis:7.4-alpine
     command: ["redis-server", "--appendonly", "yes"]
@@ -141,6 +176,28 @@ services:
     profiles: [gpu-benchmark]
     restart: "no"
 
+  evaluator:
+    build:
+      context: ../..
+      dockerfile: gateway/Dockerfile
+    command: ["python", "/app/evaluations/gpu_llm/run_evaluation.py"]
+    environment:
+      GPU_EVAL_BASE_URL: http://vllm:8000/v1
+      GPU_EVAL_MODEL: ${GPU_SERVED_MODEL_NAME:-gpu-default}
+      GPU_EVAL_MODEL_REVISION: ${GPU_MODEL_REVISION:?set GPU_MODEL_REVISION}
+      GPU_EVAL_OUTPUT: /tmp/gpu-evaluation/results.json
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      GPU_EVAL_MLFLOW_EXPERIMENT: single-l4-llm-evaluation
+    volumes:
+      - ../../evaluations/gpu_llm:/app/evaluations/gpu_llm:ro
+    depends_on:
+      vllm:
+        condition: service_healthy
+      mlflow:
+        condition: service_healthy
+    profiles: [gpu-evaluation]
+    restart: "no"
+
   dcgm-exporter:
     image: nvcr.io/nvidia/k8s/dcgm-exporter:4.7.0-4.9.0@sha256:2490e1dfb5baaee6765ef2841813af7d978bb459a566c22c326a8fc27c64eea9
     command: ["--collectors", "/etc/dcgm-exporter/l4-metrics.csv", "--collect-interval", "5000"]
@@ -237,6 +294,8 @@ services:
     restart: unless-stopped
 
 volumes:
+  mlflow-data:
+    name: multi-tenant-ai-inference-platform-gpu-mlflow
   model-cache:
     name: multi-tenant-ai-inference-platform-gpu-model-cache
   redis-data:
