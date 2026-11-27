@@ -33,16 +33,35 @@ tests exercise the deterministic scoring helpers without a model.
 ## Authorized runtime invocation
 
 Only after the exact GPU deployment plan, cost, quota, expiry, and teardown gates have
-been approved, run the evaluator on the EC2 host or from a trusted host that can reach
-the private gateway. Keep the report outside the repository:
+been approved, run the prepared Compose evaluator on the EC2 host. It waits for vLLM
+and MLflow readiness, sends the synthetic cases to the private vLLM endpoint, writes
+the report to a temporary path, and uploads the sanitized report and metadata to the
+local MLflow service:
+
+```bash
+docker compose --env-file deployments/single-gpu/.env \
+  -f deployments/single-gpu/compose.yaml \
+  --profile gpu-evaluation run --build --rm evaluator
+```
+
+The command prints the MLflow run ID. Review the run in the UI through a Systems
+Manager port-forward to `127.0.0.1:15011`, then export the sanitized report before
+teardown. The MLflow UI/API is not exposed through the instance's public interface.
+
+For a separate trusted host that already has direct network access to an inference
+endpoint, the standalone runner can also write a report outside the repository:
 
 ```bash
 export GPU_EVAL_BASE_URL=http://127.0.0.1:8000/v1
 export GPU_EVAL_MODEL=gpu-default
 export GPU_EVAL_MODEL_REVISION=989aa7980e4cf806f80c7fef2b1adb7bc71aa306
-python3 evaluations/gpu_llm/run_evaluation.py \
+python3.12 evaluations/gpu_llm/run_evaluation.py \
   --output /var/tmp/gpu-lab/evaluation/qwen-1.5b-results.json
 ```
+
+To publish from that standalone invocation, set `MLFLOW_TRACKING_URI` to an
+authorized MLflow server. The run fails if publication is configured but unavailable;
+it does not silently discard the evidence.
 
 The bearer token is optional for the direct local lab endpoint. If the protected
 gateway is used, provide its signed tenant bearer token through

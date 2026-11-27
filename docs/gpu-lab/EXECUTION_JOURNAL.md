@@ -1638,3 +1638,21 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   artifacts are temporary lab storage.
 - **Next:** publish as PR #52 stacked on PR #51, wait for required CI, then continue
   static work on immutable sequential LLM release-plan controls.
+
+## 2026-11-27 — PR #52 CI passed and evaluation instructions clarified
+
+- **Branch / PR / head:** `codex/gpu-mlflow-evaluation-records`, PR #52,
+  `55f4d59`, based on PR #51.
+- **CI:** all five required jobs passed in run `46020258170`: Python, manifests,
+  supply-chain, GPU observability, and local end-to-end. The workflow did not start
+  the L4 Compose profile or contact AWS.
+- **Documentation follow-up:** clarified the exact one-shot Compose evaluation command,
+  the MLflow UI's loopback/Session Manager access, and the need to export evidence
+  before teardown. Updated the cost report to count model cache, Redis, and MLflow data
+  against the existing encrypted 100-GiB disk; no separate AWS volume/service is added.
+- **Validation boundary:** the passing run covers source at `55f4d59`; these follow-up
+  Markdown edits still need to be published and receive their own check run. No code
+  changed after the tested head.
+- **Next:** publish the documentation follow-up, wait for its CI, then continue
+  non-billable preparation for exact container dependency pins and sequential release
+  plan controls. Applied GPU quota remains zero.
