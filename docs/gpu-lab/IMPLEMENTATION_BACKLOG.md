@@ -59,11 +59,29 @@ pull requests must include the repository's clean-room evidence.
   invocation, data-transfer allowance, tax contingency, and a reserve. It still
   requires exact AMI, price, egress, tax-profile, and state-retention confirmation;
   it is not permission to apply.
-- PRs #32–#52 are still open and unmerged. After restacking PRs #37–#51 behind the
-  gateway safety fixes in #33–#36, every required check passes on current heads. PR
-  #51's current-head workflow is `46017455801`. No AWS resources or GPU execution.
+- PRs #32–#52 are open and unmerged. Required checks pass on current heads through
+  PR #52; its follow-up head `1f02955` passed run `46021471851`. PR #53 is being
+  prepared with gateway container pins and a hash lock; CI has not started. No AWS
+  resources or GPU execution.
 
 ## Ordered implementation packages
+
+### Cross-cutting package — repeatable gateway image inputs
+
+**Status:** PR #53 prepares a pinned Python base-image digest and 124-package
+hash-locked runtime requirements. The lock coverage check passes locally; Linux
+amd64 image build and CPU end-to-end validation are pending. The Python 3.12 CUDA
+learning lock and pinned vLLM image remain separate.
+
+- [x] Pin the multi-platform official Python slim Bookworm base image by OCI index
+  digest.
+- [x] Generate universal runtime dependency hashes and require them during image
+  installation.
+- [x] Add a CI/local lock coverage check.
+- [ ] Confirm the Docker image builds on Linux amd64 and local CPU flows remain healthy.
+
+**Exit gate:** CI builds the shared gateway image from the pinned base and hash-locked
+Python dependencies.
 
 ### Package 0 — Goal charter and baseline gates
 
