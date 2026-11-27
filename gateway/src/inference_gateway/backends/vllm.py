@@ -72,6 +72,10 @@ class VllmBackend:
                         if data == "[DONE]":
                             break
                         payload = json.loads(data)
+                        if not isinstance(payload, dict):
+                            raise TypeError("vLLM stream event must be an object")
+                        if "error" in payload:
+                            raise ValueError("vLLM returned an error event")
                         raw_usage = payload.get("usage")
                         usage = Usage(**raw_usage) if raw_usage is not None else None
                         if usage is not None:

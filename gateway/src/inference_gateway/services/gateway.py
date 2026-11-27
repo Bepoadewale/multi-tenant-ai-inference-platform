@@ -214,6 +214,7 @@ class GatewayService:
             )
             output_parts: list[str] = []
             measured_usage = False
+            usage_emitted = False
             ttft_ms = None
             recorded = False
 
@@ -260,6 +261,7 @@ class GatewayService:
                                     "usage": usage.model_dump(),
                                 }
                                 yield f"data: {json.dumps(payload)}\n\n"
+                                usage_emitted = True
                         content = event.content or ""
                     else:
                         content = event
@@ -277,6 +279,18 @@ class GatewayService:
                     }
                     yield f"data: {json.dumps(payload)}\n\n"
                 await record("success")
+                if (
+                    request.stream_options
+                    and request.stream_options.include_usage
+                    and not usage_emitted
+                ):
+                    payload = {
+                        "id": f"chatcmpl-{request_id}",
+                        "object": "chat.completion.chunk",
+                        "choices": [],
+                        "usage": usage.model_dump(),
+                    }
+                    yield f"data: {json.dumps(payload)}\n\n"
                 yield "data: [DONE]\n\n"
             except asyncio.CancelledError:
                 await record("cancelled")
