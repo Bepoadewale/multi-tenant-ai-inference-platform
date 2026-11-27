@@ -19,10 +19,9 @@ pull requests must include the repository's clean-room evidence.
   publication.
   Two helper review findings have regression tests and are fixed. Human review remains
   open.
-- PR #37 is being prepared against PR #32 to record the dated Ubuntu/NVIDIA/CUDA,
-  vLLM image, and pinned Qwen model compatibility candidates. It is research evidence,
-  not proof of GPU execution; exact target-AMI packages and real L4 validation remain
-  open.
+- PR #37 is open against PR #32 to record the dated Ubuntu/NVIDIA/CUDA, vLLM image,
+  and pinned Qwen model compatibility candidates. It is research evidence, not proof
+  of GPU execution; exact target-AMI packages and real L4 validation remain open.
 - No AWS resources or GPU instance hours have been used by this goal.
 - The account's applied On-Demand G and VT quota is zero. A 4-vCPU quota increase
   request was submitted on 2026-11-27 and AWS reports `CASE_OPENED` (pending); see the

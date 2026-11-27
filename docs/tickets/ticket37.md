@@ -15,7 +15,7 @@ download the multi-gigabyte model.
   reviews continue independently.
 - Branch: `codex/gpu-software-compatibility`, based on the open PR #32 foundation
   head `da2567e`.
-- Pull request: planned as PR #37 against `codex/gpu-ec2-foundation`; not yet opened.
+- Pull request: [#37 — pinned single-L4 runtime candidates](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/37), open against `codex/gpu-ec2-foundation`; initial head `a4ea4c9`.
 - AWS G/VT On-Demand quota remains applied at 0 vCPUs. The existing increase request
   is `CASE_OPENED`; this ticket authorizes no mutation.
 - No EC2, GPU, model download, or cloud spend occurred. Local Docker registry
