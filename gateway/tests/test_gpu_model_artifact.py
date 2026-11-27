@@ -79,3 +79,28 @@ def test_verifier_rejects_missing_artifact(tmp_path):
 
     with pytest.raises(FileNotFoundError, match="missing or not a file"):
         verifier.verify_file(tmp_path / "missing.safetensors", 1, "0" * 64)
+
+
+def test_cli_reports_verified_metadata_without_cache_path(tmp_path, monkeypatch, capsys):
+    verifier = _verifier_module()
+    content = b"small CLI fixture"
+    artifact = verifier.snapshot_file(tmp_path)
+    artifact.parent.mkdir(parents=True)
+    artifact.write_bytes(content)
+    monkeypatch.setattr(verifier, "MODEL_SIZE_BYTES", len(content))
+    monkeypatch.setattr(verifier, "MODEL_SHA256", hashlib.sha256(content).hexdigest())
+
+    assert verifier.main(["--cache-dir", str(tmp_path)]) == 0
+    output = capsys.readouterr().out
+    assert '"verified": true' in output
+    assert '"sha256":' in output
+    assert str(tmp_path) not in output
+
+
+def test_cli_failure_does_not_disclose_cache_path(tmp_path, capsys):
+    verifier = _verifier_module()
+
+    assert verifier.main(["--cache-dir", str(tmp_path)]) == 1
+    error = capsys.readouterr().err
+    assert "missing or not a file" in error
+    assert str(tmp_path) not in error

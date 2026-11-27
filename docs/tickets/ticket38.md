@@ -61,7 +61,11 @@ Official references:
 - `make verify` — passed after the symlink test: Ruff passed, all 66 repository tests
   passed (one existing Starlette deprecation warning), `pip-audit` found no known
   vulnerabilities, and `docker compose config --quiet` passed.
-- `git diff --check` — passed before documentation finalization.
+- After adding CLI output-redaction tests, `make verify` passed again: Ruff passed,
+  all 68 repository tests passed (one existing Starlette deprecation warning),
+  `pip-audit` found no known vulnerabilities after a registry retry, and Compose
+  configuration passed.
+- `git diff --check` — passed before the final two CLI tests; rerun after this update.
 - Initial `ruff ...` shell invocation failed because Ruff is not installed as a
   standalone shell command. Using the repository virtual environment succeeded.
 - The PR #37 base checks passed on head `1c1e922` in run `45941524263`; PR #38 checks
@@ -85,5 +89,7 @@ open.
 ## Outstanding work
 
 - Run `make verify` after the final change and record exact results.
-- Open a focused PR based on PR #37 and wait for required checks.
+- PR #38 is open based on PR #37; required checks are running on the initial head.
+- Publish the two latest CLI output-redaction regression tests and wait for updated
+  required checks.
 - Verify the downloaded pinned model file in the authorized GPU execution batch.
