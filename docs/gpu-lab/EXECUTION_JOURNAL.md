@@ -474,3 +474,24 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** validate the workflow YAML and research note, then publish them to PR #32
   after the currently running checks reach terminal state. Observe the one subsequent
   PR-triggered workflow and update the evidence manifest.
+
+### Follow-up outcome
+
+- PR #32 head `528b52c` passed all four required jobs in the single PR-triggered
+  workflow `45929546262`. Evidence is indexed in `EVIDENCE_MANIFEST.md`; the PR
+  description has been updated. Human review remains open.
+- During a read-only tag audit, direct inspection confirmed `versions.tf` configures
+  provider-level `default_tags = local.required_tags`, so supported resources receive
+  project/environment/owner/expiry tags even when a resource block only adds `Name`.
+  AWS provider documentation confirms tags for VPCs, subnets, IAM roles, and Scheduler
+  groups. No source change was needed.
+- A `terraform providers schema -json` attempt from the configured S3-backend root
+  stopped with “Backend initialization required.” Running `init -backend=false` and
+  `-reconfigure` succeeded, but the schema command still rejected the configured
+  remote-backend root. No AWS backend call, plan, or state access occurred. The
+  provider-level default-tag configuration was verified from source instead.
+- The AWS quota request currently reports `CASE_OPENED`; the applied quota remains
+  zero. No AWS resource was created or changed, and goal-specific spend remains `$0`.
+- **Next:** continue Phase 2 non-billable cost and remote-state preparation while
+  preserving the exact-plan and apply authorization gates. Track the open review and
+  quota request without submitting a duplicate or launching infrastructure.

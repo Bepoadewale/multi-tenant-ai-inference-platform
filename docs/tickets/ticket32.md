@@ -10,7 +10,7 @@ or local CPU inference path.
 ## Current state
 
 - Branch: `codex/gpu-ec2-foundation`, based on PR #30 head `04cb564`.
-- Pull request: [#32 — guarded single-L4 EC2 foundation](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/32), open and ready for review against `codex/single-l4-gpu-goal`. Review fixes are at `99b6b84`; evidence was indexed at `d67ec3a`. Both workflows for `d67ec3a` passed. A duplicate-trigger prevention change is locally validated and awaits publication and CI.
+- Pull request: [#32 — guarded single-L4 EC2 foundation](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/32), open and ready for review against `codex/single-l4-gpu-goal`. Review fixes are at `99b6b84`; evidence is indexed at `d67ec3a`. The current head `528b52c` passed all four required jobs in workflow `45929546262`.
 - Phase: 2 of 12, static infrastructure preparation.
 - Terraform describes the proposed environment; it has not been applied.
 - AWS account identity was verified before the quota request. Applied On-Demand G/VT
@@ -151,9 +151,9 @@ or local CPU inference path.
 
 ## Outstanding work and next step
 
-Resolve CI and review feedback on PR #32. While the quota request is pending, prepare
-the remote-state plan and refreshed full cost/expiry/teardown review. No apply or GPU
-hours are part of this ticket's current work.
+Human review of PR #32 remains open. While the quota request is pending, prepare the
+remote-state plan and refreshed full cost/expiry/teardown review. No apply or GPU hours
+are part of this ticket's current work.
 
 ## Review-finding follow-up validation
 
@@ -168,4 +168,5 @@ hours are part of this ticket's current work.
 - The two workflows for head `d67ec3a` both passed all four jobs: Python, manifests,
   supply-chain, and local-e2e. Run IDs: `45928736210` and `45928742151`. These were
   duplicate CI executions caused by the old trigger, not two manual clean-room runs.
-- CI and the PR update are pending publication of these changes.
+- CI on the initial updated head passed; the corrected workflow ran once on head
+  `528b52c` and all four required jobs passed. The PR body records these results.
