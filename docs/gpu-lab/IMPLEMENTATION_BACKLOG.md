@@ -22,8 +22,12 @@ pull requests must include the repository's clean-room evidence.
 - PR #37 is open against PR #32 to record the dated Ubuntu/NVIDIA/CUDA, vLLM image,
   and pinned Qwen model compatibility candidates. It is research evidence, not proof
   of GPU execution; exact target-AMI packages and real L4 validation remain open.
-- PR #38 is being prepared as a focused model-artifact verification helper based on
-  PR #37. Its fixture tests do not replace checking the actual downloaded artifact.
+- PR #38 is open as a focused model-artifact verification helper based on PR #37.
+  Head `5256060` records the verifier, fixture tests, and Terraform validation; its
+  documentation-only check run is in progress. Fixture tests do not replace checking
+  the actual downloaded artifact.
+- PR #39 is open against PR #38 to record the quota denial, regional quota checks,
+  and an unsent appeal draft. It does not submit an AWS message or quota request.
 - No AWS resources or GPU instance hours have been used by this goal.
 - The applied On-Demand G and VT quota is zero in `us-east-1`, `us-east-2`, and
   `us-west-2`. AWS email reports that the 4-vCPU `us-east-1` request was denied, while
