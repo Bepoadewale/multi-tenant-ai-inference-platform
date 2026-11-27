@@ -109,6 +109,9 @@ benchmark, cost, inference result, or incident is claimed.
 
 PR #64 remains open for human review. Its code checks are complete; GPU-host acceptance
 items remain pending and cannot be satisfied by local CI.
+The readiness-documentation follow-up `3815390` also passed all six required checks,
+including the workflow local E2E cycle, in run `46083985132`; PR #64 is marked ready
+for review and remains unmerged.
 
 ## Outstanding work
 
