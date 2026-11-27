@@ -55,6 +55,20 @@ def test_tenant_header_cannot_spoof_or_bypass_signed_identity(tmp_path, monkeypa
     assert authorized.status_code == 200
     assert {model["id"] for model in authorized.json()["data"]} == {"chat-default"}
 
+    unauthorized_model = client.post(
+        "/v1/chat/completions",
+        headers={
+            "Authorization": f"Bearer {tokens['customer_support']}",
+            "X-Tenant": "internal-engineering",
+        },
+        json={
+            "model": "embeddings",
+            "messages": [{"role": "user", "content": "must not reach a backend"}],
+        },
+    )
+    assert unauthorized_model.status_code == 403
+    assert unauthorized_model.json()["detail"] == "tenant is not authorized for this model"
+
     forged = client.get(
         "/v1/models",
         headers={"Authorization": "Bearer invalid-token", "X-Tenant": "research"},

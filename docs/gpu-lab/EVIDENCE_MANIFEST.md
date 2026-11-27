@@ -129,6 +129,11 @@ execution. A document that describes a proposed component is not proof that it r
 
 ## No execution evidence yet
 
+| Evidence | Date | Phase / PR / commit | Method | Demonstrates | Does not demonstrate |
+| --- | --- | --- | --- | --- | --- |
+| `gateway/tests/test_api.py::test_tenant_header_cannot_spoof_or_bypass_signed_identity` local run | 2026-11-27 | Phase 6 preparation / PR #58 / local follow-up to `ea86dcb` | Repository-root pytest and Ruff | Seven API tests pass. The signed customer-support token is denied the engineering-only `embeddings` model even with `X-Tenant: internal-engineering`; invalid bearer remains denied. | This local working-tree test has not yet run in CI. It does not show live vLLM, deployed Redis sharing, GPU execution, or physical tenant isolation. |
+| [PR #58 prior-head CI run `46064223245`](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/actions/runs/46064223245) | 2026-11-27 | Phase 6/9 static follow-up / PR #58 / `ea86dcb` | GitHub Actions | All six configured jobs passed, including the workflow-triggered local E2E job. | It predates the added API assertion; it does not verify that change, AWS, GPU inference, or hardware isolation. |
+
 As of 2026-11-27, this goal has created no AWS resources, used zero GPU instance
 hours, and recorded `$0` goal-specific AWS spend. There are no genuine GPU console or
 terminal screenshots, CUDA outputs, PyTorch GPU results, vLLM responses, live GPU

@@ -132,6 +132,27 @@ passed.
 - All eventual paid work remains subject to applied quota, exact cost estimate under
   $25, bounded run time, expiry, reviewed plan, cleanup method, and explicit approval.
 
+## API model authorization follow-up
+
+- **Objective:** verify a caller cannot use `X-Tenant` to request a model assigned to
+  another tenant.
+- **Change:** the signed customer-support identity test now submits `embeddings`
+  alongside `X-Tenant: internal-engineering`. The API returns HTTP 403 with the
+  expected tenant authorization detail before backend execution.
+- **Validation:** from the repository root,
+  `uv run --project gateway pytest -q gateway/tests/test_api.py` passed 7 tests and
+  `uv run --project gateway ruff check gateway/tests/test_api.py` passed. Running the
+  same pytest file from `gateway/` failed during import because the existing ONNX
+  model path is resolved relative to the repository root; no test assertion ran in
+  that attempt. The correct working directory is now recorded here.
+- **Scope:** this is a local TestClient/API check. It does not demonstrate a live
+  vLLM request, Redis sharing between deployed replicas, or hardware isolation.
+- **CI / review:** local change only at this point; existing PR run `46064223245`
+  targets the earlier `ea86dcb` head. A new PR workflow must include the test before
+  it can be called CI-verified. PR #58 remains open and unmerged.
+- **AWS / cost:** quota preflight returned `0.0` G/VT vCPUs and no running project-
+  tagged EC2 instance. No AWS mutation, GPU use, or spend occurred.
+
 ## Remaining limitations
 
 The guide cannot yet include actual command output or empirically confirmed expected
