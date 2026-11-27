@@ -45,7 +45,7 @@ command runs, why it is needed, what success looks like, and how to stop safely.
   destroy inputs, documents the separately approved state bootstrap, stops and removes
   the manual container while retaining its model-cache volume, and splits host
   shutdown from workstation Terraform destruction.
-- A final cross-check found the batch runbook manual-serving example diverged from the hands-on guide: it used a separate host bind mount, removed the container automatically, and omitted the served alias. The batch runbook now reuses the Compose named cache volume, preserves container logs, sets `gpu-default`, and explicitly stops/removes the manual container after checking that GPU and port 8000 are released. Placeholder arguments are quoted so Bash parses them safely. Added a direct non-streaming adapter contract test for the served alias, OpenAI chat-completion path, response content, and backend-reported usage.
+- A final cross-check found the batch runbook manual-serving example diverged from the hands-on guide: it used a separate host bind mount, removed the container automatically, and omitted the served alias. The batch runbook now reuses the Compose named cache volume, preserves container logs, sets `gpu-default`, and explicitly stops/removes the manual container after checking that GPU and port 8000 are released. Placeholder arguments are quoted so Bash parses them safely. Added a direct non-streaming adapter contract test for the served alias, OpenAI chat-completion path, response content, and backend-reported usage. A security review also found Python’s default urllib redirect handler copies authorization headers to the redirect URL; the evaluator now refuses redirects, with a local two-server test proving the bearer token is not forwarded.
 - The three findings were answered and resolved after commit `a1616ec`. Final-head
   CI run `46055428111` passed all six jobs, including the workflow E2E job. The batch
   runbook correction in `8ca57ed` also passed all six jobs in `46058891531`. No
@@ -82,6 +82,8 @@ command runs, why it is needed, what success looks like, and how to stop safely.
   alias, and stop/remove procedure.
 - [x] Test the vLLM non-stream adapter against a representative OpenAI-compatible
   response, including the served model alias and backend-reported usage.
+- [x] Prevent evaluation bearer-token forwarding across HTTP redirects and verify the
+  redirect target receives no Authorization header.
 - [x] Final-head CI run `46055428111` passed all six jobs, including the scanner and
   local E2E job. The successful fresh-runner E2E evidence first passed in
   `46054114999`; later PR workflows automatically repeated the job after guide and
@@ -111,9 +113,10 @@ manual vLLM container before Compose, and workstation-only destroy commands. All
 Bash blocks parsed, all eight Make targets exist, and the manual guide and ticket have
 no broken relative links. The final guide commit `a1616ec` passed all six jobs in CI run
 `46055428111`; docs follow-up commit `2d508a9` passed all six in `46056755505`;
-runbook commit `8ca57ed` passed all six in `46058891531`. The new targeted adapter test
-passed 23 tests in `gateway/tests/test_vllm_streaming.py`; run `46059847575` for head
-`0239cbb` passed all six CI jobs. Those workflows automatically repeated local E2E; no separate local
+runbook commit `8ca57ed` passed all six in `46058891531`. The targeted adapter test passed 23 tests in `gateway/tests/test_vllm_streaming.py`.
+The evaluation suite passed 7 focused tests including the redirect-token test; Ruff
+passed on both changed Python files. Run `46059847575` for head `0239cbb` passed all
+six CI jobs; the redirect mitigation is a follow-up and still needs CI. Those workflows automatically repeated local E2E; no separate local
 clean-room run was launched. The runbook follow-up has 50 Bash blocks parsed with
 `bash -n`, zero broken relative links across changed Markdown, and `git diff --check`
 passed.
