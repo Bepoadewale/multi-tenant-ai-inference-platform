@@ -1184,3 +1184,22 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Cost/security:** local validation only; no AWS resources, GPU hours, or spend.
 - **Next:** await PR #45's existing CI watcher, then reconcile the PR #46/#47 branch
   stack and run CI against the corrected cleanup code.
+
+## 2026-11-27 — Rebase and revalidate benchmark preparation
+
+- **Phase:** Phase 8 static preparation.
+- **Branch / parent:** `codex/gpu-benchmark-preparation`, rebased to PR #46 head
+  `6df97e7`, which includes PR #45's passing capacity-demo fix.
+- **Action:** transplanted only the two benchmark-specific commits onto the updated
+  observability branch. A first broad rebase attempt began replaying PR #46's commits
+  and encountered documentation conflicts; it was aborted without changing the branch.
+  The focused rebase using the original PR #46 base then applied the benchmark package
+  cleanly apart from status documentation, which was reconciled to retain current PR
+  #45/#46 facts and show the benchmark as a candidate, not an open PR.
+- **Validation:** `make gpu-benchmark-plan` produced 11 cases and 33 commands within
+  120 minutes; a targeted cleanup-name regression test passed (1 test); Ruff,
+  `make gpu-compose-config`, and `git diff --check` passed. No Docker profile, model,
+  AWS resource, or GPU request was started. The first JSON parsing attempt included
+  Make's echoed command; parsing after that line succeeded, as noted in ticket47.
+- **CI / cost:** PR #46 new-head run is in progress. No AWS spend or GPU hours.
+- **Next:** push the updated branch and open PR #47 against PR #46, then watch its CI.
