@@ -546,3 +546,35 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** publish this test package and its evidence; observe the single PR-triggered
   CI workflow. Keep actual bootstrap and GPU changes gated by approval, quota, exact
   cost, saved plan, and expiry controls.
+
+## 2026-11-27 — Verify baseline resource scope and cleanup output
+
+- **Phase:** Phase 2 — static infrastructure preparation; no GPU infrastructure has
+  been created by this goal.
+- **Branch / PR:** `codex/gpu-ec2-foundation`, PR #32; verifier scope correction is at
+  `11d2e6e`.
+- **Discovery:** the verifier's generic success message said shared repository state
+  and budget controls were “intentionally retained,” but live read-only checks showed
+  the expected state bucket, lock table, and budget do not exist yet. The GPU verifier
+  never queried them. Changed its message and test to state clearly that shared state,
+  locks, and budget guardrails are outside its scope and are neither checked nor
+  modified by this script.
+- **AWS baseline check:** ran the read-only verifier against the expected account in
+  `us-east-1`. It exited 0 and reported no non-terminated project instance, tagged
+  volume/network resource, snapshot, expiry IAM role/profile, or Scheduler resource.
+  This is an initial pre-provision baseline, not proof of post-destroy cleanup.
+- **Partial command observation:** the first invocation returned only the first seven
+  lines at the command tool's 10-second boundary and did not return its exit code. A
+  process check found no verifier still running; the standalone NAT-gateway query
+  returned empty successfully. Re-ran the full verifier with a longer bound and
+  captured all checks and exit code `0`.
+- **Validation:** after the wording change, `make lint` and `make test` passed (60
+  tests, one existing Starlette deprecation warning); Bash syntax and `git diff
+  --check` passed. The AWS verifier itself remains read-only.
+- **State/cost:** exact project-tag inventory remains empty. Separate calls show the
+  shared state bucket, DynamoDB lock table, and budget are absent, so the preflight
+  correctly blocks until bootstrap resources are established. No cloud resource or
+  cost was created.
+- **Next:** publish the verifier correction, test, and truthful baseline record with
+  the current PR package. Keep this baseline clearly distinct from future teardown
+  evidence.

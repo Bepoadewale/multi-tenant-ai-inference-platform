@@ -50,8 +50,8 @@ or local CPU inference path.
   must never be used to apply. The future apply path uses the repository's actual
   remote state and an exact SHA-256-reviewed saved plan.
 - Routine destroy is limited to this GPU root. The independent verifier checks tagged
-  EC2/network/storage and temporary IAM/Scheduler resources. It intentionally leaves
-  the shared repository state bucket, lock table, and budget in place.
+  EC2/network/storage and temporary IAM/Scheduler resources. Shared state, locks, and
+  budget guardrails are outside its scope; it does not inspect or modify them.
 
 ## Acceptance criteria
 
@@ -193,3 +193,15 @@ are part of this ticket's current work.
   syntax for all six GPU EC2 helper scripts and `git diff --check` passed.
 - These tests validate local guards only. They do not execute a real destroy or
   establish provider-side cleanup.
+
+## Read-only project-resource baseline
+
+- Ran `AWS_PROFILE=ai-platform-pilot-key AWS_REGION=us-east-1
+  EXPECTED_AWS_ACCOUNT_ID=<redacted> scripts/gpu-ec2-verify-clean.sh` against the
+  expected account. It exited 0 and reported no matching non-terminated instance,
+  tagged volume/network resource, snapshot, expiry IAM role/profile, or Scheduler
+  group/schedule. This is a pre-provision baseline, not teardown evidence.
+- The verifier explicitly does not inspect shared state, locks, or budgets. Separate
+  read-only checks found the expected S3 state bucket and DynamoDB table absent and no
+  project budget configured, so the root preflight would refuse planning/apply until
+  the bootstrap guardrails exist.
