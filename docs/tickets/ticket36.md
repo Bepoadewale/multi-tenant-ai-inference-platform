@@ -9,7 +9,7 @@ the vLLM preflight.
 
 ## Current state
 
-- Branch: `codex/vllm-preflight-failure-cleanup`, [PR #36](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/36), rebased and pushed on PR #35 head `5cd8dfb`; branch head `e0e86c5`. Fresh CI is running.
+- Branch: `codex/vllm-preflight-failure-cleanup`, [PR #36](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/36), rebased and pushed on PR #35 head `5cd8dfb`; latest documentation head `774bc71`. Run `45938444604` is in progress.
 - Phase: non-billable Phase 6 failure-path tests. No AWS, GPU, or live vLLM was used.
 - The earlier CI failure and recovery are recorded in ticket #35 and the execution
   journal. This package adds focused coverage for the remaining timeout, cancellation,
