@@ -74,11 +74,16 @@ class ChatMessage(BaseModel):
     content: str
 
 
+class StreamOptions(BaseModel):
+    include_usage: bool = False
+
+
 class ChatCompletionRequest(BaseModel):
     model: str
     messages: list[ChatMessage] = Field(min_length=1)
     max_tokens: int = Field(default=64, ge=1, le=2048)
     stream: bool = False
+    stream_options: StreamOptions | None = None
     temperature: float = Field(default=0.7, ge=0, le=2)
 
 
@@ -96,6 +101,7 @@ class UsageRecord(BaseModel):
     deployment_version: str
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     usage: Usage
+    usage_source: Literal["backend_reported", "gateway_estimate"] = "gateway_estimate"
     latency_ms: float
     ttft_ms: float | None
     streaming: bool

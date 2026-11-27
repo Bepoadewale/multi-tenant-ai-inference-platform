@@ -9,7 +9,7 @@
 | 3. Ubuntu/NVIDIA/CUDA/Ansible | Not started | Manual host and container GPU computation, followed by repeat Ansible run. |
 | 4. CUDA performance lab | Not started | Synchronized real-GPU experiments and profiler evidence. |
 | 5. vLLM and Qwen serving | Not started | Pinned artifacts and actual L4 inference/streaming. |
-| 6. Multi-tenant GPU gateway | Not started | Real routed requests, shared limits, failure and cancellation accounting. |
+| 6. Multi-tenant GPU gateway | Local correctness work in progress; no GPU integration | PR #33 preparation adds vLLM final stream usage parsing, measured first-content latency, explicit usage provenance, and cancellation accounting tests. Shared Redis lease/reconciliation design and real GPU routing remain outstanding. |
 | 7. GPU/AI observability | Not started | Live metrics, dashboards, alert, trace correlation. |
 | 8. Benchmarks and FinOps | Not started | Reproducible measured report with raw evidence references and cost method. |
 | 9. Evaluation and releases | Not started | Actual evaluation, candidate rejection and rollback. |
@@ -43,13 +43,13 @@
 
 ## Current Next Actions
 
-1. Resolve PR #32 CI results and review feedback; keep the PR stacked on #30 until the
+1. Finish local gateway stream accounting and cancellation evidence for PR #33, then
+   open it stacked on #32.
+2. Resolve PR #32 CI results and review feedback; keep the PR stacked on #30 until the
    goal-registration base is merged.
-2. Track the pending four-vCPU G/VT quota request while preparing the exact
+3. Track the pending four-vCPU G/VT quota request while preparing the exact
    remote-state plan and full resource/cost summary. Do not apply.
-3. Continue local gateway correctness and reproducibility work in a separate focused
-   PR before live vLLM tenant integration.
-4. Keep PRs #30 and #31 open for human review; their required checks currently pass.
-   PR #32 is open as a draft with required checks running.
+4. Keep PRs #30, #31, and #32 open for human review; their required checks currently
+   pass. PR #32 is ready for review.
 
 Update this table and the detailed goal after each implementation package. A phase is complete only when its acceptance gate has actual evidence.

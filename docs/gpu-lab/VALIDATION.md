@@ -25,7 +25,7 @@ The dependency audit reported packages `certifi`, `filelock`, `gitpython`, `mlfl
 
 ## 2026-11-26 — Local dependency repair evidence (PR #31)
 
-The separate draft [PR #31](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/31)
+The separate open [PR #31](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/31)
 adds a shared constraints file to local and gateway-container installs. On that branch:
 
 - `make install` selected patched minimums for all seven affected transitive packages.
@@ -92,7 +92,38 @@ state before review; no AWS, GPU, CUDA, or vLLM execution is claimed.
 
 ### What this evidence does and does not establish
 
-This establishes current local lint/test/static configuration outcomes and read-only account/quota/resource queries. It does not establish absence of untagged AWS resources, successful GPU launch, a quota increase, instance capacity, driver/CUDA compatibility, inference performance, actual billed cost, or cloud cleanup.
+This establishes current local lint/test/static configuration outcomes and read-only account/quota/resource queries. It does not establish absence of untagged AWS resources, successful GPU launch, quota approval, instance capacity, driver/CUDA compatibility, inference performance, actual billed cost, or cloud cleanup.
+
+## 2026-11-27 — Local vLLM stream accounting and cancellation tests
+
+- **Branch:** `codex/gateway-stream-accounting`, stacked on PR #32 (ready for review).
+- **Scope:** source-level vLLM OpenAI-compatible streaming behavior and local
+  cancellation. This is non-billable local validation, not vLLM or GPU execution.
+- **Research:** the official vLLM guide documents a final usage chunk with
+  `choices: []` when `stream_options.include_usage=true`.
+- **Implementation:** the adapter requests and parses final usage; the gateway exposes
+  the usage-only event only if its client asked for it. First-content delay is measured
+  at the gateway. Non-stream backend duration is no longer reported as TTFT. Usage
+  records identify backend-reported values versus gateway word estimates. Stream
+  errors and cancellation receive one terminal record in the tested local path.
+- **Commands/results:** `.venv/bin/ruff check gateway/src
+  gateway/tests/test_vllm_streaming.py` passed; targeted pytest reported **8 passed**;
+  `.venv/bin/pytest -q` reported **58 passed**, one existing Starlette
+  `TestClient` deprecation warning.
+- **Setup and failed attempts:** the worktree had no Python 3.12 virtual environment.
+  The first Ruff invocation therefore failed because `.venv/bin/ruff` did not exist.
+  Installed the repository's editable development dependencies into a new Python 3.12
+  `.venv` and generated the missing ignored local ONNX fixture with the existing model
+  script. The first test collection then failed on that missing fixture; rerun passed.
+  One assertion initially expected bytes although direct `StreamingResponse` iteration
+  yielded strings in the test; the assertion was corrected and rerun.
+- The first fake Redis-pipeline test did not implement both `hset` call forms and
+  failed before checking serialization. The fake was corrected, then both test runs
+  passed.
+- **Limitations:** vLLM SSE was tested using `httpx.MockTransport`, not a live vLLM
+  process. Cancellation used the in-memory limiter. Shared Redis lease expiry,
+  reservations/reconciliation, tokenizer-accurate input limits, and real GPU execution
+  remain unverified. No AWS resources or spend were created.
 
 ## Future GPU execution template
 

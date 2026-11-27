@@ -4,6 +4,9 @@
 **Scope:** direct source, test, container, Terraform, observability, CI, docs, and recorded evidence inspection.  
 **Outcome:** strong local CPU control-plane baseline; no EC2 GPU execution profile exists in this revision.
 
+This is a snapshot of the audited starting revision. Later source changes and their
+validation are recorded in the dated follow-up section at the end of this file.
+
 ## Existing components and evidence
 
 | Capability | Source inspected | What exists | Evidence / boundary |
@@ -46,4 +49,19 @@ See [`../governance/VALIDATION.md`](../governance/VALIDATION.md) for exact resul
 
 ## Phase 1 remaining work
 
-This pass audited the request/admission/stream path and principal cloud contracts but is not a line-by-line security review of every unrelated service. Current AWS/NVIDIA/PyTorch/vLLM docs provide a candidate Ubuntu 24.04/driver/CUDA route, not a tested compatible pin; see [`RESEARCH_NOTES.md`](RESEARCH_NOTES.md). Initial official references for Triton, DCGM, observability, Redis, MLflow, and evaluation are now recorded; verify exact product versions and artifacts immediately before each implementation. The preliminary full-resource estimate is in [`COST_REPORT.md`](COST_REPORT.md); refresh exact rates, tax profile, account-wide transfer, and Terraform plan before any cloud authorization. The On-Demand G/VT quota remains zero.
+This pass audited the request/admission/stream path and principal cloud contracts but is not a line-by-line security review of every unrelated service. Current AWS/NVIDIA/PyTorch/vLLM docs provide a candidate Ubuntu 24.04/driver/CUDA route, not a tested compatible pin; see [`RESEARCH_NOTES.md`](RESEARCH_NOTES.md). Initial official references for Triton, DCGM, observability, Redis, MLflow, and evaluation are now recorded; verify exact product versions and artifacts immediately before each implementation. The preliminary full-resource estimate is in [`COST_REPORT.md`](COST_REPORT.md); refresh exact rates, tax profile, account-wide transfer, and Terraform plan before any cloud authorization. The applied On-Demand G/VT quota remains zero; a 4-vCPU request is now pending.
+
+## Follow-up source inspection — streaming usage package
+
+The baseline observations above were rechecked while preparing the gateway's LLM
+integration. The current working branch makes the vLLM adapter request its documented
+final streaming usage chunk, passes that measured usage to the gateway, returns a
+usage-only OpenAI-compatible chunk only when the client requested it, and measures
+time to first content rather than using a fixed value. It records whether tokens came
+from the backend or a gateway word estimate. A controlled local cancellation test
+confirms one terminal cancellation record and local in-memory concurrency release.
+
+This is local software evidence only. It does not prove real vLLM compatibility,
+tokenizer-accurate estimates for non-vLLM backends, shared Redis lease recovery, or
+GPU execution. Those remain explicit later tasks. See ticket #33 and the execution
+journal for the exact tests and remaining admission-control gaps.
