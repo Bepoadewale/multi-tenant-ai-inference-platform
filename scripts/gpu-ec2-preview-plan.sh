@@ -3,6 +3,7 @@ set -euo pipefail
 
 : "${EXPECTED_AWS_ACCOUNT_ID:?set EXPECTED_AWS_ACCOUNT_ID}"
 : "${GPU_EC2_AZ:?set GPU_EC2_AZ to a listed us-east-1 zone}"
+: "${GPU_EC2_UBUNTU_AMI_ID:?set the reviewed Canonical Ubuntu AMI ID}"
 : "${GPU_EC2_EXPIRES_AT:?set a future exact UTC expiry no more than 12 hours away}"
 export AWS_PROFILE="${AWS_PROFILE:-ai-platform-pilot-key}"
 export AWS_REGION="${AWS_REGION:-us-east-1}"
@@ -47,6 +48,7 @@ terraform -chdir="$preview" plan -input=false \
   -var="expected_account_id=${EXPECTED_AWS_ACCOUNT_ID}" \
   -var="availability_zone=${GPU_EC2_AZ}" \
   -var="instance_type=g6.xlarge" \
+  -var="ubuntu_ami_id=${GPU_EC2_UBUNTU_AMI_ID}" \
   -var="expires_at=${GPU_EC2_EXPIRES_AT}" \
   -out="$plan_file"
 python3 -c 'import hashlib,pathlib,sys; print(hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest())' "$plan_file"

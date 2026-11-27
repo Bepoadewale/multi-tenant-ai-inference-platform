@@ -2,5 +2,6 @@
 expected_account_id = "123456789012"
 availability_zone   = "us-east-1a"
 instance_type       = "g6.xlarge"
+ubuntu_ami_id       = "ami-0a951420c495183dc" # Canonical Ubuntu 24.04 amd64, 2026-11-20; reverify before use.
 volume_size_gib     = 100
 expires_at          = "2026-12-01T18:00:00Z"
