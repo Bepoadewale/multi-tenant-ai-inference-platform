@@ -79,7 +79,8 @@ command runs, why it is needed, what success looks like, and how to stop safely.
   including the three automated review findings.
 - [x] Final-head CI run `46055428111` passed all six jobs, including the scanner and
   local E2E job. The successful fresh-runner E2E evidence first passed in
-  `46054114999`; a later workflow automatically repeated it after guide corrections.
+  `46054114999`; later PR workflows automatically repeated the job after guide and
+  documentation updates, most recently in run `46056755505`.
 - [ ] Human review; do not merge without owner authorization.
 - [ ] After GPU approval, revise any command or package candidate that live evidence
   disproves and rerun the relevant reproduction stage.
@@ -104,8 +105,9 @@ was also corrected for Terraform wrapper inputs, private bootstrap, stopping the
 manual vLLM container before Compose, and workstation-only destroy commands. All 40
 Bash blocks parsed, all eight Make targets exist, and the manual guide and ticket have
 no broken relative links. The final guide commit `a1616ec` passed all six jobs in CI run
-`46055428111`. Its workflow automatically repeated the local E2E job after the
-review corrections; no separate local clean-room run was launched.
+`46055428111`; docs follow-up commit `2d508a9` also passed all six jobs in
+`46056755505`. Those workflows automatically repeated local E2E; no separate local
+clean-room run was launched.
 
 ## Security and financial limits
 
