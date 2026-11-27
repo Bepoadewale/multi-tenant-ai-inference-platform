@@ -922,3 +922,26 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** publish PR #43, then prepare a consolidated GPU execution runbook covering
   manual host setup, inference, metrics, experiments, evidence export, and teardown.
   Runtime commands remain unverified until an authorized GPU run occurs.
+
+## 2026-11-27 — Prepare GPU batch runbook and reconcile read-only AWS state
+
+- **Phase:** Phase 2 static preparation; planning Phase 3–10 GPU work in one batch.
+- **Branch:** `codex/gpu-batch-readiness`, based on PR #43 head `4e62876`.
+- **Objective:** pre-stage future GPU work and confirm the cloud is safe to wait for
+  quota approval.
+- **Research:** checked official NVIDIA Ubuntu driver/CUDA installation guides,
+  NVIDIA Container Toolkit installation, PyTorch CUDA installation and verification,
+  and vLLM GPU/Docker deployment. Recorded the headless driver path, the normal CUDA
+  13/R580-or-newer vLLM driver requirement, and the need to recheck exact packages on
+  the execution date.
+- **AWS reads:** verified the key profile's expected account without copying its
+  identifiers into evidence; applied G/VT quota remains `0.0`. Exact project-tag EC2
+  and Resource Groups Tagging API queries returned no project resources. All calls
+  were read-only.
+- **Changes:** drafted `GPU_BATCH_RUNBOOK.md` with prerequisites, a ten-hour planning
+  ceiling, manual host setup, manual vLLM first run, tenant/telemetry checks,
+  benchmark/evaluation, stop conditions, evidence export, and teardown. Commands are
+  labeled as planned and unexecuted.
+- **Cost:** no infrastructure, GPU hour, or spend.
+- **Next:** validate and publish PR #44; continue preparing scripts and datasets
+  locally while quota and the Support Center response remain pending.
