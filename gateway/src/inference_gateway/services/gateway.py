@@ -1,3 +1,4 @@
+import asyncio
 import inspect
 import json
 import os
@@ -6,6 +7,7 @@ from uuid import uuid4
 
 from fastapi import HTTPException
 from fastapi.responses import StreamingResponse
+from inference_gateway.backends.base import BackendStreamChunk
 from inference_gateway.backends.mock import MockInferenceBackend
 from inference_gateway.backends.onnx import OnnxRuntimeBackend
 from inference_gateway.backends.vllm import VllmBackend
@@ -125,7 +127,7 @@ class GatewayService:
                 release_context,
             )
         try:
-            text, usage, ttft_ms = await backend.complete(request)
+            text, usage, _backend_duration_ms = await backend.complete(request)
             record = await self._record(
                 tenant,
                 request.model,
@@ -134,10 +136,13 @@ class GatewayService:
                 request_id,
                 usage,
                 started,
-                ttft_ms,
+                None,
                 False,
                 "success",
                 release_context,
+                usage_source=(
+                    "backend_reported" if isinstance(backend, VllmBackend) else "gateway_estimate"
+                ),
             )
             return {
                 "id": f"chatcmpl-{request_id}",
@@ -177,6 +182,7 @@ class GatewayService:
                 False,
                 "backend_error",
                 release_context,
+                usage_source="gateway_estimate",
             )
             raise HTTPException(
                 502,
@@ -204,20 +210,25 @@ class GatewayService:
             usage = Usage(
                 prompt_tokens=sum(len(message.content.split()) for message in request.messages),
                 completion_tokens=0,
-                total_tokens=0,
+                total_tokens=sum(len(message.content.split()) for message in request.messages),
             )
-            try:
-                async for token in backend.stream(request):
-                    usage.completion_tokens += 1
-                    usage.total_tokens += 1
-                    payload = {
-                        "id": f"chatcmpl-{request_id}",
-                        "object": "chat.completion.chunk",
-                        "choices": [
-                            {"index": 0, "delta": {"content": token}, "finish_reason": None}
-                        ],
-                    }
-                    yield f"data: {json.dumps(payload)}\n\n"
+            output_parts: list[str] = []
+            measured_usage = False
+            ttft_ms = None
+            recorded = False
+
+            def update_estimated_usage() -> None:
+                if not measured_usage:
+                    usage.completion_tokens = len("".join(output_parts).split())
+                    usage.total_tokens = usage.prompt_tokens + usage.completion_tokens
+
+            async def record(outcome: str) -> None:
+                nonlocal recorded
+                if recorded:
+                    return
+                # Set before awaiting so a metering error cannot cause duplicate records.
+                recorded = True
+                update_estimated_usage()
                 await self._record(
                     tenant,
                     request.model,
@@ -226,16 +237,63 @@ class GatewayService:
                     request_id,
                     usage,
                     started,
-                    2.0,
+                    ttft_ms,
                     True,
-                    "success",
+                    outcome,
                     release_context,
+                    usage_source=(
+                        "backend_reported" if measured_usage else "gateway_estimate"
+                    ),
                 )
+
+            try:
+                async for event in backend.stream(request):
+                    if isinstance(event, BackendStreamChunk):
+                        if event.usage is not None:
+                            usage = event.usage
+                            measured_usage = True
+                            if request.stream_options and request.stream_options.include_usage:
+                                payload = {
+                                    "id": f"chatcmpl-{request_id}",
+                                    "object": "chat.completion.chunk",
+                                    "choices": [],
+                                    "usage": usage.model_dump(),
+                                }
+                                yield f"data: {json.dumps(payload)}\n\n"
+                        content = event.content or ""
+                    else:
+                        content = event
+                    if not content:
+                        continue
+                    output_parts.append(content)
+                    if ttft_ms is None:
+                        ttft_ms = (perf_counter() - started) * 1000
+                    payload = {
+                        "id": f"chatcmpl-{request_id}",
+                        "object": "chat.completion.chunk",
+                        "choices": [
+                            {"index": 0, "delta": {"content": content}, "finish_reason": None}
+                        ],
+                    }
+                    yield f"data: {json.dumps(payload)}\n\n"
+                await record("success")
                 yield "data: [DONE]\n\n"
+            except asyncio.CancelledError:
+                await record("cancelled")
+                raise
+            except GeneratorExit:
+                await record("cancelled")
+                raise
+            except Exception as error:
+                await record("stream_error")
+                raise RuntimeError("inference stream failed") from error
             finally:
+                update_estimated_usage()
                 ACTIVE.labels(tenant.id).dec()
-                await self._release(tenant, usage.total_tokens)
-                await self._release_capacity(tenant, allocation)
+                try:
+                    await self._release(tenant, usage.total_tokens)
+                finally:
+                    await self._release_capacity(tenant, allocation)
 
         return StreamingResponse(
             events(),
@@ -298,6 +356,7 @@ class GatewayService:
         streaming,
         outcome,
         release_context=None,
+        usage_source="gateway_estimate",
     ):
         latency_ms = (perf_counter() - started) * 1000
         trace_context = trace.get_current_span().get_span_context()
@@ -309,6 +368,7 @@ class GatewayService:
             backend=backend,
             deployment_version=version,
             usage=usage,
+            usage_source=usage_source,
             latency_ms=latency_ms,
             ttft_ms=ttft_ms,
             streaming=streaming,
