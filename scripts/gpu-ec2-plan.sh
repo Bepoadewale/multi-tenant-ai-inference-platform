@@ -6,6 +6,7 @@ set -euo pipefail
 : "${GPU_EC2_EXPIRES_AT:?set the exact approved UTC expiry, no more than 12 hours away}"
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+export AWS_PROFILE="${AWS_PROFILE:-ai-platform-pilot-key}"
 export AWS_REGION="${AWS_REGION:-us-east-1}"
 export GPU_EC2_INSTANCE_TYPE="g6.xlarge"
 "$root/scripts/gpu-ec2-preflight.sh"

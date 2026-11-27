@@ -94,17 +94,18 @@ schedule_found="$(aws scheduler list-schedule-groups --name-prefix "$schedule_gr
   --query "length(ScheduleGroups[?Name=='${schedule_group}'])" --output text)"
 if [[ "$schedule_found" == "0" ]]; then
   echo "absent: project expiry schedule group"
+  echo "absent: project one-time expiry schedule (schedule group is absent)"
 else
   echo "REMAINS: project expiry schedule group"
   failures=1
-fi
-schedule="$(aws scheduler list-schedules --group-name "$schedule_group" \
-  --query 'Schedules[].Name' --output text)"
-if [[ -z "$schedule" || "$schedule" == "None" ]]; then
-  echo "absent: project one-time expiry schedule"
-else
-  echo "REMAINS: project one-time expiry schedule"
-  failures=1
+  schedule="$(aws scheduler list-schedules --group-name "$schedule_group" \
+    --query 'Schedules[].Name' --output text)"
+  if [[ -z "$schedule" || "$schedule" == "None" ]]; then
+    echo "absent: project one-time expiry schedule"
+  else
+    echo "REMAINS: project one-time expiry schedule"
+    failures=1
+  fi
 fi
 
 if [[ "$failures" -ne 0 ]]; then

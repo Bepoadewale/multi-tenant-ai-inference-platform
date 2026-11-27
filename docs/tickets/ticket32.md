@@ -10,7 +10,7 @@ or local CPU inference path.
 ## Current state
 
 - Branch: `codex/gpu-ec2-foundation`, based on PR #30 head `04cb564`.
-- Pull request: [#32 — guarded single-L4 EC2 foundation](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/32), draft and open against `codex/single-l4-gpu-goal`; checks are running.
+- Pull request: [#32 — guarded single-L4 EC2 foundation](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/32), open and ready for review against `codex/single-l4-gpu-goal`. Automated review identified two wrapper/verifier defects; fixes are locally validated and awaiting branch publication and CI.
 - Phase: 2 of 12, static infrastructure preparation.
 - Terraform describes the proposed environment; it has not been applied.
 - AWS account identity was verified before the quota request. Applied On-Demand G/VT
@@ -94,6 +94,16 @@ or local CPU inference path.
 
 ## Issues and approaches
 
+- Automated review found that plan/apply invoked preflight as a child process, so
+  preflight's default `AWS_PROFILE` did not reach Terraform. Both parent wrappers now
+  export the same default profile before preflight, while preserving an explicit
+  operator profile. A subprocess regression test stubs AWS and Terraform and checks
+  that both receive the selected profile without using AWS credentials.
+- Automated review found that teardown verification queried schedules after the
+  one-time schedule group was already absent; AWS Scheduler can reject that request.
+  The verifier now reports the schedule absent with the group and skips enumeration.
+  A subprocess test verifies this branch and confirms no `list-schedules` call occurs.
+
 - Terraform validation initially rejected `action_after_completion` on the
   repository's pinned AWS provider `5.100.0`. The optional one-time-schedule cleanup
   field appears in newer provider documentation but not the pinned schema. Kept the
@@ -140,3 +150,13 @@ or local CPU inference path.
 Resolve CI and review feedback on PR #32. While the quota request is pending, prepare
 the remote-state plan and refreshed full cost/expiry/teardown review. No apply or GPU
 hours are part of this ticket's current work.
+
+## Review-finding follow-up validation
+
+- `make verify`: passed Ruff, 52 tests, dependency audit, and `docker compose config`.
+- The two new wrapper tests use fake AWS and Terraform commands; they do not use
+  credentials, contact AWS, or create resources.
+- `bash -n scripts/gpu-ec2-plan.sh scripts/gpu-ec2-apply.sh
+  scripts/gpu-ec2-verify-clean.sh`: passed.
+- `git diff --check`: passed.
+- CI and the PR update are pending publication of these changes.
