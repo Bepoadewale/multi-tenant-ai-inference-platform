@@ -8,6 +8,8 @@ runtime claims unverified until an approved L4 execution.
 
 ## Current state
 
+PR [#46](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/46) is open against PR #45 at initial head `3f26111`; its required checks are pending.
+
 The single-GPU profile had vLLM and gateway metrics endpoints but no Prometheus
 scrapes, GPU exporter, host exporter, alert routing, Grafana dashboard, or trace
 collector. The old GPU dashboard used DCGM names with outdated units and an older
