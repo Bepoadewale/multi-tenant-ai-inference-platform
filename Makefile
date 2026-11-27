@@ -144,7 +144,7 @@ gpu-benchmark:
 gpu-gateway-benchmark-plan:
 	$(PYTHON) benchmarks/gpu_inference/run_gateway_benchmark.py --gateway-url http://127.0.0.1:8081 --gateway-url http://127.0.0.1:8082 --direct-url http://127.0.0.1:8000 --dry-run
 gpu-gateway-benchmark:
-	$(PY) benchmarks/gpu_inference/run_gateway_benchmark.py --gateway-url "$${GPU_GATEWAY_URL_1:-http://127.0.0.1:8081}" --gateway-url "$${GPU_GATEWAY_URL_2:-http://127.0.0.1:8082}" --direct-url "$${GPU_VLLM_URL:-http://127.0.0.1:8000}" --require-l4
+	$(PYTHON) benchmarks/gpu_inference/run_gateway_benchmark.py --gateway-url "$${GPU_GATEWAY_URL_1:-http://127.0.0.1:8081}" --gateway-url "$${GPU_GATEWAY_URL_2:-http://127.0.0.1:8082}" --direct-url "$${GPU_VLLM_URL:-http://127.0.0.1:8000}" --require-l4
 gpu-evaluation-plan:
 	$(PYTHON) evaluations/gpu_llm/run_evaluation.py --dry-run
 gpu-cuda-plan:

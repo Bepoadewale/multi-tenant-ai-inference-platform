@@ -13,12 +13,9 @@ from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
 from time import perf_counter
-from typing import TYPE_CHECKING
+from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
-from urllib.request import Request, urlopen
-
-if TYPE_CHECKING:
-    import httpx
+from urllib.request import HTTPRedirectHandler, Request, build_opener, urlopen
 
 TENANTS = {
     "customer-support": "customer_support",
@@ -28,12 +25,22 @@ TENANTS = {
 PROMPT = "Reply with the single word READY."
 
 
+class RejectRedirect(HTTPRedirectHandler):
+    """Never forward a tenant bearer token to a redirect destination."""
+
+    def redirect_request(self, request, file_pointer, code, message, headers, new_url):
+        raise HTTPError(request.full_url, code, "redirect refused", headers, file_pointer)
+
+
 def percentile(values: list[float], rank: float) -> float | None:
     if not values:
         return None
     ordered = sorted(values)
-    index = max(0, min(len(ordered) - 1, round((len(ordered) - 1) * rank)))
-    return round(ordered[index], 3)
+    position = max(0.0, min(float(len(ordered) - 1), (len(ordered) - 1) * rank))
+    lower = int(position)
+    upper = min(lower + 1, len(ordered) - 1)
+    fraction = position - lower
+    return round(ordered[lower] + (ordered[upper] - ordered[lower]) * fraction, 3)
 
 
 def summarize(rows: list[dict], elapsed_seconds: float) -> dict:
@@ -102,42 +109,57 @@ def require_l4() -> dict[str, str]:
     return identity
 
 
+def post_json(url: str, model: str, token: str | None, timeout: float) -> tuple[int, dict]:
+    payload = {
+        "model": model,
+        "messages": [{"role": "user", "content": PROMPT}],
+        "max_tokens": 8,
+        "temperature": 0,
+    }
+    headers = {"Content-Type": "application/json"}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    request = Request(
+        f"{url.rstrip('/')}/v1/chat/completions",
+        data=json.dumps(payload).encode("utf-8"),
+        headers=headers,
+        method="POST",
+    )
+    opener = build_opener(RejectRedirect())
+    try:
+        with opener.open(request, timeout=timeout) as response:
+            return response.status, json.loads(response.read())
+    except HTTPError as error:
+        # Preserve only the status; do not read or log an upstream error body.
+        return error.code, {}
+
+
 async def request_one(
-    client: httpx.AsyncClient,
     url: str,
     model: str,
     tenant: str,
     token: str | None,
     semaphore: asyncio.Semaphore,
+    timeout: float,
 ) -> dict:
-    import httpx
-
     queued_at = perf_counter()
     async with semaphore:
         started_at = perf_counter()
-        headers = {"Authorization": f"Bearer {token}"} if token else {}
         try:
-            response = await client.post(
-                f"{url.rstrip('/')}/v1/chat/completions",
-                headers=headers,
-                json={
-                    "model": model,
-                    "messages": [{"role": "user", "content": PROMPT}],
-                    "max_tokens": 8,
-                    "temperature": 0,
-                },
+            status, body = await asyncio.to_thread(
+                post_json, url, model, token, timeout
             )
             latency = (perf_counter() - started_at) * 1000
-            usage = response.json().get("usage", {}) if response.status_code == 200 else {}
+            usage = body.get("usage", {}) if status == 200 else {}
             return {
                 "tenant": tenant,
-                "status": response.status_code,
+                "status": status,
                 "latency_ms": round(latency, 3),
                 "client_queue_wait_ms": round((started_at - queued_at) * 1000, 3),
                 "prompt_tokens": usage.get("prompt_tokens", 0),
                 "completion_tokens": usage.get("completion_tokens", 0),
             }
-        except (httpx.HTTPError, ValueError, TypeError):
+        except (URLError, TimeoutError, OSError, ValueError, TypeError):
             return {
                 "tenant": tenant,
                 "status": "transport_error",
@@ -152,17 +174,14 @@ async def run_phase(
     concurrency: int,
     timeout: float,
 ) -> tuple[list[dict], float]:
-    import httpx
-
     semaphore = asyncio.Semaphore(concurrency)
     started = perf_counter()
-    async with httpx.AsyncClient(timeout=timeout) as client:
-        rows = await asyncio.gather(
-            *(
-                request_one(client, url, model, tenant, token, semaphore)
-                for url, model, tenant, token in jobs
-            )
+    rows = await asyncio.gather(
+        *(
+            request_one(url, model, tenant, token, semaphore, timeout)
+            for url, model, tenant, token in jobs
         )
+    )
     return rows, perf_counter() - started
 
 
