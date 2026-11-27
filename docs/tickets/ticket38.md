@@ -68,8 +68,9 @@ Official references:
 - `git diff --check` — passed before the final two CLI tests; rerun after this update.
 - Initial `ruff ...` shell invocation failed because Ruff is not installed as a
   standalone shell command. Using the repository virtual environment succeeded.
-- The PR #37 base checks passed on head `1c1e922` in run `45941524263`; PR #38 checks
-  remain pending until the branch is published.
+- The PR #37 base checks passed on head `1c1e922` in run `45941524263`. PR #38 head
+  `b027a18` is published; manifests, Python, and supply-chain have passed in run
+  `45942740229`; local-e2e is still running.
 
 ## Security and financial considerations
 
@@ -89,7 +90,7 @@ open.
 ## Outstanding work
 
 - Run `make verify` after the final change and record exact results.
-- PR #38 is open based on PR #37; required checks are running on the initial head.
-- Publish the two latest CLI output-redaction regression tests and wait for updated
-  required checks.
+- PR #38 is open based on PR #37. Its latest check run is `45942740229`; local-e2e
+  remains pending.
+- Wait for all required checks to finish on head `b027a18`.
 - Verify the downloaded pinned model file in the authorized GPU execution batch.
