@@ -42,12 +42,13 @@
 
 ## Current Next Actions
 
-1. Complete the final source and documentation review, publish PR #32 against PR #30,
-   and wait for its required checks.
+1. Resolve PR #32 CI results and review feedback; keep the PR stacked on #30 until the
+   goal-registration base is merged.
 2. Track the pending four-vCPU G/VT quota request while preparing the exact
    remote-state plan and full resource/cost summary. Do not apply.
 3. Continue local gateway correctness and reproducibility work in a separate focused
    PR before live vLLM tenant integration.
 4. Keep PRs #30 and #31 open for human review; their required checks currently pass.
+   PR #32 is open as a draft with required checks running.
 
 Update this table and the detailed goal after each implementation package. A phase is complete only when its acceptance gate has actual evidence.

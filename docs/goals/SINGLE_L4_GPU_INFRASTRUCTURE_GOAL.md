@@ -4,7 +4,7 @@
 **Source of truth:** this document, the linked execution journal, pull requests, and evidence records.  
 **Last updated:** 2026-11-27
 **Current branch:** `codex/gpu-ec2-foundation` (stacked on PR #30)
-**Registration PR:** [#30 — docs: register single-L4 GPU infrastructure goal](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/30) (open; current head `04cb564`, required checks passed). **PR #32** is being prepared against that branch.
+**Registration PR:** [#30 — docs: register single-L4 GPU infrastructure goal](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/30) (open; current head `04cb564`, required checks passed). **Phase 2 PR:** [#32 — guarded single-L4 EC2 foundation](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/32) (open draft, based on #30; CI running).
 **Baseline repair PR:** [#31 — fix: apply audited dependency constraints](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/31) (open; head `9710932`, required checks passed).
 **GPU quota:** 4-vCPU On-Demand G/VT increase requested in `us-east-1`; AWS status is **PENDING**. Request ID is recorded in the execution journal and evidence manifest. This does not authorize infrastructure creation.
 
@@ -36,7 +36,7 @@ checked to avoid a duplicate. AWS accepted a request for 4 On-Demand G/VT vCPUs 
 one `g6.xlarge`; its current status is **PENDING**. The applied quota remains 0, so a
 GPU launch remains blocked. No compute resource or spend was created.
 
-**GitHub state:** `gh auth status` identified the authenticated account as Bepoadewale. PRs #30 and #31 are open; neither has been merged. Required checks pass on PR #30 head `04cb564` and PR #31 head `9710932`. PR #32's Phase 2 infrastructure package is being prepared as a stacked PR based on #30.
+**GitHub state:** `gh auth status` identified the authenticated account as Bepoadewale. PRs #30, #31, and #32 are open; none has been merged. Required checks pass on PR #30 head `04cb564` and PR #31 head `9710932`. PR #32 (`80d0d47`) is a draft Phase 2 infrastructure PR stacked on #30; its two CI workflow runs were in progress at last check.
 
 The current package sequence and spending/authorization gates are in the [GPU lab
 implementation backlog](../gpu-lab/IMPLEMENTATION_BACKLOG.md), with the current
