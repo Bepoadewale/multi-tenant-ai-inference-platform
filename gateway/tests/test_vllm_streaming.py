@@ -171,7 +171,7 @@ def test_gateway_records_cancelled_stream_and_releases_local_slots():
     record = asyncio.run(cancel_after_first_chunk())
     assert record.outcome == "cancelled"
     assert record.usage.completion_tokens == 1
-    assert service.limiter.active[tenant.id] == 0
+    assert not service.limiter.active[tenant.id]
 
 
 def test_gateway_records_stream_failure_and_releases_local_slots():
@@ -195,7 +195,7 @@ def test_gateway_records_stream_failure_and_releases_local_slots():
 
     assert service.meter.records[-1].outcome == "stream_error"
     assert service.meter.records[-1].usage_source == "gateway_estimate"
-    assert service.limiter.active[tenant.id] == 0
+    assert not service.limiter.active[tenant.id]
 
 
 def test_gateway_hides_usage_chunk_when_client_did_not_request_it():
