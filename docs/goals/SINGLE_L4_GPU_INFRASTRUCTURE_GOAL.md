@@ -9,6 +9,8 @@
 **GPU quota:** the latest read-only CLI check confirms the existing request is `CASE_CLOSED` with desired value 4.0 and applied On-Demand G/VT quota is 4.0 vCPUs in `us-east-1`, sufficient numerically for one `g6.xlarge`. This does not reserve AZ capacity or authorize provisioning. Do not submit another quota request.
 **Launch gates still open:** exact project remote state and locking, a valid private Budget-alert recipient and project Budget, exact saved-plan/cost review, fresh regional capacity validation, independent expiry verification, and a separate explicit apply authorization. No GPU instance or other project AWS resources exist.
 
+**Latest progress (2026-11-27):** PR #58 head `351f164` passed all six CI jobs in run `46068015904`. Local cancellation and Redis outage/recovery drills passed, including fail-closed HTTP 503 from both gateways and recovery to readiness. This remains local CPU Compose evidence. Current non-billable task: publish the AI infrastructure learning handbook as a separate documentation PR. No AWS resources, L4 execution, or spend.
+
 ## Project objective
 
 Extend `Bepoadewale/multi-tenant-ai-inference-platform` into a reproducible, production-oriented learning lab for a logically multi-tenant language-model service backed by exactly one NVIDIA L4 GPU on AWS EC2. Carry the work from source audit and official research through isolated Terraform infrastructure, manual then automated Ubuntu/NVIDIA/CUDA setup, GPU experiments, vLLM model serving, gateway integration, observability, benchmarks, evaluation and governed releases, incident response, CI, clean-room reproduction, evidence export, and verified teardown.
