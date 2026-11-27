@@ -753,3 +753,42 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   are still pending; one watcher will be used.
 - **Cloud boundary:** no vLLM server, Redis, AWS mutation, or GPU was used. Goal spend
   remains `$0`; GPU hours remain `0`; quota and apply gates are unchanged.
+
+## 2026-11-27 — NVIDIA, vLLM, and model compatibility candidate
+
+- **Phase:** Phase 1 official research supporting Phase 3; no cloud or GPU execution.
+- **Branch / PR:** `codex/gpu-software-compatibility`, prepared on the PR #32 foundation
+  branch at `da2567e`; PR #37 is not yet open.
+- **Starting state:** worktree clean; quota request `34647c8598cb4ac5a8e43b3e956ccd65ikyKx4Qy`
+  still `CASE_OPENED`, with applied G/VT quota 0 vCPUs. PR #36's existing CI watcher
+  session `5600` was live; run `45938690893` had manifests and supply-chain passed,
+  Python passed, while local-e2e remained pending.
+- **Objective:** replace moving dependency references with current official release
+  evidence and identify a verifiable model artifact before preparing the one bounded
+  GPU batch.
+- **Research and commands:** checked NVIDIA's R580.196.11 release notes, driver/CUDA
+  matrix, and Ubuntu installation guide; checked vLLM v0.34.0 release, L4 GPU
+  requirements, and supported model table. Queried `docker buildx imagetools inspect
+  vllm/vllm-openai:v0.34.0` and recorded the registry index and AMD64 digests.
+  Queried Hugging Face's public model page/API using `python3` for revision, license,
+  model config, tokenizer metadata, size, and LFS SHA-256. No image layers or model
+  files were downloaded.
+- **Minor failed command:** invoking the Python query with `python` failed because
+  this host exposes `python3` only; the same read-only query then completed with
+  `python3`. This changed the command only and did not affect environment state.
+- **Finding:** R580.196.11 / CUDA 13.0 / vLLM 0.34.0 / Qwen2.5-1.5B is an official-doc
+  candidate for Ubuntu 24.04 x86_64 and L4, but not proven on EC2. The model's
+  `config.json` reports 32,768 positional embeddings while tokenizer metadata reports
+  131,072 max length; use a conservative context until RoPE and runtime behavior are
+  checked. The exact package repository versions and host kernel remain open.
+- **Changes:** added the dated compatibility matrix and source links to
+  `RESEARCH_NOTES.md`; added ticket37 with digests, model provenance, unresolved
+  checks, and clear no-execution status; added the research package to the backlog.
+- **Validation:** public metadata queries succeeded; no model weights, GPU image,
+  container, or cloud resource was started. Diff review and documentation checks are
+  pending.
+- **AWS/cost:** no mutations; 0 GPU hours; no AWS resource or spend. No quota request
+  was repeated.
+- **Next:** validate documentation formatting, commit the focused research package,
+  push its branch, open PR #37 against PR #32, and let its required checks reach a
+  terminal state. Continue using the existing PR #36 watcher only.

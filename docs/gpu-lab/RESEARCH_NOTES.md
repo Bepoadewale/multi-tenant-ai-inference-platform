@@ -87,6 +87,47 @@ download size, AMI/kernel, Docker/NVIDIA Container Toolkit support, current pack
 digests, and actual G6 capacity. The $25 cap and zero G/VT account quota remain
 independent gates.
 
+## Compatibility research update (2026-11-27)
+
+This update replaces the moving `stable`/`latest` candidate above for planning.
+It is still a **candidate matrix**, not evidence that the stack has run on an L4.
+Recheck package availability, AMI/kernel compatibility, image digests, and pricing
+immediately before a GPU batch.
+
+| Layer | Current candidate | Evidence and remaining check |
+| --- | --- | --- |
+| Host OS | Standard Ubuntu Server 24.04 x86_64 | NVIDIA R580 release notes support Ubuntu 24.04 through point release 24.04.4. Resolve and record the exact official AWS AMI and kernel at provisioning time; do not use an NVIDIA-ready AMI. |
+| Host driver | NVIDIA Data Center R580.196.11, compute-only | NVIDIA published this R580 point release on 2026-11-23; its release notes list CUDA 13.x and Ubuntu 24.04.4 support. R580 is an LTS branch with stated end of life June 2028. Confirm its exact Ubuntu package availability and signing key before selecting the manual install command. Driver must be installed on the host before container GPU access. |
+| Host CUDA Toolkit | CUDA Toolkit 13.0, separately pinned | This is for the `nvcc` and CUDA C++ learning exercises. The vLLM image has its own CUDA user-space stack; host `nvcc` is not a prerequisite for that image. Confirm the toolkit package version and driver compatibility before installation. |
+| Docker GPU bridge | NVIDIA Container Toolkit; exact package pin still open | Install after the host driver. The official guide requires configuring the Docker runtime with `nvidia-ctk` and restarting Docker. Query the apt repository and choose one exact package version during preflight; do not leave an unversioned package in the final Ansible role. |
+| GPU inference image | `vllm/vllm-openai:v0.34.0` | The official vLLM release identifies CUDA 13.0 as the default and PyTorch 2.14.0 as its bundled version. A local registry manifest query on 2026-11-27 returned OCI index `sha256:20fdb089454afbb324efa4110a2c025ff7b27cc1a086e07aa580b18df8ad1ce1` and `linux/amd64` child `sha256:cf5b2fdd087eb4f6d261736967cc5cde974bd22ff4df50365f8fa419b6b4c484`. Pin the architecture-specific digest in Compose after a fresh registry check; the version tag alone is mutable. |
+| GPU/model support | NVIDIA L4 and Qwen2 | vLLM's GPU guide lists compute capability 7.5+ and names L4; its v0.34.0 supported-model table lists `Qwen2ForCausalLM`. The pinned Hugging Face model config declares that architecture. This establishes documented support, not runtime validation. |
+| Model artifact | `Qwen/Qwen2.5-1.5B-Instruct` at `989aa7980e4cf806f80c7fef2b1adb7bc71aa306` | Hugging Face Hub API returned `apache-2.0`, a 3,087,467,144-byte `model.safetensors`, and SHA-256 `dd924a11b4c220f385b51ffa522daea7c9f3d850e31b162bb5661df483c6d3ee`. Its config says BF16, `Qwen2ForCausalLM`, 28 layers, hidden size 1536, and 32,768 positional embeddings. Download only the pinned revision and verify the weight digest. |
+
+The CUDA 13.0 host toolkit, R580 driver, and vLLM CUDA 13.0 image are version-family
+compatible on paper. CUDA compatibility does not prove that Ubuntu packages,
+kernel modules, container libraries, and model kernels work together on this EC2
+AMI; that needs a bounded real-L4 validation. Keep the standalone PyTorch CUDA
+exercise separate from the vLLM service environment, or use the PyTorch bundled in
+the pinned vLLM image to avoid replacing its dependencies. Do not infer a successful
+inference deployment from the manifest lookup or model metadata.
+
+The model card and tokenizer configuration expose a context-length detail to check:
+the model config reports 32,768 positional embeddings while the tokenizer metadata
+reports a 131,072 maximum length. Do not configure 131,072 from tokenizer metadata
+alone. Start with a conservative context (for example, 8,192), inspect the pinned
+model's RoPE scaling/configuration, and validate memory and correctness before
+raising it. The weight file size is not GPU-memory demand: runtime workspaces and
+the attention KV cache also consume L4 memory.
+
+### Primary sources checked on 2026-11-27
+
+- [NVIDIA R580.196.11 release notes](https://docs.nvidia.com/datacenter/tesla/tesla-release-notes-580-196-11/index.html) and [driver/CUDA support matrix](https://docs.nvidia.com/datacenter/tesla/drivers/latest/supported-drivers-and-cuda-toolkit-versions.html).
+- [NVIDIA Ubuntu driver installation guide](https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/latest/ubuntu.html), including version pinning and headless compute installation.
+- [vLLM v0.34.0 release](https://github.com/vllm-project/vllm/releases/tag/v0.34.0), [GPU requirements](https://docs.vllm.ai/en/latest/getting_started/installation/gpu/), and [v0.34.0 supported models](https://docs.vllm.ai/en/v0.34.0/models/supported_models/).
+- [Qwen2.5-1.5B-Instruct model card](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct) and [pinned model revision](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct/tree/989aa7980e4cf806f80c7fef2b1adb7bc71aa306). License, revision, config, tokenizer metadata, file size, and LFS SHA-256 were read from the Hub page/API; no model file was downloaded.
+- [NVIDIA Container Toolkit installation guide](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html).
+
 ## State, access, and cost-control research update (2026-11-26)
 
 - HashiCorp's [S3 backend guide](https://developer.hashicorp.com/terraform/language/backend/s3)
