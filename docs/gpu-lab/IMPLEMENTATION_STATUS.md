@@ -1,6 +1,6 @@
 # GPU Lab Implementation Status
 
-**Overall:** ACTIVE — Phase 2 infrastructure is prepared but blocked on quota. The deployment stack is statically prepared through PR #52 and includes PRs #33–#36. Current required checks pass on PRs #32–#52; PR #52 head `1f02955` passed five checks in run `46021471851`. PR #53 is preparing locked gateway build inputs; its CI is pending. No GPU cloud execution has occurred in this goal.
+**Overall:** ACTIVE — Phase 2 infrastructure is prepared but blocked on quota. The deployment stack is statically prepared through PR #53 and includes PRs #33–#36. PR #52 head `1f02955` passed five checks in run `46021471851`. PR #53's tested code head `e623b75` adds locked gateway build inputs; all five checks passed in run `46023306230`, including Linux image build and CPU local end-to-end. A documentation-only follow-up is now awaiting CI. No GPU cloud execution has occurred in this goal.
 
 | Phase | Status | Evidence / next gate |
 | --- | --- | --- |
@@ -14,7 +14,7 @@
 | 8. Benchmarks and FinOps | Prepared — static only | PR #47 includes a bounded direct vLLM serving matrix and metadata collection. All five required jobs pass on the current restacked head. No L4 benchmark or measured inference cost exists. |
 | 9. Evaluation and releases | In progress — static implementation | PR #48 has seven synthetic evaluation cases and a privacy-safe dry-run. PR #51 documents the missing sequential LLM release path. PR #52 adds private MLflow tracking and report publication; its current head passed all five checks in run `46021471851`. No real LLM evaluation, candidate decision, approval, or rollback has occurred. |
 | 10. Incidents and recovery | Not started | Safe real fault injection, diagnosis and verified recovery reports. |
-| 11. Automation and CI | In progress — static only | `make verify` validates the dedicated single-GPU Compose file. PR #53 adds a hash-locked container build and a lock coverage check; Linux image build and CI are pending. Terraform apply, Ansible roles, and cloud execution remain unrun. |
+| 11. Automation and CI | In progress — static only | PR #53 adds a hash-locked container build and a lock coverage check; its Linux image build and all five required CI jobs pass. Terraform apply, Ansible roles, and cloud execution remain unrun. |
 | 12. Clean-room and teardown | Not started | Independent recreation, export and provider-side absence checks. |
 
 ## Baseline verified directly
@@ -54,7 +54,7 @@ unit-tested; the profile has not run on an L4.
 
 ## Current Next Actions
 
-1. Run CI for PR #53's pinned, hash-locked gateway image and review the existing CPU path.
+1. Continue non-billable sequential LLM release-control implementation and review.
 2. Keep AWS work read-only until the existing quota appeal is approved and applied G/VT quota is nonzero. Do not send another appeal or request.
 3. Complete non-billable preparation that does not contradict the requirement to perform manual NVIDIA host setup before Ansible.
 4. Recheck signed package indexes, image digest, model revision/license/hash, capacity, current prices, and the exact bounded plan immediately before any authorized GPU batch.

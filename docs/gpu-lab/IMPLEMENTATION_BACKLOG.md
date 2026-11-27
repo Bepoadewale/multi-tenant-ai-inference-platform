@@ -59,18 +59,19 @@ pull requests must include the repository's clean-room evidence.
   invocation, data-transfer allowance, tax contingency, and a reserve. It still
   requires exact AMI, price, egress, tax-profile, and state-retention confirmation;
   it is not permission to apply.
-- PRs #32–#52 are open and unmerged. Required checks pass on current heads through
-  PR #52; its follow-up head `1f02955` passed run `46021471851`. PR #53 is being
-  prepared with gateway container pins and a hash lock; CI has not started. No AWS
-  resources or GPU execution.
+- PRs #32–#53 are open and unmerged. PR #52 follow-up head `1f02955` passed run
+  `46021471851`. PR #53 tested code head `e623b75` passed all five required checks in
+  run `46023306230`, including a Linux amd64 Docker image build and CPU end-to-end.
+  A documentation-only PR #53 follow-up awaits checks. No AWS resources or GPU
+  execution.
 
 ## Ordered implementation packages
 
 ### Cross-cutting package — repeatable gateway image inputs
 
-**Status:** PR #53 prepares a pinned Python base-image digest and 124-package
-hash-locked runtime requirements. The lock coverage check passes locally; Linux
-amd64 image build and CPU end-to-end validation are pending. The Python 3.12 CUDA
+**Status:** PR #53 adds a pinned Python base-image digest and 124-package
+hash-locked runtime requirements. Local lock coverage passes; Linux amd64 image build
+and CPU end-to-end validation passed in CI run `46023306230`. The Python 3.12 CUDA
 learning lock and pinned vLLM image remain separate.
 
 - [x] Pin the multi-platform official Python slim Bookworm base image by OCI index
@@ -78,10 +79,13 @@ learning lock and pinned vLLM image remain separate.
 - [x] Generate universal runtime dependency hashes and require them during image
   installation.
 - [x] Add a CI/local lock coverage check.
-- [ ] Confirm the Docker image builds on Linux amd64 and local CPU flows remain healthy.
+- [x] Confirm the Docker image builds on Linux amd64 and local CPU flows remain healthy.
 
 **Exit gate:** CI builds the shared gateway image from the pinned base and hash-locked
 Python dependencies.
+
+**Evidence:** PR #53 run `46023306230` passed all five required jobs. The Linux amd64
+image build, dependency audit, and existing CPU local end-to-end flow passed.
 
 ### Package 0 — Goal charter and baseline gates
 
