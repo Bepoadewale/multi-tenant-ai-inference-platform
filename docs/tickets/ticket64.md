@@ -40,6 +40,8 @@ host or project AWS resource has been created.
 - [x] Add a reversible Redis outage drill that verifies the baseline, checks both
   gateways fail closed, restores Redis in an exit trap, and checks recovery.
 - [x] Add private sanitized host evidence output and fake-based unit tests.
+- [x] Validate the deployment `.env` file is a regular mode-`0600` file with unique
+  keys, verified-format model digest/source commit, and a sufficiently long password.
 - [x] Document the manual-to-automated handoff, confirmations, locations, timeouts,
   evidence limits, and Terraform-only teardown in the reproduction and batch guides.
 - [x] Align Ansible validation with the hash-locked local environment and keep a CI
@@ -91,7 +93,7 @@ the exact-plan, project-scoped Terraform process from the local workstation.
 
 ## Evidence collected
 
-Eleven focused tests passed; Ruff passed for all new Python files; both shell scripts
+Sixteen focused tests passed; Ruff passed for all new Python files; both shell scripts
 passed `bash -n`; Make previews showed only the intended wrapper commands; a local
 negative check confirmed host configuration stops before metadata access without its
 confirmation; `git diff --check` passed. Seventy-eight local Markdown links across
@@ -100,7 +102,9 @@ the executable absent. The Make target now prefers the hash-locked host venv;
 installing `infrastructure/ansible/requirements.lock` with `--require-hashes` into
 that ignored local venv allowed `make gpu-ansible-validate` to pass. GitHub CI is
 pending. These results are local/static only. No L4 screenshot, metric, benchmark,
-cost, inference result, or incident is claimed.
+cost, inference result, or incident is claimed. The initial PR head passed all six
+required checks in run `46081589301`, including one local E2E cycle; the later
+deployment-preflight follow-up is not yet pushed and therefore needs updated-head CI.
 
 ## Outstanding work
 

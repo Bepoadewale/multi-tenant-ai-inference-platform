@@ -31,27 +31,7 @@ case "${1:-}" in
     require_confirmation GPU_EC2_DEPLOY_CONFIRM deploy
     [[ "${EUID}" -eq 0 ]] || { echo "run Compose from a root shell; Docker socket access is root-level" >&2; exit 1; }
     "${guard[@]}"
-    python3 - "${profile}/.env" <<'PY'
-import os
-import stat
-import sys
-from pathlib import Path
-
-path = Path(sys.argv[1])
-mode = stat.S_IMODE(path.stat().st_mode)
-if mode & 0o077:
-    raise SystemExit("refusing deploy: deployments/single-gpu/.env must be mode 0600")
-values = {}
-for line in path.read_text().splitlines():
-    stripped = line.strip()
-    if not stripped or stripped.startswith("#") or "=" not in stripped:
-        continue
-    key, value = stripped.split("=", 1)
-    values[key] = value
-password = values.get("GRAFANA_ADMIN_PASSWORD", "")
-if not password or password.startswith("replace-"):
-    raise SystemExit("refusing deploy: set a unique Grafana password before startup")
-PY
+    python3 "${repo_root}/scripts/gpu_ec2_deploy_preflight.py" "${profile}/.env"
     compose config --quiet
     if ! timeout 45m docker compose --env-file "${profile}/.env" \
       -f "${profile}/compose.yaml" up --build --detach; then
