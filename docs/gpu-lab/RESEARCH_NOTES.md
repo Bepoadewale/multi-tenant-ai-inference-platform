@@ -121,6 +121,15 @@ quality and memory before increasing it toward the model config's 32,768 limit. 
 weight file size is not GPU-memory demand: runtime workspaces and the attention KV
 cache also consume L4 memory.
 
+For capacity planning only, the pinned config gives 28 transformer layers, two
+key/value heads, head dimension `1536 / 12 = 128`, and BF16 values (2 bytes each).
+With one sequence and a BF16 KV cache, the raw cache estimate is
+`layers × 2 (key and value) × KV heads × head dimension × bytes` = **28 KiB per
+token**, about **224 MiB at 8,192 tokens** or **896 MiB at 32,768 tokens**. This
+excludes vLLM block padding, allocator overhead, runtime workspaces, temporary
+activations, and other requests. It is a config-derived estimate, not an observed
+GPU memory measurement; measure actual cache use and concurrency on the L4.
+
 ### Primary sources checked on 2026-11-27
 
 - [NVIDIA R580.196.11 release notes](https://docs.nvidia.com/datacenter/tesla/tesla-release-notes-580-196-11/index.html) and [driver/CUDA support matrix](https://docs.nvidia.com/datacenter/tesla/drivers/latest/supported-drivers-and-cuda-toolkit-versions.html).

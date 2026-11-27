@@ -65,6 +65,11 @@ download the multi-gigabyte model.
   RoPE scaling, while tokenizer metadata says 131,072 maximum length. The pinned
   README does not document an extension to 131,072. Begin with a conservative context
   such as 8,192 and do not copy the tokenizer limit directly into the vLLM config.
+- The config-derived raw BF16 key/value cache estimate is 28 KiB per token for one
+  sequence: `28 layers × 2 (key and value) × 2 KV heads × 128 head dimension × 2
+  bytes`. This is approximately 224 MiB at 8,192 tokens and 896 MiB at 32,768
+  tokens, before block padding and runtime/allocator overhead. It is not a measured
+  GPU result.
 - These sources establish a version-family candidate, not actual host, container,
   CUDA, PyTorch, or model behavior on EC2 L4 hardware.
 
@@ -126,6 +131,9 @@ with a separately resolved build.
 - The tokenizer's 131,072 limit conflicts with the model config's 32,768 positional
   embeddings and absent RoPE scaling. Validate correctness and memory before raising
   the conservative runtime context.
+- The theoretical KV-cache size is not enough to choose concurrency. vLLM cache
+  blocks, CUDA workspaces, model/runtime memory, and multiple live sequences must be
+  measured on the real device.
 
 ## Security and financial considerations
 
