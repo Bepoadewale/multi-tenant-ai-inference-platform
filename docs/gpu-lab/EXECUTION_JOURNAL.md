@@ -459,6 +459,18 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Evidence limits:** fake CLI subprocess tests prove local wrapper branching and
   environment propagation only. They do not prove actual AWS authentication,
   Scheduler behavior, infrastructure deployment, or clean teardown.
-- **Next:** review the complete diff, commit and push one package to PR #32, then let
-  its single PR-triggered workflow finish before updating PR status and the evidence
-  manifest.
+- **CI duplication observed:** publishing the same PR head created two workflow runs
+  (`45928736210` and `45928742151`) because this branch's workflow still ran on both
+  branch pushes and pull requests. Both have passed Python, manifest, and supply-chain
+  checks; their local-e2e jobs were pending at the last check. The workflow trigger is
+  now restricted to pushes to `main` plus all pull requests so future branch updates
+  produce one PR workflow. These are automated fresh-runner jobs, not the project's
+  final end-to-end AWS/GPU clean-room reproduction.
+- **Research update:** AWS's one-time schedule documentation confirms an `at(...)`
+  schedule continues to count against schedule quota after it fires, until deleted.
+  The pinned AWS provider schema does not support automatic deletion after completion,
+  so the runbook must require Terraform destroy to remove the schedule and must not
+  claim that expiry removes it.
+- **Next:** validate the workflow YAML and research note, then publish them to PR #32
+  after the currently running checks reach terminal state. Observe the one subsequent
+  PR-triggered workflow and update the evidence manifest.

@@ -10,7 +10,7 @@ or local CPU inference path.
 ## Current state
 
 - Branch: `codex/gpu-ec2-foundation`, based on PR #30 head `04cb564`.
-- Pull request: [#32 — guarded single-L4 EC2 foundation](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/32), open and ready for review against `codex/single-l4-gpu-goal`. Automated review identified two wrapper/verifier defects; fixes are locally validated and awaiting branch publication and CI.
+- Pull request: [#32 — guarded single-L4 EC2 foundation](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/32), open and ready for review against `codex/single-l4-gpu-goal`. Review fixes are at `99b6b84`; evidence was indexed at `d67ec3a`. Both workflows for `d67ec3a` passed. A duplicate-trigger prevention change is locally validated and awaits publication and CI.
 - Phase: 2 of 12, static infrastructure preparation.
 - Terraform describes the proposed environment; it has not been applied.
 - AWS account identity was verified before the quota request. Applied On-Demand G/VT
@@ -103,6 +103,10 @@ or local CPU inference path.
   one-time schedule group was already absent; AWS Scheduler can reject that request.
   The verifier now reports the schedule absent with the group and skips enumeration.
   A subprocess test verifies this branch and confirms no `list-schedules` call occurs.
+- The first publication of the fix triggered two identical CI workflows on the same
+  head because this branch still had both push and pull-request triggers. Changed CI
+  so branch pushes run only on `main`, while every pull request still runs the checks.
+  This prevents another duplicate local end-to-end run on the next PR update.
 
 - Terraform validation initially rejected `action_after_completion` on the
   repository's pinned AWS provider `5.100.0`. The optional one-time-schedule cleanup
@@ -159,4 +163,9 @@ hours are part of this ticket's current work.
 - `bash -n scripts/gpu-ec2-plan.sh scripts/gpu-ec2-apply.sh
   scripts/gpu-ec2-verify-clean.sh`: passed.
 - `git diff --check`: passed.
+- Ruby YAML parsing of `.github/workflows/ci.yml` passed after restricting branch-push
+  runs to `main`; all pull requests continue to trigger the workflow.
+- The two workflows for head `d67ec3a` both passed all four jobs: Python, manifests,
+  supply-chain, and local-e2e. Run IDs: `45928736210` and `45928742151`. These were
+  duplicate CI executions caused by the old trigger, not two manual clean-room runs.
 - CI and the PR update are pending publication of these changes.
