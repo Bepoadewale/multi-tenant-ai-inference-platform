@@ -1219,3 +1219,21 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   --check` passed. The PR #47 workflow must still confirm the Trivy action accepts the
   value without warnings.
 - **Next:** push the fix and watch the resulting PR #47 run; no local clean-room rerun.
+
+## 2026-11-27 — Confirm rebased observability and benchmark CI
+
+- **Phase:** Phases 7/8/11, static validation only.
+- **PR #46:** rebased head `6df97e7` passed all five required checks in run
+  `45992409372`, including the dedicated GPU observability schema job. No monitoring
+  stack or GPU was started.
+- **PR #47:** head `33a1586` passed all five required checks in run `45993312156`:
+  local E2E, manifests, Python, supply-chain, and GPU observability. The supply-chain
+  log now passes `HIGH,CRITICAL` as a single Trivy severity input without the earlier
+  malformed-input warning.
+- **Evidence:** both runs are indexed in `EVIDENCE_MANIFEST.md`; ticket46/ticket47 and
+  implementation status record the static-only boundary.
+- **Cloud and cost:** no AWS resource, GPU hour, model download, inference benchmark,
+  or goal-specific AWS spend.
+- **Next:** continue static preparation for evaluation and incident exercises, then
+  refresh shared status docs and PR descriptions. The single-L4 experiment still
+  requires quota approval and the complete $25 cost/plan authorization gate.
