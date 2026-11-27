@@ -1856,3 +1856,16 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Warning:** test startup emitted the repository's existing Starlette/httpx deprecation warning; no test failed.
 - **Cost/security:** all work was local; no cloud service, GPU, or AWS resource was used.
 - **Next:** publish the verified documentation correction, then implement and review sequential LLM release controls without assuming that runtime GPU behavior has been proven.
+
+## 2026-11-27 — Prepare immutable LLM release records
+
+- **Phase:** Phase 9 static implementation; Phase 2 remains blocked by quota.
+- **Branch:** `codex/gpu-sequential-llm-release`, based on the green PR #53 documentation head.
+- **Starting state:** PR #53 latest documentation head `2153942` passed all five required checks in GitHub run `46025160292`. The existing release API still applies only to the ONNX weighted canary; it cannot deploy the single vLLM target.
+- **Research/design:** preserve the existing ONNX API. Bind the LLM's full model commit, artifact digest, runtime image digest/configuration, evaluation suite and report digests, source commit, and current champion into a sequential release plan. Approval state must be separate from the immutable plan digest and must come from a different actor.
+- **Changes:** added local release manifest, plan, stale-input validation, and SQLite independent-approval primitives; added focused tests and updated the release design, evaluator instructions, backlog, status, index, and ticket #54. No deployment endpoint or Docker control was added.
+- **Troubleshooting:** the first focused test run found two champion fixtures whose report revision did not match; corrected their fixture metadata. Ruff reported import ordering; auto-fix and rerun passed. A later test-edit initially placed the multi-GPU assertion in the wrong test scope; corrected it before acceptance. Seven focused tests now pass.
+- **Security boundary:** the approval store accepts an actor string and is not itself an identity provider. It must not authorize deployment until an API obtains requester/approver identity from the existing verified role tokens and checks the actual MLflow run and model artifact.
+- **Cost:** local-only code and tests; no AWS call, model download, GPU, or spend.
+- **Next:** finish ticket/status records, run the complete local validation suite, then open PR #54 stacked on PR #53. Follow with authenticated approval and a safe host-side sequential deployment/rollback package.
+- **Validation completion:** full `make verify` passed Ruff, 123 tests (2 skipped), and the dependency audit; GPU Compose and observability validation passed, and benchmark/evaluation/CUDA targets remained dry runs with zero model requests or GPU operations. The single-L4 CPU/GPU Compose configuration parsed successfully. No local model-serving containers were started.

@@ -87,6 +87,23 @@ Python dependencies.
 **Evidence:** PR #53 run `46023306230` passed all five required jobs. The Linux amd64
 image build, dependency audit, and existing CPU local end-to-end flow passed.
 
+### Package — immutable single-L4 LLM release records
+
+**Status:** PR #54 adds local manifest/plan digest validation, stale-input protection,
+and independent-approver state in SQLite. Authenticated API and host-side deployment
+are not included in this package.
+
+- [x] Bind full model revision, artifact digest, license, serving image/configuration,
+  evaluation suite/report digests, and source commit.
+- [x] Reject deterministic failures, unpinned image tags, multi-GPU configuration,
+  tampered manifests/plans, stale manifests, and self-approval.
+- [ ] Connect plan approval to the existing signed `release.approve` identity.
+- [ ] Link plan and manifest records to the actual MLflow run and verified model file.
+- [ ] Implement and test the host-side sequential restart and verified rollback path.
+
+**Exit gate:** authenticated independent approval binds to the exact candidate and
+runtime, then a bounded operator command can deploy or restore it on one L4.
+
 ### Package 0 — Goal charter and baseline gates
 
 **Status:** PR #30 and PR #31 ready for review.
