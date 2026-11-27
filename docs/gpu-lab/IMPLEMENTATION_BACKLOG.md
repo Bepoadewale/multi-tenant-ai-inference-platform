@@ -141,7 +141,7 @@ and teardown/absence commands are ready.
 
 ### Package 3 — Manual Linux, NVIDIA, CUDA, Docker, and Ansible
 
-**Status:** non-billable install manifest prepared on `codex/gpu-host-install-manifest`; no GPU host has been configured. The documented candidate stack is not a final pin or a runtime-verified combination.
+**Status:** non-billable install manifest is in open PR #50 (`codex/gpu-host-install-manifest`); checks are pending and no GPU host has been configured. The documented candidate stack is not a final pin or a runtime-verified combination.
 
 - [ ] Select and pin a standard Ubuntu 24.04 x86_64 AMI, kernel, NVIDIA driver,
   CUDA Toolkit, Docker Engine, NVIDIA Container Toolkit, Python, and PyTorch after

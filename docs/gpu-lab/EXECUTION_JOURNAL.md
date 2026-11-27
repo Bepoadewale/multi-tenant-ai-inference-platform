@@ -1548,6 +1548,9 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** finish local documentation checks, open the focused PR, and keep the GPU
   work behind quota, exact-plan, $25, runtime, expiry, and teardown gates.
 
+- **Publication:** opened PR #50 at `1097acb`, stacked on PR #49. Required checks are
+  pending. Local Markdown-link and whitespace checks passed before publication.
+
 ## 2026-11-27 — Confirm CUDA preparation PR checks
 
 - **PR / head:** PR #49, docs follow-up head `a7afcdf`.
