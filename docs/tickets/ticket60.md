@@ -28,6 +28,8 @@ any live benchmark run.
 - Store result files with owner-only permissions under `.local/`.
 - Use Python's standard library on the EC2 host; reject redirects so tenant bearer
   tokens cannot be forwarded to another destination.
+- Require HTTPS or loopback HTTP for endpoints; send bearer credentials only to the
+  gateway requests, never to the direct vLLM comparison.
 - Require IMDSv2 to confirm `us-east-1`, an approved single-GPU G6 type, and exactly
   one visible NVIDIA L4 before a live run. Keep the run bounded to at most 60 requests,
   concurrency 2–16, and a 15-second request timeout.

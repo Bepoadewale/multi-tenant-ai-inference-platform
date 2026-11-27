@@ -49,7 +49,6 @@ def validate_endpoint(value: str) -> str:
         "localhost",
         "127.0.0.1",
         "::1",
-        "vllm",
     }
     if parsed.hostname is None or (parsed.scheme != "https" and not local_http):
         raise ValueError("use HTTPS, loopback HTTP, or the internal Compose host vllm")

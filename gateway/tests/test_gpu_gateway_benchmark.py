@@ -125,6 +125,7 @@ def test_endpoint_rejects_credentials_and_nonlocal_plain_http():
     assert benchmark.validate_endpoint("http://127.0.0.1:8081") == "http://127.0.0.1:8081"
     for value in (
         "http://gateway.example",
+        "http://vllm:8000",
         "https://user:password@gateway.example",
         "https://gateway.example?token=sensitive",
     ):
