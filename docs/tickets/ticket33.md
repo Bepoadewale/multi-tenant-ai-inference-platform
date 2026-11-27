@@ -9,7 +9,7 @@ and record cancellation/error outcomes exactly once.
 
 ## Current state
 
-- Branch: `codex/gateway-stream-accounting`, based on PR #32 commit `24336cf` (ready for review).
+- Branch: `codex/gateway-stream-accounting`, based on PR #32 commit `24336cf` (ready for review); implementation commit `1186e30`.
 - Phase: local work supporting Phase 6; Phase 2 remains the active cloud phase.
 - No vLLM server, AWS resource, or GPU was used for this ticket.
 - AWS G/VT request for 4 vCPUs is pending. Applied quota remains zero.
