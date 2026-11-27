@@ -3,6 +3,7 @@ set -euo pipefail
 
 : "${EXPECTED_AWS_ACCOUNT_ID:?set EXPECTED_AWS_ACCOUNT_ID to the approved 12-digit AWS account}"
 : "${GPU_EC2_AZ:?set GPU_EC2_AZ to an offered us-east-1 availability zone}"
+: "${GPU_EC2_UBUNTU_AMI_ID:?set the reviewed Canonical Ubuntu AMI ID}"
 : "${GPU_EC2_EXPIRES_AT:?set GPU_EC2_EXPIRES_AT to the exact approved UTC expiry}"
 
 export AWS_PROFILE="${AWS_PROFILE:-ai-platform-pilot-key}"
@@ -13,6 +14,7 @@ instance_type="${GPU_EC2_INSTANCE_TYPE:-g6.xlarge}"
 [[ "$AWS_REGION" == "us-east-1" ]] || { echo "refusing: initial region must be us-east-1" >&2; exit 1; }
 [[ "$GPU_EC2_AZ" =~ ^us-east-1[a-z]$ ]] || { echo "refusing: GPU_EC2_AZ must be an us-east-1 zone name" >&2; exit 1; }
 [[ "$EXPECTED_AWS_ACCOUNT_ID" =~ ^[0-9]{12}$ ]] || { echo "refusing: expected account ID must be 12 digits" >&2; exit 1; }
+[[ "$GPU_EC2_UBUNTU_AMI_ID" =~ ^ami-[0-9a-f]{8,17}$ ]] || { echo "refusing: GPU_EC2_UBUNTU_AMI_ID must be a valid AMI ID" >&2; exit 1; }
 [[ "$GPU_EC2_EXPIRES_AT" =~ ^20[0-9]{2}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$ ]] || {
   echo "refusing: expiry must be an exact UTC timestamp ending in Z" >&2
   exit 1
@@ -34,6 +36,17 @@ esac
 account_id="$(aws sts get-caller-identity --query Account --output text)"
 [[ "$account_id" == "$EXPECTED_AWS_ACCOUNT_ID" ]] || {
   echo "refusing: authenticated account does not match EXPECTED_AWS_ACCOUNT_ID" >&2
+  exit 1
+}
+
+read -r image_owner image_name image_arch image_state < <(aws ec2 describe-images \
+  --image-ids "$GPU_EC2_UBUNTU_AMI_ID" \
+  --query 'Images[0].[OwnerId,Name,Architecture,State]' --output text)
+[[ "$image_owner" == "099720109477" &&
+   "$image_name" == ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-* &&
+   "$image_arch" == "x86_64" &&
+   "$image_state" == "available" ]] || {
+  echo "refusing: AMI must be an available Canonical Ubuntu 24.04 amd64 server image" >&2
   exit 1
 }
 
@@ -74,5 +87,5 @@ budget_count="$(aws budgets describe-budgets --account-id "$EXPECTED_AWS_ACCOUNT
   exit 1
 }
 
-echo "Read-only preflight passed for the expected account, region, quota, type offering, and repository guardrails."
+echo "Read-only preflight passed for the expected account, Canonical Ubuntu AMI, region, quota, type offering, and repository guardrails."
 echo "No quota request or cloud mutation was made. Instance capacity is not reserved by this check."

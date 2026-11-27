@@ -40,6 +40,16 @@ variable "instance_type" {
   }
 }
 
+variable "ubuntu_ami_id" {
+  type        = string
+  description = "Exact Canonical Ubuntu 24.04 amd64 AMI reviewed for this deployment. Update deliberately with matching evidence."
+
+  validation {
+    condition     = can(regex("^ami-[0-9a-f]{8,17}$", var.ubuntu_ami_id))
+    error_message = "ubuntu_ami_id must be a valid lowercase EC2 AMI identifier."
+  }
+}
+
 variable "volume_size_gib" {
   type        = number
   default     = 100

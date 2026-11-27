@@ -2,6 +2,7 @@
 set -euo pipefail
 
 : "${EXPECTED_AWS_ACCOUNT_ID:?set EXPECTED_AWS_ACCOUNT_ID}"
+: "${GPU_EC2_UBUNTU_AMI_ID:?set the deployment Canonical Ubuntu AMI ID}"
 export AWS_PROFILE="${AWS_PROFILE:-ai-platform-pilot-key}"
 export AWS_REGION="${AWS_REGION:-us-east-1}"
 [[ "$AWS_REGION" == "us-east-1" ]] || { echo "refusing: initial region must be us-east-1" >&2; exit 1; }
@@ -34,6 +35,7 @@ terraform -chdir="$terraform_root" init -reconfigure -input=false \
 terraform -chdir="$terraform_root" plan -destroy -input=false \
   -var="expected_account_id=${EXPECTED_AWS_ACCOUNT_ID}" \
   -var="availability_zone=${GPU_EC2_AZ:?set GPU_EC2_AZ from the deployment record}" \
+  -var="ubuntu_ami_id=${GPU_EC2_UBUNTU_AMI_ID}" \
   -var="expires_at=${destroy_plan_expiry}" \
   -out="$plan_file"
 python3 -c 'import hashlib,pathlib,sys; print(hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest())' "$plan_file"
