@@ -1,0 +1,26 @@
+---
+- name: Create the isolated GPU lab directory
+  ansible.builtin.file:
+    path: /opt/gpu-lab
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Copy the repository's hash-locked PyTorch CUDA requirements
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../../../benchmarks/cuda_performance/requirements-torch.lock"
+    dest: "{{ gpu_host_torch_lock }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Install standalone PyTorch and CUDA libraries in an isolated Python environment
+  ansible.builtin.pip:
+    requirements: "{{ gpu_host_torch_lock }}"
+    virtualenv: "{{ gpu_host_torch_venv }}"
+    virtualenv_command: /usr/bin/python3.12 -m venv
+    extra_args: >-
+      --require-hashes
+      --index-url https://download.pytorch.org/whl/cu130
+      --extra-index-url https://pypi.org/simple

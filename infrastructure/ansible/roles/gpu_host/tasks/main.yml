@@ -1,0 +1,52 @@
+---
+- name: Check the host is the reviewed Ubuntu target
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution == "Ubuntu"
+      - ansible_distribution_version == gpu_host_ubuntu_release
+      - ansible_architecture == gpu_host_architecture
+    fail_msg: >-
+      This playbook only configures Ubuntu {{ gpu_host_ubuntu_release }} on
+      {{ gpu_host_architecture }}. No packages were changed.
+
+- name: Confirm that one L4 is exposed by the virtual machine
+  ansible.builtin.command:
+    argv:
+      - lspci
+      - -D
+  register: gpu_host_lspci
+  changed_when: false
+
+- name: Stop unless the EC2 host exposes exactly one NVIDIA L4
+  ansible.builtin.assert:
+    that:
+      - >-
+        (gpu_host_lspci.stdout_lines | select('search', '(?i)nvidia.*\[L4\]') | list | length) == 1
+    fail_msg: >-
+      Expected exactly one NVIDIA accelerator in lspci. The installed driver is
+      not required yet, but the host must expose the authorized L4 device.
+
+- name: Install matching Ubuntu kernel headers and repository tools
+  ansible.builtin.apt:
+    name:
+      - "linux-headers-{{ ansible_kernel }}"
+      - build-essential
+      - dkms
+      - ca-certificates
+      - curl
+      - gnupg
+      - python3-debian
+      - python3-venv
+      - python3.12-venv
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Configure NVIDIA drivers, CUDA compiler, Docker, and container GPU support
+  ansible.builtin.import_tasks: install_gpu_stack.yml
+
+- name: Install the hash-locked standalone PyTorch CUDA environment
+  ansible.builtin.import_tasks: install_torch.yml
+
+- name: Verify host GPU driver and compiler
+  ansible.builtin.import_tasks: verify_gpu_stack.yml

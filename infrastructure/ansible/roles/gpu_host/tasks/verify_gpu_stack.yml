@@ -1,0 +1,87 @@
+---
+- name: Check whether driver packages require a host reboot
+  ansible.builtin.stat:
+    path: /var/run/reboot-required
+  register: gpu_host_reboot_required
+
+- name: Check NVIDIA device discovery after the required reboot
+  ansible.builtin.command:
+    argv:
+      - nvidia-smi
+      - --query-gpu=name
+      - --format=csv,noheader
+  register: gpu_host_nvidia_smi
+  changed_when: false
+  when: >-
+    not gpu_host_reboot_required.stat.exists and
+    not gpu_host_driver_install.changed
+
+- name: Require one NVIDIA L4 and reject a CPU-only fallback
+  ansible.builtin.assert:
+    that:
+      - gpu_host_nvidia_smi.stdout_lines | default([]) | length == 1
+      - gpu_host_nvidia_smi.stdout_lines | default([]) | first | default('') == gpu_host_gpu_name
+    fail_msg: >-
+      NVIDIA driver verification failed. Expected one {{ gpu_host_gpu_name }};
+      inspect nvidia-smi and the kernel module before proceeding.
+
+- name: Check the installed CUDA compiler
+  ansible.builtin.command:
+    argv:
+      - /usr/local/cuda-13.0/bin/nvcc
+      - --version
+  register: gpu_host_nvcc
+  changed_when: false
+  when: >-
+    not gpu_host_reboot_required.stat.exists and
+    not gpu_host_driver_install.changed
+
+- name: Run a small synchronized PyTorch computation on the L4
+  ansible.builtin.command:
+    argv:
+      - /opt/gpu-lab/torch-venv/bin/python
+      - -c
+      - >-
+        import torch; assert torch.cuda.is_available();
+        assert torch.cuda.device_count() == 1;
+        assert torch.cuda.get_device_name(0) == 'NVIDIA L4';
+        a = torch.ones((512, 512), device='cuda');
+        b = a @ a; torch.cuda.synchronize();
+        assert torch.allclose(b, torch.full_like(b, 512));
+        print(torch.cuda.get_device_name(0), '512x512 matrix check passed')
+  register: gpu_host_torch_smoke
+  changed_when: false
+  when: >-
+    not gpu_host_reboot_required.stat.exists and
+    not gpu_host_driver_install.changed
+
+- name: Check the Docker service
+  ansible.builtin.command:
+    argv:
+      - docker
+      - info
+      - --format
+      - "{{ '{{' }}json .Runtimes{{ '}}' }}"
+  register: gpu_host_docker_runtimes
+  changed_when: false
+  when: >-
+    not gpu_host_reboot_required.stat.exists and
+    not gpu_host_driver_install.changed
+
+- name: Require the NVIDIA Docker runtime
+  ansible.builtin.assert:
+    that:
+      - "'nvidia' in (gpu_host_docker_runtimes.stdout | default(''))"
+    fail_msg: >-
+      Docker does not report the NVIDIA runtime. Check nvidia-ctk output and
+      daemon logs before launching a GPU container.
+  when: >-
+    not gpu_host_reboot_required.stat.exists and
+    not gpu_host_driver_install.changed
+
+- name: Explain the post-driver reboot checkpoint
+  ansible.builtin.debug:
+    msg: >-
+      The host requires a reboot before GPU validation. Reboot it through the
+      documented Systems Manager procedure, reconnect, then rerun this playbook.
+  when: gpu_host_reboot_required.stat.exists or gpu_host_driver_install.changed

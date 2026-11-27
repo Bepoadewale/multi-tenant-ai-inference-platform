@@ -199,9 +199,11 @@ the [CUDA performance lab guide](../../benchmarks/cuda_performance/README.md). C
 free disk before installation; do not add these libraries to the vLLM container.
 
 The current vendor docs recommend distribution packages on Ubuntu and describe a
-headless driver path. The exact driver and Toolkit packages are deliberately not
-hard-coded here: the checked project candidate set is dated and must be reconciled
-with the image and driver compatibility matrix at launch time.
+headless driver path. The current candidate package versions are pinned in the
+Ansible role and install manifest, but they are dated research inputs. Recheck package
+signatures, availability, exact AMI/kernel support, and the vLLM compatibility
+matrix at launch time. Do not treat a static syntax check as proof of a working
+driver or GPU container.
 
 ## Manual vLLM model serving
 
@@ -436,6 +438,21 @@ instance termination, delete-on-termination volume handling, and scoped project
 network, IAM, Scheduler, and address resources. Do not remove the shared backend or
 other projects' resources. Record estimated runtime cost and retrieve actual billing
 evidence when available. Until billing settles, label it as an estimate.
+
+## Repeat host configuration with Ansible
+
+Complete the manual NVIDIA driver, CUDA, Docker, Container Toolkit, container, and
+PyTorch exercises first. This teaches the layers Ansible will manage. Then follow
+[`infrastructure/ansible/README.md`](../../infrastructure/ansible/README.md) from a
+root shell on the EC2 host, reached through Session Manager. The playbook uses a
+local connection; running it on the Mac would configure the Mac.
+
+Review the dated package pins and check-mode diff before applying. The playbook does
+not reboot. If the driver changed, use the documented SSM reboot process, reconnect,
+and rerun the play. Record both Ansible outputs. The second run should report zero
+changes. Then independently repeat the `nvidia-smi`, `nvcc`, Docker GPU-container,
+and PyTorch computation checks. A zero-change Ansible run only shows the configured
+packages and files are stable; it does not prove GPU computation works.
 
 ## Current research set and compatibility decision
 

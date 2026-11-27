@@ -382,6 +382,36 @@ correlation remain unverified until the approved single-L4 batch.
 These references inform design only. No monitoring stack, model evaluation, AWS
 automation, GPU runtime, or model download was executed during this research.
 
+## 2026-11-27 — Ansible host-configuration candidate refresh
+
+The Ansible controller candidate is `ansible-core==2.21.6`. PyPI metadata queried
+through its JSON API reports Python `>=3.12`; the EC2 Ubuntu 24.04 image and the
+project's dedicated local validation environment both use Python 3.12. The package
+and its transitive dependencies are pinned with hashes in
+`infrastructure/ansible/requirements.lock`. The lock was generated with uv 0.9.15
+and universal CPython 3.12 resolution. Ansible syntax validation passed locally,
+but the playbook has not executed on an EC2 host.
+
+The install-role candidates were refreshed from HTTPS package metadata on 2026-11-27:
+
+| Source | Candidate | Integrity evidence and boundary |
+| --- | --- | --- |
+| NVIDIA Ubuntu 24.04 CUDA repository | `cuda-keyring` 1.1-1; headless R580 driver 580.196.11; CUDA Toolkit 13.0.3 | `Packages.gz` metadata gave keyring SHA-256 `d2a6b11c096396d868758b86dab1823b25e14d70333f1dfa74da5ddaf6a06dba` and Toolkit SHA-256 `8286faab8b7a61f3fe669c03ad1bb042dc322582a3dc7df44a4b3302a30ca5fb`. The role pins APT versions and keyring package checksum. Detached APT metadata signature verification and actual installation remain required on the host. |
+| NVIDIA Container Toolkit repository | 1.20.2-1 for four required AMD64 packages | The public package index lists this package set. Repository key SHA-256 fetched from NVIDIA's published `gpgkey` URL: `c880576d6cf75a48e5027a871bac70fd0421ab07d2b55f30877b21f1c87959c9`. The playbook binds the APT source to that keyring and pins each package version. |
+| Docker Ubuntu repository | Engine/CLI 29.9.3, containerd 2.4.2, Buildx 0.39.1, Compose 5.8.0 | The published Ubuntu Noble amd64 package index provided these versions. Docker signing-key SHA-256 fetched from the official repository URL: `1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570`. The Ansible role pins the key bytes and the installed package versions. |
+
+The playbook is deliberately run locally on the EC2 host through a root shell
+opened with Systems Manager Session Manager. This avoids adding SSH ingress or
+requiring cloud credentials in the Ansible process. A check-mode preview is followed
+by operator review; a driver package change is reported as requiring a manual,
+controlled reboot. The role also installs the repository's 29-package hash-locked
+PyTorch CUDA environment separately from vLLM and runs a small synchronized matrix
+check after the reboot. The second playbook run after reconnection is the idempotency
+check. Neither syntax-check nor check-mode establishes that the package set works
+with an L4 or the pinned vLLM image.
+
+Official sources: NVIDIA's [CUDA repository package index](https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/Packages.gz), [Container Toolkit repository instructions](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html), the [Container Toolkit repository key](https://nvidia.github.io/libnvidia-container/gpgkey), Docker's [Ubuntu Noble AMD64 package index](https://download.docker.com/linux/ubuntu/dists/noble/stable/binary-amd64/Packages.gz), and the [Docker repository key](https://download.docker.com/linux/ubuntu/gpg). The metadata/key downloads were read-only research. Ansible wheels were installed only in `/tmp/gpu-ansible-venv`; no host APT packages, model artifacts, or container images were installed or downloaded.
+
 ## 2026-11-27 — vLLM serving benchmark preparation research
 
 - The official [vLLM 0.34.0 `bench serve` CLI reference](https://docs.vllm.ai/en/v0.34.0/cli/bench/serve/)

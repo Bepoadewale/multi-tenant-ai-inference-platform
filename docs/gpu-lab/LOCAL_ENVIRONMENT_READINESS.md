@@ -24,9 +24,10 @@ not GPU readiness.
 
 `ansible-playbook`, `nvcc`, `nvidia-smi`, and `nvidia-container-cli` are absent.
 The workstation is Apple Silicon and is not the target NVIDIA L4 machine, so these
-GPU host tools are not expected to work locally. Ansible is not yet part of this
-repository's GPU configuration because the goal requires manual host installation
-and learning first, then an Ansible implementation and repeatability check.
+GPU host tools are not expected to work locally. The repository now includes a
+hash-locked Ansible controller and a syntax-checked host role. It is designed to run
+locally on the EC2 host through Session Manager after the manual installation lesson;
+do not run the local-connection playbook on this Mac.
 
 The GPU host must be prepared separately after quota and spending gates pass. The
 current runbook covers the standard Ubuntu image, headless NVIDIA driver, CUDA
@@ -37,8 +38,9 @@ workstation as a substitute for L4 validation.
 ## AWS and spending state
 
 - No AWS mutation was performed during this readiness check.
-- A fresh read-only identity check using `ai-platform-pilot-key` matched the expected
-  project account. The applied On-Demand G/VT quota in `us-east-1` is still `0.0`.
+- A fresh read-only AWS CLI check on 2026-11-27 using `ai-platform-pilot-key` matched
+  the expected project account. The applied On-Demand G/VT quota in `us-east-1` is
+  still `0.0` vCPUs.
   `g6.xlarge` is listed as an instance-type offering in five availability zones, but
   that listing is not a capacity reservation or quota approval. The owner reports
   sending an appeal through the existing AWS support case; no appeal decision is
@@ -57,8 +59,8 @@ workstation as a substitute for L4 validation.
    availability, exact resources, current prices, and the reviewed saved plan. Do not
    print credentials. The latest read-only check found quota `0.0`; G6 offerings are
    visible in us-east-1 but do not guarantee capacity.
-3. Install Ansible only when its pinned project requirements and role are ready; use a
-   project-scoped or isolated environment rather than changing unrelated tools.
-4. After authorized provisioning, install and validate the GPU stack on the Ubuntu
+3. The hash-locked Ansible requirements and host role are prepared for the future EC2
+   host. Do not run its local-connection playbook on this workstation.
+4. After authorized provisioning and the manual learning pass, run Ansible on the Ubuntu
    EC2 host through Systems Manager. This Apple Silicon workstation cannot prove host
    driver, CUDA, container, PyTorch, or L4 runtime compatibility.

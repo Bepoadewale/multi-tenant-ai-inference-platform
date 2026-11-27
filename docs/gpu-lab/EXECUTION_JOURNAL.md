@@ -2042,3 +2042,131 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** record this CI result in the PR and status documents, then continue the
   non-billable host-side release-controller work as a separate PR package. Human review
   and merge remain pending; no merge is authorized by this task.
+<<<<<<< HEAD
+=======
+
+- 2026-11-27: PR #55 documentation head `de4c6e7` passed all five required jobs in
+  run `46034523863` (Python, manifests, GPU observability, supply-chain, and
+  local end-to-end). PR #55 remains open and unmerged.
+
+## 2026-11-27 — Prepare host-only sequential release controller
+
+- **Phase:** Phase 9 static release preparation; Phase 2 remains blocked by zero
+  applied On-Demand G/VT quota. No AWS mutation or GPU operation occurred.
+- **Branch / PR:** `codex/gpu-release-host-controller`, based on PR #55 head
+  `de4c6e7`; PR #56 is being prepared.
+- **Starting state:** PR #55's latest documentation head passed all five required jobs
+  in run `46034523863`. The release API still accepted caller-supplied champion and
+  artifact metadata and could not verify a running model.
+- **Objective:** add a host-only release tool so the gateway does not receive Docker
+  access. Verify approved release inputs and the current model before replacing the
+  single vLLM container; recover the known champion if the candidate fails.
+- **Changes:** added a controller with commands for model-snapshot digest,
+  manifest-from-report, initial champion verification, approved sequential apply,
+  interrupted-transaction recovery, and restoration after candidate-only evaluation.
+  It validates independent approval, bounded one-GPU settings, host active-state
+  digest, live container image/arguments/cache mount, vLLM/gateway readiness, and each
+  file in the pinned Hugging Face cache snapshot. State and transaction files plus
+  `.env` updates use private atomic writes. API tokens are prompted without echoing.
+- **Troubleshooting:** the initial focused test run exposed three missing model
+  artifact fields in the environment mapping; those fields were added and tests
+  passed. Ruff found import-order and unused-code issues, which were fixed. A review
+  found non-apply CLI commands could fail after success because the final status line
+  assumed a `plan_id`; added command-specific messages and a regression test. A
+  second wiring review found the Compose gateway host ports are 8081/8082 rather than
+  8080, and vLLM had no host endpoint although the host controller checks its API.
+  Updated the controller to check both gateway replicas, added a vLLM port bound only
+  to `127.0.0.1`, and added a readiness test for those exact ports. Compose still has
+  no public inbound rule; verify these bindings in the plan/run before launch.
+- **Validation:** Ruff passed on controller/tests; focused pytest passed **15 tests**;
+  `make gpu-release-controller-help`, `make gpu-compose-config`, and
+  `git diff --check` passed. Full `make verify` passed Ruff, **143 tests** (2 skipped),
+  dependency audit with no known vulnerabilities, base/GPU Compose parsing,
+  monitoring validation, and benchmark/evaluation/CUDA dry-run plans. One existing
+  Starlette/httpx warning remains. A relative Markdown-link check across 13 changed
+  docs passed. Tests use fake subprocess results and fake HTTP responses, not live
+  Docker or an L4 host. PR #56 CI is pending.
+- **Documentation:** created ticket #56; updated release design, runbook, Compose
+  profile guide, backlog, status, risk register, goal, documentation index, and
+  evidence records. The runbook now distinguishes first-champion initialization from
+  later candidate restoration and calls for a real authenticated gateway smoke
+  request after deployment. The controller itself checks readiness, not tenant
+  inference; it does not update an MLflow champion alias.
+- **Security follow-up:** bearer-token API calls reject HTTP redirects so credentials
+  are not forwarded by the client to a new host or URL.
+- **Cost/security:** no AWS API call, model/image download, GPU hour, or cloud cost.
+  The owner's manually submitted appeal remains unconfirmed by AWS; applied quota is
+  still zero. $25 remains a hard project ceiling; no apply is authorized.
+- **Next:** run full local validation, inspect the complete diff and links, publish
+  PR #56 as a focused stack on #55, and watch its single required-check workflow.
+
+## 2026-11-27 — Publish draft PR #56
+
+- **Phase:** Phase 9 static release preparation; Phase 2 remains quota-blocked.
+- **Branch / PR:** `codex/gpu-release-host-controller`, [draft PR #56](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/56), commit `70a0227`, based on PR #55 branch `codex/gpu-llm-release-api`.
+- **Starting state:** local validation passed Ruff, 143 tests (2 skipped), the dependency audit, Compose and monitoring validation, and benchmark/evaluation/CUDA dry-run plans.
+- **Action:** pushed the focused source/docs branch and opened PR #56 as a draft. It remains draft pending its single GitHub required-check workflow and clean-room local end-to-end job.
+- **Security and scope:** PR describes the static-only guarantees and gaps. No AWS mutation, model/image download, GPU hour, or spend. The $25 cap and zero-quota block remain.
+- **Next:** watch PR #56's one required-check workflow, address any failure, and update the goal and PR based on the terminal result. Do not merge without authorization.
+
+## 2026-11-27 — PR #56 first CI clean-room cycle passed
+
+- **Branch / PR:** draft PR #56, initial head `ad10699`.
+- **Validation:** GitHub run `46039778508` passed all five required jobs. Its single
+  `local-e2e` job completed `make install`, `make bootstrap-local`, `make smoke`,
+  `make demo-flagship`, `make verify`, and project-scoped `make clean-local`; runtime
+  was about five minutes. This is one clean-room cycle, run on a fresh CI host.
+- **Follow-up review:** after that run, a source review found that the single-GPU
+  controller accepted `tensor_parallel_size: 1.0` as equal to integer `1`, although
+  the serving CLI expects an integer. The validator now requires an actual integer,
+  and a focused test covers the rejection. This is a material configuration-safety
+  fix, so the updated PR head needs one revalidation cycle. Also documented the
+  root-level Docker privilege needed in a fresh Session Manager host shell.
+- **Follow-up validation:** the type-safety change passes Ruff and 16 focused tests.
+  Full `make verify` passes Ruff, 144 tests (2 skipped), the dependency audit,
+  Compose/monitoring checks, and benchmark/evaluation/CUDA dry-run plans. Relative
+  Markdown links and whitespace checks pass. No AWS resource, GPU, model download,
+  or cost was used. The updated commit's CI is pending.
+- **Cost/limits:** local hosted CI only; no AWS credentials, infrastructure, GPU,
+  model artifact, or cloud spend.
+- **Next:** run final local validation and let the updated PR head receive its
+  required checks. Do not start another clean-room cycle unless this new cycle fails
+  or another material fix is made.
+
+## 2026-11-27 — PR #56 updated-head checks and Ansible host preparation
+
+- **Time / phase:** 17:42 UTC; Phase 2 remains static and quota-blocked; preparing
+  Phase 3 automation without GPU execution.
+- **Branch / PR:** `codex/gpu-ansible-host-configuration`, stacked on PR #56 head
+  `852c873`. PR #56 passed all five checks including its one clean-room cycle in run
+  `46040861818` and is ready for review. PR #57 is being prepared as a focused draft.
+- **Research:** queried PyPI's JSON metadata and official NVIDIA/Docker repository
+  package indexes and key files through read-only CLI requests. Recorded Ansible
+  2.21.6, dated OS package versions, signing-key hashes, and remaining signature and
+  compatibility checks. No APT package, model, or container image was installed or
+  downloaded.
+- **Changes:** added a hash-locked Ansible controller, local host playbook, Ubuntu
+  24.04/amd64/one-L4 guards, signed NVIDIA/Docker repository configuration, pinned
+  headless driver/CUDA/Docker/Container Toolkit packages, isolated hash-locked
+  PyTorch install, reboot checkpoint, Docker runtime setup, and a small synchronized
+  GPU matrix check. Added CI syntax validation, runbook instructions, research,
+  ticket #57, evidence/status records, and documentation index links.
+- **Commands/results:** universal Ansible lock compiled and installed with hashes in
+  `/tmp/gpu-ansible-venv`; playbook syntax, task list, and a temporary local `lspci`
+  assertion passed. `make install` prepared the project `.venv`; `make verify` then
+  passed Ruff, 144 tests (2 skipped), audit, Compose/monitoring checks, and
+  benchmark/evaluation/CUDA dry-run plans. `make gpu-ansible-validate`, relative
+  Markdown-link validation, and `git diff --check` passed. Initial commands found
+  macOS PEP 668 protection on system pip, a missing `.venv` in the new worktree, and
+  a wrong working directory for the first Ansible invocation; each was corrected
+  with an isolated venv, `make install`, or the documented working directory. No
+  local clean-room command was run.
+- **Cloud / cost:** no AWS request or mutation, host configuration, image/model pull,
+  GPU operation, or spend. A new read-only check with the specified key profile
+  confirmed the expected account and applied us-east-1 G/VT quota of `0.0` vCPUs;
+  no account identifier was printed. The owner's existing appeal has no confirmed
+  result in the API. The USD $25 ceiling and separate exact-plan authorization gates
+  remain unchanged.
+- **Next:** review the complete diff, publish PR #57 as a draft stacked on PR #56,
+  then watch its single CI run. No merge or paid operation is authorized.
+>>>>>>> 6d738fe (feat: prepare reproducible L4 host configuration)
