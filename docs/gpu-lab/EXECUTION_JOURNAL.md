@@ -860,3 +860,37 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   existing case from AWS Support Center if they choose to appeal; no GPU launch is
   possible until the quota is approved and the cost/apply gates pass.
 - **Cost:** no AWS resources, GPU hours, or charges were created.
+
+## 2026-11-27 — Refresh the pinned-AMI local-state preview
+
+- **Phase:** Phase 2 — static-only EC2 infrastructure preparation; quota blocks apply.
+- **Branch / PR:** `codex/refresh-gpu-ec2-preview`, preparing PR #42 on top of PR #41.
+- **Starting cloud state:** verified the AWS account with the key profile. Latest
+  read-only quota checks show applied On-Demand G/VT quota `0.0`; the existing
+  request still says `CASE_OPENED`, despite the denial email. The attempted Support
+  CLI communication was rejected before sending. No project resources exist.
+- **Objective:** refresh the EC2 local-state plan after pinning the exact Ubuntu AMI
+  and review its resource count and security properties without applying it.
+- **Execution:** `scripts/gpu-ec2-preview-plan.sh` ran with `g6.xlarge`,
+  `us-east-1c`, the reviewed Canonical Ubuntu 24.04 amd64 AMI, and an exact six-hour
+  expiry. It verified caller account and AZ offering, copied the Terraform root,
+  removed only the S3 backend block in that preview copy, and produced a local-state
+  saved plan. Plan digest:
+  `d33721981fdeaec4b513d3a738553c155423d50aa8bb7851c31ef0c5da70bd44`.
+- **Plan review:** 14 creates, zero changes, zero destroys. Exactly one `g6.xlarge`;
+  IMDSv2 required; root volume is 100 GiB, encrypted gp3, delete on termination;
+  security group has no inbound rules and outbound TCP 80/443. A public IPv4 is
+  associated so the host can use public internet egress without a NAT Gateway.
+- **Plan limitations:** this local-state preview has no remote lock, does not run the
+  quota preflight, cannot establish account capacity, and must not be applied. The
+  raw plan remains under ignored `.local/` and was not added to Git. Terraform's
+  `applyable=true` is metadata, not authorization or proof of safe applicability.
+- **Troubleshooting:** an initial `terraform show -json` from the repository root
+  could not load the provider schema. Running it from the initialized preview copy
+  succeeded. A first filtered parser assumed object-shaped metadata and failed on
+  Terraform's list-shaped JSON; correcting the parser produced the security summary.
+- **Cost:** plan-only; no AWS resource, GPU hour, or spend was created. It does not
+  recalculate the full project estimate.
+- **Next:** submit the sanitized plan review in PR #42; continue work on shared remote
+  state, current cost assumptions, expiry safeguards, and runtime preparation without
+  paid GPU infrastructure.
