@@ -1,6 +1,10 @@
 # Draft: request reconsideration of the On-Demand G/VT quota
 
-**Status:** draft only. It has not been sent to AWS.
+**Status:** the owner authorized reopening the existing AWS case. The AWS CLI
+`add-communication-to-case` attempt was rejected because this account's support plan
+does not allow the Support API. No communication was sent and the case was not
+changed. The text below remains available for an AWS Support Center update if that
+route is later used.
 
 ## Proposed message
 
@@ -41,12 +45,18 @@ quota is requested.
 - `us-east-2` and `us-west-2` also currently report zero applied On-Demand G/VT quota;
   `g6.xlarge` is listed as an offering in both regions. Switching regions alone does
   not currently remove the quota blocker.
-- Reopening through the AWS Support API is unavailable to this account profile; the
-  read-only call returned `SubscriptionRequiredException`. AWS documents reopening
-  a resolved case through the Support Center console.
-- Do not submit a duplicate Service Quotas request while the original record still
-  exists. Confirm the final status and reopen the existing case through the console
-  with the proposed use case if the owner decides to appeal.
+- The owner authorized reopening the existing case. The installed AWS CLI has no
+  `support reopen-case` operation. The available `support add-communication-to-case`
+  call was attempted using the existing case ID and this proposed message, after
+  verifying the AWS account identity. AWS rejected it with
+  `SubscriptionRequiredException`; no message was sent. AWS's CLI help says the
+  Support API requires Business, Enterprise On-Ramp, or Enterprise Support.
+- The Service Quotas CLI has `create-support-case`, but it only creates a Support
+  case for a request in `PENDING` status. This existing request reports `CASE_OPENED`,
+  so that command does not reopen or update it and was not called.
+- Do not submit a duplicate quota request or create a related case by accident. The
+  current valid path for reopening a resolved case is the AWS Support Center, as
+  described in the official support guide.
 
 References:
 

@@ -1,6 +1,41 @@
 # GPU Lab Execution Journal
 
+<<<<<<< HEAD
 ## 2026-11-27 — Quota status rechecked without mutation
+=======
+## 2026-11-27 — Attempt the authorized quota-case update with AWS CLI
+
+- **Phase:** Phase 2 — static-only EC2 preparation; GPU execution remains blocked.
+- **Branch / PR:** `codex/quota-case-cli-followup`, preparing a focused PR #41 on top
+  of PR #40.
+- **Objective:** follow the owner's instruction to reopen the existing denied quota
+  case through the CLI, while avoiding a duplicate quota request or support case.
+- **AWS identity and case:** verified `ai-platform-pilot-key` caller account against
+  the expected project account. The support case reference was obtained from the
+  existing quota record and the AWS email; the identifier is intentionally omitted
+  from the public repository.
+- **Attempt:** inspected `aws support help`; it has `add-communication-to-case` but no
+  `reopen-case` command. Used the available add-communication operation with the
+  prepared appeal text and existing case reference. AWS returned
+  `SubscriptionRequiredException` before accepting any communication.
+- **Failed approach:** the SSO profile had no cached token, so an SSO device-auth
+  login was briefly started. After the owner clarified to use CLI only, it was
+  canceled before sign-in; no browser interaction or AWS change occurred.
+- **Alternative checked:** `aws service-quotas create-support-case` only applies to
+  quota requests with status `PENDING`. This request still reports `CASE_OPENED`, so
+  that command would not reopen it and was not called.
+- **Post-check:** a fresh read returned `CASE_OPENED` and desired quota `4.0`; applied
+  quota remains `0.0`. No new request, support case, communication, resource, GPU hour,
+  or spend was created.
+- **Support path:** AWS's official guide documents reopening a resolved case through
+  the Support Center. The owner's explicit CLI request has been attempted, but the
+  API route is blocked by the account's Support plan. Keep the project moving on
+  non-billable tasks; do not launch with zero applied quota.
+- **Next:** submit this truthful blocker record in PR #41 and continue remote-state,
+  cost, expiry, and automation work that does not require GPU runtime.
+
+## 2026-11-27 — PR #40 status follow-up checks passed
+>>>>>>> e837919 (docs: record quota case CLI blocker)
 
 - **Phase:** Phase 2 static-only preflight; no cloud resource creation or spend.
 - **Command:** read-only AWS Service Quotas queries in `us-east-1` checked the existing
