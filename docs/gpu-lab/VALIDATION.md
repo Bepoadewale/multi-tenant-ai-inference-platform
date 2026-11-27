@@ -257,6 +257,9 @@ This establishes current local lint/test/static configuration outcomes and read-
 - **Limits:** Redis outage is tested with a deterministic client double; timeout is
   simulated through HTTPX `MockTransport`; no live Redis outage or vLLM server was
   used. No AWS, GPU, or clean-room execution is claimed.
+- **CI:** PR #36 commit `69365aa` passed all four jobs in one PR-triggered run
+  (`45926383360`), including local-e2e. This is routine CI validation; the project
+  still requires one final clean-room reproduction in Phase 12.
 
 ## Future GPU execution template
 
