@@ -29,10 +29,11 @@ pull requests must include the repository's clean-room evidence.
 - PR #39 is open against PR #38 to record the quota denial, regional quota checks,
   and an unsent appeal draft. Its head `7605b0b` passed all four required checks in
   run `45947503606`. It does not submit an AWS message or quota request.
-- PR #40 is open against PR #39 at `f580217` to pin the reviewed Canonical Ubuntu AMI
+- PR #40 is open against PR #39 to pin the reviewed Canonical Ubuntu AMI
   and fail closed when publisher, image family, architecture, or availability does
-  not match. All four required checks passed in run `45949421928`. No AWS resource or
-  GPU run is part of this package.
+  not match. All four required checks passed in the implementation run
+  `45949421928` and documentation follow-up run `45950217355`. No AWS resource or GPU
+  run is part of this package.
 - No AWS resources or GPU instance hours have been used by this goal.
 - The applied On-Demand G and VT quota is zero in `us-east-1`, `us-east-2`, and
   `us-west-2`. AWS email reports that the 4-vCPU `us-east-1` request was denied, while
