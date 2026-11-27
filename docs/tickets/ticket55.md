@@ -13,7 +13,9 @@ Docker daemon or restart vLLM.
 - PR #55 adds `/gpu-release/v1` endpoints for plan creation, plan retrieval, and
   independent approval. It also records the candidate manifests in the shared,
   single-host SQLite volume.
-- PR #55 is being prepared on branch `codex/gpu-llm-release-api`, based on PR #54.
+- [PR #55](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/55)
+  is open on branch `codex/gpu-llm-release-api`, based on PR #54. Its initial checks
+  are pending.
 - This is local/static validation only. No AWS or GPU resources have been used.
 
 ## Research and design
@@ -72,7 +74,7 @@ verify live state and model bytes before it acts on an approved plan.
 - An older release database may have the plan table but not the newly added manifest
   table. Store initialization now creates both tables; a regression test covers this
   upgrade shape.
-- `git diff --check` passed. PR CI and publication remain pending.
+- `git diff --check` passed. GitHub CI is pending on the published PR head.
 
 ## Security and financial considerations
 
