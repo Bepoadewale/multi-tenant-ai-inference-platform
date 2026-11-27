@@ -402,13 +402,17 @@ class GatewayService:
         renew = getattr(self.limiter, "renew", None)
         if renew is None:
             return
-        interval = max(0.1, float(self.limiter.lease_seconds) / 3)
+        interval = float(self.limiter.lease_seconds) / 3
         while True:
             await asyncio.sleep(interval)
             try:
                 renewed = renew(tenant, reservation)
                 if inspect.isawaitable(renewed):
-                    renewed = await renewed
+                    # A blocked Redis command must not outlive the lease it renews.
+                    # Sleep plus this deadline uses at most two thirds of the lease,
+                    # leaving time to cancel the owner before another gateway can
+                    # safely reuse the expired concurrency slot.
+                    renewed = await asyncio.wait_for(renewed, timeout=interval)
             except Exception:
                 owner_task.cancel()
                 return

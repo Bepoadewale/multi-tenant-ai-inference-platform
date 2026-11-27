@@ -18,7 +18,14 @@ local has_queue_slot = ARGV[10] == '1'
 
 redis.call('ZREMRANGEBYSCORE', KEYS[1], '-inf', cutoff)
 redis.call('ZREMRANGEBYSCORE', KEYS[2], '-inf', cutoff)
-redis.call('ZREMRANGEBYSCORE', KEYS[3], '-inf', now)
+local expired_leases = redis.call('ZRANGEBYSCORE', KEYS[3], '-inf', now)
+for _, expired_request_id in ipairs(expired_leases) do
+  redis.call('ZREM', KEYS[3], expired_request_id)
+  -- Keep token ledgers conservative until their rolling windows expire, but remove
+  -- per-request metadata once the concurrency lease can no longer be renewed.
+  redis.call('HDEL', KEYS[6], expired_request_id)
+end
+if redis.call('ZCARD', KEYS[3]) == 0 then redis.call('DEL', KEYS[3]) end
 redis.call('ZREMRANGEBYSCORE', KEYS[4], '-inf', daily_cutoff)
 if redis.call('ZCARD', KEYS[1]) >= rpm then return {0, 'requests_per_minute'} end
 
@@ -85,9 +92,18 @@ return 1
 RENEW_LUA = """
 -- KEYS: active_leases, reservations
 -- ARGV: request_id, now_ms, lease_ms
-if not redis.call('HEXISTS', KEYS[2], ARGV[1]) then return 0 end
-if not redis.call('ZSCORE', KEYS[1], ARGV[1]) then return 0 end
-redis.call('ZADD', KEYS[1], tonumber(ARGV[2]) + tonumber(ARGV[3]), ARGV[1])
+local request_id = ARGV[1]
+local now = tonumber(ARGV[2])
+local expires_at = redis.call('ZSCORE', KEYS[1], request_id)
+if not expires_at then return 0 end
+if tonumber(expires_at) <= now then
+  redis.call('ZREM', KEYS[1], request_id)
+  redis.call('HDEL', KEYS[2], request_id)
+  if redis.call('ZCARD', KEYS[1]) == 0 then redis.call('DEL', KEYS[1]) end
+  return 0
+end
+if not redis.call('HEXISTS', KEYS[2], request_id) then return 0 end
+redis.call('ZADD', KEYS[1], now + tonumber(ARGV[3]), request_id)
 redis.call('PEXPIRE', KEYS[2], 86400000)
 return 1
 """.strip()
