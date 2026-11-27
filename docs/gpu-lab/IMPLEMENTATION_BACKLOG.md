@@ -231,7 +231,7 @@ captured and described with units and limits.
 
 **Status:** PR #47 is open on `codex/gpu-benchmark-preparation` against PR #46. The
 direct vLLM serving matrix and capped runner passed local static validation and all
-five required checks in run `45993312156`; its timeout cleanup regression test passes.
+five required checks in run `45994609421`; its timeout cleanup regression test passes.
 Gateway benchmarking, actual performance results, actual model evaluation, and
 releases remain outstanding. Ticket #48 adds a static synthetic evaluation suite and
 dry-run; its CI and runtime behavior remain pending.

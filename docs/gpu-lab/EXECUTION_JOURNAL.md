@@ -1287,3 +1287,22 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   `make gpu-evaluation-plan`, and `git diff --check` passed.
 - **Cloud and cost:** no model, Docker evaluation service, AWS operation, GPU hour, or
   spend. PR #48 CI remains pending.
+
+## 2026-11-27 — Open evaluation preparation PR
+
+- **Phase:** Phase 9 static evaluation preparation.
+- **Branch / PR / commit:** `codex/gpu-evaluation-preparation`, PR #48 against PR #47,
+  initial head `b67d74e`.
+- **Action:** opened PR #48 with the task suite, evaluator, tests, CI dry-run, README,
+  ticket, and evidence/status links. The PR description states the exact local checks
+  and the limitations before GPU execution.
+- **Validation before publication:** `make gpu-evaluation-plan` reported seven cases
+  and zero network requests; five Python 3.12 tests passed; Ruff across source,
+  tests, benchmarks, evaluations, and scripts passed; bytecode, JSON/workflow parsing,
+  and `git diff --check` passed.
+- **Related CI:** PR #47's updated documentation head `9936e11` passed all five
+  required jobs in run `45994609421`. PR #48's required checks are now pending.
+- **Cloud and cost:** no LLM request, AWS resource, GPU hour, or goal-specific AWS
+  spend.
+- **Next:** watch PR #48's checks, fix any real failure, then continue preparing the
+  CUDA lab and incident drill without claiming runtime evidence.
