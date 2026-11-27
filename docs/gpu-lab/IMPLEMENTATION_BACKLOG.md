@@ -14,8 +14,8 @@ pull requests must include the repository's clean-room evidence.
 - PR #31 repairs the baseline dependency audit, passed two fresh local clean-room
   cycles and all required GitHub checks, and is ready for review.
 - No AWS resources or GPU instance hours have been used by this goal.
-- The account's On-Demand G and VT quota is zero. No quota increase request has been
-  submitted.
+- The account's applied On-Demand G and VT quota is zero. A 4-vCPU quota increase
+  request was submitted on 2026-11-27 and is pending; see the execution journal.
 - The existing repository budget and Terraform state guardrails use a repository-
   scoped bucket and lock table. GPU state must use a unique key namespace, not create
   duplicate guardrails. The budget uses email notifications. A recipient must be

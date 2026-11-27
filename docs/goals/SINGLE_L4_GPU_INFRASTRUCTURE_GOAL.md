@@ -6,6 +6,7 @@
 **Current branch:** `codex/gpu-ec2-foundation` (stacked on PR #30)
 **Registration PR:** [#30 — docs: register single-L4 GPU infrastructure goal](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/30) (open; current head `04cb564`, required checks passed). **PR #32** is being prepared against that branch.
 **Baseline repair PR:** [#31 — fix: apply audited dependency constraints](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/31) (open; head `9710932`, required checks passed).
+**GPU quota:** 4-vCPU On-Demand G/VT increase requested in `us-east-1`; AWS status is **PENDING**. Request ID is recorded in the execution journal and evidence manifest. This does not authorize infrastructure creation.
 
 ## Project objective
 
@@ -28,6 +29,12 @@ Direct source inspection confirms; see the [repository audit](../gpu-lab/REPOSIT
 - Existing local scope is reported complete; GPU/vLLM, DCGM, cloud model hosting, and EKS execution remain unexecuted.
 
 **AWS resource inventory:** on 2026-11-26, read-only calls using the designated key profile confirmed the configured account matches the expected account. `resourcegroupstaggingapi get-resources` with the exact project tag and `ec2 describe-instances` with the exact project tag both returned empty lists in `us-east-1`. This is not proof that no untagged or differently tagged resource exists; historical records also say the EKS-oriented plan was no-apply. No AWS mutation occurred.
+
+**Quota request:** after the user asked to submit it immediately, the authenticated
+`ai-platform-pilot-key` identity was verified and the current quota/history were
+checked to avoid a duplicate. AWS accepted a request for 4 On-Demand G/VT vCPUs for
+one `g6.xlarge`; its current status is **PENDING**. The applied quota remains 0, so a
+GPU launch remains blocked. No compute resource or spend was created.
 
 **GitHub state:** `gh auth status` identified the authenticated account as Bepoadewale. PRs #30 and #31 are open; neither has been merged. Required checks pass on PR #30 head `04cb564` and PR #31 head `9710932`. PR #32's Phase 2 infrastructure package is being prepared as a stacked PR based on #30.
 
@@ -89,7 +96,7 @@ Plan for at most 8–12 cumulative GPU instance hours where feasible. Bundle GPU
 - **Active phase:** Phase 2 — isolated EC2 infrastructure, static preparation only; AWS mutation is blocked.
 - **Current task:** complete the static review and evidence for the separate EC2 root, guarded saved-plan workflow, dual expiry, and teardown verification; then open a focused PR. Do not request quota changes or run an AWS mutation yet.
 - **Completed:** source audit and initial proposed architecture with AWS, Linux/GPU stack, request/security/admission/inference/observability/model-release/provision/teardown diagrams; risk/research/status/journal and prioritized implementation backlog; README/docs index links; read-only AWS identity and exact project-tag inventory checks; G6 offerings and zero quota checks; initial Price List lookup; both existing Terraform roots passed backend-disabled validation; baseline local lint, 50 tests, Compose configuration, and cloud-delivery validation passed. In dependency PR #31, shared minimum constraints were applied to local and container installs; `make install`, a local image build, Ruff, 50 tests, the audit, Compose config, smoke, and the cumulative CPU/local demo passed. Two successful local clean-room cycles and project-scoped cleanup are documented there. No AWS resource was changed.
-- **Outstanding:** finish review of the new static EC2 root and scripts, record their validation in the journal/ticket, and open a focused PR; generate an exact read-only plan/cost summary before any quota request; recheck exact dated dependency/model pins before each runtime package; obtain human review/approval for #30 and #31; continue non-billable work. GPU work remains ineligible until the zero quota is changed through the authorized process and the exact plan, runtime, total cost, tax, expiry, and teardown gates are reviewed.
+- **Outstanding:** finish review of the static EC2 root and scripts and publish PR #32; prepare an exact remote-state plan and refreshed full cost review; recheck dated dependency/model pins before runtime packages; obtain human review/approval for PRs #30–#32; continue non-billable work. GPU apply remains ineligible while the quota increase is pending and until the exact plan, runtime, total cost, tax, expiry, and teardown gates are reviewed.
 - **Blocked:** G6 launch in `us-east-1` remains blocked by the account's On-Demand G and VT quota of 0 vCPUs (`L-DB2E81BA`). `g6.xlarge` was offered in several zones, not capacity-guaranteed. No quota increase was requested. The planned request is 4 vCPUs, enough for exactly one `g6.xlarge`; submit it only after the exact plan, full cost, expiry, and teardown gates are ready for review. Independently, no billable apply can happen until all controls fit within the $25 ceiling.
 - **Open PRs:** #30 (goal registration; latest docs head `04cb564`, all required checks passed; human review remains open); #31 (dependency audit repair; ready for review; Python, manifests, supply-chain, and two local-e2e workflow checks passed at `9710932`).
 - **Relevant commits:** baseline `c8f02ed` on `main`; goal registration `754564d`, `914ecaf`, `612e4d3`, `80ca94e`, `04cb564` on `codex/single-l4-gpu-goal`; dependency repair `e1d9aa0`, `9710932` on `codex/fix-baseline-dependency-audit`.
