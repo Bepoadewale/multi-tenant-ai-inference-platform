@@ -1,12 +1,48 @@
 # GPU Lab Execution Journal
 
+## 2026-11-27 — PR #35 lease held during tokenizer preflight
+
+- **Phase:** Phase 6 non-billable gateway correctness work. Phase 2 remains the active
+  cloud phase; no AWS resource or GPU was used.
+- **Branch / PR:** `codex/tokenizer-admission-preflight`, PR #35 stacked on PR #34.
+  Code fix commit: `59cca44`; docs and rebase follow-up are local pending publication.
+- **Starting state:** PR #35 was based on old PR #34 head `ae99959`; PR #34 had been
+  rebased and updated to `b51aedd`. The PR #35 branch had diverged after both histories
+  changed.
+- **Objective:** resolve review finding that tokenization can take longer than the
+  concurrency lease, allowing admission to expire before the exact token reservation.
+- **Rebase/troubleshooting:** rebased PR #35 with
+  `git rebase --onto origin/codex/redis-admission-leases ae99959940b217495ae5a2e231656965b2a4ce2f
+  codex/tokenizer-admission-preflight`. Conflicts affected shared goal/status/journal
+  docs and `test_vllm_streaming.py`. Kept the updated PR #34 documentation and combined
+  unique PR #35 test functions with current stream regression tests. A targeted test run
+  then found five `NameError` failures because the merged test file lacked its
+  `HTTPException` import; restored the import and reran successfully. No conflict markers
+  or partial rebase remain.
+- **Change:** start a bounded lease watcher immediately after vLLM admission, retain it
+  through `/tokenize` and exact reservation adjustment, then stop it on all success,
+  rejection, error, and cancellation paths. Normal generation and streaming start their
+  own watcher after preflight.
+- **Validation:** targeted stream/lease suite passed **21 tests**. `make verify` passed
+  Ruff, **87 tests**, pip-audit and Compose config (2 optional Redis tests skipped; one
+  existing Starlette deprecation warning). Redis 7.4 integration passed **2 tests**.
+  `git diff --check` passed. The integration container was stopped and is absent.
+- **Review response:** resolved the stale second-clean-cycle finding based on the
+  owner's explicit rule: one successful cycle is sufficient, and the two historical CPU
+  cycles remain evidence.
+- **Cloud/cost:** no AWS calls, GPU, or live vLLM; goal-specific spend remains `$0` and
+  GPU hours remain `0`.
+- **Next action:** finish PR #35 evidence, push the rebased branch with
+  `--force-with-lease`, resolve the lease-review finding, and watch its CI once.
+
 ## 2026-11-27 — Redis lease review fixes and branch recovery
 
 - **Phase:** Phase 6 non-billable gateway correctness prework. The active cloud
   implementation phase remains Phase 2; no cloud resource was created or changed.
 - **Branch / PR:** `codex/redis-admission-leases`, PR #34 stacked on PR #33. Code fix
-  commit: `4cffc60`. The PR remote branch had not yet been updated at the start of this
-  work; this entry will be refreshed with the pushed documentation commit and CI run.
+  commit: `4cffc60`, documentation head `b51aedd`. The rebased branch was pushed with
+  lease protection; both review threads were resolved and all four required checks
+  passed in run `45936485832`.
 - **Starting state:** local branch was rebased onto PR #33 head `c5de757`, while the
   GitHub PR branch still pointed to `ae99959940b217495ae5a2e231656965b2a4ce2f`.
   Five validation and goal documents contained local updates that had not been committed.
@@ -32,8 +68,8 @@
   the `--onto` rebase used the old PR #34 base commit to replay only its own work.
 - **Cloud / cost:** no AWS API, GPU, or live vLLM was used in this package. Goal-specific
   spend remains `$0`; GPU instance-hours remain `0`.
-- **Next action:** publish the updated PR #34 branch with `--force-with-lease`, respond
-  to the two review threads, and run one PR check watcher on the new head.
+- **Completion:** the rebased PR #34 branch was published, both review threads resolved,
+  and all four required checks passed as recorded above. Work then moved to PR #35.
 
 ## 2026-11-27 — Clean-room run count clarified
 

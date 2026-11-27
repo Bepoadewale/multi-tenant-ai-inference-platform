@@ -4,7 +4,7 @@ This file records execution specific to the single-L4 project. Historical local 
 
 ## 2026-11-26 — Baseline repository and read-only AWS preflight
 
-- **Repository SHA:** `c8f02ed` baseline; docs are being prepared on `codex/single-l4-gpu-goal`.
+- **Repository SHA:** `c8f02ed` baseline; subsequent implementation and validation entries identify their own branch and commit.
 - **Scope:** Phase 1 audit and read-only preflight. No AWS mutation, Terraform plan/apply, EC2 launch, or GPU execution.
 - **Identity:** the configured `ai-platform-pilot-key` profile returned the expected AWS account. Account identifier is intentionally not repeated in this public file.
 - **Current project resources:** Resource Groups Tagging API query for exact `project=multi-tenant-ai-inference-platform` returned `[]`; EC2 query for the same project tag returned `[]` in `us-east-1`. These exact-tag queries do not exclude untagged or differently tagged resources.
@@ -193,6 +193,24 @@ This establishes current local lint/test/static configuration outcomes and read-
   private Compose-network enforcement, cache salt behavior, AWS, GPU, or production
   availability. The request-count/content bounds and token preflight are code evidence
   only until the runtime is pinned and exercised.
+
+## 2026-11-27 — PR #35 lease renewal during tokenizer preflight
+
+- **Scope:** prevent the concurrency reservation from expiring during a valid but slow
+  vLLM tokenizer request. No cloud resource or GPU was used.
+- **Change:** start the lease watcher immediately after shared admission, retain it
+  through tokenization and exact reservation adjustment, and stop it on success or all
+  preflight failure/cancellation paths. The normal generation/stream path starts its
+  own watcher after preflight.
+- **Regression:** a local `TenantLimiter` with a 30 ms lease and an async tokenizer
+  delay of 100 ms completes the request and releases reservation state. Targeted tests:
+  21 passed.
+- **Validation:** `make verify` passed Ruff, **87 tests**, pip-audit, and Docker Compose
+  configuration; two opt-in Redis tests were skipped. A disposable local Redis 7.4
+  integration run passed **2 tests**. `git diff --check` passed.
+- **Limitations:** tokenizer and inference use mocks; Redis tests use one local Redis
+  process. This does not verify a live vLLM release, separate gateway processes,
+  production network failure, or GPU execution. Commit `59cca44` was local at capture.
 
 ## 2026-11-27 — PR #35 CI failure and single-run policy
 

@@ -10,11 +10,10 @@ private because it is not protected by vLLM's API key.
 ## Current state
 
 - Branch: `codex/tokenizer-admission-preflight`, based on PR #34.
-- Pull request: [#35 — model-aware token reservations](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/35), draft and open against PR #34's `codex/redis-admission-leases` branch; head `34782b9`, CI running.
+- Pull request: [#35 — model-aware token reservations](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/35), open against PR #34's `codex/redis-admission-leases` branch; rebased code head `59cca44` is validated locally and awaits publication/CI.
 - Phase: non-billable Phase 6 prework. No live vLLM, AWS infrastructure, or GPU was
   used.
-- PR #34's latest docs head `ae99959` passed all required checks and is ready for
-  review.
+- PR #34 review fixes are at `b51aedd`; run `45936485832` is still in progress.
 
 ## Research findings
 
@@ -58,7 +57,8 @@ the risk register.
   implemented yet.
 - [ ] Add tenant-scoped prefix-cache salt if supported by the pinned runtime; do not
   treat it as an isolation boundary.
-- [ ] Add dedicated timeout, preflight cancellation, and Redis-outage tests.
+- [ ] Add and verify the remaining dedicated timeout, preflight cancellation, and
+  Redis-outage tests; see stacked PR #36 for its separate failure-path coverage.
 - [ ] Validate `/tokenize` request/response compatibility against the pinned live
   vLLM release during the authorized GPU batch.
 
@@ -118,3 +118,18 @@ inference. Tokenization failure fails closed and releases concurrency.
 and tests pass. Live vLLM compatibility, private Compose-network reachability, cache
 salting, and timeout/cancellation/outage drills remain outstanding. Mock tests do not
 prove the deployed runtime protocol.
+
+## Review follow-up — 2026-11-27
+
+Review found that a concurrency lease could expire while the gateway awaited
+`/tokenize`, before committing the exact prompt reservation. The gateway now starts
+lease renewal immediately after admission, keeps it active through tokenization and
+reservation adjustment, and stops it on success or each preflight error, rejection,
+and cancellation path. The regular inference/stream path then starts its own watcher.
+
+A regression test uses a 30 ms lease and a 100 ms tokenizer delay. It verifies that the
+request completes and releases its reservation. Targeted tests passed (**21 passed**);
+`make verify` passed Ruff, **87 tests**, pip-audit, and Compose configuration (2
+optional Redis tests skipped); local Redis 7.4 integration passed (**2 tests**). No AWS
+resource, live vLLM, or GPU was used. Code commit `59cca44` was tested locally; push
+and CI remained to be done.
