@@ -50,7 +50,7 @@ host or project AWS resource has been created.
   fallback for the workflow that installs those same locked dependencies.
 - [x] Run focused local fake-based tests, Ruff, shell parsing, static command previews,
   and documentation/link checks.
-- [ ] Pass required pull request CI and resolve any findings.
+- [x] Pass required pull request CI and resolve any findings.
 - [ ] Obtain human review; do not merge without owner authorization.
 
 ## Acceptance criteria
@@ -102,11 +102,13 @@ confirmation; `git diff --check` passed. Seventy-eight local Markdown links acro
 seven updated documentation files resolve. The first Ansible syntax attempt found
 the executable absent. The Make target now prefers the hash-locked host venv;
 installing `infrastructure/ansible/requirements.lock` with `--require-hashes` into
-that ignored local venv allowed `make gpu-ansible-validate` to pass. GitHub CI is
-pending. These results are local/static only. No L4 screenshot, metric, benchmark,
-cost, inference result, or incident is claimed. The initial PR head passed all six
-required checks in run `46081589301`, including one local E2E cycle; the later
-deployment-preflight follow-up is not yet pushed and therefore needs updated-head CI.
+that ignored local venv allowed `make gpu-ansible-validate` to pass. Code commit
+`07161ab` passed all six required checks in run `46082712127`, including the workflow's
+local E2E cycle. These results are local/static only. No L4 screenshot, metric,
+benchmark, cost, inference result, or incident is claimed.
+
+PR #64 remains open for human review. Its code checks are complete; GPU-host acceptance
+items remain pending and cannot be satisfied by local CI.
 
 ## Outstanding work
 
