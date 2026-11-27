@@ -37,7 +37,8 @@ any live benchmark run.
 
 - [x] A dry-run describes the selected tenants and does not make a network request.
 - [x] Mocked-transport coverage verifies sensitive request data is not copied to
-  result records and redirect destinations are refused.
+  result records; redirects and credential-bearing endpoint URLs are refused; and
+  output files are unique and owner-only.
 - [x] L4 checks and request/runtime bounds fail closed before live execution.
 - [x] Report limitations distinguish gateway latency from pure overhead and client wait
   from server queue depth.
@@ -47,7 +48,7 @@ any live benchmark run.
 
 ## Commands and results
 
-- `.venv/bin/python -m pytest -q gateway/tests/test_gpu_gateway_benchmark.py` — 4 passed.
+- `.venv/bin/python -m pytest -q gateway/tests/test_gpu_gateway_benchmark.py` — 6 passed.
 - `.venv/bin/ruff check benchmarks/gpu_inference/run_gateway_benchmark.py gateway/tests/test_gpu_gateway_benchmark.py` — passed.
 - `python3 -m py_compile benchmarks/gpu_inference/run_gateway_benchmark.py` — passed.
 - `make gpu-gateway-benchmark-plan` — printed the bounded synthetic plan; no network,

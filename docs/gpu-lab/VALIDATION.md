@@ -381,10 +381,11 @@ through either GPU gateway, model denial on live vLLM, or GPU hardware isolation
 
 ## Authenticated gateway benchmark preparation
 
-On 2026-11-27, the non-GPU gateway benchmark client passed four focused tests,
+On 2026-11-27, the non-GPU gateway benchmark client passed six focused tests,
 including a mocked response with a sentinel completion; the result record contained
-neither that completion nor the bearer token. A separate test verifies redirects are
-refused. `make gpu-gateway-benchmark-plan`, Python compilation, Ruff, and
+neither that completion nor the bearer token. Separate tests verify redirects and
+credential-bearing URLs are refused, and owner-only uniquely named files preserve
+previous results. `make gpu-gateway-benchmark-plan`, Python compilation, Ruff, and
 `git diff --check` passed. The plan makes no network request. The first dry-run failed
 because `httpx` was missing from system Python. The final client uses the standard
 library so the EC2 host does not require a project virtual environment. Ruff also
