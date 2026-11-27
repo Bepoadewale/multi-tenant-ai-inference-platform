@@ -1364,6 +1364,15 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** watch PR #48's checks, fix any real failure, then continue preparing the
   CUDA lab and incident drill without claiming runtime evidence.
 
+## 2026-11-27 — Confirm evaluation code CI and track environment-doc refresh
+
+- **PR #48 code head:** `24b149c` passed all five required jobs in run `45996207684`,
+  including Python and local E2E. CI did not contact a model or AWS.
+- **Documentation follow-up:** added the exact local workstation tool inventory and
+  link to `LOCAL_ENVIRONMENT_READINESS.md` in commit `5af5562`. The checks for this
+  latest docs head are running in PR run `45997123263`; no result is claimed yet.
+- **Cost/cloud:** no GPU or AWS operation, no model load, and no spend.
+
 ## 2026-11-27 — Record workstation tool readiness
 
 - **Phase:** cross-phase non-billable preparation.

@@ -60,6 +60,8 @@ runtime. No LLM evaluation has run.
   `4.`; the matcher now allows sentence punctuation while rejecting `14` and `4.5`.
 - An initial Ruff run found one unused import; it was removed before the passing run.
 - No GPU, model, or AWS resource is used. PR CI remains pending.
+- The code and status-document head `24b149c` passed all five required CI jobs in run
+  `45996207684`. A follow-up documentation-only head `5af5562` is running through CI.
 
 ## Security and financial considerations
 
