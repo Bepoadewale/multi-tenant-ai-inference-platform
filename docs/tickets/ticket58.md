@@ -153,6 +153,42 @@ passed.
 - **AWS / cost:** quota preflight returned `0.0` G/VT vCPUs and no running project-
   tagged EC2 instance. No AWS mutation, GPU use, or spend occurred.
 
+## Current AWS launch-preflight result
+
+The repository's actual `make gpu-ec2-preflight` target was run read-only with the
+expected AWS profile/account, the pinned Canonical Ubuntu 24.04 AMI, an offered
+`us-east-1` zone, and a future expiry within the 12-hour limit. It verified the
+account and AMI, then stopped at the intended fail-closed gate:
+`On-Demand G/VT quota is 0.0 vCPUs; 4 are required`. It did not reach Terraform,
+backend, budget, or resource-creation steps. The existing case remains
+`CASE_OPENED`; no AWS mutation occurred. No GPU hours or spend were used.
+
+The API test is now published as commit `56a0493`; all six PR jobs passed in run
+`46065078837`, including the automatic local E2E job. This workflow ran before the
+new Redis outage and cross-gateway cancellation drills were added, so those changes
+still require their own PR workflow. No separate local clean-room run was launched.
+
+## Local, no-GPU admission fault drills
+
+- **Objective:** close the static/local integration gap for cross-process cancellation,
+  Redis fail-closed behavior, and Redis recovery before the L4 becomes available.
+- **Change:** `make demo-gateway-cancellation` issues ten streamed requests through
+  both independent local gateways, closes each response after its first data chunk,
+  and verifies both the process-local active-request metric and shared Redis active
+  lease hash return to zero. `make demo-redis-outage` stops only the project Redis
+  container, requires both gateways to return the documented 503, starts Redis in an
+  exit trap, and verifies both readiness checks recover. Both are wired into the
+  flagship local E2E flow. The manual reproduction guide explains the commands and
+  recovery.
+- **Static validation:** Bash syntax, Ruff, bytecode compilation, Make target
+  resolution, and `git diff --check` passed. A first Ruff run found an import-order
+  issue; it was fixed. The new scripts have not yet been run against containers.
+- **Pending:** validate actual cancellation/disconnect semantics and Redis restart in
+  the single GitHub local E2E run on the new PR head; update this record with the
+  result. No second manual clean-room run is planned.
+- **AWS / GPU:** none. The existing AWS preflight stopped at quota `0.0`; no cloud
+  mutation or spend occurred.
+
 ## Remaining limitations
 
 The guide cannot yet include actual command output or empirically confirmed expected

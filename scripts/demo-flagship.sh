@@ -16,6 +16,8 @@ run_demo() {
 # assertions; this orchestrator only establishes the reproducible cumulative route.
 run_demo demo-local
 run_demo demo-overload
+run_demo demo-gateway-cancellation
+run_demo demo-redis-outage
 run_demo demo-routing
 run_demo demo-metering
 run_demo demo-observability

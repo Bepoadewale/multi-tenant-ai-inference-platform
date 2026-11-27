@@ -740,6 +740,26 @@ The 403 proves model authorization, not separate GPU capacity. To test quota sha
 use the existing bounded GPU overload drill after confirming its request count and
 runtime fit the approved batch. Do not run unbounded loops.
 
+Before an AWS/GPU batch, the same two gateway processes can exercise the shared
+admission behavior against the existing CPU ONNX backend without creating cloud
+resources. Run these from the repository root after `make bootstrap-local`:
+
+```bash
+make demo-gateway-cancellation
+make demo-redis-outage
+```
+
+The first cancels ten streaming requests across the two local gateways and checks
+that each process's active-request gauge and Redis's shared active-lease count return
+to zero. The second stops only the project's Redis container, expects both gateways
+to reject requests with HTTP 503, then restarts Redis and checks both gateways become
+ready again. The outage script has an exit trap that starts Redis if an assertion or
+command fails; it preserves the named Redis volume. These checks validate local
+gateway and shared-state handling only. They do not validate vLLM, GPU behavior, or
+production recovery. If Redis does not recover, run `docker compose -f
+docker-compose.yml start redis` and check `docker compose ps redis`; do not delete the
+volume or run global Docker cleanup.
+
 Then verify:
 
 - Both gateway replicas are ready and can reach the vLLM service over the internal

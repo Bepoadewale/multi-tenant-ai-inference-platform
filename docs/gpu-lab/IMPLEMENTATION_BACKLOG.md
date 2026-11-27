@@ -324,7 +324,11 @@ tokenizer preflight. None has live GPU inference evidence.
   lease during slow tokenizer preflight and release it on rejection.
 - [x] Add local failure-path coverage for preflight cancellation, unavailable Redis
   admission, and bounded tokenizer HTTP timeout.
-- [ ] Test Redis failure and cancellation across separate gateway processes.
+- [ ] Run `make demo-gateway-cancellation` and `make demo-redis-outage` through the
+  local flagship flow. They are prepared to cancel ten streams across the two CPU
+  gateway processes, verify shared Redis lease cleanup, fail closed with HTTP 503
+  during Redis outage, restart Redis, and verify readiness recovery. The changes are
+  not yet CI-tested or executed against local containers.
 - [ ] Verify the stream/admission contract against the pinned live vLLM runtime and
   route real GPU-backed requests.
 - [x] Preserve ONNX defaults and add vLLM as a separately configured single-target
