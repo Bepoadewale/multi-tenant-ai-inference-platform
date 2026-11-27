@@ -1175,3 +1175,27 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   produced the intended JSON record. The Make target itself completed successfully.
 - **Next:** finish the static review, then publish PR #47 after reconciling the
   PR #45/#46 stack.
+
+## 2026-11-27 — Fix benchmark timeout container targeting
+
+- **Phase:** Phase 8 static preparation; PR #47 candidate branch.
+- **Branch:** `codex/gpu-benchmark-preparation`; PR #47 is not open yet.
+- **Starting state:** PR #45's capacity demo fix is pushed and its CI watcher is active.
+  Review of the stacked benchmark runner found a potential cleanup mismatch after the
+  first benchmark repetition.
+- **Finding:** Compose names each client container from workload, concurrency, and
+  repetition. The timeout handler used the overall run index, so later timeouts could
+  ask Docker to stop a different, nonexistent container and leave the actual client
+  alive.
+- **Change:** one helper now creates the container name for both `compose run --name`
+  and timeout/interruption cleanup. Added a targeted regression test for repetition 3.
+- **Validation:** first test attempt could not collect the test because the standalone
+  pytest environment did not include the repository root on `sys.path`; the test now
+  adds that root explicitly. The workstation's default Python 3.12 has no pytest, so
+  `uvx --python 3.12 --from pytest pytest -q gateway/tests/test_gpu_benchmark_runner.py`
+  ran the targeted test in a temporary tool environment: 1 passed. Ruff, Python 3.12
+  bytecode compilation, and `git diff --check` passed. No Docker container or GPU
+  benchmark was launched.
+- **Cost/security:** local validation only; no AWS resources, GPU hours, or spend.
+- **Next:** await PR #45's existing CI watcher, then reconcile the PR #46/#47 branch
+  stack and run CI against the corrected cleanup code.
