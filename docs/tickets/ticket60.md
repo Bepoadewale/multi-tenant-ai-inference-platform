@@ -51,7 +51,7 @@ any live benchmark run.
 
 ## Commands and results
 
-- `.venv/bin/python -m pytest -q gateway/tests/test_gpu_gateway_benchmark.py` — 6 passed.
+- `.venv/bin/python -m pytest -q gateway/tests/test_gpu_gateway_benchmark.py` — 8 passed.
 - `.venv/bin/ruff check benchmarks/gpu_inference/run_gateway_benchmark.py gateway/tests/test_gpu_gateway_benchmark.py` — passed.
 - `python3 -m py_compile benchmarks/gpu_inference/run_gateway_benchmark.py` — passed.
 - `make gpu-gateway-benchmark-plan` — printed the bounded synthetic plan; no network,
@@ -64,6 +64,18 @@ any live benchmark run.
   host does not need the repository virtual environment; this also enabled explicit
   redirect refusal. Ruff identified import-order issues during development; corrected
   them before the final passing checks.
+
+## Review findings
+
+- Automated review reproduced a truncated HTTP 200 response that raised
+  `http.client.IncompleteRead` and aborted `asyncio.gather()`. The client now converts
+  HTTP protocol/read errors into a sanitized per-request `transport_error` result so
+  other samples and the final report can complete.
+- Review found that baseline P50 included 401/429/backend failures and could present an
+  invalid gateway-overhead delta. The comparison now uses only HTTP 200 inference
+  samples and returns `null` if either side has no successful sample.
+- Added regressions for both findings. Eight focused tests pass; Ruff, compilation,
+  dry-run, and whitespace validation pass. The fixes require fresh PR CI.
 
 ## Risks and limitations
 

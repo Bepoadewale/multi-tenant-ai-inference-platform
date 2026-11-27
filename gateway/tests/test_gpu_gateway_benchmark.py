@@ -1,4 +1,5 @@
 import asyncio
+import http.client
 import json
 import stat
 from urllib.error import HTTPError
@@ -53,6 +54,15 @@ def test_percentile_handles_empty_and_single_sample():
     assert percentile([], 0.5) is None
     assert percentile([7.25], 0.95) == 7.25
     assert percentile([0.0, 10.0], 0.95) == 9.5
+
+
+def test_gateway_overhead_uses_only_successful_inference_samples():
+    direct = [{"status": 200, "latency_ms": 100.0}]
+    rejected_gateway = [{"status": 401, "latency_ms": 2.0}]
+    successful_gateway = [{"status": 200, "latency_ms": 115.0}]
+
+    assert benchmark.overhead_p50_delta(direct, rejected_gateway) is None
+    assert benchmark.overhead_p50_delta(direct, successful_gateway) == 15.0
 
 
 def test_benchmark_client_discards_prompt_response_and_auth_header(monkeypatch):
@@ -118,6 +128,28 @@ def test_redirect_handler_refuses_to_forward_tenant_token():
         benchmark.RejectRedirect().redirect_request(
             request, None, 302, "Found", {}, "https://other.example/collect"
         )
+
+
+def test_truncated_http_response_becomes_sanitized_request_failure(monkeypatch):
+    def truncated_response(*_args):
+        raise http.client.IncompleteRead(b'{"usage":')
+
+    monkeypatch.setattr(benchmark, "post_json", truncated_response)
+
+    row = asyncio.run(
+        request_one(
+            "https://gateway.example",
+            "chat-default",
+            "customer-support",
+            "private-bearer-sentinel",
+            asyncio.Semaphore(1),
+            5,
+        )
+    )
+
+    assert row["status"] == "transport_error"
+    assert "usage" not in repr(row)
+    assert "private-bearer-sentinel" not in repr(row)
 
 
 def test_endpoint_rejects_credentials_and_nonlocal_plain_http():

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import http.client
 import json
 import os
 import statistics
@@ -100,6 +101,20 @@ def summarize(rows: list[dict], elapsed_seconds: float) -> dict:
     }
 
 
+def successful_p50(rows: list[dict]) -> float | None:
+    return percentile(
+        [row["latency_ms"] for row in rows if row["status"] == 200], 0.50
+    )
+
+
+def overhead_p50_delta(direct_rows: list[dict], gateway_rows: list[dict]) -> float | None:
+    direct_p50 = successful_p50(direct_rows)
+    gateway_p50 = successful_p50(gateway_rows)
+    if direct_p50 is None or gateway_p50 is None:
+        return None
+    return round(gateway_p50 - direct_p50, 3)
+
+
 def require_l4() -> dict[str, str]:
     """Check instance identity through IMDSv2 and require one visible NVIDIA L4."""
     token_request = Request(
@@ -184,7 +199,7 @@ async def request_one(
                 "prompt_tokens": usage.get("prompt_tokens", 0),
                 "completion_tokens": usage.get("completion_tokens", 0),
             }
-        except (URLError, TimeoutError, OSError, ValueError, TypeError):
+        except (http.client.HTTPException, URLError, TimeoutError, OSError, ValueError, TypeError):
             return {
                 "tenant": tenant,
                 "status": "transport_error",
@@ -270,13 +285,11 @@ async def run(args: argparse.Namespace) -> dict:
         phases["gateway_sequential_baseline"] = {
             "summary": summarize(gateway_base, elapsed)
         }
-        direct_p50 = phases["direct_baseline"]["summary"]["latency_ms"]["p50"]
-        gateway_p50 = phases["gateway_sequential_baseline"]["summary"]["latency_ms"]["p50"]
-        phases["rough_gateway_overhead_p50_ms"] = (
-            round(gateway_p50 - direct_p50, 3)
-            if direct_p50 is not None and gateway_p50 is not None
-            else None
+        phases["direct_baseline"]["successful_latency_p50_ms"] = successful_p50(direct)
+        phases["gateway_sequential_baseline"]["successful_latency_p50_ms"] = (
+            successful_p50(gateway_base)
         )
+        phases["rough_gateway_overhead_p50_ms"] = overhead_p50_delta(direct, gateway_base)
 
     workload = []
     tenant_names = list(TENANTS)
