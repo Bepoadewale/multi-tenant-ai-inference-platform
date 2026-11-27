@@ -50,10 +50,10 @@ download the multi-gigabyte model.
   The Hub's LFS SHA-256 is
   `dd924a11b4c220f385b51ffa522daea7c9f3d850e31b162bb5661df483c6d3ee`. The model
   files were not downloaded.
-- The model config says 32,768 positional embeddings, while tokenizer metadata says
-  131,072 maximum length. The pinned config's RoPE settings and the runtime-supported
-  limit need review. Begin with a conservative context such as 8,192 and do not copy
-  the tokenizer limit directly into the vLLM config.
+- The model config says 32,768 positional embeddings, `rope_theta=1,000,000`, and no
+  RoPE scaling, while tokenizer metadata says 131,072 maximum length. The pinned
+  README does not document an extension to 131,072. Begin with a conservative context
+  such as 8,192 and do not copy the tokenizer limit directly into the vLLM config.
 - These sources establish a version-family candidate, not actual host, container,
   CUDA, PyTorch, or model behavior on EC2 L4 hardware.
 
@@ -109,8 +109,8 @@ with a separately resolved build.
 - The image tag is not an immutable reference. Use the platform-specific digest and
   recheck it before use.
 - The tokenizer's 131,072 limit conflicts with the model config's 32,768 positional
-  embeddings. Resolve the model's RoPE details before increasing the conservative
-  runtime context.
+  embeddings and absent RoPE scaling. Validate correctness and memory before raising
+  the conservative runtime context.
 
 ## Security and financial considerations
 
