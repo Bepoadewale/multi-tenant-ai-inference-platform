@@ -485,6 +485,15 @@ changes. Then independently repeat the `nvidia-smi`, `nvcc`, Docker GPU-containe
 and PyTorch computation checks. A zero-change Ansible run only shows the configured
 packages and files are stable; it does not prove GPU computation works.
 
+After completing that manual pass, the guarded host wrappers documented in the
+[manual reproduction guide](MANUAL_REPRODUCTION_GUIDE.md#use-the-guarded-host-operation-wrappers-after-the-manual-lesson)
+can repeat configuration, build/deploy Compose, run the bounded tenant smoke,
+evaluation and benchmark, execute the Redis outage drill, and capture a private host
+snapshot. They are prepared automation, not executed evidence. Each host action checks
+the exact EC2 identity and visible L4; workload actions also require a distinct
+confirmation variable. Keep their runtime inside the reviewed batch. A confirmation
+variable does not grant spending approval.
+
 ## Current research set and compatibility decision
 
 The 2026-11-27 research record contains provisional candidates: Ubuntu 24.04 amd64;

@@ -37,13 +37,19 @@ reboot step and rerun the playbook.
 
 ## Validate without a GPU
 
-From the repository root, in a Python 3.12 environment with the locked Ansible
-dependencies installed:
+From `infrastructure/ansible`, install the hash-locked dependencies into the local
+Python 3.12 environment and run syntax validation:
 
 ```bash
-cd infrastructure/ansible
+python3.12 -m venv .venv
+.venv/bin/python -m pip install --require-hashes -r requirements.lock
 ANSIBLE_CONFIG=ansible.cfg ansible-playbook playbooks/configure-gpu-host.yml --syntax-check
 ```
+
+Use `.venv/bin/ansible-playbook` in place of the bare command above if the virtual
+environment is not activated. From the repository root, `make gpu-ansible-validate`
+prefers this pinned local environment and otherwise uses the executable installed by
+CI. It prints a setup instruction and exits if Ansible is not installed.
 
 Syntax checking parses the playbook but does not run tasks, fetch packages, access
 AWS, or prove the packages work with an L4. CI runs this check.
@@ -71,3 +77,17 @@ Ansible's return to `changed=0` is necessary but not sufficient: verify `nvidia-
 `nvcc --version`, `docker info`, and a digest-pinned CUDA container as described in
 the runbook. The playbook includes a small PyTorch GPU computation, but it has not yet
 run on an EC2 host.
+
+After this manual learning pass, the repository has an optional guarded wrapper:
+
+```bash
+GPU_EC2_CONFIGURE_CONFIRM=apply make gpu-ec2-configure
+```
+
+Run it from the repository root on the exact approved EC2 host in a root shell. Set
+`EXPECTED_AWS_ACCOUNT_ID` and `GPU_EC2_INSTANCE_ID` from the approved deployment
+record in that shell first. The wrapper checks Instance Metadata Service v2, region,
+instance type, and one visible NVIDIA L4, then runs this local playbook with a
+90-minute timeout. It does not create cloud resources or reboot. The confirmation
+string is an accidental-use guard, not AWS authorization. Review `--check --diff`
+before the first actual run and capture the two real play summaries privately.
