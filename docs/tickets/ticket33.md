@@ -9,7 +9,7 @@ and record cancellation/error outcomes exactly once.
 
 ## Current state
 
-- Branch: `codex/gateway-stream-accounting`, based on PR #32 commit `24336cf` (ready for review); implementation commit `1186e30`.
+- Branch: `codex/gateway-stream-accounting`, rebased on PR #32 head `da2567e`; current implementation head `635f61d`.
 - Pull request: [#33 — vLLM stream usage and cancellation](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/33), open and ready for review against `codex/gpu-ec2-foundation`; review follow-up is in progress.
 - Phase: local work supporting Phase 6; Phase 2 remains the active cloud phase.
 - No vLLM server, AWS resource, or GPU was used for this ticket.

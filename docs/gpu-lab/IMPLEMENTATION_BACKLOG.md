@@ -73,9 +73,9 @@ phase exit does not authorize payment.
 
 ### Package 2 — Isolated EC2 Terraform and expiry controls
 
-**Status:** PR #32 is open and ready for review against PR #30. The latest pushed head
-passed CI; a new local teardown-test commit awaits publication and CI. Billable
-resources remain prohibited until every cost and quota gate passes.
+**Status:** PR #32 is ready for review against PR #30; all four required jobs passed on
+head `da2567e` in run `45933749318`. Billable resources remain prohibited until every
+cost and quota gate passes.
 
 - [x] Create a separate Terraform root with account, region, type, project-tag, and
   IMDSv2 guards. One `aws_instance` resource and a quota/resource preflight limit the
