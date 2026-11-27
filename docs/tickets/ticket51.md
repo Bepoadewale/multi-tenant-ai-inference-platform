@@ -58,8 +58,10 @@ canary or provide high availability.
 - Official release and installation documentation were rechecked on 2026-11-27;
   versioned image digest and all configuration choices still require final preflight.
 - All five required checks, including local end-to-end, passed on the prior design head
-  `b205929` in run `46013204318`. Fresh CPU-only CI is pending on the restacked head.
-  Neither run demonstrates model serving or GPU behavior.
+  `b205929` in run `46013204318`. After restacking behind gateway safety PRs #33–#36,
+  current head `44c467a` passed all five required checks in run `46017455801`. These
+  checks validate CPU-only workflows and configuration, not model serving or GPU
+  behavior.
 
 ## Security and cost
 
