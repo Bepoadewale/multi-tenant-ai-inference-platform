@@ -44,7 +44,8 @@ any live benchmark run.
 - [x] L4 checks and request/runtime bounds fail closed before live execution.
 - [x] Report limitations distinguish gateway latency from pure overhead and client wait
   from server queue depth.
-- [ ] PR #60 CI passes.
+- [x] PR #60 implementation head `2e2d177` passed all six required jobs, including
+  local E2E, in run `46072579851`.
 - [ ] Human review completes; no merge without authorization.
 - [ ] Actual benchmark execution remains a GPU-phase acceptance item, not this PR.
 
@@ -56,6 +57,8 @@ any live benchmark run.
 - `make gpu-gateway-benchmark-plan` — printed the bounded synthetic plan; no network,
   identity file, AWS call, model request, or GPU was used.
 - `git diff --check` — passed.
+- PR run `46072579851` passed `python`, `manifests`, `supply-chain`, `ansible`,
+  `gpu-observability`, and `local-e2e` on implementation head `2e2d177`.
 - Initial dry-run failed because importing `httpx` at module load time required the
   project environment. Replaced it with Python's standard-library `urllib` so the EC2
   host does not need the repository virtual environment; this also enabled explicit
