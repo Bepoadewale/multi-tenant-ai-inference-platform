@@ -34,6 +34,8 @@ claim L4 compatibility.
 - Added an ordered manifest for host packages, driver, CUDA Toolkit, Docker, NVIDIA
   Container Toolkit, isolated PyTorch, vLLM, the pinned Qwen model, gateway/Redis,
   and observability containers.
+- Added a 29-package hash-locked PyTorch CUDA 13.0 environment for Linux x86_64 and
+  CPython 3.12, plus installation instructions for the future EC2 execution.
 - Explained why the order matters, what belongs in containers, how to verify each
   layer, and which mismatches require stopping rather than improvising.
 - Linked the manifest from the documentation index and marked Phase 3 as static
@@ -43,9 +45,15 @@ claim L4 compatibility.
 
 - Reviewed the manifest against the existing runbook, Terraform host configuration,
   Compose profile, and official-source research notes.
-- `git diff --check` and documentation link checks are required before publication.
+- Local Markdown link checks and `git diff --check` passed before the initial PR push.
+- `uv 0.9.15` resolved the 29-package CUDA environment from the official PyTorch
+  index first and PyPI second; no package was installed. Refresh the lock before the
+  live batch.
 - No driver, CUDA Toolkit, Docker image, model, or Ansible package was downloaded or
   installed. No Terraform plan/apply, AWS API call, GPU operation, or spend occurred.
+- The resolver fetched a 1.2-MiB setuptools distribution for metadata; a separate
+  direct-wheel attempt began a 529-MiB Torch transfer and was interrupted before
+  installation. Cache state was not inspected or cleaned.
 
 ## Security and cost
 
@@ -57,11 +65,15 @@ approval, runtime cap, expiry, and teardown gates.
 ## Outstanding work
 
 - Refresh package metadata signatures and exact package names on the reviewed AMI.
-- Confirm Docker and Ansible controller versions and pin project-scoped automation.
+- Refresh Docker package signatures and versions; pin the Ansible controller and
+  project-scoped automation when the roles are ready.
 - Perform the manual installation on one authorized L4, record actual outputs, then
   write Ansible roles from verified steps and run them twice.
 - Confirm host memory/CPU fit for the full Compose stack before starting monitoring
   services.
+- Decide and implement how GPU evaluation/release records reach MLflow, because the
+  current single-GPU Compose profile does not include or connect to the existing local
+  MLflow service.
 
 ## Acceptance status
 

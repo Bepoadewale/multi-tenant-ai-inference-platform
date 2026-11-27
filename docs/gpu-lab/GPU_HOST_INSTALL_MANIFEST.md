@@ -24,20 +24,24 @@ repair a missing or broken driver.
 | 3 | EC2 host | OS build and inspection tools | Install only required Ubuntu packages: matching `linux-headers-$(uname -r)`, compiler/build tools needed by the selected driver/toolkit, certificates, HTTPS/repository tools, `jq`, and Python virtual-environment support if a host-side script needs it. Resolve versions from the signed Ubuntu repository for the pinned image. | Matching headers enable driver modules; compiler tools build the CUDA sample; repository tools verify signed vendor repositories. | `dpkg-query`, `gcc --version`, `make --version`, and confirm header path matches `uname -r`. |
 | 4 | EC2 host | NVIDIA Data Center compute driver | R580.196.11 candidate, compute/headless package set; the Ubuntu 24.04 NVIDIA repository exposes a matching pin package. Verify APT metadata signature and exact package names before install. | The kernel driver controls the physical L4 and makes it available to Linux and containers. | Reboot, reconnect with SSM, then `nvidia-smi`, `nvidia-smi -L`, and `nvidia-smi -q`; confirm one L4 and no driver error. |
 | 5 | EC2 host | CUDA Toolkit and compiler | Toolkit-only package candidate `cuda-toolkit-13-0=13.0.3-1`. Do not install a meta-package that silently changes the driver. | `nvcc` compiles the CUDA C++ vector-add exercise. The toolkit is not needed just to run vLLM's container. | `nvcc --version`; compile the bounded sample; run it inside a GPU-enabled container or on the host. |
-| 6 | EC2 host | Docker Engine, CLI, and Compose plugin | Install from Docker's signed Ubuntu repository; choose exact package versions and repository metadata during preflight, then record them. Do not use an unreviewed `curl | sh` installer. | Runs the single-GPU Compose application and observability stack. | `docker version`, `docker compose version`, `docker info`; verify the daemon is active. |
+| 6 | EC2 host | Docker Engine, CLI, and Compose plugin | 2026-11-27 Ubuntu 24.04 amd64 repository candidates: Engine/CLI `5:29.9.3-1~ubuntu.24.04~noble`, containerd `2.4.2-4~ubuntu.24.04~noble`, Buildx `0.39.1-1~ubuntu.24.04~noble`, Compose `5.8.0-1~ubuntu.24.04~noble`. Hashes are in `RESEARCH_NOTES.md`. Install from Docker's signed repository; recheck package metadata and signature before use. | Runs the single-GPU Compose application and observability stack. | `docker version`, `docker compose version`, `docker info`; verify the daemon is active. |
 | 7 | EC2 host | NVIDIA Container Toolkit | Candidate package set `1.20.2-1`; verify all four package versions and signed repository metadata again. Configure Docker with `nvidia-ctk runtime configure --runtime=docker`, inspect the daemon change, then restart Docker. | Passes GPU device nodes and driver libraries into containers. | `docker info`; run a digest-pinned CUDA image with `--gpus all`, `nvidia-smi`, and a CUDA sample. |
-| 8 | EC2 host or isolated container | Standalone PyTorch CUDA lab | Exact Python/PyTorch/CUDA wheel tuple is intentionally not pinned until the current official PyTorch selector is checked against the selected driver and CUDA runtime. Keep it isolated from vLLM's bundled Python/PyTorch. | Executes synchronized tensor allocation and matrix multiplication for GPU learning and benchmark comparisons. | Assert `torch.cuda.is_available()`, exactly one device named NVIDIA L4, allocate tensors, multiply, synchronize, and compare with CPU output. |
+| 8 | EC2 host Python 3.12 virtual environment | Standalone PyTorch CUDA lab | Official wheel candidate: Linux x86_64 `torch==2.14.0+cu130`; the 29-package transitive lock is `benchmarks/cuda_performance/requirements-torch.lock`. It has hashes and targets CPython 3.12 / x86_64 Linux. Recheck the sources before installation. Keep it isolated from vLLM's bundled Python/Torch libraries. | Executes synchronized tensor allocation and matrix multiplication for GPU learning and benchmark comparisons. | Assert `torch.cuda.is_available()`, exactly one device named NVIDIA L4, allocate tensors, multiply, synchronize, and compare with CPU output. |
 | 9 | EC2 host, Docker | vLLM OpenAI server | Candidate `vllm/vllm-openai:v0.34.0`; use only the freshly verified `linux/amd64` immutable image digest. Candidate CUDA 13.0 and bundled PyTorch 2.14.0. Never override its Torch libraries with an unrelated install. | Serves the model with a GPU-aware OpenAI-compatible API. | Confirm image digest, model revision, loaded CUDA model, `/health`, `/v1/models`, a real completion, and a streamed completion. |
 | 10 | Model cache volume | Qwen model files | `Qwen/Qwen2.5-1.5B-Instruct`, revision `989aa7980e4cf806f80c7fef2b1adb7bc71aa306`, Apache-2.0 metadata, expected safetensors SHA-256 recorded in `RESEARCH_NOTES.md`. Recheck license and digest before download. | Provides the first small, open-weight model for measured L4 inference. | Verify the downloaded artifact digest before load; record the exact model revision. |
 | 11 | Docker Compose network | Gateway (2 replicas), Redis, vLLM | Existing gateway image is built from this repository; Redis and vLLM image/model pins must match the reviewed Compose environment. Bind operator interfaces to loopback only. | Reuses existing authentication, tenant admission, shared quota, routing, and CPU/GPU runtime abstraction. | Health/readiness checks, authorized tenant request, denied tenant request, streaming, quota sharing across replicas. |
 | 12 | Docker Compose network | DCGM Exporter, Node Exporter, Prometheus, Grafana, Alertmanager, OpenTelemetry Collector, Tempo, Redis exporter | Use the immutable image digests already in the single-GPU Compose profile; recheck registry manifests at preflight. | Measures GPU, host, gateway, Redis, vLLM, alert, and trace behavior without managed monitoring services. | Prometheus targets are healthy and real GPU/inference series move during a request; dashboard and alert drill use those series. |
+| 13 | Release/evaluation environment | MLflow registry and artifact store integration | The default local Compose includes MLflow, but the single-GPU Compose profile does not. Decide before the release phase whether the GPU batch can securely use the existing registry or whether a bounded local MLflow service must be added. Include memory, storage, and retention in the cost/host fit check. | The project needs model versions, evaluation evidence, release approvals, and rollback records; the local registry is not automatically reachable from EC2. | Verify a model artifact and evaluation run can be linked to an immutable candidate; exercise approval and rollback only after the registry path is implemented. |
 
 ## What does not belong on the host
 
 - Do not install Kubernetes, kubelet, EKS components, or a multi-GPU scheduler. This
   project uses one standalone EC2 instance and Docker Compose.
-- Do not install host Redis, MLflow, Prometheus, Grafana, Tempo, or vLLM if the pinned
-  Compose containers provide those services. Avoid duplicate listeners and storage.
+- Do not install host Redis, Prometheus, Grafana, Tempo, or vLLM when the pinned Compose
+  containers provide those services. Avoid duplicate listeners and storage.
+- The existing MLflow service is in the default local Compose, but not the single-GPU
+  profile. Do not assume it is available to EC2. Finish and cost-check the registry
+  integration choice before the release/evaluation phase.
 - Do not install a second independent PyTorch into vLLM's environment. The server
   image owns its Python and CUDA user-space dependencies.
 - Do not install a desktop driver or graphical display stack on this headless host.
@@ -50,8 +54,13 @@ repair a missing or broken driver.
 The OS should show one NVIDIA L4. The host driver owns the kernel interface. The CUDA
 Toolkit supplies `nvcc` for the C++ lab. Docker runs the application containers. The
 NVIDIA Container Toolkit connects Docker to the host driver. The vLLM image supplies
-its own compatible CUDA libraries and PyTorch. This split avoids treating the host
-Toolkit version as the same thing as the CUDA libraries inside the model image.
+its own compatible CUDA libraries and PyTorch. The standalone PyTorch CUDA build and
+its CUDA library packages are installed in a separate Python 3.12 virtual environment
+for the CUDA experiment. The host Toolkit separately provides `nvcc`. This split
+avoids changing vLLM's libraries or treating the host Toolkit version as the same
+thing as the CUDA libraries inside the model image. Check free disk before downloads:
+the model, vLLM image, and standalone CUDA packages all consume space on the 100-GiB
+root volume.
 
 For example, `nvidia-smi` reports the maximum CUDA driver API level supported by the
 installed driver; `nvcc --version` reports the separately installed compiler toolkit.

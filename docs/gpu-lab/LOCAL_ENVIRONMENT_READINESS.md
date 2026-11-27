@@ -11,6 +11,7 @@
 | Terraform | 1.14.0 | Repository static Terraform validation; cloud plan/apply still requires its state and cost gates |
 | Docker Compose | v2.40.3-desktop.1 | Local Compose rendering and CPU validation |
 | Python | 3.12.12 | Project scripts and tests |
+| uv | 0.9.15 | Generate a target Linux/Python 3.12 hash lock; no CUDA packages were installed locally |
 | GitHub CLI | Authenticated as `Bepoadewale` using the local keychain | PR and Actions operations |
 
 ## Not installed on this workstation

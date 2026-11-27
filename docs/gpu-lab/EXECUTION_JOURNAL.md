@@ -1427,3 +1427,25 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Evidence limit:** the workflow used a CPU-only runner; it did not compile CUDA,
   contact AWS, download a model, or demonstrate L4 behavior.
 - **Cost:** no AWS resources, GPU hours, model or image downloads, or spend.
+
+## 2026-11-27 — Resolve hash-locked PyTorch CUDA dependencies
+
+- **Phase:** Phase 3 static preparation, branch `codex/gpu-host-install-manifest`.
+- **Research:** queried the official PyTorch CUDA 13.0 wheel index and Docker's
+  official Ubuntu 24.04 amd64 package index. Recorded the PyTorch wheel and metadata
+  hashes plus candidate Docker Engine, containerd, Buildx, and Compose package
+  versions/hashes in `RESEARCH_NOTES.md`.
+- **Failed approaches:** the first `uv` resolution put PyPI before the PyTorch index
+  and could not find `torch==2.14.0+cu130`. A direct-wheel resolution began fetching
+  a 529-MiB Torch wheel; it was interrupted before installation. Cache state was not
+  inspected or cleaned. The successful approach made the official PyTorch index the
+  first index and used PyPI as fallback with `first-index` resolution.
+- **Result:** `uv 0.9.15` resolved 29 pinned packages and SHA-256 hashes for CPython
+  3.12 / x86_64 Linux into `requirements-torch.lock`. Resolver fetched a 1.2-MiB
+  setuptools distribution for metadata; no package was installed in the local Python
+  environment. No model or container image was downloaded.
+- **Validation:** the lock includes the selected Torch wheel hash and CUDA dependency
+  versions; final preflight still must refresh and review the lock.
+- **Cost/resources:** no AWS calls, GPU use, or spend.
+- **Next:** add the lock to the focused host-install PR, update installation steps,
+  then validate the package and scripts only on an authorized Ubuntu/L4 host.

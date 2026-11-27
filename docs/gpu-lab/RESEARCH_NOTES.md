@@ -514,3 +514,53 @@ These sources informed `GPU_BATCH_RUNBOOK.md`, which groups setup, model serving
 tenant checks, telemetry, experiments, evidence export, and cleanup into one paid
 window. All version pins remain candidates until final date-of-run checks. No GPU
 host, package, container, CUDA computation, vLLM server, or inference was executed.
+
+## 2026-11-27 — Ubuntu Docker and PyTorch package metadata
+
+Read public official package indexes to fill in two previously open host-stack
+candidates. This was metadata-only research: no wheel, `.deb`, image layer, or model
+was downloaded. APT repository signatures were not verified in this query; the
+install must use the signed repository metadata and recheck versions on the target
+AMI.
+
+| Package | Ubuntu/Python candidate | SHA-256 from official package index |
+| --- | --- | --- |
+| `docker-ce` | `5:29.9.3-1~ubuntu.24.04~noble` amd64 | `c546181f0bc5f1d19085d764a3219aa86069468dbee4743fae420ee8a31809a4` |
+| `docker-ce-cli` | `5:29.9.3-1~ubuntu.24.04~noble` amd64 | `24f78a893cece8d345c4e90b5163907c047b996b747265f873743e8b0b0546d4` |
+| `containerd.io` | `2.4.2-4~ubuntu.24.04~noble` amd64 | `15cc3d6c64422ed278f60cb3c9a5df760a3de38055affc335c6ee40c12411b75` |
+| `docker-buildx-plugin` | `0.39.1-1~ubuntu.24.04~noble` amd64 | `a9ecd4ab59dbd52f395d07712a840bc7d145c5f8bec4880d5531e0443aeceba5` |
+| `docker-compose-plugin` | `5.8.0-1~ubuntu.24.04~noble` amd64 | `ca5130d92e95f3e27901d8d9916e388d7ddde0b6ba94798a6877dfa0a14714d8` |
+| `torch` | `2.14.0+cu130`, CPython 3.12, Linux x86_64 | `9c5693d3ca91743202034094ad3b3df20b5eb1373d5e0bc8a5d976be12c35302` |
+
+The Docker versions are the last listed amd64 versions in the official Ubuntu 24.04
+stable package index fetched at this review. The PyTorch wheel came from the official
+CUDA 13.0 wheel index. PyTorch 2.14.0 was selected to match the researched PyTorch
+version inside the candidate vLLM 0.34.0 image; the index also listed 2.14.1, so this
+is a compatibility-alignment choice, not a claim that 2.14.0 is newest. The wheel is
+for the standalone experiment and must live in a separate Python environment. Its
+PEP 658 wheel metadata has SHA-256
+`4c3a9ca0bbabfa134a65c45c4c09a890a99da6e0e98c8fcab8026fa236b968ba` and requires
+Python >=3.10. It declares runtime dependencies on `filelock`, `typing-extensions`,
+`setuptools`, `sympy`, `networkx`, `jinja2`, `fsspec`, CUDA Toolkit `13.0.3`, CUDA
+bindings, cuDNN, cuSPARSELt, NCCL, NVSHMEM, and Triton `3.8.x` for Linux. A 29-package
+CPython 3.12 / x86_64 Linux hash lock is now in
+`benchmarks/cuda_performance/requirements-torch.lock`. It was resolved from the
+PyTorch CUDA index first, with PyPI as a fallback, using `uv pip compile` with
+`--generate-hashes` and `--index-strategy first-index`. A date-of-run refresh and
+inspection are still required. The CUDA libraries installed with the wheel remain
+separate from the host's `nvcc` Toolkit package.
+
+Sources: Docker's [official Ubuntu repository index](https://download.docker.com/linux/ubuntu/dists/noble/stable/binary-amd64/Packages.gz),
+PyTorch's [official CUDA 13.0 wheel index](https://download.pytorch.org/whl/cu130/torch/),
+and the [PyTorch install selector](https://docs.pytorch.org/get-started/locally/).
+Confirm current versions and verify APT signatures at the final preflight. These
+metadata results do not demonstrate package installation, image operation, or L4
+compatibility.
+
+The initial lock resolution failed when PyPI was treated as the first index and did
+not contain the CUDA-specific Torch build. A second direct-wheel resolution attempt
+began downloading the 529-MiB wheel; it was interrupted before package installation.
+The successful resolution placed the official PyTorch index first and used the
+hash-locked output. No wheel was installed, and no model or container image was
+downloaded. The temporary research command and its failure are recorded in the
+execution journal.

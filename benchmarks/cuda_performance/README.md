@@ -51,6 +51,25 @@ nvidia-smi -L
 nvidia-smi
 ```
 
+Create the Python 3.12 environment and install the hash-locked PyTorch CUDA build.
+These commands are for the **EC2 host through SSM**, after checking free disk space.
+The lock targets Linux x86_64. It installs CUDA libraries into this virtual
+environment; the host CUDA Toolkit separately provides `nvcc`.
+
+```bash
+python3.12 -m venv /opt/gpu-lab/torch-venv
+/opt/gpu-lab/torch-venv/bin/python -m pip install \
+  --require-hashes \
+  --index-url https://download.pytorch.org/whl/cu130 \
+  --extra-index-url https://pypi.org/simple \
+  -r benchmarks/cuda_performance/requirements-torch.lock
+```
+
+The package index URLs are public vendor sources, not credentials. The hashes protect
+the pinned artifacts. This dated lock is still a candidate; refresh and review it
+before the authorized batch. Do not run this install against the workstation's Apple
+Silicon Python.
+
 Compile the CUDA C++ program into temporary storage and run it:
 
 ```bash
@@ -68,7 +87,7 @@ maximum vector size is bounded. No per-element values are printed.
 Run the PyTorch comparison and keep its result outside Git:
 
 ```bash
-python3 benchmarks/cuda_performance/torch_matmul.py \
+/opt/gpu-lab/torch-venv/bin/python benchmarks/cuda_performance/torch_matmul.py \
   --sizes 256 512 1024 --warmups 3 --repeats 10 \
   --output /var/tmp/gpu-lab/cuda-performance/matmul.json
 ```
