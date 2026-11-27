@@ -1,5 +1,6 @@
 import asyncio
 import json
+import stat
 from urllib.error import HTTPError
 from urllib.request import Request
 
@@ -117,3 +118,26 @@ def test_redirect_handler_refuses_to_forward_tenant_token():
         benchmark.RejectRedirect().redirect_request(
             request, None, 302, "Found", {}, "https://other.example/collect"
         )
+
+
+def test_endpoint_rejects_credentials_and_nonlocal_plain_http():
+    assert benchmark.validate_endpoint("https://gateway.example/") == "https://gateway.example"
+    assert benchmark.validate_endpoint("http://127.0.0.1:8081") == "http://127.0.0.1:8081"
+    for value in (
+        "http://gateway.example",
+        "https://user:password@gateway.example",
+        "https://gateway.example?token=sensitive",
+    ):
+        with pytest.raises(ValueError):
+            benchmark.validate_endpoint(value)
+
+
+def test_report_writer_preserves_runs_with_private_permissions(tmp_path):
+    first = benchmark.write_report(tmp_path / "results", {"run": 1})
+    second = benchmark.write_report(tmp_path / "results", {"run": 2})
+
+    assert first != second
+    assert json.loads(first.read_text()) == {"run": 1}
+    assert json.loads(second.read_text()) == {"run": 2}
+    assert stat.S_IMODE(first.stat().st_mode) == 0o600
+    assert stat.S_IMODE((tmp_path / "results").stat().st_mode) == 0o700

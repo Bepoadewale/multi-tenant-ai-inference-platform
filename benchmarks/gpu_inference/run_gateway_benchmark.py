@@ -12,7 +12,7 @@ import sys
 from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
-from time import perf_counter
+from time import perf_counter, time_ns
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 from urllib.request import HTTPRedirectHandler, Request, build_opener, urlopen
@@ -41,6 +41,32 @@ def percentile(values: list[float], rank: float) -> float | None:
     upper = min(lower + 1, len(ordered) - 1)
     fraction = position - lower
     return round(ordered[lower] + (ordered[upper] - ordered[lower]) * fraction, 3)
+
+
+def validate_endpoint(value: str) -> str:
+    parsed = urlparse(value)
+    local_http = parsed.scheme == "http" and parsed.hostname in {
+        "localhost",
+        "127.0.0.1",
+        "::1",
+        "vllm",
+    }
+    if parsed.hostname is None or (parsed.scheme != "https" and not local_http):
+        raise ValueError("use HTTPS, loopback HTTP, or the internal Compose host vllm")
+    if parsed.username or parsed.password or parsed.query or parsed.fragment:
+        raise ValueError("endpoint URLs cannot contain credentials, query strings, or fragments")
+    return value.rstrip("/")
+
+
+def write_report(output_dir: Path, report: dict) -> Path:
+    output_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
+    os.chmod(output_dir, 0o700)
+    stamp = f"{datetime.now(UTC).strftime('%Y%m%dT%H%M%S.%fZ')}-{time_ns()}"
+    path = output_dir / f"gateway-benchmark-{stamp}.json"
+    file_descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    with os.fdopen(file_descriptor, "w", encoding="utf-8") as result_file:
+        result_file.write(json.dumps(report, indent=2) + "\n")
+    return path
 
 
 def summarize(rows: list[dict], elapsed_seconds: float) -> dict:
@@ -303,12 +329,7 @@ async def run(args: argparse.Namespace) -> dict:
         ],
         "phases": phases,
     }
-    output = args.output_dir
-    output.mkdir(parents=True, exist_ok=True, mode=0o700)
-    os.chmod(output, 0o700)
-    path = output / "gateway-benchmark.json"
-    path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-    path.chmod(0o600)
+    path = write_report(args.output_dir, report)
     print(json.dumps({"output": str(path), "phases": list(phases), "content_saved": False}))
     return report
 
@@ -341,11 +362,10 @@ if __name__ == "__main__":
     if arguments.timeout <= 0 or arguments.timeout > 15:
         parser().error("--timeout must be above zero and at most 15 seconds")
     for value in [*arguments.gateway_url, *([arguments.direct_url] if arguments.direct_url else [])]:
-        parsed = urlparse(value)
-        if parsed.scheme != "https" and not (
-            parsed.scheme == "http" and parsed.hostname in {"localhost", "127.0.0.1", "::1", "vllm"}
-        ):
-            parser().error("use HTTPS, loopback HTTP, or the internal Compose host vllm")
+        try:
+            validate_endpoint(value)
+        except ValueError as error:
+            parser().error(str(error))
     result = asyncio.run(run(arguments))
     if arguments.dry_run:
         print(json.dumps(result, indent=2))
