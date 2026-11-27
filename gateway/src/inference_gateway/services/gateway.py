@@ -2,6 +2,7 @@ import asyncio
 import inspect
 import json
 import os
+from contextlib import suppress
 from time import perf_counter
 from uuid import uuid4
 
@@ -15,7 +16,7 @@ from inference_gateway.capacity.redis_service import RedisCapacityService
 from inference_gateway.capacity.service import CapacityService
 from inference_gateway.catalog.store import Catalog
 from inference_gateway.limiting.redis_service import RedisTenantLimiter
-from inference_gateway.limiting.service import TenantLimiter
+from inference_gateway.limiting.service import AdmissionReservation, TenantLimiter
 from inference_gateway.metering.redis_service import RedisMeter
 from inference_gateway.metering.service import Meter
 from inference_gateway.models import (
@@ -108,7 +109,7 @@ class GatewayService:
         )
         allocation = await self._admit_capacity(tenant, model)
         try:
-            await self._admit(tenant, estimate)
+            reservation = await self._admit(tenant, estimate, request_id)
             ACTIVE.labels(tenant.id).inc()
         except HTTPException as error:
             await self._release_capacity(tenant, allocation)
@@ -123,11 +124,19 @@ class GatewayService:
                 request_id,
                 started,
                 backend,
+                reservation,
                 allocation,
                 release_context,
             )
+        actual_tokens = None
+        lease_task = self._start_lease_watch(tenant, reservation)
         try:
             text, usage, _backend_duration_ms = await backend.complete(request)
+            usage_source = (
+                "backend_reported" if isinstance(backend, VllmBackend) else "gateway_estimate"
+            )
+            if usage_source == "backend_reported":
+                actual_tokens = usage.total_tokens
             record = await self._record(
                 tenant,
                 request.model,
@@ -140,9 +149,7 @@ class GatewayService:
                 False,
                 "success",
                 release_context,
-                usage_source=(
-                    "backend_reported" if isinstance(backend, VllmBackend) else "gateway_estimate"
-                ),
+                usage_source=usage_source,
             )
             return {
                 "id": f"chatcmpl-{request_id}",
@@ -191,8 +198,11 @@ class GatewayService:
             ) from error
         finally:
             ACTIVE.labels(tenant.id).dec()
-            await self._release(tenant, 0)
-            await self._release_capacity(tenant, allocation)
+            await self._stop_lease_watch(lease_task)
+            try:
+                await self._release(tenant, reservation, actual_tokens)
+            finally:
+                await self._release_capacity(tenant, allocation)
 
     def _stream(
         self,
@@ -203,6 +213,7 @@ class GatewayService:
         request_id,
         started,
         backend,
+        reservation,
         allocation,
         release_context,
     ):
@@ -217,6 +228,10 @@ class GatewayService:
             usage_emitted = False
             ttft_ms = None
             recorded = False
+            actual_tokens = None
+            lease_task = self._start_lease_watch(
+                tenant, reservation, asyncio.current_task()
+            )
 
             def update_estimated_usage() -> None:
                 if not measured_usage:
@@ -253,6 +268,7 @@ class GatewayService:
                         if event.usage is not None:
                             usage = event.usage
                             measured_usage = True
+                            actual_tokens = usage.total_tokens
                             if request.stream_options and request.stream_options.include_usage:
                                 payload = {
                                     "id": f"chatcmpl-{request_id}",
@@ -304,8 +320,9 @@ class GatewayService:
             finally:
                 update_estimated_usage()
                 ACTIVE.labels(tenant.id).dec()
+                await self._stop_lease_watch(lease_task)
                 try:
-                    await self._release(tenant, usage.total_tokens)
+                    await self._release(tenant, reservation, actual_tokens)
                 finally:
                     await self._release_capacity(tenant, allocation)
 
@@ -344,18 +361,66 @@ class GatewayService:
             CAPACITY_ALLOCATED.labels(allocation.pool).dec(allocation.slots)
             CAPACITY_TENANT_ALLOCATED.labels(tenant.id, allocation.pool).dec(allocation.slots)
 
-    async def _admit(self, tenant: Tenant, estimate: int) -> None:
+    async def _admit(
+        self, tenant: Tenant, estimate: int, request_id: str
+    ) -> AdmissionReservation:
         started = perf_counter()
-        result = self.limiter.admit(tenant, estimate)
-        if inspect.isawaitable(result):
-            await result
+        reservation = self.limiter.admit(tenant, estimate, request_id)
+        if inspect.isawaitable(reservation):
+            reservation = await reservation
         QUEUE.labels(tenant.id).set(0)
         QUEUE_WAIT.labels(tenant.id).observe(perf_counter() - started)
+        return reservation
 
-    async def _release(self, tenant: Tenant, actual_tokens: int) -> None:
-        result = self.limiter.release(tenant, actual_tokens)
+    async def _release(
+        self,
+        tenant: Tenant,
+        reservation: AdmissionReservation,
+        actual_tokens: int | None,
+    ) -> None:
+        result = self.limiter.release(tenant, reservation, actual_tokens)
         if inspect.isawaitable(result):
             await result
+
+    def _start_lease_watch(
+        self,
+        tenant: Tenant,
+        reservation: AdmissionReservation,
+        owner_task: asyncio.Task | None = None,
+    ) -> asyncio.Task:
+        owner_task = owner_task or asyncio.current_task()
+        if owner_task is None:
+            raise RuntimeError("admitted inference request has no owning asyncio task")
+        return asyncio.create_task(self._maintain_lease(tenant, reservation, owner_task))
+
+    async def _maintain_lease(
+        self,
+        tenant: Tenant,
+        reservation: AdmissionReservation,
+        owner_task: asyncio.Task,
+    ) -> None:
+        renew = getattr(self.limiter, "renew", None)
+        if renew is None:
+            return
+        interval = max(0.1, float(self.limiter.lease_seconds) / 3)
+        while True:
+            await asyncio.sleep(interval)
+            try:
+                renewed = renew(tenant, reservation)
+                if inspect.isawaitable(renewed):
+                    renewed = await renewed
+            except Exception:
+                owner_task.cancel()
+                return
+            if not renewed:
+                owner_task.cancel()
+                return
+
+    @staticmethod
+    async def _stop_lease_watch(lease_task: asyncio.Task) -> None:
+        lease_task.cancel()
+        with suppress(asyncio.CancelledError):
+            await lease_task
 
     async def _record(
         self,
