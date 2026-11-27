@@ -1203,3 +1203,19 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   Make's echoed command; parsing after that line succeeded, as noted in ticket47.
 - **CI / cost:** PR #46 new-head run is in progress. No AWS spend or GPU hours.
 - **Next:** push the updated branch and open PR #47 against PR #46, then watch its CI.
+
+## 2026-11-27 — Correct Trivy severity input parsing
+
+- **Phase:** Phase 11 static CI preparation; discovered while reviewing PR #46 checks.
+- **Branch / PR:** `codex/gpu-benchmark-preparation`, PR #47.
+- **Finding:** PR #46's workflow emitted `Unexpected input(s) 'CRITICAL'` from the
+  Trivy action. The inline YAML map left the comma-separated severity value unquoted,
+  so `CRITICAL` was parsed as a separate action input rather than part of `HIGH,CRITICAL`.
+- **Change:** rewrote that action's `with` section as a normal mapping and quoted the
+  combined severity string so both requested severities are passed as one value.
+- **Validation:** pending the next PR #47 CI run; inspect the action log for the
+  absence of the warning. No AWS or GPU activity.
+- **Validation:** Ruby's YAML parser accepted `.github/workflows/ci.yml`; `git diff
+  --check` passed. The PR #47 workflow must still confirm the Trivy action accepts the
+  value without warnings.
+- **Next:** push the fix and watch the resulting PR #47 run; no local clean-room rerun.

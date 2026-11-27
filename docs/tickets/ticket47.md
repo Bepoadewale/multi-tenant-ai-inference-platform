@@ -42,6 +42,8 @@ GPU benchmark harness.
   the exact named container for that workload repetition.
 - Added a regression test that verifies the runner command and cleanup name agree for
   a non-first repetition.
+- Corrected the Trivy GitHub Actions input so `HIGH,CRITICAL` is passed as one quoted
+  severity value instead of YAML parsing `CRITICAL` as a separate input.
 - Added a non-cloud GitHub Actions step that parses the GPU Compose profile and runs
   the benchmark dry-run even if the separate long local E2E job fails.
 - Documented that direct vLLM results do not include gateway overhead, Redis quotas,
@@ -95,6 +97,11 @@ names diverged after the first run, so a timed-out later benchmark could leave i
 container running. The runner now uses one shared name helper for both `docker compose
 run --name` and timeout/interruption cleanup. The regression check verifies repetition
 3, which catches the mismatch. No container was started during this investigation.
+
+The rebased PR #46 workflow emitted an `Unexpected input(s) 'CRITICAL'` warning for
+the Trivy action. Its inline YAML map did not quote the comma-separated severity
+value. The workflow now uses a multiline input map and quotes `HIGH,CRITICAL`; the
+updated PR #47 CI run must confirm the action accepts the configuration.
 
 ## Acceptance status
 
