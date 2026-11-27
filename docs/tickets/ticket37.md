@@ -27,11 +27,17 @@ download the multi-gigabyte model.
   ID and kernel resolved at a reviewed plan. No GPU-ready AMI is used.
 - Candidate NVIDIA branch: Data Center R580, point release 580.196.11, compute-only.
   NVIDIA release notes dated 2026-11-23 list CUDA 13.x and Ubuntu 24.04.4 support;
-  the R580 branch is LTS through June 2028. The exact signed Ubuntu package and
-  dependencies must be checked before finalizing manual commands and Ansible pins.
-- Candidate host CUDA Toolkit: 13.0 for the `nvcc` learning exercises. The vLLM
-  container supplies its own CUDA user-space libraries; the host toolkit is not
-  required merely to run this container.
+  the R580 branch is LTS through June 2028. NVIDIA's Ubuntu 24.04 CUDA package index
+  currently lists `nvidia-driver-pinning-580.196.11=580.196.11-1ubuntu1` with index
+  SHA-256 `2dd51a60370e7321ee04efe5f5732b1fb0e7eb6db31211e05038f9ec23ddd68f`.
+  This is a pinning package, not the driver itself. Verify the APT signature and
+  exact headless driver package set on the target AMI before documenting commands.
+- Candidate host CUDA Toolkit: `cuda-toolkit-13-0=13.0.3-1` for the `nvcc` learning
+  exercises; NVIDIA's package index metadata reports SHA-256
+  `8286faab8b7a61f3fe669c03ad1bb042dc322582a3dc7df44a4b3302a30ca5fb`. Verify the
+  APT signature and package on the target AMI before installation. The vLLM container
+  supplies its own CUDA user-space libraries; the host toolkit is not required merely
+  to run this container.
 - NVIDIA Container Toolkit must follow the host driver. The official installation
   guide and release notes document version 1.20.2. A read-only fetch of NVIDIA's
   signed-repository AMD64 `Packages` index on 2026-11-27 confirmed the required
@@ -88,13 +94,16 @@ with a separately resolved build.
   compatibility for R580 and CUDA 13.
 - [x] Check official vLLM release artifacts, GPU requirements, and supported model
   architecture.
+- [x] Read the public NVIDIA Ubuntu 24.04 repository index and record current R580
+  pin and CUDA Toolkit 13.0.3 package metadata hashes.
 - [x] Resolve the current Qwen revision, license metadata, configuration, size, and
   published LFS SHA-256 without downloading the weights.
 - [x] Query the registry for the vLLM OCI index and AMD64 child digests.
 - [x] Record one-run clean-room policy remains unchanged; no extra local clean-room
   cycle is part of this research package.
-- [ ] Recheck exact Ubuntu packages, signing keys, CUDA Toolkit package, Docker and
-  Container Toolkit package availability, and image digests in the GPU preflight.
+- [ ] Verify the NVIDIA APT signature and pin the complete headless driver and CUDA
+  package sets on the exact target AMI; recheck Docker/Container Toolkit availability
+  and image digests in the GPU preflight.
 - [ ] Validate the full software matrix on one authorized L4 during a consolidated
   paid execution batch after all spending and quota gates pass.
 
@@ -112,9 +121,13 @@ with a separately resolved build.
   Reading NVIDIA's repository list showed the signed repo path is flat; querying its
   `Packages` file succeeded and confirmed all four required 1.20.2-1 AMD64 packages
   and their hashes. No `.deb` files were downloaded.
+- A separate read-only query of NVIDIA's Ubuntu 24.04 CUDA `Packages.gz` index found
+  the R580.196.11 pinning package and CUDA Toolkit 13.0.3-1. This direct metadata
+  query did not verify the repository's APT signature or download package files.
 - Official docs checked: NVIDIA R580.196.11 release notes, NVIDIA driver/CUDA
   support matrix and Ubuntu install guide, vLLM v0.34.0 release and model/GPU docs,
-  and the Hugging Face model card and pinned revision.
+  NVIDIA Container Toolkit 1.20.2 guide/release notes, and the Hugging Face model card
+  and pinned revision.
 - No GPU tests, local clean-room cycle, AWS calls that mutate state, or inference
   tests were performed as part of this ticket.
 
