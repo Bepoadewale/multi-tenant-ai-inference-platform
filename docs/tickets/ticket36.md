@@ -9,7 +9,7 @@ the vLLM preflight.
 
 ## Current state
 
-- Branch: `codex/vllm-preflight-failure-cleanup`, [PR #36](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/36), ready for review and based on PR #35.
+- Branch: `codex/vllm-preflight-failure-cleanup`, [PR #36](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/36), rebased locally on PR #35 head `5cd8dfb`; local source commit `ec5dcd1`, documentation commit `a8d3278`. Publication and fresh CI are pending.
 - Phase: non-billable Phase 6 failure-path tests. No AWS, GPU, or live vLLM was used.
 - The earlier CI failure and recovery are recorded in ticket #35 and the execution
   journal. This package adds focused coverage for the remaining timeout, cancellation,
@@ -28,15 +28,18 @@ the vLLM preflight.
 
 ## Validation and evidence
 
-- `make verify` passed: Ruff, **76 passed, 2 optional Redis skips**, no known audited
+- `make verify` on the rebased stack passed: Ruff, **90 passed, 2 optional Redis skips**, no known audited
   vulnerabilities, and Docker Compose configuration.
 - One existing Starlette deprecation warning remains.
-- The first PR workflow run (`45926383360`) passed Python, manifests, supply-chain,
+- The original pre-rebase PR workflow run (`45926383360`) passed Python, manifests, supply-chain,
   and local-e2e. This is automated local end-to-end validation, not AWS/GPU
   clean-room evidence.
 - The tests exercise local fakes and HTTPX `MockTransport`; they do not prove a real
   Redis network partition, a live vLLM timeout, AWS, GPU behavior, or production
   recovery.
+- Rebase conflicts were limited to shared status/evidence documents; the updated #35
+  docs were retained and the #36 test/ticket content was preserved. `make verify` on
+  this combined stack passed all 90 tests; no new clean-room cycle was started.
 
 ## Security and cost boundaries
 

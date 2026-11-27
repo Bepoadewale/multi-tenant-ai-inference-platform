@@ -212,6 +212,17 @@ This establishes current local lint/test/static configuration outcomes and read-
   process. This does not verify a live vLLM release, separate gateway processes,
   production network failure, or GPU execution. Commit `59cca44` was local at capture.
 
+## 2026-11-27 — PR #36 rebased failure-path suite
+
+- **Scope:** retain cancellation, unavailable-admission, and tokenizer timeout tests on
+  top of the PR #35 lease-renewal fix. No cloud or GPU was used.
+- **Validation:** `make verify` passed Ruff, **90 tests**, pip-audit, and Compose config;
+  2 optional Redis tests were skipped, and one existing Starlette warning remains.
+  `git diff --check` passed.
+- **Limits:** test doubles and HTTPX `MockTransport` only; not a real Redis outage,
+  live vLLM timeout, GPU, or independent gateway process. Local PR #36 code is based on
+  PR #35 head `5cd8dfb`; fresh CI is pending publication.
+
 ## 2026-11-27 — PR #35 CI failure and single-run policy
 
 - **Commit:** `97bfcfc` on `codex/tokenizer-admission-preflight`.

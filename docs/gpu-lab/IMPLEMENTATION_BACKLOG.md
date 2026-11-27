@@ -168,6 +168,8 @@ tokenizer preflight. None has live GPU inference evidence.
   Redis scripts against a local Redis 7.4 service.
 - [x] Add tokenizer-based reservation and model context bounds; renew the admission
   lease during slow tokenizer preflight and release it on rejection.
+- [x] Add local failure-path coverage for preflight cancellation, unavailable Redis
+  admission, and bounded tokenizer HTTP timeout.
 - [ ] Test Redis failure and cancellation across separate gateway processes.
 - [ ] Verify the stream/admission contract against the pinned live vLLM runtime and
   route real GPU-backed requests.
