@@ -78,8 +78,8 @@ batch and stop early if required evidence, time, or the $25 total budget is at r
 
 ## Outstanding work
 
-- Publish PR #47 stacked on the rebased PR #46 head, then pass its CI checks and
-  review. PR #46's new-head CI is still running at the time this ticket was updated.
+- PR #47 is open stacked on PR #46; pass its CI checks and review. PR #46's rebased
+  CI was still running when PR #47 was opened.
 - Recheck the pinned vLLM image and CLI flags against the exact runtime inside the
   benchmark container immediately before execution.
 - Add a separate authenticated gateway benchmark for end-to-end overhead and

@@ -229,7 +229,10 @@ captured and described with units and limits.
 
 ### Package 8 — Benchmarking, FinOps, evaluation, release, and rollback
 
-**Status:** direct vLLM serving matrix prepared on `codex/gpu-benchmark-preparation`; gateway benchmark, actual results, evaluation, and releases remain outstanding.
+**Status:** PR #47 is open on `codex/gpu-benchmark-preparation` against PR #46. The
+direct vLLM serving matrix and capped runner have passed local static validation; its
+timeout cleanup regression test passes. CI, gateway benchmarking, actual results,
+evaluation, and releases remain outstanding.
 
 - [x] Prepare the official `vllm bench serve` runner, context-bounded synthetic
   workloads, gated high concurrency, repeated aggregates, and hardware/software
