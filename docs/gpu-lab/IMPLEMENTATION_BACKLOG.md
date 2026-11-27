@@ -14,8 +14,9 @@ pull requests must include the repository's clean-room evidence.
 - PR #31 repairs the baseline dependency audit, passed two fresh local clean-room
   cycles and all required GitHub checks, and is ready for review.
 - PR #32 adds the static single-L4 Terraform root and helpers. Head `d3cee0f` passed
-  all four required jobs once on the PR event. Four additional fail-closed tests are
-  committed locally at `7988b8f`; local verification passes, and CI awaits publication.
+  all four required jobs once on the PR event. Ten create/destroy fail-closed tests are
+  committed locally through `ca3706b`; local verification passes, and CI awaits
+  publication.
   Two helper review findings have regression tests and are fixed. Human review remains
   open.
 - No AWS resources or GPU instance hours have been used by this goal.
@@ -73,8 +74,8 @@ phase exit does not authorize payment.
 ### Package 2 — Isolated EC2 Terraform and expiry controls
 
 **Status:** PR #32 is open and ready for review against PR #30. The latest pushed head
-passed CI; a new local test commit awaits publication and CI. Billable resources remain
-prohibited until every cost and quota gate passes.
+passed CI; a new local teardown-test commit awaits publication and CI. Billable
+resources remain prohibited until every cost and quota gate passes.
 
 - [x] Create a separate Terraform root with account, region, type, project-tag, and
   IMDSv2 guards. One `aws_instance` resource and a quota/resource preflight limit the

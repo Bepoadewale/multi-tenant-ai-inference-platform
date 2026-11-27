@@ -527,3 +527,22 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** publish code plus records to PR #32; let its single PR workflow validate
   the current head. Continue preparing the remote-state and full-cost gates without
   applying the bootstrap or GPU roots.
+
+## 2026-11-27 — Verify destroy-plan authorization gates locally
+
+- **Phase:** Phase 2 — static-only EC2 infrastructure preparation.
+- **Branch / PR:** `codex/gpu-ec2-foundation`, PR #32; teardown tests are committed at
+  `ca3706b` and docs are being prepared before publication.
+- **Changes:** added fake-CLI tests proving the destroy wrapper refuses missing
+  explicit confirmation, altered destroy-plan bytes, and an unexpected AWS account
+  before Terraform. A positive fake command test verifies the plan helper calls
+  `terraform plan -destroy` and stores its output only in the test's temporary path.
+- **Validation:** `make verify` passed Ruff, all 60 tests, dependency audit, and Compose
+  configuration. Shell syntax checks passed for all six `gpu-ec2` helper scripts, as
+  did `git diff --check`. One existing Starlette deprecation warning remains.
+- **Cloud / cost:** tests replace `aws` and `terraform` in `PATH` with local stubs.
+  They make no AWS API calls and cannot create or destroy resources. No GPU hours or
+  goal-specific spend were added.
+- **Next:** publish this test package and its evidence; observe the single PR-triggered
+  CI workflow. Keep actual bootstrap and GPU changes gated by approval, quota, exact
+  cost, saved plan, and expiry controls.
