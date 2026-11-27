@@ -10,7 +10,7 @@ leases. Keep the existing in-memory implementation for local use and tests.
 ## Current state
 
 - Branch: `codex/redis-admission-leases`, based on the PR #33 gateway stream branch.
-- Pull request: being prepared as a focused stacked PR; number and CI status pending.
+- Pull request: [#34 — request-scoped Redis admission leases](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/34), draft and open against `codex/gateway-stream-accounting` (PR #33); head `8f3e4fd`, CI running.
 - Phase: non-billable Phase 6 prework. The active cloud phase remains Phase 2, with the
   AWS GPU launch gated by the pending quota request and the $25/apply checks.
 - No AWS infrastructure, GPU, or live vLLM server was used.
@@ -73,7 +73,8 @@ does not claim production persistence, replication, or failover behavior.
   reconciliation now updates the entry in place. Negative reported usage retains the
   estimate. The regression test was added, and the latest `make verify` passed with
   **62 tests passed and 2 optional Redis skips**.
-- GitHub Actions Python workflow now declares a Redis 7.4 service and sets `REDIS_TEST_URL`; the follow-up PR checks have not started yet.
+- GitHub Actions Python workflow now declares a Redis 7.4 service and sets
+  `REDIS_TEST_URL`; PR #34 CI has started and must be watched to a terminal result.
 
 ## Issues discovered and troubleshooting
 
