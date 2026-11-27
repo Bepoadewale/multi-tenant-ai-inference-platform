@@ -111,8 +111,8 @@ checks readiness, or restores the known-good model on one L4.
 ### Package — authenticated LLM release planning and approval API
 
 **Status:** [PR #55](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/55)
-is open; focused tests and full `make verify` pass. GitHub CI is pending. No AWS or GPU
-operation is involved.
+is open; focused tests and full `make verify` pass. All five required CI jobs passed
+on head `b94fc27` in run `46033196309`. No AWS or GPU operation is involved.
 
 - [x] Require `platform.admin` to create/read plans and `release.approve` to approve.
 - [x] Reject a candidate unless its finished MLflow run and sanitized report match the

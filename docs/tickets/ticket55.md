@@ -74,7 +74,9 @@ verify live state and model bytes before it acts on an approved plan.
 - An older release database may have the plan table but not the newly added manifest
   table. Store initialization now creates both tables; a regression test covers this
   upgrade shape.
-- `git diff --check` passed. GitHub CI is pending on the published PR head.
+- `git diff --check` passed.
+- PR #55 head `b94fc27` passed all five required jobs in run `46033196309`, including
+  Python, manifests, GPU observability, supply-chain, and local end-to-end.
 
 ## Security and financial considerations
 
@@ -96,5 +98,5 @@ rollback, or GPU behavior.
 ## Acceptance status
 
 **Authenticated release planning and independent approval are implemented and locally
-tested. Deployment, live state and artifact verification, GPU execution, and rollback
-remain incomplete.**
+tested, and all five required PR checks pass. Deployment, live state and artifact
+verification, GPU execution, and rollback remain incomplete.**
