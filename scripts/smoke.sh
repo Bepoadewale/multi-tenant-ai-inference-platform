@@ -17,6 +17,18 @@ wait_for() {
   return 1
 }
 
+check_json() {
+  local description="$1"
+  local filter="$2"
+  shift 2
+  if curl -fsS --connect-timeout 2 --max-time 5 "$@" | jq -e "$filter" >/dev/null; then
+    echo "Passed: ${description}."
+  else
+    echo "Failed: ${description}." >&2
+    return 1
+  fi
+}
+
 wait_for "Prometheus readiness" curl -fsS --connect-timeout 2 --max-time 5 http://localhost:9090/-/ready
 wait_for "Tempo readiness" curl -fsS --connect-timeout 2 --max-time 5 http://localhost:3200/ready
 wait_for "Grafana readiness" curl -fsS --connect-timeout 2 --max-time 5 http://localhost:3002/api/health
@@ -32,13 +44,16 @@ wait_for "operator console UI" bash -c "curl -fsS --connect-timeout 2 --max-time
 for port in 8088 8089; do
   wait_for "edge device ${port} readiness" curl -fsS --connect-timeout 2 --max-time 5 "http://localhost:${port}/healthz"
 done
-curl -fsS --connect-timeout 2 --max-time 5 "http://localhost:15010/api/2.0/mlflow/registered-models/get?name=local-tiny-intent-classifier" | jq -e '.registered_model.name == "local-tiny-intent-classifier"' >/dev/null
+check_json "MLflow registered model" '.registered_model.name == "local-tiny-intent-classifier"' \
+  "http://localhost:15010/api/2.0/mlflow/registered-models/get?name=local-tiny-intent-classifier"
 
 for port in 8081 8082; do
   wait_for "gateway ${port} health" curl -fsS --connect-timeout 2 --max-time 5 "http://localhost:${port}/healthz"
-  curl -fsS --connect-timeout 2 --max-time 5 "http://localhost:${port}/healthz" | jq -e '.status == "ok" and .runtime == "onnx" and .backend_ready == true and .admission_ready == true' >/dev/null
+  check_json "gateway ${port} health details" \
+    '.status == "ok" and .runtime == "onnx" and .backend_ready == true and .admission_ready == true' \
+    "http://localhost:${port}/healthz"
   wait_for "gateway ${port} signed identity" curl -fsS --connect-timeout 2 --max-time 5 "http://localhost:${port}/v1/models" -H "Authorization: Bearer ${search_token}"
 done
-curl -fsS --connect-timeout 2 --max-time 5 http://localhost:3002/api/health | jq -e '.database == "ok"' >/dev/null
-curl -fsS --connect-timeout 2 --max-time 5 http://localhost:8087/edge/v1/devices | jq -e '.devices | length == 2' >/dev/null
+check_json "Grafana database health" '.database == "ok"' http://localhost:3002/api/health
+check_json "edge device inventory" '.devices | length == 2' http://localhost:8087/edge/v1/devices
 echo 'Smoke passed: MLflow registry, release/remediation controls, delegated agent tools, bounded sandbox control, operator console, developer self-service, edge control plus two independent edge agents, two gateways, CPU ONNX targets, Prometheus, Tempo, and Grafana are healthy.'

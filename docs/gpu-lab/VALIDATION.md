@@ -356,16 +356,18 @@ expected tenant claims. They also check the signing key and token file are mode 
 and the gateway-readable public key is mode `0644`.
 
 The guide's initial relative-link and documented Make-target checks passed; later
-follow-up edits still need the final cross-reference check. PR #58 run `46049398387`
-passed Python, manifests, GPU observability, and Ansible. Supply-chain did not reach
-its scan because the action requested unavailable Trivy release `v0.70.0`. The fresh
-local E2E runner completed bootstrap but failed at `make smoke`; the workflow did not
-collect service logs after that failure, so the specific failing check remains
-unknown. The follow-up pins published Trivy `v0.76.2` and adds failure-only
-project-scoped Compose diagnostics. Its CI result is pending. This first clean-room
-attempt failed; a successful fresh-runner cycle on the final head remains required.
-No AWS command, model download, OCI image pull outside CI, GPU operation, or cloud
-spend occurred.
+follow-up edits still need the final cross-reference check. PR #58 runs `46049398387`
+and `46050614853` passed Python, manifests, GPU observability, and Ansible. Their
+supply-chain jobs failed before scanning: first on default Trivy `v0.70.0`, then on
+published Trivy `v0.76.2` because the installer could not resolve its tag. The second
+fresh local E2E run completed bootstrap but failed at `make smoke`. Its project
+container inventory showed healthy services, and application logs showed successful
+gateway/model and edge-device requests, but the script did not name the failed JSON
+assertion. The current unrun follow-up uses the versioned official Trivy archive with
+a pinned SHA-256 and adds secret-safe named smoke assertions. Its CI result is
+pending. Both clean-room attempts failed; a successful fresh-runner cycle on the final
+head remains required. No AWS command, model download, OCI image pull outside CI, GPU
+operation, or cloud spend occurred.
 
 These checks establish source behavior and document consistency only. They do not
 establish cross-process Redis behavior for these named tenants, a real signed request

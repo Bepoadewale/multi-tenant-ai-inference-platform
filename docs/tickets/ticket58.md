@@ -20,11 +20,16 @@ command runs, why it is needed, what success looks like, and how to stop safely.
   profiles and corresponding signed-token entries are now added without removing
   existing tenants. Local token generation now makes the private key and token file
   mode `0600`, while the mounted public key is readable by the gateway container.
-- The first PR #58 CI run `46049398387` failed in supply-chain setup because the
-  Trivy action defaulted to unpublished release `v0.70.0`. Its fresh local end-to-end
-  job also failed at `make smoke` without identifying the failed assertion. The
-  follow-up pins a current verified Trivy release and adds project-container
-  diagnostics after a smoke failure; the smoke root cause is still unconfirmed.
+- PR #58 run `46049398387` failed before Trivy scanning while resolving the action's
+  default `v0.70.0`. Follow-up run `46050614853` confirmed that `v0.76.2` is
+  published, but the action's release resolver still could not find that tag on the
+  runner. The workflow now downloads the official Linux AMD64 archive directly and
+  verifies its SHA-256 before running the scan.
+- Both fresh local end-to-end jobs failed at `make smoke`. The latest run's service
+  inventory showed containers running and healthy, and logs showed successful
+  gateway/model and edge-device HTTP requests. It did not show which silent JSON
+  assertion failed, so the cause remains unconfirmed. The smoke script now names each
+  JSON assertion on failure without printing response bodies or identity tokens.
 
 ## Research and design
 
@@ -53,8 +58,9 @@ command runs, why it is needed, what success looks like, and how to stop safely.
   contain the intended tenant identity.
 - [x] Links from the documentation index and clearly labels unexecuted GPU commands.
 - [ ] Final review commands against actual scripts and files in the repository.
-- [ ] The follow-up CI run passes all required checks, including the fresh local
-  end-to-end cycle. The first run failed as described above.
+- [ ] The next CI run passes the scanner and fresh local end-to-end cycle; if smoke
+  still fails, its named assertion should identify the check to fix. Runs
+  `46049398387` and `46050614853` failed as described above.
 - [ ] Human review; do not merge without owner authorization.
 - [ ] After GPU approval, revise any command or package candidate that live evidence
   disproves and rerun the relevant reproduction stage.
@@ -64,13 +70,16 @@ command runs, why it is needed, what success looks like, and how to stop safely.
 `make verify` passed Ruff, 146 tests (2 skipped), dependency audit, Compose and
 monitoring validation, and benchmark/evaluation/CUDA dry-run plans. The new token test
 ran the generator in an isolated temporary directory and checked permissions and
-Ed25519 claims. AWS/GPU commands in the guide remain unexecuted. Initial CI run
-`46049398387` had Python, manifests, GPU observability, and Ansible pass;
-supply-chain failed while locating Trivy `v0.70.0`; local E2E failed at `make smoke`
-without diagnostics to identify which readiness/assertion failed. The follow-up adds
-an explicit published Trivy version and failure-only project container logs. No cause
-is claimed for smoke until those logs or a successful rerun establishes it. Final CI
-and relative Markdown-link validation remain pending.
+Ed25519 claims. AWS/GPU commands in the guide remain unexecuted. CI runs
+`46049398387` and `46050614853` both passed Python, manifests, GPU observability, and
+Ansible. The first scanner failed resolving `v0.70.0`; the second failed resolving
+the API-confirmed published `v0.76.2` through the installer's release lookup, so
+neither run executed Trivy. The second local E2E run failed at `make smoke`; its
+service inventory showed healthy containers and logs showed successful gateway/model
+and edge-device requests, but no silent assertion was named. The current follow-up
+uses an official release archive with a checked SHA-256 and makes smoke JSON
+assertions name themselves on failure. It has not run in CI. No smoke root cause is
+claimed. Final CI and relative Markdown-link validation remain pending.
 
 ## Security and financial limits
 
