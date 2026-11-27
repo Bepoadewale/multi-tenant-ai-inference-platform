@@ -90,6 +90,10 @@ def load_matrix(path: Path, allow_16: bool) -> tuple[dict, list[dict]]:
     return matrix, selected
 
 
+def benchmark_container_name(case: dict, repetition: int) -> str:
+    return f"gpu-lab-bench-{case['name']}-c{case['concurrency']}-r{repetition}"
+
+
 def benchmark_command(
     case: dict, matrix: dict, repetition: int, metadata: dict, output_dir: Path
 ) -> list[str]:
@@ -117,7 +121,7 @@ def benchmark_command(
         "--volume",
         f"{output_dir}:/results:rw",
         "--name",
-        f"gpu-lab-bench-{case['name']}-c{case['concurrency']}-r{repetition}",
+        benchmark_container_name(case, repetition),
         "benchmark",
         "bench",
         "serve",
@@ -350,8 +354,7 @@ def main() -> int:
             except subprocess.TimeoutExpired:
                 os.killpg(process.pid, signal.SIGKILL)
                 process.wait()
-            container_name = f"gpu-lab-bench-{case['name']}-c{case['concurrency']}-r{index}"
-            stop_benchmark_container(container_name)
+            stop_benchmark_container(benchmark_container_name(case, repetition))
             print(
                 f"Benchmark timed out at run {index}; preserve partial results in {output_dir}",
                 file=sys.stderr,
@@ -364,8 +367,7 @@ def main() -> int:
             except subprocess.TimeoutExpired:
                 os.killpg(process.pid, signal.SIGKILL)
                 process.wait()
-            container_name = f"gpu-lab-bench-{case['name']}-c{case['concurrency']}-r{index}"
-            stop_benchmark_container(container_name)
+            stop_benchmark_container(benchmark_container_name(case, repetition))
             print(f"Benchmark interrupted at run {index}; partial results are preserved", file=sys.stderr)
             return 130
         if return_code:

@@ -38,6 +38,10 @@ GPU benchmark harness.
   no GPU; output is bind-mounted to an explicitly chosen host path.
 - Added a local dry-run target and linked it into `make verify`.
 - Added a 120-minute batch runtime cap and 10-minute per-command timeout by default.
+- Centralized the benchmark container name so timeout and interruption cleanup target
+  the exact named container for that workload repetition.
+- Added a regression test that verifies the runner command and cleanup name agree for
+  a non-first repetition.
 - Added a non-cloud GitHub Actions step that parses the GPU Compose profile and runs
   the benchmark dry-run even if the separate long local E2E job fails.
 - Documented that direct vLLM results do not include gateway overhead, Redis quotas,
@@ -53,6 +57,10 @@ GPU benchmark harness.
   mount an output directory outside the repository.
 - `python3.12 -m py_compile`, Ruff for the new runner, `make gpu-compose-config`, and
   `git diff --check` passed.
+- The targeted cleanup-name regression test passed with an isolated Python 3.12 pytest
+  invocation; Ruff and bytecode compilation passed for the runner and test. The
+  workstation's Python 3.12 environment does not include pytest, so the test used
+  `uvx` without changing the repository environment.
 - No Docker profile service, model, benchmark request, AWS resource, or GPU was used.
 
 ## Security and financial considerations
@@ -72,6 +80,15 @@ batch and stop early if required evidence, time, or the $25 total budget is at r
   multi-tenant quota behavior.
 - Run the matrix on real L4 hardware, retain genuine raw results, plot measurements,
   investigate outliers, and calculate complete request/token costs.
+
+## Troubleshooting update
+
+Static review found that emergency cleanup constructed the container name from the
+overall matrix index, while Docker Compose names it from the workload repetition. The
+names diverged after the first run, so a timed-out later benchmark could leave its
+container running. The runner now uses one shared name helper for both `docker compose
+run --name` and timeout/interruption cleanup. The regression check verifies repetition
+3, which catches the mismatch. No container was started during this investigation.
 
 ## Acceptance status
 
