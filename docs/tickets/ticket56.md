@@ -12,8 +12,9 @@ known champion if candidate readiness fails.
 
 - PR #55 provides the authenticated planning and approval API. Its latest recorded
   head `de4c6e7` passed all five required jobs in GitHub run `46034523863`.
-- PR #56 is being prepared on `codex/gpu-release-host-controller`, stacked on
-  `codex/gpu-llm-release-api`.
+- [PR #56](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/56)
+  is open as a draft on `codex/gpu-release-host-controller`, stacked on PR #55's
+  `codex/gpu-llm-release-api` branch. Source commit: `70a0227`.
 - No AWS resource, EC2 host, GPU, model download, or GPU hour was used.
 - The controller has local fake-based tests only. Deployment, rollback, interruption
   recovery, and GPU behavior remain unverified on a real host.
@@ -83,7 +84,7 @@ inside the planned GPU batch, before the controlled release operation.
 - Relative Markdown link check across 13 changed documentation files passed;
   `git diff --check` passed.
 - PR #55's latest check run `46034523863` passed all five required jobs. PR #56 CI,
-  including its single local end-to-end clean-room cycle, is pending publication.
+  including its single local end-to-end clean-room cycle, is pending.
 - During implementation, Ruff first found unused/reordered imports and a test had
   missing model-artifact environment mapping; these were corrected and the focused
   suite rerun. Review also caught that non-`apply` CLI commands lacked `plan_id` in

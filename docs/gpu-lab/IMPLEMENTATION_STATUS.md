@@ -54,7 +54,7 @@ unit-tested; the profile has not run on an L4.
 
 ## Current Next Actions
 
-1. Commit and open PR #56 with host-controller evidence and limitations; run one CI clean-room cycle.
+1. Watch PR #56's required checks once; its local end-to-end job provides the one clean-room cycle for this code change.
 2. Keep AWS work read-only until the manually submitted appeal is decided and applied G/VT quota is nonzero; do not send another appeal or request.
 3. Continue non-billable research and deployment preparation without claiming host execution; manual NVIDIA setup still precedes Ansible.
 4. Recheck signed package indexes, image digest, model revision/license/hash, capacity, current prices, and exact bounded plan immediately before any authorized GPU batch.
