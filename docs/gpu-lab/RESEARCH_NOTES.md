@@ -129,6 +129,16 @@ independent gates.
   reserve a small positive amount rather than counting on account free tier. Test
   failure, retry, and teardown behavior before relying on either mechanism.
 
+  Follow-up from the current AWS [one-time schedule documentation](https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html)
+  (checked 2026-11-27): an `at(...)` schedule invokes once, but a completed schedule
+  still counts against the account's schedule quota until it is deleted. Current
+  AWS provider documentation describes `action_after_completion = "DELETE"`, but the
+  repository's pinned AWS provider `5.100.0` schema rejected that argument during
+  static validation. Therefore this lab keeps the schedule in Terraform state and
+  requires normal Terraform destroy after the GPU batch; the read-only verifier must
+  tolerate the schedule group already being absent. Do not claim expiry cleanup also
+  removes the Scheduler schedule.
+
 These findings refine the proposed cost architecture only; no AWS resources, budget,
 VPC, or expiry mechanism have been created or tested. The current provisional
 resource/runtime estimate and assumptions are recorded in [`COST_REPORT.md`](COST_REPORT.md).
