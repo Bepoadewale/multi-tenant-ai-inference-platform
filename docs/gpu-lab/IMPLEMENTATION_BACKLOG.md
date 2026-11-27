@@ -156,11 +156,19 @@ startup, readiness, streaming, and clean shutdown are proven.
 
 ### Package 6 — Multi-tenant GPU gateway integration
 
-**Status:** not started; requires token accounting and lease design first.
+**Status:** non-billable gateway correctness work is in progress across PRs #33 and #34.
+PR #33 covers stream usage/error accounting; PR #34 covers shared reservations and
+Redis lease recovery. Neither has live GPU inference evidence.
 
-- [ ] Test and fix OpenAI-compatible schemas, measured TTFT, final streaming usage,
-  tokenizer-based reservation, actual-usage reconciliation, cancellation/error
-  outcomes, Redis failure, and crash-safe concurrency lease recovery.
+- [x] Cover final streaming usage, in-band errors, gateway estimates, and local
+  cancellation/error accounting (mock/local backends only).
+- [x] Add shared request reservations, measured usage reconciliation, idempotent
+  release, crash-expiring leases, renewal deadlines, and stale metadata cleanup; test
+  Redis scripts against a local Redis 7.4 service.
+- [ ] Add tokenizer-based reservation and model context bounds; test Redis failure and
+  cancellation across gateway processes.
+- [ ] Verify the stream/admission contract against the pinned live vLLM runtime and
+  route real GPU-backed requests.
 - [ ] Preserve ONNX defaults and add vLLM as a separately configured runtime target.
 - [ ] Demonstrate support, engineering, and research tenants with shared quotas,
   model grants, bounded queueing, and noisy-neighbor controls.
