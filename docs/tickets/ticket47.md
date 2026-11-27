@@ -62,6 +62,11 @@ GPU benchmark harness.
   workstation's Python 3.12 environment does not include pytest, so the test used
   `uvx` without changing the repository environment.
 - No Docker profile service, model, benchmark request, AWS resource, or GPU was used.
+- After rebasing the candidate onto PR #46 head `6df97e7`, `make gpu-benchmark-plan`
+  again produced 11 cases and 33 commands with the 120-minute batch and 600-second
+  per-command bounds. One regression test passed; Ruff, `make gpu-compose-config`, and
+  `git diff --check` passed. Make echoes the command before its JSON output, so the
+  JSON was parsed from the output after skipping that first echoed line.
 
 ## Security and financial considerations
 
@@ -73,7 +78,8 @@ batch and stop early if required evidence, time, or the $25 total budget is at r
 
 ## Outstanding work
 
-- Publish PR #47 after PR #46 and PR #45 branch heads are reconciled.
+- Publish PR #47 stacked on the rebased PR #46 head, then pass its CI checks and
+  review. PR #46's new-head CI is still running at the time this ticket was updated.
 - Recheck the pinned vLLM image and CLI flags against the exact runtime inside the
   benchmark container immediately before execution.
 - Add a separate authenticated gateway benchmark for end-to-end overhead and
