@@ -112,7 +112,8 @@ Bash blocks parsed, all eight Make targets exist, and the manual guide and ticke
 no broken relative links. The final guide commit `a1616ec` passed all six jobs in CI run
 `46055428111`; docs follow-up commit `2d508a9` passed all six in `46056755505`;
 runbook commit `8ca57ed` passed all six in `46058891531`. The new targeted adapter test
-passed 23 tests in `gateway/tests/test_vllm_streaming.py`. Those workflows automatically repeated local E2E; no separate local
+passed 23 tests in `gateway/tests/test_vllm_streaming.py`; run `46059847575` for head
+`0239cbb` passed all six CI jobs. Those workflows automatically repeated local E2E; no separate local
 clean-room run was launched. The runbook follow-up has 50 Bash blocks parsed with
 `bash -n`, zero broken relative links across changed Markdown, and `git diff --check`
 passed.
