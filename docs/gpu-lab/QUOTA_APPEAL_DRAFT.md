@@ -1,10 +1,11 @@
 # Draft: request reconsideration of the On-Demand G/VT quota
 
-**Status:** the owner authorized reopening the existing AWS case. The AWS CLI
-`add-communication-to-case` attempt was rejected because this account's support plan
-does not allow the Support API. No communication was sent and the case was not
-changed. The text below remains available for an AWS Support Center update if that
-route is later used.
+**Status:** the owner reports manually submitting this appeal through the existing
+case in AWS Support Center. The AWS CLI `add-communication-to-case` attempt was
+rejected because this account's Support plan does not allow the Support API. The
+quota-history API still shows `CASE_OPENED` and the applied quota is zero; no new AWS
+response has appeared in the connected email search yet. Do not submit this appeal
+again while awaiting AWS.
 
 ## Proposed message
 
@@ -45,7 +46,9 @@ quota is requested.
 - `us-east-2` and `us-west-2` also currently report zero applied On-Demand G/VT quota;
   `g6.xlarge` is listed as an offering in both regions. Switching regions alone does
   not currently remove the quota blocker.
-- The owner authorized reopening the existing case. The installed AWS CLI has no
+- The owner authorized reopening the existing case and later reported submitting the
+  appeal manually through Support Center. The connected email search has not yet
+  found a new AWS response, and the quota API status has not changed. The installed AWS CLI has no
   `support reopen-case` operation. The available `support add-communication-to-case`
   call was attempted using the existing case ID and this proposed message, after
   verifying the AWS account identity. AWS rejected it with
@@ -54,9 +57,9 @@ quota is requested.
 - The Service Quotas CLI has `create-support-case`, but it only creates a Support
   case for a request in `PENDING` status. This existing request reports `CASE_OPENED`,
   so that command does not reopen or update it and was not called.
-- Do not submit a duplicate quota request or create a related case by accident. The
-  current valid path for reopening a resolved case is the AWS Support Center, as
-  described in the official support guide.
+- Do not resubmit the appeal, create a duplicate quota request, or create a related
+  case by accident while awaiting AWS's reply. The Support Center route was used by
+  the owner, as described in the official support guide.
 
 References:
 
