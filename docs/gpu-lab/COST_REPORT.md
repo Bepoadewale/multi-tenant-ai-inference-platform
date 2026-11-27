@@ -164,12 +164,14 @@ not run the lab.
 - Confirm the full adjusted estimate is below $25 with the stated reserve. If required
   execution cannot fit under $25, stop cloud work, finish safe local work, and request
   more budget through the user's authorization process.
-- No quota request, Terraform apply, or infrastructure mutation has been made in this
-  project. A later quota change and paid apply still require the appropriate explicit
-  authorization and exact reviewed plan.
+- On 2026-11-27, after the user explicitly asked to submit the quota request
+  immediately, a request for 4 On-Demand G/VT vCPUs was submitted. AWS reports it as
+  `PENDING`; the applied quota remains zero. No Terraform apply or infrastructure
+  mutation has been made. Quota approval does not authorize paid provisioning.
 
 ## Current outcome
 
 The first cost gate is prepared but not passed for launch: the estimate is provisional,
-the exact Terraform plan and expiry mechanism do not yet exist, and the On-Demand G/VT
-quota is zero. AWS spend recorded for this goal remains `$0`.
+there is no final remote-state Terraform plan, and the quota increase request is still
+pending while the applied quota remains zero. AWS spend recorded for this goal remains
+`$0`.

@@ -12,8 +12,8 @@ or local CPU inference path.
 - Branch: `codex/gpu-ec2-foundation`, based on PR #30 head `04cb564`.
 - Phase: 2 of 12, static infrastructure preparation.
 - Terraform describes the proposed environment; it has not been applied.
-- AWS account read-only identity check matched the expected account. On-Demand G/VT
-  quota remains zero vCPUs (`L-DB2E81BA`); no quota request was submitted.
+- AWS account identity was verified before the quota request. Applied On-Demand G/VT
+  quota remains zero vCPUs (`L-DB2E81BA`); a requested increase to 4 vCPUs is pending.
 - `g6.xlarge` is currently listed in `us-east-1a`, `1b`, `1c`, `1d`, and `1f`. This
   shows an offering, not available capacity. No instance was launched.
 - AWS spend and GPU instance-hours remain zero for this goal.
@@ -124,8 +124,8 @@ or local CPU inference path.
 - Hard project ceiling: USD $25. Preliminary 12-hour estimate: approximately $18.35
   including a 25% tax placeholder and $5 reserve. It remains provisional and must be
   refreshed against the exact full plan, tax profile, transfer, and state lifecycle.
-- No quota request until the resource and cost plan plus expiry/teardown procedures
-  are ready for review. The planned quota request is 4 G/VT vCPUs for one `g6.xlarge`.
+- A 4-vCPU G/VT quota request for one `g6.xlarge` is pending following the user's
+  direct instruction. This request alone does not authorize any paid provisioning.
 - AWS Budgets is an alert only and does not stop the instance. The repository's
   recipient must be privately supplied and verified before treating notifications as
   active.
@@ -138,5 +138,5 @@ or local CPU inference path.
 
 Update the execution journal and evidence manifest with the latest preview and rendered
 template evidence, finish the final static review, and open this package as a focused
-PR. Then prepare the full plan/cost review before any quota request. No quota request,
-apply, or GPU hours are part of this ticket's current work.
+PR. Prepare the exact remote-state plan and full cost review while the quota request
+is pending. No apply or GPU hours are part of this ticket's current work.

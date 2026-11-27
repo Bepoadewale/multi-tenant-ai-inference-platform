@@ -36,7 +36,7 @@
   7-resource bootstrap preview; no bootstrap apply has occurred.
 - Read-only `us-east-1` resource-group tag and EC2 instance lookups for the exact project tag: **no matches**. Untagged or differently tagged leftovers are not excluded.
 - EC2 instance type offerings list G6 in multiple `us-east-1` AZs; this is not a capacity reservation.
-- On-Demand G and VT quota: **0 vCPUs** (`L-DB2E81BA`); G6 launch cannot proceed until increased. The planned request is 4 vCPUs for one `g6.xlarge`, submitted only after the exact plan/cost and expiry/teardown gates are ready.
+- On-Demand G and VT applied quota: **0 vCPUs** (`L-DB2E81BA`). A request for **4 vCPUs** for one `g6.xlarge` was submitted after the user's direct instruction; its AWS status is **PENDING**. The request does not allow launch until AWS approves it and the separate cost/apply gates pass.
 - Price List API on 2026-11-26: Linux shared On-Demand `g6.xlarge` **$0.8048/hour**. An 8–12 hour instance window costs **$6.44–$9.66** before all other charges. A provisional 12-hour envelope including IPv4, gp3, repository S3/DynamoDB state requests, expiry, egress, tax contingency, and reserve is about **$18.35**; see `COST_REPORT.md` for assumptions and exclusions. This is not a final quote or authorization.
 - Credentials are never recorded here.
 
@@ -44,8 +44,8 @@
 
 1. Complete the final source and documentation review, publish PR #32 against PR #30,
    and wait for its required checks.
-2. Prepare the exact read-only plan and full resource/cost summary, then request a
-   four-vCPU G/VT quota only after those review gates are ready. Do not apply.
+2. Track the pending four-vCPU G/VT quota request while preparing the exact
+   remote-state plan and full resource/cost summary. Do not apply.
 3. Continue local gateway correctness and reproducibility work in a separate focused
    PR before live vLLM tenant integration.
 4. Keep PRs #30 and #31 open for human review; their required checks currently pass.

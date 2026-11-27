@@ -391,3 +391,28 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next action:** finish reviewing staged source and documentation, then create PR
   #32 against the PR #30 branch. Keep quota and apply gated on the exact remote plan,
   refreshed cost review, expiry proof, and the existing `$25` maximum.
+
+## 2026-11-27T00:03Z — User-directed G/VT quota request
+
+- **Phase:** Phase 2 — static infrastructure preparation; no paid resources.
+- **Branch / PR:** `codex/gpu-ec2-foundation`, commit `8f3bb44`; PR #32 was being
+  prepared against PR #30's branch.
+- **Instruction:** the user asked to request quota immediately while non-billable
+  engineering continued.
+- **Pre-request verification:** ran the required
+  `AWS_PROFILE=ai-platform-pilot-key aws sts get-caller-identity`; the account matched
+  the expected project account. Read the `L-DB2E81BA` applied quota (0 vCPUs) and
+  request history (no existing requests) before submitting. No credentials were
+  recorded.
+- **Action and result:** submitted an account-level request for 4 On-Demand G/VT vCPUs
+  in `us-east-1`, enough for the planned single `g6.xlarge`. Request ID:
+  `34647c8598cb4ac5a8e43b3e956ccd65ikyKx4Qy`. AWS accepted the request and reports
+  `PENDING`; an independent `get-requested-service-quota-change` query confirmed the
+  status immediately after submission.
+- **Financial/security boundary:** this is a quota control-plane request, not an EC2
+  launch. Applied quota remains 0, no infrastructure was created or changed, no GPU
+  hours accrued, and recorded project spend remains `$0`. The `$25` ceiling and the
+  exact-plan/apply approval gate remain in force.
+- **Next action:** record this request in PR #32, create the focused stacked PR, and
+  continue the remote plan, price, expiry, teardown, and non-billable work while AWS
+  reviews the request.
