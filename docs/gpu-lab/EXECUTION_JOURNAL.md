@@ -1306,3 +1306,19 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   spend.
 - **Next:** watch PR #48's checks, fix any real failure, then continue preparing the
   CUDA lab and incident drill without claiming runtime evidence.
+
+## 2026-11-27 — Record workstation tool readiness
+
+- **Phase:** cross-phase non-billable preparation.
+- **Branch:** `codex/gpu-evaluation-preparation`, PR #48.
+- **Inventory:** macOS 25.6.0 arm64; AWS CLI 2.32.6; Terraform 1.14.0; Docker
+  Compose v2.40.3; Python 3.12.12; GitHub CLI authenticated as Bepoadewale.
+  `ansible-playbook`, `nvcc`, `nvidia-smi`, and `nvidia-container-cli` are not
+  installed on this local workstation.
+- **Interpretation:** local static checks, Terraform tooling, Compose rendering, and
+  PR work are available. The local Mac is not the target Linux/L4 host. No CUDA or
+  Ansible installation was attempted; Ansible follows manual host setup in this goal.
+- **Cloud/cost:** did not inspect or print local AWS configuration and made no AWS
+  request or mutation. No cost or GPU runtime.
+- **Evidence:** exact tool state and its limits are recorded in
+  `LOCAL_ENVIRONMENT_READINESS.md` and the evidence manifest.
