@@ -30,6 +30,37 @@ class VllmBackend:
             payload["stream_options"] = {"include_usage": True}
         return payload
 
+    async def count_tokens(self, request: ChatCompletionRequest) -> tuple[int, int]:
+        """Return the rendered prompt token count and the server context limit."""
+        timeout_seconds = min(
+            self.timeout_seconds,
+            float(os.getenv("INFERENCE_TOKENIZER_TIMEOUT_SECONDS", "3")),
+        )
+        payload = {
+            "model": self.model_id,
+            "messages": [message.model_dump() for message in request.messages],
+            "add_generation_prompt": True,
+            "return_token_strs": False,
+        }
+        try:
+            async with httpx.AsyncClient(
+                base_url=self.base_url, timeout=timeout_seconds
+            ) as client:
+                response = await client.post("/tokenize", json=payload)
+                response.raise_for_status()
+            result = response.json()
+            count, max_model_len = result.get("count"), result.get("max_model_len")
+            if (
+                type(count) is not int
+                or count < 0
+                or type(max_model_len) is not int
+                or max_model_len < 1
+            ):
+                raise ValueError("tokenizer response has invalid count or context length")
+            return count, max_model_len
+        except (httpx.HTTPError, ValueError, TypeError, AttributeError) as error:
+            raise RuntimeError("vLLM tokenization request failed") from error
+
     async def health(self) -> bool:
         try:
             async with httpx.AsyncClient(base_url=self.base_url, timeout=3) as client:

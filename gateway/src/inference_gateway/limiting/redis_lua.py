@@ -89,6 +89,55 @@ if redis.call('ZCARD', KEYS[2]) == 0 then redis.call('DEL', KEYS[2]) end
 return 1
 """.strip()
 
+RESERVE_USAGE_LUA = """
+-- KEYS: minute_tokens, active_leases, daily_tokens, reservations
+-- ARGV: request_id, now_ms, window_ms, tpm, daily_limit, estimated_tokens
+local request_id = ARGV[1]
+local now = tonumber(ARGV[2])
+local minute_cutoff = now - tonumber(ARGV[3])
+local daily_cutoff = now - 86400000
+local estimated = tonumber(ARGV[6])
+local previous = redis.call('HGET', KEYS[4], request_id)
+if not previous then return {0, 'reservation_expired'} end
+
+redis.call('ZREMRANGEBYSCORE', KEYS[1], '-inf', minute_cutoff)
+redis.call('ZREMRANGEBYSCORE', KEYS[2], '-inf', now)
+redis.call('ZREMRANGEBYSCORE', KEYS[3], '-inf', daily_cutoff)
+if not redis.call('ZSCORE', KEYS[2], request_id) then
+  return {0, 'reservation_expired'}
+end
+
+local old_member = request_id .. ':' .. previous
+local minute_score = redis.call('ZSCORE', KEYS[1], old_member)
+local minute_total = 0
+for _, member in ipairs(redis.call('ZRANGE', KEYS[1], 0, -1)) do
+  minute_total = minute_total + tonumber(string.match(member, ':(%d+)$'))
+end
+if minute_score then minute_total = minute_total - tonumber(previous) end
+if minute_total + estimated > tonumber(ARGV[4]) then
+  return {0, 'tokens_per_minute'}
+end
+
+local daily_score = redis.call('ZSCORE', KEYS[3], old_member)
+local daily_total = 0
+for _, member in ipairs(redis.call('ZRANGE', KEYS[3], 0, -1)) do
+  daily_total = daily_total + tonumber(string.match(member, ':(%d+)$'))
+end
+if daily_score then daily_total = daily_total - tonumber(previous) end
+if daily_total + estimated > tonumber(ARGV[5]) then
+  return {0, 'daily_token_quota'}
+end
+
+if minute_score then redis.call('ZREM', KEYS[1], old_member) end
+redis.call('ZADD', KEYS[1], minute_score or now, request_id .. ':' .. estimated)
+redis.call('PEXPIRE', KEYS[1], ARGV[3])
+if daily_score then redis.call('ZREM', KEYS[3], old_member) end
+redis.call('ZADD', KEYS[3], daily_score or now, request_id .. ':' .. estimated)
+redis.call('PEXPIRE', KEYS[3], 86400000)
+redis.call('HSET', KEYS[4], request_id, estimated)
+return {1, 'reserved'}
+""".strip()
+
 RENEW_LUA = """
 -- KEYS: active_leases, reservations
 -- ARGV: request_id, now_ms, lease_ms

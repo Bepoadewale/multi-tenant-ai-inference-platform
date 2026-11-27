@@ -2,8 +2,10 @@ import time
 from collections import deque
 from datetime import UTC, datetime, timedelta
 
+import pytest
+from fastapi import HTTPException
 from inference_gateway.catalog.store import Catalog
-from inference_gateway.limiting.service import TenantLimiter
+from inference_gateway.limiting.service import AdmissionReservation, TenantLimiter
 
 
 def test_release_reconciles_usage_once_and_frees_concurrency():
@@ -49,6 +51,25 @@ def test_reconciliation_preserves_time_order_and_negative_usage_keeps_estimate()
     ]
     assert limiter.tokens[tenant.id][0] == (old, "old", 3)
     assert sum(value for _, _, value in limiter.tokens[tenant.id]) == 20
+
+
+def test_usage_reservation_adjustment_is_atomic_and_quota_bounded():
+    tenant = Catalog().tenant("team-search")
+    tenant.quotas.tokens_per_minute = 30
+    tenant.quotas.daily_token_quota = 30
+    limiter = TenantLimiter()
+    first = limiter.admit(tenant, estimated_tokens=0, request_id="first")
+    second = limiter.admit(tenant, estimated_tokens=0, request_id="second")
+
+    first = limiter.reserve_usage(tenant, first, estimated_tokens=20)
+    with pytest.raises(HTTPException) as rejected:
+        limiter.reserve_usage(tenant, second, estimated_tokens=15)
+    assert rejected.value.status_code == 429
+
+    second = limiter.reserve_usage(tenant, second, estimated_tokens=10)
+    assert second == AdmissionReservation("second", 10)
+    assert sum(value for _, _, value in limiter.tokens[tenant.id]) == 30
+    assert sum(value for _, _, value in limiter.daily[tenant.id]) == 30
 
 
 def test_expired_lease_is_removed_before_the_next_concurrency_check():

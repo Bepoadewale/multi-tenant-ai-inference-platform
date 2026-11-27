@@ -104,7 +104,9 @@ class GatewayService:
         # deliberately exhaust a tenant's valid workload budget.
         target = self.router.choose(tenant, model, request_id)
         backend = self.backend_for(model, target)
-        estimate = (
+        if request.max_tokens > tenant.quotas.max_output_tokens:
+            raise HTTPException(413, "tenant output-token limit exceeded")
+        estimate = 0 if isinstance(backend, VllmBackend) else (
             sum(len(message.content.split()) for message in request.messages) + request.max_tokens
         )
         allocation = await self._admit_capacity(tenant, model)
@@ -115,6 +117,40 @@ class GatewayService:
             await self._release_capacity(tenant, allocation)
             THROTTLES.labels(tenant.id, error.detail).inc()
             raise
+        if isinstance(backend, VllmBackend):
+            try:
+                prompt_tokens, server_context_limit = await backend.count_tokens(request)
+                if prompt_tokens > tenant.quotas.max_input_tokens:
+                    raise HTTPException(413, "tenant input-token limit exceeded")
+                context_limit = min(model.max_model_len, server_context_limit)
+                if prompt_tokens + request.max_tokens > context_limit:
+                    raise HTTPException(413, "prompt and requested output exceed model context")
+                reservation = await self._reserve_usage(
+                    tenant, reservation, prompt_tokens + request.max_tokens
+                )
+            except asyncio.CancelledError:
+                ACTIVE.labels(tenant.id).dec()
+                try:
+                    await self._release(tenant, reservation, 0)
+                finally:
+                    await self._release_capacity(tenant, allocation)
+                raise
+            except HTTPException as error:
+                ACTIVE.labels(tenant.id).dec()
+                try:
+                    await self._release(tenant, reservation, 0)
+                finally:
+                    await self._release_capacity(tenant, allocation)
+                if error.status_code == 429:
+                    THROTTLES.labels(tenant.id, error.detail).inc()
+                raise
+            except Exception as error:
+                ACTIVE.labels(tenant.id).dec()
+                try:
+                    await self._release(tenant, reservation, 0)
+                finally:
+                    await self._release_capacity(tenant, allocation)
+                raise HTTPException(503, "model tokenizer unavailable") from error
         if request.stream:
             return self._stream(
                 tenant,
@@ -371,6 +407,12 @@ class GatewayService:
         QUEUE.labels(tenant.id).set(0)
         QUEUE_WAIT.labels(tenant.id).observe(perf_counter() - started)
         return reservation
+
+    async def _reserve_usage(
+        self, tenant: Tenant, reservation: AdmissionReservation, estimated_tokens: int
+    ) -> AdmissionReservation:
+        result = self.limiter.reserve_usage(tenant, reservation, estimated_tokens)
+        return await result if inspect.isawaitable(result) else result
 
     async def _release(
         self,
