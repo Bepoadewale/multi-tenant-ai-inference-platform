@@ -94,3 +94,19 @@ predictable.
   does not establish multi-tenant isolation or authorization.
 - Do not run until the paid execution batch is authorized. The default report path is
   outside Git, and raw reports must be reviewed before sharing.
+
+## Release record preparation
+
+`release_control.py` provides local, unit-tested helpers for binding a passing
+evaluation report to the full model revision, model artifact digest, vLLM image
+digest, serving configuration, and source commit. It also creates an immutable plan
+digest and a SQLite approval record that requires an actor different from the plan
+requester. A failed candidate, unpinned image, multi-GPU configuration, changed plan,
+or stale champion/candidate manifest is rejected.
+
+This is control logic, not a deployment command. The plan is not yet connected to an
+authenticated HTTP endpoint or the actual MLflow run, and it does not restart vLLM.
+The independent actor in the SQLite helper is a value passed by its caller; a future
+API must derive that identity from a verified `release.approve` token. No model should
+be switched based only on a local function call. These limits are recorded in the
+[sequential release design](../../docs/gpu-lab/SEQUENTIAL_LLM_RELEASE_DESIGN.md).

@@ -1,6 +1,6 @@
 # GPU Lab Implementation Status
 
-**Overall:** ACTIVE — Phase 2 infrastructure is prepared but blocked on quota. The deployment stack is statically prepared through PR #53 and includes PRs #33–#36. PR #52 head `1f02955` passed five checks in run `46021471851`. PR #53's tested code head `e623b75` adds locked gateway build inputs; all five checks passed in run `46023306230`, including Linux image build and CPU local end-to-end. A documentation-only follow-up is now awaiting CI. No GPU cloud execution has occurred in this goal.
+**Overall:** ACTIVE — Phase 2 infrastructure is prepared but blocked on quota. The deployment stack is statically prepared through PR #53 and includes PRs #33–#36. PR #53's code head `e623b75` passed all five checks in `46023306230`; its documentation follow-up `2153942` passed all five checks in `46025160292`. PR #54's local release-record tests pass; the PR is being prepared. No GPU cloud execution has occurred in this goal.
 
 | Phase | Status | Evidence / next gate |
 | --- | --- | --- |
@@ -12,7 +12,7 @@
 | 6. Multi-tenant GPU gateway | Prepared — static integration | PRs #33–#36 add stream usage/cancellation handling, request-scoped Redis admission leases, model-aware token reservations, and cleanup tests; PR #45 integrates the GPU profile on top of that chain. Required CI passes on the current restacked heads through PR #50. No real GPU request, quota reconciliation, or client cancellation has been verified on vLLM. |
 | 7. GPU/AI observability | Prepared — static only | PR #46 configures pinned exporters, Prometheus, Grafana, Alertmanager, OpenTelemetry, Tempo, rules, and dashboards. All five required jobs pass on the current restacked head. No live device metrics, alert, dashboard, or trace has been observed. |
 | 8. Benchmarks and FinOps | Prepared — static only | PR #47 includes a bounded direct vLLM serving matrix and metadata collection. All five required jobs pass on the current restacked head. No L4 benchmark or measured inference cost exists. |
-| 9. Evaluation and releases | In progress — static implementation | PR #48 has seven synthetic evaluation cases and a privacy-safe dry-run. PR #51 documents the missing sequential LLM release path. PR #52 adds private MLflow tracking and report publication; its current head passed all five checks in run `46021471851`. No real LLM evaluation, candidate decision, approval, or rollback has occurred. |
+| 9. Evaluation and releases | In progress — static implementation | PR #48 has seven synthetic evaluation cases and a privacy-safe dry-run. PR #51 designs sequential LLM release. PR #52 adds private MLflow tracking and report publication. PR #54 adds local, unit-tested manifest/plan digest and independent-approval state primitives; authenticated API, live registry, deployment, and rollback remain outstanding. No real LLM evaluation, candidate decision, approval, or rollback has occurred. |
 | 10. Incidents and recovery | Not started | Safe real fault injection, diagnosis and verified recovery reports. |
 | 11. Automation and CI | In progress — static only | PR #53 adds a hash-locked container build and a lock coverage check; its Linux image build and all five required CI jobs pass. Terraform apply, Ansible roles, and cloud execution remain unrun. |
 | 12. Clean-room and teardown | Not started | Independent recreation, export and provider-side absence checks. |
@@ -54,7 +54,7 @@ unit-tested; the profile has not run on an L4.
 
 ## Current Next Actions
 
-1. Continue non-billable sequential LLM release-control implementation and review.
+1. Open PR #54 for immutable LLM release record primitives, then run and review its CI.
 2. Keep AWS work read-only until the existing quota appeal is approved and applied G/VT quota is nonzero. Do not send another appeal or request.
 3. Complete non-billable preparation that does not contradict the requirement to perform manual NVIDIA host setup before Ansible.
 4. Recheck signed package indexes, image digest, model revision/license/hash, capacity, current prices, and the exact bounded plan immediately before any authorized GPU batch.
