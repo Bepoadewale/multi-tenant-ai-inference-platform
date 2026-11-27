@@ -1,4 +1,4 @@
-# Draft: request reconsideration of the On-Demand G/VT quota
+# On-Demand G/VT quota appeal record
 
 **Status:** the owner reports manually submitting this appeal through the existing
 case in AWS Support Center. The AWS CLI `add-communication-to-case` attempt was
@@ -7,7 +7,11 @@ quota-history API still shows `CASE_OPENED` and the applied quota is zero; no ne
 response has appeared in the connected email search yet. Do not submit this appeal
 again while awaiting AWS.
 
-## Proposed message
+## Reference message supplied for the appeal
+
+The owner manually submitted an appeal through the existing case, according to the
+owner's report. The record below preserves the prepared use case; it does not verify
+that the submitted wording was identical.
 
 Please reconsider the request for a 4-vCPU On-Demand G and VT instances quota in
 `us-east-1`. The quota is needed for a short, controlled educational engineering lab

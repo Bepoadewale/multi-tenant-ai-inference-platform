@@ -1363,3 +1363,35 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Evidence limits:** CI did not contact a language model or AWS. The evaluation
   remains static; no quality score or release approval exists.
 - **Cost:** no AWS resources, GPU hours, model download, or spend.
+
+## 2026-11-27 — Open CUDA preparation PR
+
+- **Phase:** Phase 4 static preparation; AWS/GPU execution remains blocked on quota
+  and the approved cost plan.
+- **Branch / PR / head:** `codex/gpu-cuda-lab-preparation`, PR #49, `ce8bbba`.
+- **Starting state:** local macOS arm64; no NVIDIA device or `nvcc`. The CUDA sample
+  could not be compiled locally.
+- **Work:** opened PR #49 with the bounded CUDA/PyTorch lab, dry-run, tests, and
+  learning documentation. Updated the goal, implementation status, backlog, ticket,
+  and evidence records to reflect the opened PR.
+- **CI:** run `45998860857`; at journal time Python, manifests, GPU observability,
+  and supply-chain passed, while local E2E remained pending.
+- **Validation limits:** CI/static checks do not establish CUDA compilation, L4
+  compatibility, GPU timings, or real performance.
+- **Cost/resources:** no AWS resource, GPU hour, model download, or spend.
+- **Next:** finish CI observation, then prepare the manual Ubuntu/GPU setup checklist
+  and consolidate required host artifacts before the authorized GPU batch.
+
+## 2026-11-27 — Owner reports manual quota appeal submitted
+
+- **Phase:** Phase 2 remains blocked; all work this session is non-billable.
+- **Status source:** the owner reports manually submitting the appeal through the
+  existing AWS Support Center case. No independent delivery receipt or new AWS
+  decision has been recorded here. The prior AWS email says denied; the last recorded
+  Service Quotas history still says `CASE_OPENED`, with applied quota zero.
+- **Action:** updated current-state documentation to avoid asking the owner to submit
+  the appeal again. No AWS case message, quota request, or infrastructure mutation was
+  sent by the agent.
+- **Cost/resources:** no AWS calls, GPU time, resources, or spend in this update.
+- **Next:** continue preparation; check the appeal outcome and applied quota before
+  any launch preflight, and do not launch with zero applied quota.

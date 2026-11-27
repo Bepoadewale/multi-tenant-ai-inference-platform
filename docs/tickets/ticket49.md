@@ -9,7 +9,7 @@ authorized NVIDIA L4 execution window. Local commands and CI must not start GPU 
 
 The repository has no CUDA kernel or GPU performance lab. The workstation is macOS
 arm64 and has no NVIDIA tools or CUDA compiler. This package is a static preparation;
-the `.cu` file has not been compiled.
+the `.cu` file has not been compiled. PR [#49](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/49) is open. All five required jobs passed in run `45998860857` on code head `ce8bbba`.
 
 ## Research and decisions
 
@@ -43,7 +43,7 @@ the `.cu` file has not been compiled.
 - Ruff, Python bytecode compilation, and `git diff --check` passed.
 - The local Apple Silicon workstation has no `nvcc`, NVIDIA driver, or CUDA device, so
   the `.cu` program was not compiled. No CUDA runtime, GPU kernel, or AWS resource was
-  used. PR CI remains pending.
+  used. All five required jobs passed in run `45998860857` on code head `ce8bbba`.
 
 ## Security and cost
 
