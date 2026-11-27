@@ -63,7 +63,7 @@ raw plan, or account identifier is added to the public repository.
 
 ## Outstanding work
 
-- Publish PR #44 and pass CI.
+- PR #44 was opened at `868e11d` against PR #43; CI is pending.
 - Recheck service quota, regional capacity, prices, package pins, image digest, and
   model integrity immediately before any authorized GPU batch.
 - Establish the reviewed shared backend and budget through their separate guarded
