@@ -66,8 +66,13 @@ pull requests must include the repository's clean-room evidence.
   execution.
 - PR #56 controller head `852c873` passed all five required checks in run
   `46040861818`, including its one clean-room local end-to-end cycle. PR #56 is ready
-  for review and remains open. PR #57 prepares the Ansible host role; its CI and host
-  execution are pending. No AWS or GPU work is eligible.
+  for review and remains open. PR #57 Ansible head `4795f12` passed all six required
+  jobs, including one clean-room local end-to-end cycle, in run `46045068200`. PR #57
+  is ready for review; no host execution or AWS/GPU work occurred.
+- The current manual-guide branch adds named GPU tenant profiles and signed
+  identities, and documents their bounded gateway checks. Local `make verify` passed
+  with 146 tests (2 skipped); no AWS or GPU work occurred. The branch's PR has not yet
+  been published and needs its one fresh CI clean-room cycle.
 
 ## Ordered implementation packages
 
@@ -97,7 +102,8 @@ image build, dependency audit, and existing CPU local end-to-end flow passed.
 and independent-approver state in SQLite. PR #55 adds the authenticated plan and
 approval API, MLflow evaluation checks, and shared single-host manifest storage; all
 five checks passed on latest head `de4c6e7` in run `46034523863`. PR #56 prepares a
-host-only deployment controller and currently has 16 focused local tests passing.
+host-only deployment controller and has 16 focused local tests passing; updated head
+`852c873` passed all five checks in `46040861818`.
 PR #55 remains open and unmerged. [PR #56](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/56)
 is open as a draft, stacked on PR #55. Initial head `ad10699` passed all five required
 checks in run `46039778508`, including one clean-room local end-to-end cycle. The
@@ -231,7 +237,7 @@ and teardown/absence commands are ready.
 
 ### Package 3 — Manual Linux, NVIDIA, CUDA, Docker, and Ansible
 
-**Status:** PR #50 contains a non-billable ordered install manifest and hashed PyTorch lock. PR #57 adds a universal hash-locked Ansible 2.21.6 controller and local-host role for the dated Ubuntu/NVIDIA/CUDA/Docker candidate set. Local syntax checking passes; CI is pending. No GPU host has been configured; candidates are not runtime-verified.
+**Status:** PR #50 contains a non-billable ordered install manifest and hashed PyTorch lock. PR #57 adds a universal hash-locked Ansible 2.21.6 controller and local-host role for the dated Ubuntu/NVIDIA/CUDA/Docker candidate set. Its six checks, including one clean-room local run, passed on head `4795f12` in `46045068200`; PR #57 is ready for review. No GPU host has been configured; candidates are not runtime-verified.
 
 - [ ] Select and pin a standard Ubuntu 24.04 x86_64 AMI, kernel, NVIDIA driver,
   CUDA Toolkit, Docker Engine, NVIDIA Container Toolkit, Python, and PyTorch after

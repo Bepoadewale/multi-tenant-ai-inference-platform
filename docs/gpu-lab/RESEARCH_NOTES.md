@@ -412,6 +412,17 @@ with an L4 or the pinned vLLM image.
 
 Official sources: NVIDIA's [CUDA repository package index](https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/Packages.gz), [Container Toolkit repository instructions](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html), the [Container Toolkit repository key](https://nvidia.github.io/libnvidia-container/gpgkey), Docker's [Ubuntu Noble AMD64 package index](https://download.docker.com/linux/ubuntu/dists/noble/stable/binary-amd64/Packages.gz), and the [Docker repository key](https://download.docker.com/linux/ubuntu/gpg). The metadata/key downloads were read-only research. Ansible wheels were installed only in `/tmp/gpu-ansible-venv`; no host APT packages, model artifacts, or container images were installed or downloaded.
 
+## 2026-11-27 — small CUDA container digest
+
+`docker buildx imagetools inspect nvidia/cuda:13.0.2-base-ubuntu24.04` read the
+official OCI registry manifest without pulling image layers. It returned the
+multi-platform index `sha256:2ab6381d970b211fb93853796dc6707eb8a72575a375c422b17cf4d8b2641701`
+and Linux AMD64 image digest
+`sha256:605fb0c8acf8674e164d822da8a8521f3a655056e569f0899e72ae940e1fe7dc`. The
+manual guide uses the AMD64 child digest for a minimal `nvidia-smi` container check.
+Recheck the image identity and digest before the GPU batch. This registry lookup is
+metadata evidence only; the image was not pulled or run.
+
 ## 2026-11-27 — vLLM serving benchmark preparation research
 
 - The official [vLLM 0.34.0 `bench serve` CLI reference](https://docs.vllm.ai/en/v0.34.0/cli/bench/serve/)

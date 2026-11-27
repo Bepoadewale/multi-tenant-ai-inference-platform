@@ -40,6 +40,9 @@ def test_platform_endpoints_require_stronger_role():
     )
     assert response.status_code == 200
     assert {tenant["id"] for tenant in response.json()} == {
+        "customer-support",
+        "internal-engineering",
+        "research",
         "team-analytics",
         "team-payments",
         "team-reporting",

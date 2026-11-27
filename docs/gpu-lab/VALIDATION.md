@@ -340,6 +340,30 @@ environment guard; the actual hash-locked Ansible install was performed in the
 isolated temporary virtual environment. `git diff --check` and relative Markdown-link
 validation passed. These are local/static checks, not package or GPU execution.
 
+## GPU tenant fixtures and manual reproduction guide preparation
+
+**Date:** 2026-11-27 18:19 UTC
+
+**Branch:** `codex/gpu-manual-reproduction-guide`, stacked on PR #57 head `4795f12`.
+
+The first `make verify` stopped because this worktree did not yet have its project
+`.venv`. After `make install`, `make verify` passed Ruff, **146 tests** (2 skipped),
+the dependency audit with no known vulnerabilities, GPU Compose validation,
+Prometheus/Alertmanager/dashboard validation, and benchmark/evaluation/CUDA dry-run
+plans. The new tests confirm three tenant profiles have different quotas and model
+access, existing CPU tenants remain available, and generated Ed25519 tokens carry the
+expected tenant claims. They also check the signing key and token file are mode `0600`
+and the gateway-readable public key is mode `0644`.
+
+The guide's relative-link and placeholder review, final documentation review, PR
+publication, and CI remain outstanding. No local clean-room flow was run; a single
+fresh-runner cycle is expected from the new implementation PR. No AWS command, model
+download, OCI image pull, container build, GPU operation, or cloud spend occurred.
+
+These checks establish source behavior and document consistency only. They do not
+establish cross-process Redis behavior for these named tenants, a real signed request
+through either GPU gateway, model denial on live vLLM, or GPU hardware isolation.
+
 ## Future GPU execution template
 
 - Date/time and commit SHA:

@@ -52,6 +52,7 @@ def token(
 def main() -> None:
     root = Path(".local/identity")
     root.mkdir(parents=True, exist_ok=True)
+    root.chmod(0o755)
     private_path, public_path, tokens_path = root / "private.pem", root / "public.pem", root / "tokens.json"
     if private_path.exists() and public_path.exists():
         private_bytes = private_path.read_bytes()
@@ -61,7 +62,8 @@ def main() -> None:
         public_bytes = private.public_key().public_bytes(serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo)
         private_path.write_bytes(private_bytes)
         public_path.write_bytes(public_bytes)
-        private_path.chmod(0o600)
+    private_path.chmod(0o600)
+    public_path.chmod(0o644)
     tokens_path.write_text(json.dumps({
         "search": token(
             private_bytes.decode(),
@@ -76,6 +78,24 @@ def main() -> None:
             "developer-reporting",
             "team-reporting",
             ["inference.invoke", "developer.self_service"],
+        ),
+        "customer_support": token(
+            private_bytes.decode(),
+            "developer-customer-support",
+            "customer-support",
+            ["inference.invoke"],
+        ),
+        "internal_engineering": token(
+            private_bytes.decode(),
+            "developer-internal-engineering",
+            "internal-engineering",
+            ["inference.invoke"],
+        ),
+        "research": token(
+            private_bytes.decode(),
+            "developer-research",
+            "research",
+            ["inference.invoke"],
         ),
         "admin": token(private_bytes.decode(), "platform-admin", "team-search", ["platform.admin"]),
         "approver": token(private_bytes.decode(), "release-approver", "team-search", ["release.approve"]),
@@ -123,6 +143,7 @@ def main() -> None:
             principal_type="device",
         ),
     }))
+    tokens_path.chmod(0o600)
 
 
 if __name__ == "__main__":
