@@ -229,10 +229,14 @@ captured and described with units and limits.
 
 ### Package 8 — Benchmarking, FinOps, evaluation, release, and rollback
 
-**Status:** not started; prepare data and scripts before paid execution.
+**Status:** direct vLLM serving matrix prepared on `codex/gpu-benchmark-preparation`; gateway benchmark, actual results, evaluation, and releases remain outstanding.
 
-- [ ] Implement controlled vLLM and local benchmark drivers with valid context/output
-  combinations, concurrency ramp, warmups, repetitions, and raw result retention.
+- [x] Prepare the official `vllm bench serve` runner, context-bounded synthetic
+  workloads, gated high concurrency, repeated aggregates, and hardware/software
+  metadata capture. Static dry-run only; no inference request was sent.
+- [ ] Prepare an authenticated gateway benchmark that reports gateway overhead,
+  multi-tenant admission behavior, cancellation, and queueing without logging tokens
+  or prompt/response content.
 - [ ] Run representative workload/precision/concurrency experiments inside the
   authorized GPU runtime window; compute full request and million-token cost.
 - [ ] Prepare versioned synthetic evaluations and deterministic quality/format gates.

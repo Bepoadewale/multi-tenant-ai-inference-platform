@@ -1129,3 +1129,34 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** inspect the #46 CI result, resolve any reviewable validation issue, then
   continue non-billable deployment preparation while quota and appeal outcome remain
   unresolved.
+
+## 2026-11-27 — Prepare direct vLLM benchmark matrix
+
+- **Phase:** Phase 8 static preparation; no inference measurement or GPU execution.
+- **Branch:** `codex/gpu-benchmark-preparation`, prepared on top of the current PR #46
+  head before PR #45's current CI run completes. PR #47 is not yet open.
+- **Starting state:** existing `benchmarks/load_test.py` is marked local-mock and
+  launches all requests together even though it reports a concurrency field; it does
+  not measure vLLM TTFT/TPOT or authenticate requests to the gateway.
+- **Research:** reviewed the official vLLM 0.34.0 `bench serve` reference for the
+  OpenAI chat backend, random token lengths, max concurrency, warmups, aggregate
+  output, metadata labels, and TTFT/TPOT/ITL/end-to-end percentiles.
+- **Changes:** added a benchmark-client Compose profile with no GPU reservation, a
+  three-shape synthetic matrix, a runner that checks context bounds and one-L4
+  metadata, aggregate-only output saved outside Git, and a `make gpu-benchmark-plan`
+  dry-run included in `make verify`. Concurrency 16 is opt-in after lower-load memory
+  checks. The direct test is documented as excluding gateway and tenant overhead.
+- **Validation:** `python3.12 -m py_compile`, Ruff, `make gpu-benchmark-plan`,
+  `make gpu-compose-config`, and `git diff --check` passed. Dry-run produced 11 cases
+  and 33 commands; opt-in concurrency 16 produced 12 cases and 36 commands. No Docker
+  profile service was started and no benchmark API request was sent.
+- **Security and cost:** output is outside public Git; detailed request payload output
+  is not enabled. No AWS or model resources, GPU hours, or spend were used.
+- **Outstanding:** an authenticated gateway benchmark is still needed, and vLLM CLI
+  flags/pins must be verified inside the exact image before the authorized batch. No
+  actual performance/cost result exists.
+- **Troubleshooting:** an attempt to parse `make gpu-benchmark-plan` stdout as raw JSON
+  failed because Make echoes its command line; invoking the Python dry-run directly
+  produced the intended JSON record. The Make target itself completed successfully.
+- **Next:** finish the static review, then publish PR #47 after reconciling the
+  PR #45/#46 stack.
