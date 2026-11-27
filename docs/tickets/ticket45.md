@@ -60,11 +60,14 @@ approval gates remain unchanged.
 
 ## Outstanding work
 
-- PR #45 is open against PR #44. Head `2688d48` fixes the smoke assertion and adds sanitized failure-stage diagnostics
-  to `demo-capacity`. Runs `45983777135`, `140460013629`, and PR #46 workflow
-  `45987574123` passed smoke but failed in that script; their logs did not identify
-  the failing assertion. The new diagnostic run is pending. The script is not run
-  locally because it starts with Redis `FLUSHDB`.
+- PR #45 is open against PR #44. Head `65e5cba` adds sanitized failure-stage
+  diagnostics to `demo-capacity`. CI run `45988603667` then identified the stale
+  capacity snapshot assertion: the script expected `.hardware == "SIMULATED"`, while
+  the actual API returns `.mode == "SIMULATED_HARDWARE_QUOTA_ACCOUNTING"`. The HTTP
+  requests, tenant quota rejection, and CPU fallback returned expected results before
+  that assertion. The assertion now matches the implemented API response; the next CI
+  run must confirm the queued-request path. The script is not run locally because it
+  starts with Redis `FLUSHDB`.
 - Recheck the pinned container digest, NVIDIA driver/runtime compatibility, and model
   revision, license, and artifact hash before any paid run.
 - Review the separate GPU observability package in PR #46; its static checks passed

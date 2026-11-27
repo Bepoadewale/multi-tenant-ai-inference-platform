@@ -19,7 +19,7 @@ report_failure() {
     body="${status_file%.status}.json"
     printf '  %s: HTTP %s\n' "$(basename "${status_file%.status}")" "$(cat "${status_file}")" >&2
     if [[ -s "${body}" ]] && jq -e . "${body}" >/dev/null 2>&1; then
-      jq -c '{detail, error, x_capacity, usage} | with_entries(select(.value != null))' "${body}" >&2
+      jq -c '{detail, error, x_capacity, usage, mode, pools} | with_entries(select(.value != null))' "${body}" >&2
     fi
   done
 }
@@ -79,9 +79,13 @@ jq -e '.x_capacity.decision == "CPU_FALLBACK" and .x_capacity.simulated_hardware
   "${results}/analytics-fallback.json" >/dev/null
 
 stage="verify administrative capacity snapshot"
-curl -fsS --connect-timeout 2 --max-time 5 http://localhost:8081/platform/v1/capacity \
+curl -sS --connect-timeout 2 --max-time 5 -o "${results}/capacity-snapshot.json" -w '%{http_code}' \
+  http://localhost:8081/platform/v1/capacity \
   -H "Authorization: Bearer ${admin_token}" \
-  | jq -e '.hardware == "SIMULATED" and .pools[0].total_slots == 2' >/dev/null
+  >"${results}/capacity-snapshot.status"
+expect_status capacity-snapshot 200
+jq -e '.mode == "SIMULATED_HARDWARE_QUOTA_ACCOUNTING" and .pools[0].total_slots == 2' \
+  "${results}/capacity-snapshot.json" >/dev/null
 
 stage="wait for capacity holders and queued request"
 wait "${search_pid}" "${payments_pid}"
