@@ -205,11 +205,21 @@ This establishes current local lint/test/static configuration outcomes and read-
 - **Policy:** one complete clean-room cycle is sufficient; repeat only after a failed
   cycle or a relevant fix. The two successful CPU clean-room cycles under PR #31 are
   retained as historical evidence and will not be repeated for this goal.
-- **Diagnostics prepared:** `demo-local.sh` now reports the failed stream or HTTP
-  assertion and its synthetic response. CI is configured for pull requests and
-  pushes to `main`, so a feature-branch commit should run once. Bash syntax, workflow
-  YAML parsing, and `git diff --check` pass. The diagnostic commit and its CI result
-  are pending; no clean-room or GPU rerun is claimed.
+- **Root cause:** the gateway treated every `VllmBackend` HTTP adapter as a vLLM
+  model. The local CPU ONNX target also uses an HTTP adapter, but has no `/tokenize`
+  endpoint. The GPU preflight therefore failed on the existing CPU streaming demo.
+- **Fix and local result:** the gateway now invokes tokenizer preflight only when the
+  catalog declares `runtime: vllm`; a vLLM model with a non-vLLM backend fails closed.
+  A regression test covers the ONNX HTTP target. `make verify` passed with **73
+  passed, 2 optional Redis skips**, one existing Starlette deprecation warning, no
+  known dependency vulnerabilities, and valid Compose configuration. The first
+  attempt exposed a positional argument mistake in the new test's `Usage` fixture;
+  switching it to named fields fixed the test.
+- **Next CI:** `demo-local.sh` now reports the failed stream or HTTP assertion and its
+  synthetic response. CI is configured for pull requests and pushes to `main`, so
+  feature-branch commits run once. Bash syntax, workflow YAML parsing, and
+  `git diff --check` pass. The code fix still needs its single PR CI run; no clean-room
+  or GPU rerun is claimed.
 
 ## Future GPU execution template
 

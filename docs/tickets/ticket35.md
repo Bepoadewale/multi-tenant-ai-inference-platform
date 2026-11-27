@@ -94,6 +94,16 @@ inference. Tokenization failure fails closed and releases concurrency.
 - `bash -n scripts/demo-local.sh`, Ruby YAML parsing of `.github/workflows/ci.yml`,
   and `git diff --check` pass after the diagnostics and trigger change. No demo rerun
   has been performed yet.
+- The single diagnostic CI run confirmed that the CPU ONNX runtime target returned
+  `{"detail":"model tokenizer unavailable"}`. `GatewayService` had selected the
+  tokenizer path by adapter class, but the local ONNX service also uses the HTTP
+  adapter. Tokenizer preflight now follows the catalog's explicit `runtime: vllm`
+  declaration; a misconfigured vLLM route fails closed. A regression test verifies
+  that an HTTP-backed ONNX model does not call `/tokenize`.
+- After correcting a positional `Usage` fixture in the new regression test,
+  `make verify` passed: **73 passed, 2 optional Redis skips**, one existing
+  deprecation warning, no known dependency vulnerabilities, and Compose configuration
+  passed. The code fix is not pushed yet; its one PR CI run remains outstanding.
 - Evidence and official source notes are indexed in `docs/gpu-lab/VALIDATION.md`,
   `docs/gpu-lab/EVIDENCE_MANIFEST.md`, and `docs/gpu-lab/RESEARCH_NOTES.md`.
 

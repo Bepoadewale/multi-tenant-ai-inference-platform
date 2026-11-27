@@ -27,6 +27,11 @@ def chat_request(stream: bool = True, include_usage: bool = False) -> ChatComple
     )
 
 
+def use_vllm_backend(service: GatewayService, backend: vllm.VllmBackend) -> None:
+    service.catalog.models["chat-default"].runtime = "vllm"
+    service.backend_for = lambda _model, _target: backend
+
+
 def test_vllm_stream_requests_and_parses_final_usage(monkeypatch):
     seen = {}
     response_body = "".join(
@@ -357,7 +362,7 @@ def test_gateway_reserves_exact_prompt_and_output_cap_before_vllm_inference():
 
     backend.count_tokens = count_tokens
     backend.complete = complete
-    service.backend_for = lambda _model, _target: backend
+    use_vllm_backend(service, backend)
     tenant = Catalog().tenant("team-search")
 
     response = asyncio.run(service.chat(tenant, chat_request(stream=False)))
@@ -365,6 +370,35 @@ def test_gateway_reserves_exact_prompt_and_output_cap_before_vllm_inference():
     assert response["usage"]["total_tokens"] == 14
     assert sum(value for _, _, value in service.limiter.tokens[tenant.id]) == 14
     assert not service.limiter.active[tenant.id]
+
+
+def test_onnx_model_with_http_target_does_not_call_vllm_tokenizer():
+    """Only a model declared as vLLM needs the vLLM-specific tokenizer route."""
+    service = GatewayService()
+    backend = vllm.VllmBackend("http://onnx-runtime.test", "fixture-model")
+    tokenizer_called = False
+
+    async def count_tokens(_request):
+        nonlocal tokenizer_called
+        tokenizer_called = True
+        raise RuntimeError("ONNX target has no vLLM tokenizer route")
+
+    async def complete(_request):
+        return (
+            "classification=positive",
+            Usage(prompt_tokens=2, completion_tokens=1, total_tokens=3),
+            1.0,
+        )
+
+    backend.count_tokens = count_tokens
+    backend.complete = complete
+    service.backend_for = lambda _model, _target: backend
+    tenant = Catalog().tenant("team-search")
+
+    response = asyncio.run(service.chat(tenant, chat_request(stream=False)))
+
+    assert response["choices"][0]["message"]["content"] == "classification=positive"
+    assert tokenizer_called is False
 
 
 def test_gateway_rejects_context_overflow_and_releases_preflight_reservation():
@@ -376,7 +410,7 @@ def test_gateway_rejects_context_overflow_and_releases_preflight_reservation():
         return 11, 4096
 
     backend.count_tokens = count_tokens
-    service.backend_for = lambda _model, _target: backend
+    use_vllm_backend(service, backend)
     tenant = Catalog().tenant("team-search")
 
     with pytest.raises(HTTPException) as rejected:
@@ -396,7 +430,7 @@ def test_gateway_fails_closed_when_vllm_tokenizer_is_unavailable():
         raise RuntimeError("tokenizer endpoint unavailable")
 
     backend.count_tokens = fail_tokenizer
-    service.backend_for = lambda _model, _target: backend
+    use_vllm_backend(service, backend)
     tenant = Catalog().tenant("team-search")
 
     with pytest.raises(HTTPException) as rejected:
@@ -423,7 +457,7 @@ def test_gateway_enforces_tenant_prompt_limit_before_inference():
 
     backend.count_tokens = count_tokens
     backend.complete = complete
-    service.backend_for = lambda _model, _target: backend
+    use_vllm_backend(service, backend)
     tenant = Catalog().tenant("team-search")
     tenant.quotas.max_input_tokens = 20
 
@@ -453,7 +487,7 @@ def test_gateway_rejects_exact_token_reservation_before_inference():
 
     backend.count_tokens = count_tokens
     backend.complete = complete
-    service.backend_for = lambda _model, _target: backend
+    use_vllm_backend(service, backend)
     tenant = Catalog().tenant("team-search")
     tenant.quotas.tokens_per_minute = 18
 
