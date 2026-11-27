@@ -1,4 +1,4 @@
-.PHONY: install test lint audit run demo load-test bootstrap-local smoke status public-demo demo-local demo-overload demo-routing demo-failure demo-timeout demo-metering demo-observability demo-recovery demo-model-registry demo-release-control demo-capacity demo-operational-evidence demo-remediation demo-agent-tools demo-self-service demo-edge-adapter demo-sandboxed-agent demo-operator-console demo-flagship verify clean-local destroy-local helm-lint terraform-validate cloud-delivery-validate pilot-guardrails-plan pilot-cloud-plan pilot-cloud-apply pilot-cloud-push-image pilot-cloud-bootstrap-runtime pilot-cloud-smoke pilot-cloud-validate pilot-cloud-destroy
+.PHONY: install test lint audit run demo load-test bootstrap-local smoke status public-demo demo-local demo-overload demo-routing demo-failure demo-timeout demo-metering demo-observability demo-recovery demo-model-registry demo-release-control demo-capacity demo-operational-evidence demo-remediation demo-agent-tools demo-self-service demo-edge-adapter demo-sandboxed-agent demo-operator-console demo-flagship verify clean-local destroy-local helm-lint terraform-validate cloud-delivery-validate pilot-guardrails-plan pilot-cloud-plan pilot-cloud-apply pilot-cloud-push-image pilot-cloud-bootstrap-runtime pilot-cloud-smoke pilot-cloud-validate pilot-cloud-destroy gpu-ec2-preflight gpu-ec2-validate gpu-ec2-bootstrap-preview-plan gpu-ec2-preview-plan gpu-ec2-plan gpu-ec2-apply gpu-ec2-destroy-plan gpu-ec2-destroy-apply gpu-ec2-verify-clean
 PYTHON ?= python3.12
 VENV := .venv
 PY := $(VENV)/bin/python
@@ -91,6 +91,8 @@ terraform-validate:
 	terraform -chdir=infrastructure/terraform/bootstrap validate
 	terraform -chdir=infrastructure/terraform/environments/aws init -backend=false
 	terraform -chdir=infrastructure/terraform/environments/aws validate
+	terraform -chdir=infrastructure/terraform/environments/gpu-ec2 init -backend=false
+	terraform -chdir=infrastructure/terraform/environments/gpu-ec2 validate
 cloud-delivery-validate:
 	./scripts/validate-cloud-delivery-contracts.sh
 pilot-cloud-plan:
@@ -109,3 +111,23 @@ pilot-cloud-validate:
 	./scripts/pilot-cloud-validate.sh
 pilot-cloud-destroy:
 	./scripts/pilot-cloud-destroy.sh
+gpu-ec2-preflight:
+	./scripts/gpu-ec2-preflight.sh
+gpu-ec2-validate:
+	terraform -chdir=infrastructure/terraform/environments/gpu-ec2 init -backend=false
+	terraform -chdir=infrastructure/terraform/environments/gpu-ec2 fmt -check -recursive
+	terraform -chdir=infrastructure/terraform/environments/gpu-ec2 validate
+gpu-ec2-bootstrap-preview-plan:
+	./scripts/gpu-ec2-bootstrap-preview-plan.sh
+gpu-ec2-preview-plan:
+	./scripts/gpu-ec2-preview-plan.sh
+gpu-ec2-plan:
+	./scripts/gpu-ec2-plan.sh
+gpu-ec2-apply:
+	./scripts/gpu-ec2-apply.sh
+gpu-ec2-destroy-plan:
+	./scripts/gpu-ec2-destroy-plan.sh
+gpu-ec2-destroy-apply:
+	./scripts/gpu-ec2-destroy-apply.sh
+gpu-ec2-verify-clean:
+	./scripts/gpu-ec2-verify-clean.sh

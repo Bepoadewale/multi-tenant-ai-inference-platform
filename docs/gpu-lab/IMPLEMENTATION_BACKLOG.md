@@ -9,14 +9,16 @@ pull requests must include the repository's clean-room evidence.
 
 - Phase 1 design gate is complete. The repository audit and candidate architecture are recorded in
   `REPOSITORY_AUDIT.md`, `ARCHITECTURE.md`, and `RESEARCH_NOTES.md`.
-- PR #30 registers this goal and is ready for review. All required checks passed for
-  head `336c1b468cf1ac9e0505ffc95a7e8bb10d8a86b6` on 2026-11-26.
+- PR #30 registers this goal and is ready for review. Its current head is
+  `04cb5645be7c3182958248a62c22b0a9b9d055f6`; all required checks passed.
 - PR #31 repairs the baseline dependency audit, passed two fresh local clean-room
   cycles and all required GitHub checks, and is ready for review.
 - No AWS resources or GPU instance hours have been used by this goal.
 - The account's On-Demand G and VT quota is zero. No quota increase request has been
   submitted.
-- The existing repository budget uses email notifications. A recipient must be
+- The existing repository budget and Terraform state guardrails use a repository-
+  scoped bucket and lock table. GPU state must use a unique key namespace, not create
+  duplicate guardrails. The budget uses email notifications. A recipient must be
   provided outside version control and verified before that alert is active; it is
   not an enforcement control.
 - The initial USD $25 limit is a hard ceiling. A provisional planning scenario now
@@ -64,29 +66,37 @@ phase exit does not authorize payment.
 
 ### Package 2 — Isolated EC2 Terraform and expiry controls
 
-**Status:** static design/implementation in progress; billable resources prohibited
+**Status:** static design/implementation in review preparation; billable resources prohibited
 until every cost and quota gate is satisfied.
 
-- [ ] Create a separate Terraform root with strict account, region, instance-type,
-  instance-count, project-tag, and IMDSv2 guards.
-- [ ] Keep the resource set to a VPC, subnet, route/IGW, minimal security group,
+- [x] Create a separate Terraform root with account, region, type, project-tag, and
+  IMDSv2 guards. One `aws_instance` resource and a quota/resource preflight limit the
+  first package to one GPU host.
+- [x] Keep the resource set to a VPC, subnet, route/IGW, minimal security group,
   scoped IAM instance role/profile, one `g6.xlarge`, and encrypted gp3 storage.
-- [ ] Use a private, versioned, encrypted S3 state bucket and a dedicated pay-per-
-  request DynamoDB lock table, as required by the repository's cloud-pilot rule. Add
-  S3 native lock files if supported by the selected Terraform release, and test both
-  locks together. Define bootstrap and final state teardown without committing state
-  or saved plans.
-- [ ] Prefer SSM with no inbound ports. Add only outbound access required for package
-  and model downloads; do not add NAT Gateway or endpoints without a demonstrated
+- [x] Reuse the repository's private, versioned, encrypted S3 state bucket and
+  pay-per-request DynamoDB lock table, with a unique `gpu-ec2/` state-key namespace.
+  Add S3-native lock files if supported by the selected Terraform release, and test
+  both locks together. Do not delete shared repository guardrails during GPU teardown
+  or commit state or saved plans.
+- [x] Prefer SSM with no inbound ports. Limit outbound access to TCP 80/443 for
+  package/model retrieval; do not add NAT Gateway or endpoints without a demonstrated
   need and priced approval.
-- [ ] Add an independent EventBridge Scheduler one-time `ec2:TerminateInstances`
+- [x] Add an independent EventBridge Scheduler one-time `ec2:TerminateInstances`
   call with an exact UTC deadline and instance/tag-scoped execution role; use a
-  guest-side systemd shutdown timer as a second control. Configure automatic schedule
-  deletion after invocation and test retry, missed invocation, reboot, and already-
-  terminated-instance behavior. EC2 guest shutdown must terminate; encrypted gp3
+  guest-side systemd shutdown timer as a second control. The schedule has no repeat
+  rule and Terraform destroy removes it; the current pinned provider lacks an
+  after-completion delete setting. EC2 guest shutdown must terminate; encrypted gp3
   storage must delete on termination.
-- [ ] Validate and plan statically first. Prepare a single saved plan and human-readable
-  resource/cost review. Do not apply until the quota and exact cost gate are cleared.
+- [x] Validate statically and prepare AWS-backed local-state previews: 7 bootstrap
+  creates and 14 GPU-root creates. The previews are not remote-state or apply-ready
+  plans. Keep plans outside Git.
+- [x] Enforce the expected AWS account through the provider and fail an instance
+  launch when the selected AZ does not offer the approved type.
+- [x] Render and parse the cloud-init YAML; actual host behavior remains unverified.
+- [ ] Create and inspect the final remote-state saved plan, confirm the full current
+  cost and budget recipient, and then request the 4-vCPU quota. Do not apply until the
+  $25 project gate is cleared.
 
 **Exit gate:** exact plan creates one authorized L4 and only enumerated project
 resources, estimated total remains below $25 with safety margin, expiry is tested,

@@ -1,0 +1,38 @@
+#cloud-config
+write_files:
+  - path: /etc/systemd/system/gpu-lab-expiry.service
+    owner: root:root
+    permissions: '0644'
+    content: |
+      [Unit]
+      Description=Terminate the bounded single-L4 laboratory instance
+
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/sbin/shutdown --poweroff now
+  - path: /etc/systemd/system/gpu-lab-expiry.timer
+    owner: root:root
+    permissions: '0644'
+    content: |
+      [Unit]
+      Description=Enforce the approved single-L4 laboratory expiry
+
+      [Timer]
+      OnCalendar=${expiry_systemd}
+      Persistent=true
+      Unit=gpu-lab-expiry.service
+
+      [Install]
+      WantedBy=timers.target
+runcmd:
+  - |
+    if systemctl cat snap.amazon-ssm-agent.amazon-ssm-agent.service >/dev/null 2>&1; then
+      systemctl enable --now snap.amazon-ssm-agent.amazon-ssm-agent.service
+    elif systemctl cat amazon-ssm-agent.service >/dev/null 2>&1; then
+      systemctl enable --now amazon-ssm-agent.service
+    else
+      echo "SSM Agent unit was not found in the selected Ubuntu AMI" >&2
+      exit 1
+    fi
+  - [systemctl, daemon-reload]
+  - [systemctl, enable, --now, gpu-lab-expiry.timer]

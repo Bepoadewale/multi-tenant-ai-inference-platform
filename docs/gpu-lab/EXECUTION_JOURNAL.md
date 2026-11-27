@@ -255,12 +255,14 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Starting state:** PR #30 head `80ca94e`; its two workflow runs were still active
   when the repository's state-lock requirement was reviewed.
 - **Objective:** align the architecture and cost record with the repository rule that
-  each cloud root has its own DynamoDB lock table, while keeping Terraform's current
-  S3-native lock option documented.
+  the cloud repository has its own DynamoDB lock table and roots use unique state-key
+  namespaces, while keeping Terraform's current S3-native lock option documented.
 - **Research and decision:** HashiCorp documents that S3 and DynamoDB backend locking
   can be configured together, but marks DynamoDB locking deprecated. The repository
-  rule still requires a DynamoDB table. The proposed design therefore retains a
-  small project table and tests the pinned Terraform dual-lock path before use.
+  rule requires a repository-scoped DynamoDB table. A follow-up inspection of the
+  actual `AGENTS.md` and existing bootstrap showed that the repository already defines
+  this bucket and table. The GPU root will reuse them with a unique state key and
+  test the pinned Terraform dual-lock path; it will not create a duplicate table.
   AWS Budgets direct-email alerts require recipient verification and can lag charges;
   they are not a runtime stop control.
 - **Changes:** corrected the current rounded 12-hour envelope from `$18.34` to
@@ -275,5 +277,117 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Limitations:** estimate remains provisional. Exact price, tax, egress aggregation,
   state lifetime, resource plan, budget recipient verification, and expiry testing
   remain open before any apply.
-- **Next action:** commit this documentation correction, then prepare the isolated
-  Phase 2 Terraform root in a separate pull request and keep it static-only.
+- **Next action:** finish the static cost/design correction and prepare the isolated
+  Phase 2 Terraform root in a separate pull request; keep it static-only.
+
+## 2026-11-26 — Phase 2 single-L4 static root and AWS preview plans
+
+- **Phase:** Phase 2 — isolated EC2 infrastructure, static-only.
+- **Branch / PR:** `codex/gpu-ec2-foundation`, intended PR #32, based on PR #30 head
+  `04cb564`.
+- **Starting state:** PRs #30 and #31 remained open; PR #30's latest checks passed.
+  This branch contained no Phase 2 Terraform root. Project AWS resources and GPU
+  instance-hours were both zero.
+- **Objective:** add a reviewable one-L4 root, independent expiry, scoped read-only
+  preflight, exact-plan gates, and cleanup verification; produce AWS-backed previews
+  without applying resources.
+- **Research:** reviewed official Terraform S3 backend guidance, current AWS provider
+  `5.100.0` schema, AWS quota/offerings, Canonical Ubuntu AMIs, AWS Systems Manager
+  Agent setup, AWS budget notification pricing, and EventBridge Scheduler behavior.
+- **Changes:** added a dedicated `gpu-ec2` Terraform root with one `g6.xlarge`, no
+  inbound rules, outbound TCP 80/443, IMDSv2, encrypted 100 GiB gp3, scoped SSM and
+  expiry roles, a guest `systemd` timer, and a one-time scheduled termination. Added
+  account/quota/AZ/resource/bootstrap preflight, plan/apply/destroy scripts with
+  checksum checks, a read-only resource-absence verifier, local-only preview plans,
+  Make targets, and Phase 2 documentation. Reused the repository-level state bucket
+  and DDB lock table under a distinct `gpu-ec2/` key after checking the actual
+  `AGENTS.md` rule; created no duplicate table.
+- **AWS read-only checks:** the expected account matched. Current On-Demand G/VT quota
+  is `0.0` vCPUs. The `g6.xlarge` offering list currently includes `us-east-1a`, `1b`,
+  `1c`, `1d`, and `1f`. Offerings do not reserve capacity.
+- **Preview results:** the bootstrap local-state preview proposed `7 to add, 0 to
+  change, 0 to destroy`; it used `operator@example.invalid` as a placeholder alert
+  address. The GPU local-state preview proposed `14 to add, 0 to change, 0 to
+  destroy`, exactly one `g6.xlarge`, AZ `us-east-1c`, and Canonical image
+  `ami-0a951420c495183dc`. Together these show a preliminary 21-create scope. Plans
+  are ignored under `.local/`, are not remote-backend plans, and must not be applied.
+- **Validation:** final `make terraform-validate` passed the bootstrap, existing EKS,
+  and new GPU roots with backend disabled. `make gpu-ec2-validate`, `bash -n
+  scripts/gpu-ec2-*.sh`, and `git diff --check` passed. PR #30 checks passed at
+  `04cb564`.
+- **Failed attempts and fixes:** Terraform 5.100.0 rejected the optional
+  `action_after_completion` argument; kept the pinned provider and rely on Terraform
+  destroy to remove the non-recurring schedule. An HCL multi-line expiry expression
+  needed parentheses. `terraform console` requested backend initialization and did
+  not render the cloud-init file. The first `terraform show` command ran from the
+  source root and could not load the plan copy's provider schema; rerunning `show`
+  from `.local/gpu-ec2-preview` succeeded and listed all 14 create addresses. These
+  failed commands changed no AWS resources.
+- **Financial boundary:** preliminary estimate remains `$18.35`, below the `$25`
+  ceiling but not an authorization. AWS Budgets notifications are free without
+  actions, but email verification is required for alerts. No apply or quota request
+  was made; AWS spend is `$0` and GPU hours are `0`.
+- **Limitations:** previews omit remote locking and state bootstrap relationships,
+  do not prove Scheduler or guest-timer behavior, and do not reserve capacity. The
+  placeholder budget recipient is not usable. A final remote-state plan, exact price
+  and tax confirmation, and expiry tests remain outstanding.
+- **Next action:** finish static review, create and monitor the focused PR, then
+  prepare the full cost/plan review. Request 4 vCPUs only after that is ready; do not
+  apply while quota is zero.
+
+## 2026-11-26T23:57Z — Final static checks and cloud-init template evidence
+
+- **Phase:** Phase 2 — static-only infrastructure preparation.
+- **Branch / PR:** `codex/gpu-ec2-foundation`, intended stacked PR #32 based on PR #30.
+- **Starting state:** Terraform, scripts, and documentation were present but
+  uncommitted. PRs #30 and #31 remained open. No Terraform mutation or quota request
+  had been made.
+- **Objective:** verify the latest cloud-init change, preserve the correct preview
+  evidence, and run the complete static validation before opening the PR.
+- **Commands and results:** `make gpu-ec2-validate` passed; `make terraform-validate`
+  passed for bootstrap, the existing EKS root, and the GPU root; `bash -n
+  scripts/gpu-ec2-*.sh` passed; `git diff --check` passed. A backend-free local copy
+  rendered `cloud-init.yaml.tftpl`; Ruby YAML safe parsing succeeded using
+  `YAML.safe_load(File.read(...))`. The prior `safe_load_file` method was unavailable
+  in the installed Ruby and was replaced with the supported API.
+- **Preview evidence:** the revised AWS-backed local-state GPU plan has SHA-256
+  `a91226c5be150e1972e9351c843837c0004d54f19072684389a1c035facdef5d` and proposes
+  14 creates. The bootstrap preview proposes 7 creates and has SHA-256
+  `e1cd8a88e803b8cd15c1dd20fc9896aba03ffe40013d879cd6aff5928f69aaed`. The plans are
+  local previews with the S3 backend removed; neither is suitable for apply.
+- **Changes:** updated the validation record, ticket, and evidence manifest to
+  distinguish successful static rendering/YAML parsing from unverified real-host
+  cloud-init, SSM registration, and expiry behavior.
+- **Cloud resources and cost:** no resources created or changed; AWS spend `$0`; GPU
+  instance-hours `0`; G/VT quota remains `0` vCPUs; no quota request submitted.
+- **Limitations:** no quota approval, remote-state plan, capacity guarantee, instance,
+  GPU, or guest behavior has been verified. The first project bootstrap still needs
+  private operator email input before its budget alert can be applied.
+- **Next action:** complete the diff review and open PR #32 against the PR #30 branch;
+  continue non-billable work while PR checks run. Keep quota and apply gates closed
+  until exact plan, cost, and expiry controls are ready.
+
+## 2026-11-27T00:00Z — Enforced account guard and refreshed preview
+
+- **Phase:** Phase 2 — static-only infrastructure preparation.
+- **Branch / PR:** `codex/gpu-ec2-foundation`, intended stacked PR #32 based on PR #30.
+- **Objective:** ensure Terraform's account and AZ guards stop operations rather than
+  merely warn, then produce a preview from the final source.
+- **Issue found:** Terraform `check` blocks are diagnostic checks, not a sufficiently
+  strong control for an account boundary or instance-launch condition.
+- **Change made:** configured AWS provider `allowed_account_ids` in both the new GPU
+  root and its prerequisite bootstrap root. Moved the G6 AZ-offering test into an
+  `aws_instance` lifecycle precondition. The account identity remains a data source
+  for the expiry-role trust policy.
+- **Validation:** `make gpu-ec2-validate`, `make terraform-validate` (bootstrap,
+  existing EKS root, GPU root), shell syntax checks, and `git diff --check` passed.
+- **Read-only preview:** the source-updated AWS-backed local-state GPU plan proposed
+  `14 to add, 0 to change, 0 to destroy`. It selected one `g6.xlarge` in `us-east-1c`
+  and Canonical Ubuntu AMI `ami-0a951420c495183dc`. SHA-256 is recorded in
+  `EVIDENCE_MANIFEST.md`; the plan is not remote-state-backed or apply-ready. No cloud
+  resource was created or changed.
+- **Cost and quota:** spend remains `$0`, GPU instance-hours `0`, G/VT quota `0` vCPUs;
+  no quota request was submitted. The plan is not an authorization to spend.
+- **Next action:** finish reviewing staged source and documentation, then create PR
+  #32 against the PR #30 branch. Keep quota and apply gated on the exact remote plan,
+  refreshed cost review, expiry proof, and the existing `$25` maximum.
