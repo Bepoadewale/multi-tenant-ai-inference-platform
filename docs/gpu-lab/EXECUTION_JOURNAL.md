@@ -1,5 +1,22 @@
 # GPU Lab Execution Journal
 
+## 2026-11-27 — Clean-room run count clarified
+
+- **Scope:** verified the repository's clean-room requirements after the owner clarified
+  that one successful run is sufficient.
+- **Finding:** `AGENTS.md` and the pull request template required a second bootstrap/demo;
+  the GPU goal's final acceptance text already described one reproduction. Historical
+  CPU evidence records two successful runs, but no GPU clean-room run has started.
+- **Decision:** one successful clean-room cycle satisfies this GPU goal and the shared
+  implementation-PR gate. Repeat only after a failed cycle or a material correction that
+  requires revalidation. Historical records remain unchanged.
+- **Changes:** aligned `AGENTS.md`, the PR template, goal document, and implementation
+  status with that decision.
+- **Validation:** source review only; no runtime clean-room cycle was run. No AWS resource
+  was created or changed.
+- **Next step:** continue Phase 2 non-billable work; retain the single clean-room run for
+  Phase 12 after the GPU automation and evidence process are ready.
+
 Preserve earlier entries. Record actual actions and outcomes; never replace failed attempts with a clean narrative. Keep credentials, tokens, private data, raw Terraform state, and sensitive logs out of this file.
 
 ## 2026-11-26 — Goal registration and initial audit

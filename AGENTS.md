@@ -63,7 +63,8 @@ from an existing developer environment; execute it after project-specific cleanu
 
 Do not certify any implementation PR as ready for human review until it includes executed,
 project-scoped clean-room evidence for the change: clean state, bootstrap, smoke, the relevant
-success and failure/security demos, validation, safe cleanup, and a second clean bootstrap/demo.
-Record exact commands and outcomes in `docs/governance/VALIDATION.md`; if the sequence has not run or fails,
+success and failure/security demos, validation, and safe cleanup. One successful clean
+bootstrap/demo cycle is sufficient. Repeat it only when the first cycle fails or a material
+fix needs verification. Record exact commands and outcomes in `docs/governance/VALIDATION.md`; if the sequence has not run or fails,
 the PR remains draft. Documentation-only changes may state that clean-room execution is not
 applicable, but must not imply implementation validation.

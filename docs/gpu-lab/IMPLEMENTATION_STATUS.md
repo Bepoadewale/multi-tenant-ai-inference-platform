@@ -25,6 +25,7 @@
 - Gateway vLLM response accounting and token estimation need direct tests and design review before GPU integration.
 - Baseline on `main` reported 84 advisory records across seven transitive packages and failed `make verify`. PR #31 adds shared minimum-version constraints; local full verification, image build, clean-room evidence, and all four required GitHub check names across two workflow runs passed. Human review/merge remains outstanding. See ticket #31 and `docs/governance/VALIDATION.md`.
 - Historical validation is documented in `docs/governance/VALIDATION.md`; this session's local results are not GPU evidence.
+- The prior CPU baseline has two recorded clean-room cycles. This GPU goal requires one successful end-to-end clean-room reproduction; rerun only to recover from a failure or verify a material fix.
 
 ## Authorization and resource tracking
 
