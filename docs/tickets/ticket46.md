@@ -8,7 +8,7 @@ runtime claims unverified until an approved L4 execution.
 
 ## Current state
 
-PR [#46](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/46) is open against PR #45 at initial head `3f26111`; its required checks are pending.
+PR [#46](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/46) is open against PR #45 at head `2945887`. Run `45987574123` passed Python, manifests, supply-chain, and the new `gpu-observability` job. Its inherited `local-e2e` job failed in the existing CPU `demo-capacity` script, the same failure seen on PR #45. Static observability validation passed.
 
 The single-GPU profile had vLLM and gateway metrics endpoints but no Prometheus
 scrapes, GPU exporter, host exporter, alert routing, Grafana dashboard, or trace

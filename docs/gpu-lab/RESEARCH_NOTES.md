@@ -382,6 +382,31 @@ correlation remain unverified until the approved single-L4 batch.
 These references inform design only. No monitoring stack, model evaluation, AWS
 automation, GPU runtime, or model download was executed during this research.
 
+## 2026-11-27 — vLLM serving benchmark preparation research
+
+- The official [vLLM 0.34.0 `bench serve` CLI reference](https://docs.vllm.ai/en/v0.34.0/cli/bench/serve/)
+  supports the OpenAI chat backend, a base URL and endpoint, synthetic random input
+  and output lengths, `--max-concurrency`, warm-up requests, saved aggregate JSON,
+  metadata labels, and selected TTFT/TPOT/ITL/end-to-end percentiles. This project
+  uses that official client rather than treating the existing mock-oriented local
+  load script as GPU benchmark evidence.
+- The CLI's finite maximum-concurrency setting bounds simultaneous client requests;
+  request rate `inf` sends the configured workload as quickly as the concurrency
+  limit allows. It does not create a GPU admission limit or prove physical isolation.
+- The prepared runner saves aggregate results only and does not request detailed
+  per-request data, which can contain output text. It records commit, region, instance
+  type, GPU/driver and memory, PyTorch/CUDA/vLLM versions, model revision, request
+  lengths, concurrency, and repetition. It stops after a failed case and keeps partial
+  evidence outside public Git.
+- vLLM's benchmark results are serving measurements, not kernel timings. CUDA kernel
+  experiments still need synchronized GPU timing and a profiler. The direct benchmark
+  also omits gateway latency and tenant controls; those need a separate authenticated
+  workload.
+- No benchmark was run against a model. The dry-run validated 11 default cases (33
+  runs across three repetitions); explicit opt-in adds one short-shape concurrency-16
+  case (36 runs). These are planned commands only and do not establish runtime,
+  throughput, memory safety, or cost.
+
 ## 2026-11-27 — GPU profiling and instrumentation boundaries
 
 - NVIDIA's [CUDA programming guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
