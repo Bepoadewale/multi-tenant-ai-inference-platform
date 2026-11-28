@@ -2174,3 +2174,14 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Limits and cost:** no real gateway/vLLM requests, GPU, AWS query/write, model downloads, or spend. No benchmark measurements were generated.
 - **Current CI:** PR #58 run `46162221680` passed all six required checks. Sibling PR #59 run `46162611345` was still in progress at this journal snapshot. PR #60 new CI has not yet been published.
 - **Next:** finish current-status docs and ticket, push with an exact lease against old PR #60 head `9a8bd28`, update its PR body, and watch the triggered checks.
+
+
+## 2026-11-28 — Restack and validate the GPU interview guide
+
+- **Phase:** non-billable learning documentation; paid GPU gates remain open.
+- **Branch / PR:** `codex/gpu-interview-preparation`, PR #61, parent PR #60 current head `9fc23f2`; rebased from old parent `9a8bd28`. The one handbook-specific commit is now based on the current benchmark PR.
+- **Content check:** the interview guide contains 106 numbered questions across Linux, AWS, GPU, CUDA, Docker, Python, distributed systems, vLLM, language models, LLMOps/MLOps, evaluation, observability, reliability, security, performance, FinOps, incidents, and system design; it includes follow-ups and evidence-grounded STAR examples.
+- **Validation:** relative Markdown links in six changed files had no missing targets; `git diff --check` passed. No test or clean-room run was needed for this documentation-only change.
+- **AWS / GPU / cost:** none; no AWS query/write, model download, GPU activity, or spend.
+- **CI:** PR #58 run `46162221680` passed. PR #59 run `46162611345` and PR #60 run `46162969703` were still in progress. PR #61 fresh CI has not yet been published.
+- **Next:** commit the current goal/status/journal updates, push using an exact lease against old PR head `bfd3449`, update its PR body, and track one CI run.

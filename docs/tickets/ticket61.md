@@ -66,3 +66,13 @@ PR #61 was rebased onto the updated PR #60 head `9a8bd28`; its prior passing run
 guide remains 106 questions across 18 topics. Structural and changed-file link checks
 are being rerun before publishing; fresh PR CI is required. No AWS, GPU, model, or
 clean-room operation occurred.
+
+
+## 2026-11-28 restack validation
+
+PR #61 was rebased from former PR #60 head `9a8bd28` onto refreshed PR #60 head
+`9fc23f2`. It contains 106 numbered questions spanning the required technical
+areas, plus follow-up questions and examples grounded only in this repository's
+actual local/static evidence. Relative links in six changed Markdown files passed;
+`git diff --check` passed. This documentation check does not prove GPU experience.
+No AWS or GPU operation occurred. Fresh CI is pending publication.
