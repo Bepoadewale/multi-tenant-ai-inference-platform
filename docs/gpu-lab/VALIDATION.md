@@ -146,6 +146,28 @@ This establishes current local lint/test/static configuration outcomes and read-
   `$0`, GPU instance-hours are `0`, and the quota request remains separate from apply
   authorization.
 
+## 2026-11-27 — PR #34 Redis lease safety review fixes
+
+- **Scope:** bounded Redis lease renewal and cleanup of orphaned reservation metadata.
+  This was local non-billable work; no AWS resource or GPU was used.
+- **Changes:** the gateway now bounds each asynchronous renewal wait to one third of
+  the lease after sleeping for one third, then cancels the request owner on timeout or
+  failed renewal before the lease expires. Redis refuses to renew an already-expired
+  lease. New admissions prune expired lease members and delete their hash metadata,
+  while minute/day token-ledger entries remain until the quota windows expire.
+- **Validation:** `make verify` passed Ruff, **75 tests**, pip-audit with no known
+  vulnerabilities, and Docker Compose config. Two optional Redis tests were skipped in
+  the general run. With a disposable Redis 7.4 container, the lease/in-memory suite
+  reported **7 passed**, including repeated crash cleanup and the bounded renewal test.
+- **Environment:** the first bounded-renewal regression test also verifies that the
+  owner is cancelled in less than the configured lease duration. The Redis test
+  container was stopped after the integration run.
+- **Limitations:** this establishes Lua behavior against one local Redis server and
+  cancellation behavior in one Python process. It does not prove independent gateway
+  processes, a Redis outage under live traffic, live vLLM, or GPU behavior.
+- **Cloud boundary:** no AWS changes; project-specific spend remains `$0` and GPU
+  instance-hours remain `0`.
+
 ## Future GPU execution template
 
 - Date/time and commit SHA:
