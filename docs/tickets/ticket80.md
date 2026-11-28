@@ -45,6 +45,8 @@ but the complete $25 cost gate and exact saved-plan review remain separately req
 
 ## Acceptance status
 
-Local Terraform formatting, validation, all 12 mocked cases, and the 31-file docs link
-check pass. PR #80 is open at head `cf25f6d`; all six required jobs passed in run
-`46139054282`. This is static/local evidence only; no AWS or GPU behavior is claimed.
+On the refreshed local branch, Terraform formatting, validation, all 12 mocked cases,
+`make gpu-docs-validate` across 31 Markdown files, and `git diff --check` pass. The
+older remote PR #80 head `cf25f6d` passed all six jobs in run `46139054282`; that run
+does not cover the refreshed branch. Fresh CI is pending publication. This is
+static/local evidence only; no AWS or GPU behavior is claimed.
