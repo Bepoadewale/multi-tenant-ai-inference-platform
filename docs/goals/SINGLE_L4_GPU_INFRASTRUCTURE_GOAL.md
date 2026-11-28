@@ -2,14 +2,14 @@
 
 **Status: ACTIVE — Phase 2, isolated EC2 infrastructure (static preparation only)**
 **Source of truth:** this document, the linked execution journal, pull requests, and evidence records.  
-**Last updated:** 2026-11-28 16:01 UTC
-**Current branch:** PR #63 evidence-based final-report draft has been restacked onto refreshed PR #62 head `8927734`; its structure and Markdown links pass locally. Fresh CI is pending. PR #58 passed; PRs #59–#62 have active or pending refreshed checks.
+**Last updated:** 2026-11-28
+**Current branch:** PR #64 host-operator automation is restacked onto the refreshed PR #63 head `e178ff7`; source and documentation conflicts are being reconciled. PRs #59 and #60 passed refreshed six-job CI (`46162611345`, `46162969703`); PRs #61–#63 have active refreshed checks. No AWS resource or GPU activity.
 **Registration PR:** [#30 — docs: register single-L4 GPU infrastructure goal](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/30) (open; current head `04cb564`, required checks passed). **Phase 2 PR:** [#32 — guarded single-L4 EC2 foundation](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/32) (open and ready for review; current head `da2567e`).
 **Baseline repair PR:** [#31 — fix: apply audited dependency constraints](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/31) (open; head `9710932`, required checks passed).
 **GPU quota:** the latest read-only CLI check confirms the existing request is `CASE_CLOSED` with desired value 4.0 and applied On-Demand G/VT quota is 4.0 vCPUs in `us-east-1`, sufficient numerically for one `g6.xlarge`. This does not reserve AZ capacity or authorize provisioning. Do not submit another quota request.
 **Launch gates still open:** exact project remote state and locking, a valid private Budget-alert recipient and project Budget, exact saved-plan/cost review, fresh regional capacity validation, independent expiry verification, and a separate explicit apply authorization. No GPU instance or other project AWS resources exist.
 
-**Latest progress (2026-11-28):** PR #58 current guide head is `59925fd`. PR #60 head `9a8bd28` has fresh six-job CI in progress after local focused checks. PR #61 head `bfd3449` was rebased onto #60 and needs fresh CI. PR #62 head `90e4aca` adds benchmark and incident handbooks, rebased onto #61, and needs fresh CI. PR #63's evidence-labeled report draft is being restacked onto #62. No AWS resources, L4 execution, or spend.
+**Latest progress (2026-11-28):** PR #58 head `fa4d819` passed refreshed CI. PR #59 and #60 passed refreshed six-job CI. PRs #61–#63 are restacked with active CI. PR #64 is being restacked to fix the first-configuration host guard so Ansible can install drivers before `nvidia-smi` exists. No AWS resources, L4 execution, or spend.
 
 ## Project objective
 

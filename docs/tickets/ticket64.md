@@ -1,0 +1,170 @@
+# Ticket 64 — guarded single-L4 host operations
+
+## Objective
+
+Prepare the remaining repeatable host commands before quota approval. After the
+manual installation and first manual deployment lessons, an operator should be able
+to configure the exact L4 host, deploy the isolated Compose profile, check real tenant
+inference, run bounded evaluation/benchmark and a reversible Redis drill, and collect
+sanitized evidence. No AWS provisioning or GPU execution is part of this ticket.
+
+## Current state
+
+Terraform and the GPU stack are prepared, and this ticket adds single-command
+post-provisioning host wrappers. They have only been validated locally and in CI;
+none has run on EC2. The current AWS applied On-Demand G/VT quota is 4.0 vCPUs, but
+remote state/locking, Budget controls, exact plan and cost review, expiry checks,
+fresh capacity verification, and separate apply authorization still gate launch. No
+L4 host or project AWS resource has been created.
+
+## Research and design
+
+- Follow the repository's single-host Docker Compose profile and local Ansible
+  connection. Run these operations through Systems Manager Session Manager on the
+  EC2 host; do not open public service ports or give CI AWS credentials.
+- Validate each host against IMDSv2 identity, the expected account and exact instance
+  ID, `us-east-1`, and `g6.xlarge`. The first configuration run checks identity only
+  because it installs the driver; later GPU actions require exactly one visible L4.
+- Keep tenant tokens mode `0600`; never print prompt, response, token, `.env`, or raw
+  logs in operator output or evidence.
+- Bound configure (90 minutes), Compose build/start (45 minutes), readiness (20 minutes), evaluation (20
+  minutes), benchmark (1–120 minutes, 60 by default), and each HTTP request. The
+  Terraform expiry remains the independent limit if the session is interrupted.
+- Keep host snapshots under a private path outside the repository. Record only
+  sanitized hardware/software/service/readiness metadata.
+
+## Implementation tasks
+
+- [x] Add an IMDSv2/account/instance/region/type/L4 guard.
+- [x] Add a bounded authenticated smoke for readiness, tenant spoof, identity/model
+  denial, three short tenant requests, and one streamed request.
+- [x] Add separately confirmed host wrappers for Ansible, Compose deploy, evaluation,
+  and bounded direct/gateway benchmarks.
+- [x] Add a reversible Redis outage drill that verifies the baseline, checks both
+  gateways fail closed, restores Redis in an exit trap, and checks recovery.
+- [x] Add private sanitized host evidence output and fake-based unit tests.
+- [x] Validate the deployment `.env` file is a regular mode-`0600` file with unique
+  keys, verified-format model digest/source commit, and a sufficiently long password.
+- [x] Reject a deployment source commit that is stale relative to the checked-out
+  code, so evaluation provenance cannot silently name a different revision.
+- [x] Document the manual-to-automated handoff, confirmations, locations, timeouts,
+  evidence limits, and Terraform-only teardown in the reproduction and batch guides.
+- [x] Align Ansible validation with the hash-locked local environment and keep a CI
+  fallback for the workflow that installs those same locked dependencies.
+- [x] Allow first-pass host configuration before the driver exists while retaining
+  the L4 guard for inference and post-install GPU operations.
+- [x] Run focused local fake-based tests, Ruff, shell parsing, static command previews,
+  and documentation/link checks.
+- [x] Pass required pull request CI and resolve any findings.
+- [ ] Obtain human review; do not merge without owner authorization.
+
+## Acceptance criteria
+
+- Local tests prove the host identity guard rejects mismatched account/instance,
+  wrong GPU count/type, and insecure tenant token permissions.
+- Smoke tests prove only synthetic traffic is sent and that output excludes tokens
+  and response content.
+- Evidence tests prove private permissions and repository-path refusal.
+- Shell wrappers parse and refuse absent explicit confirmations. Static checks do not
+  contact AWS, Docker, a model endpoint, or a GPU host.
+- Operator guides accurately state the timeouts and limits and label host execution as
+  pending until real L4 evidence exists.
+- Existing CPU ONNX, EKS contract, Terraform destroy protections, and local clean-room
+  validation remain unchanged.
+
+## Validation and commands
+
+Planned local-only checks:
+
+```bash
+.venv/bin/ruff check scripts/gpu_ec2_host_guard.py scripts/gpu_ec2_smoke.py \
+  scripts/gpu_ec2_evidence.py gateway/tests/test_gpu_ec2_operator.py
+PYTHONPATH=.:gateway/src .venv/bin/python -m pytest -q gateway/tests/test_gpu_ec2_operator.py
+bash -n scripts/gpu-ec2-host-action.sh scripts/gpu-ec2-redis-outage.sh
+make -n gpu-ec2-configure gpu-ec2-deploy gpu-ec2-smoke gpu-ec2-benchmark \
+  gpu-ec2-evaluate gpu-ec2-incident-drills gpu-ec2-evidence
+git diff --check
+```
+
+Pull request CI remains responsible for the repository's normal required checks.
+Do not launch a separate manual clean-room cycle for this package; record the
+workflow's local-E2E result and do not claim that it exercised EC2/GPU operations.
+
+## Security and financial considerations
+
+No AWS operation, model download, GPU request, or spend is required. Confirmation
+variables only guard accidental invocation and do not authorize cloud spend. Host
+identity is checked before actions. The Redis drill changes only the project Compose
+service and restores it on exit. No Docker-wide cleanup is added. AWS teardown remains
+the exact-plan, project-scoped Terraform process from the local workstation.
+
+## Evidence collected
+
+Seventeen focused tests passed; Ruff passed for all new Python files; both shell scripts
+passed `bash -n`; Make previews showed only the intended wrapper commands; a local
+negative check confirmed host configuration stops before metadata access without its
+confirmation; `git diff --check` passed. Seventy-eight local Markdown links across
+seven updated documentation files resolve. The first Ansible syntax attempt found
+the executable absent. The Make target now prefers the hash-locked host venv;
+installing `infrastructure/ansible/requirements.lock` with `--require-hashes` into
+that ignored local venv allowed `make gpu-ansible-validate` to pass. Code commit
+`07161ab` passed all six required checks in run `46082712127`, including the workflow's
+local E2E cycle. These results are local/static only. No L4 screenshot, metric,
+benchmark, cost, inference result, or incident is claimed.
+
+PR #64 remains open for human review. Its code checks are complete; GPU-host acceptance
+items remain pending and cannot be satisfied by local CI.
+The readiness-documentation follow-up `3815390` also passed all six required checks,
+including the workflow local E2E cycle, in run `46083985132`; PR #64 is marked ready
+for review and remains unmerged.
+
+## Review follow-up — direct entrypoints and validation record
+
+The review found that direct execution of `scripts/gpu_ec2_smoke.py` and
+`scripts/gpu_ec2_evidence.py` could not import `scripts.gpu_ec2_host_guard` when
+`PYTHONPATH` was unset. Both entrypoints now add the repository root to their import
+path before loading the shared guard. The evidence command now parses `--help` before
+attempting host identity checks. A subprocess regression test runs both direct
+`--help` commands with `PYTHONPATH` removed.
+
+Validation evidence for the clean GitHub runner cycle in run `46084793573` is now in
+`docs/governance/VALIDATION.md`, with the exact `make install`, `make bootstrap-local`,
+`make smoke`, `make demo-flagship`, `make verify`, and `make clean-local` sequence and
+its CPU/local limits. The focused local check passed Ruff, 19 tests, and both direct
+entrypoint help commands without `PYTHONPATH`. No AWS or GPU operation occurred.
+
+The prior PR head `81362cb` passed all six required jobs in GitHub Actions run
+`46104868080`, including its local CPU E2E job and project-scoped cleanup. The
+workflow does not exercise the EC2 host wrappers or claim GPU behavior. Refreshed
+CI for the current PR #64 head is pending.
+
+## Rebase and pre-driver guard follow-up — 2026-11-28
+
+PR #64 was restacked onto PR #63 current head `d25413f`. Review found the initial
+Ansible configuration wrapper required `nvidia-smi` before the driver installation
+that the wrapper is meant to perform. Configuration now uses the identity-only guard;
+deployment, smoke, evaluation, benchmark, evidence, and incident operations still
+require a visible L4. A regression checks that command split.
+
+Validation: 20 focused operator tests passed; Ruff and Bash syntax checks passed;
+`make gpu-ansible-validate`, `make gpu-ec2-validate`, Compose validation, and
+observability validation passed. Full `make verify` first failed collection because
+this fresh worktree lacked ignored generated ONNX fixtures. After generating the two
+local fixtures with `scripts/create_model.py`, it passed Ruff, 181 tests (2 skipped),
+the dependency audit with no known vulnerabilities, Compose and observability checks,
+and the benchmark/evaluation/CUDA dry-run plans. An existing Starlette/httpx
+deprecation warning remains. These checks used no AWS, GPU, model download, or
+clean-room teardown.
+
+The CI runs for PRs #60–#63 passed on their current pre-#64-update heads: #60
+`46112810861`, #61 `46113035567`, #62 `46113162785`, and #63 `46113289587`. The
+rebase and pre-driver fix require fresh PR #64 checks. The earlier PR #64 runs apply
+to prior source heads only.
+
+## Outstanding work
+
+- Complete required PR CI and address automated review.
+- Obtain human review; do not merge without owner authorization.
+- Await human review/merge authorization.
+- Execute these commands only after quota is applied, a separate exact-plan/budget
+  approval exists, and the user-authorized GPU batch begins.

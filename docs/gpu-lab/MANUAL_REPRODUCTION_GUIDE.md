@@ -795,6 +795,99 @@ aggregate-only result files, explicit duration, and project metadata. Real evalu
 uses the versioned synthetic suite. Do not make performance or quality claims from
 dry-run output.
 
+### Use the guarded host-operation wrappers after the manual lesson
+
+The commands below automate repeated host work only after the matching manual steps
+above have been understood and verified. They have not run on an EC2 host. Every host
+operation checks the Instance Metadata Service v2 identity against the expected AWS
+account, exact GPU instance ID, `us-east-1`, and `g6.xlarge`. Configuration checks
+identity only because the first Ansible pass must install the driver before
+`nvidia-smi` can work. Deploy, inference, benchmark, evaluation, and incident commands
+also require exactly one visible L4. Get the instance ID from reviewed Terraform
+output and keep it in the Session Manager shell only; do not add it to public
+evidence. These commands run in the EC2 host's **root shell** from the repository
+root. They do not provision AWS.
+
+Set the two identity checks in that shell, using the account value from the approved
+deployment record and the exact instance ID:
+
+```bash
+export EXPECTED_AWS_ACCOUNT_ID='<approved AWS account ID>'
+export GPU_EC2_INSTANCE_ID='<exact project g6.xlarge instance ID>'
+```
+
+First repeat the host configuration. Before applying it, review Ansible check mode as
+described in [the Ansible guide](../../infrastructure/ansible/README.md). The pinned
+Ansible environment must exist at `infrastructure/ansible/.venv`:
+
+```bash
+GPU_EC2_CONFIGURE_CONFIRM=apply make gpu-ec2-configure
+```
+
+The command can run for at most 90 minutes. It uses the local Ansible playbook and
+does not reboot automatically. If the NVIDIA driver changed, follow the manual SSM
+reboot procedure, reconnect, and rerun it. Save both real Ansible summaries privately
+so the second run's `changed=0` can be checked.
+
+The earlier manual Compose start is the first deployment. To build and deploy the
+reviewed profile again, the root shell must have a reviewed `.env` with exact mode
+`0600`, the owner-only tenant identity file, a verified 64-character model artifact
+SHA-256, the current checkout's exact 40-character source commit, and a unique Grafana
+password at least 32 characters long:
+
+```bash
+GPU_EC2_DEPLOY_CONFIRM=deploy make gpu-ec2-deploy
+```
+
+The preflight rejects symlinks, duplicate keys, placeholders, invalid or stale
+provenance, and weak passwords without printing values. This gives the Compose
+image build/start operation a 45-minute limit, then waits for
+vLLM and both gateways for at most 20 minutes. If build/start fails or readiness does
+not arrive, it stops vLLM and both gateways and exits with failure. The script does
+not print `.env`, model responses,
+or identity tokens; it reads no more than 256 KiB from any response. A failed start still needs operator inspection and the planned
+Terraform expiry remains the final protection against an abandoned instance.
+
+Run the short synthetic authenticated check only after readiness. It exercises the
+three named tenants, header-spoof resistance, invalid identity, model denial, and a
+small streamed response through both gateway replicas. It issues four short model
+requests, reads at most 256 KiB per response, and reports only statuses and token
+counts:
+
+```bash
+GPU_EC2_SMOKE_CONFIRM=run make gpu-ec2-smoke
+```
+
+Collect a private host snapshot outside the checkout. The tool refuses to write
+under the public repository and creates a new mode-`0700` directory with a mode-`0600`
+JSON file. It records versions, one-line GPU status, service states, readiness codes,
+and source commit; it does not collect logs, prompts, completions, or tokens:
+
+```bash
+make gpu-ec2-evidence
+```
+
+The optional scripts have separate confirmations and limits. Evaluation is limited
+to 20 minutes. The direct vLLM benchmark defaults to 60 minutes and may be set from
+1 to 120 minutes; the authenticated gateway benchmark then runs its fixed 18-request
+synthetic workload. Results are written to the reviewed private output locations.
+The Redis drill first checks current readiness, stops only the Compose Redis service,
+requires both gateways to return HTTP 503, restarts Redis in an exit trap, and checks
+both gateways recover. It does not destroy volumes or other Docker resources:
+
+```bash
+GPU_EC2_EVALUATE_CONFIRM=run make gpu-ec2-evaluate
+GPU_EC2_BENCHMARK_CONFIRM=run GPU_EC2_BENCHMARK_MAX_MINUTES=60 make gpu-ec2-benchmark
+GPU_EC2_INCIDENT_CONFIRM=redis-outage make gpu-ec2-incident-drills
+```
+
+The confirmation values prevent accidental invocation; they are not substitutes for
+the separate cost, quota, and exact-plan authorization gates. Run benchmarks and
+incident drills only within the approved instance window. Save their raw outputs
+privately and add only reviewed, sanitized summaries to Git. Teardown remains a
+separate, locally reviewed Terraform operation from the workstation, after evidence
+export; never use Docker-wide cleanup.
+
 ## 10. Re-run the host configuration with Ansible
 
 Finish the manual installation and initial GPU validation before this section. The

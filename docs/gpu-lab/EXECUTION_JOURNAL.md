@@ -2206,3 +2206,13 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **AWS / GPU / cost:** no AWS operation, GPU, model download, measured result, or spend.
 - **CI:** PR #63 fresh CI has not been triggered yet; parent PR #62 run is pending.
 - **Next:** publish with exact lease against old PR #63 head `d25413f`, update the PR description, and track its required checks.
+
+## 2026-11-28 — Restack PR #64 host-operator automation
+
+- **Phase:** Phase 11 non-billable automation preparation; GPU deployment remains gated.
+- **Branch / PR:** PR #64 (`codex/gpu-host-operator-automation`) is being restacked from old PR #63 head `d25413f` onto refreshed PR #63 head `e178ff7`.
+- **Review finding:** the original host `configure` action required `nvidia-smi` before Ansible could install the NVIDIA driver, making first-time setup impossible on standard Ubuntu.
+- **Change:** configure now validates IMDSv2 instance identity, account, region, and allowed instance type; deployment/workload commands continue to require a visible single L4. Added regression coverage and updated the operator documentation.
+- **Validation:** prior-base check recorded in ticket64: 20 focused tests; full `make verify` passed (181 passed, 2 skipped); Ansible, Terraform, Compose, observability, Ruff, and dry-run preparation checks passed. On the refreshed stack, PR #59 and #60 CI runs `46162611345` and `46162969703` passed all six jobs; PRs #61–#63 runs are active. PR #64 needs CI on its refreshed head.
+- **AWS / GPU / cost:** no AWS query or mutation, no instance, no model download, no GPU execution, and no spend. Applied quota is 4.0 vCPUs, but project state/locking, Budget recipient and Budget, exact plan/cost, independent expiry, fresh capacity, and separate apply authorization remain launch gates.
+- **Next:** finish conflict review and link/status checks, publish PR #64 with exact lease against old head `06f1a11`, then monitor its single CI run.

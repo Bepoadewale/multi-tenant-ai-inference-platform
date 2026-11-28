@@ -66,13 +66,13 @@ Old quota-denial statements below are dated historical snapshots, not current st
   invocation, data-transfer allowance, tax contingency, and a reserve. It still
   requires exact AMI, price, egress, tax-profile, and state-retention confirmation;
   it is not permission to apply.
-- PRs #30–#62 remain open and unmerged; merge authorization is outstanding. PR #59
-  and #60 were rebased onto current PR #58 head `59925fd`; #60 head `9a8bd28` has
-  fresh CI running after eight focused tests and Ruff passed locally. PR #61's
-  interview guide was rebased onto #60 head `9a8bd28`; fresh CI is required. Earlier
-  passing CI on the old stack is not evidence for these updated heads. PR #62 head
-  `90e4aca` adds benchmark and incident-response handbooks, rebased onto PR #61, and
-  needs fresh CI. PR #63 adds an evidence-labeled report draft. PR #53
+- PRs #30–#64 remain open and unmerged; merge authorization is outstanding. PR #59
+  head `0cfbedb` passed six checks in `46162611345`; #60 head `9fc23f2` passed six
+  checks in `46162969703`; #61 head `1474752` passed six checks in `46163194154`.
+  PR #62 run `46163327188` and #63 run `46163484312` are still running. PR #64 is
+  being restacked after review found configuration must work before the NVIDIA
+  driver exists. Twenty focused tests and full `make verify` passed on its earlier
+  base; fresh PR CI remains pending. PR #53
   code head `e623b75` passed all five checks in `46023306230`, including a Linux AMD64
   gateway image build and CPU end-to-end. PR #56 head `852c873` passed all five checks
   in `46040861818`; PR #57 Ansible head `4795f12` passed all six checks, including a

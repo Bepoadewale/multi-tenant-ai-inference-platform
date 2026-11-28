@@ -851,11 +851,73 @@ against a live model, AWS, or a GPU.
 
 After this run passed, review found that the host controller treated float `1.0` as
 equal to the required integer tensor-parallel size. The validator now rejects
-non-integer types and has a regression test. This is a material configuration-safety
-fix. A later review found `manifest-from-report` needlessly initialized host state and
-raised `AttributeError`; the command now creates a host controller only for operations
-that use it, and a regression test generates a manifest without host access. Updated
-head `473db1cee7fa0aacb826d7a6e94fbf020c7c9c74` passed all five required jobs,
-including another local CPU end-to-end job, in run
+non-integer types and has a regression test. A later review found `manifest-from-report`
+needlessly initialized host state and raised `AttributeError`; the command now creates
+a host controller only for operations that use it. Updated head
+`473db1cee7fa0aacb826d7a6e94fbf020c7c9c74` passed all five required jobs, including
+another local CPU end-to-end job, in run
 [46105533251](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/actions/runs/46105533251).
 No host model release, AWS action, or GPU behavior was exercised.
+
+## PR #64 host-operator preparation clean-room evidence
+
+**Date:** 2026-11-27
+
+**PR head:** `8045c10f43bc8acbd0cf75d52a03fa559f69447a`
+
+**GitHub Actions run:** [46084793573](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/actions/runs/46084793573)
+
+**Environment:** fresh GitHub-hosted Ubuntu 24.04 runner with Python 3.12. The job
+used a fresh checkout and the repository's local CPU Compose stack. It had no AWS
+credentials and did not run paid cloud operations.
+
+The `local-e2e` job executed this exact sequence from the repository root:
+
+```bash
+make install
+make bootstrap-local
+make smoke
+make demo-flagship
+make verify
+make clean-local
+```
+
+On failure, the workflow was configured to print `docker compose ps -a` and
+`docker compose logs --no-color`; those diagnostic steps did not run because the
+sequence passed. All six required jobs in run `46084793573` passed. The local flow
+installed the project environment, started its CPU ONNX Compose stack, passed smoke
+checks and the flagship success/failure demonstrations, ran lint, tests, dependency
+audit, and Compose validation, then removed only project-labeled containers, images,
+volumes, network, and generated local artifacts. The job log ends with the scoped
+cleanup success message.
+
+This is local CPU clean-room evidence for PR #64. It does not demonstrate the guarded
+host wrappers against EC2, NVIDIA L4 access, CUDA, Docker GPU passthrough, or vLLM
+inference. Separate fake-based tests cover local host-guard and operator-wrapper
+behavior. The direct-entrypoint regression tests also prove the smoke and evidence
+`--help` commands work without a `PYTHONPATH`; they make no host or AWS call.
+
+## PR #64 host-operator preparation clean-room evidence
+
+**Date:** 2026-11-27
+
+**PR head:** `8045c10f43bc8acbd0cf75d52a03fa559f69447a`
+
+**GitHub Actions run:** [46084793573](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/actions/runs/46084793573)
+
+**Environment:** fresh GitHub-hosted Ubuntu 24.04 runner with Python 3.12. The job
+used a fresh checkout and the repository's local CPU Compose stack. It had no AWS
+credentials and did not run paid cloud operations.
+
+The `local-e2e` job ran `make install`, `make bootstrap-local`, `make smoke`,
+`make demo-flagship`, `make verify`, and `make clean-local`. All six required jobs
+passed. The flow started its CPU ONNX Compose stack, passed smoke checks and the
+flagship success/failure demonstrations, ran lint, tests, dependency audit, and
+Compose validation, then removed only project-labeled containers, images, volumes,
+network, and generated local artifacts. Failure diagnostics were configured but did
+not run because the sequence passed.
+
+This is local CPU clean-room evidence for an earlier PR #64 head. It does not
+validate the host wrappers against EC2, NVIDIA L4 access, CUDA, Docker GPU passthrough,
+or vLLM inference. Fake-based unit tests cover host-guard and operator-wrapper logic.
+The current PR #64 restack and pre-driver configuration fix require fresh CI.

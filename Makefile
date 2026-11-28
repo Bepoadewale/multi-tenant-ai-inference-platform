@@ -1,4 +1,4 @@
-.PHONY: install test lint audit run demo load-test bootstrap-local smoke status public-demo demo-local demo-overload demo-gateway-cancellation demo-redis-outage demo-routing demo-failure demo-timeout demo-metering demo-observability demo-recovery demo-model-registry demo-release-control demo-capacity demo-operational-evidence demo-remediation demo-agent-tools demo-self-service demo-edge-adapter demo-sandboxed-agent demo-operator-console demo-flagship verify clean-local destroy-local helm-lint terraform-validate cloud-delivery-validate pilot-guardrails-plan pilot-cloud-plan pilot-cloud-apply pilot-cloud-push-image pilot-cloud-bootstrap-runtime pilot-cloud-smoke pilot-cloud-validate pilot-cloud-destroy container-dependencies-validate container-dependencies-audit gpu-ec2-preflight gpu-ec2-validate gpu-compose-config gpu-observability-validate gpu-benchmark-plan gpu-benchmark gpu-gateway-benchmark-plan gpu-gateway-benchmark gpu-evaluation-plan gpu-cuda-plan gpu-cuda-matmul gpu-cuda-vector-add gpu-release-controller-help gpu-ansible-validate gpu-ec2-bootstrap-preview-plan gpu-ec2-preview-plan gpu-ec2-plan gpu-ec2-apply gpu-ec2-destroy-plan gpu-ec2-destroy-apply gpu-ec2-verify-clean
+.PHONY: install test lint audit run demo load-test bootstrap-local smoke status public-demo demo-local demo-overload demo-gateway-cancellation demo-redis-outage demo-routing demo-failure demo-timeout demo-metering demo-observability demo-recovery demo-model-registry demo-release-control demo-capacity demo-operational-evidence demo-remediation demo-agent-tools demo-self-service demo-edge-adapter demo-sandboxed-agent demo-operator-console demo-flagship verify clean-local destroy-local helm-lint terraform-validate cloud-delivery-validate pilot-guardrails-plan pilot-cloud-plan pilot-cloud-apply pilot-cloud-push-image pilot-cloud-bootstrap-runtime pilot-cloud-smoke pilot-cloud-validate pilot-cloud-destroy container-dependencies-validate container-dependencies-audit gpu-ec2-preflight gpu-ec2-validate gpu-compose-config gpu-observability-validate gpu-benchmark-plan gpu-benchmark gpu-gateway-benchmark-plan gpu-gateway-benchmark gpu-evaluation-plan gpu-cuda-plan gpu-cuda-matmul gpu-cuda-vector-add gpu-release-controller-help gpu-ansible-validate gpu-ec2-bootstrap-preview-plan gpu-ec2-preview-plan gpu-ec2-plan gpu-ec2-apply gpu-ec2-configure gpu-ec2-deploy gpu-ec2-smoke gpu-ec2-benchmark gpu-ec2-evaluate gpu-ec2-incident-drills gpu-ec2-evidence gpu-ec2-destroy-plan gpu-ec2-destroy gpu-ec2-destroy-apply gpu-ec2-verify-clean
 PYTHON ?= python3.12
 VENV := .venv
 PY := $(VENV)/bin/python
@@ -136,11 +136,18 @@ gpu-compose-config:
 gpu-observability-validate:
 	./scripts/validate-gpu-observability.sh
 gpu-ansible-validate:
-	cd infrastructure/ansible && ANSIBLE_CONFIG=ansible.cfg ansible-playbook playbooks/configure-gpu-host.yml --syntax-check
+	@ansible="$$(command -v ansible-playbook 2>/dev/null || true)"; \
+	if [ -x infrastructure/ansible/.venv/bin/ansible-playbook ]; then \
+		ansible="$(CURDIR)/infrastructure/ansible/.venv/bin/ansible-playbook"; \
+	fi; \
+	if [ -z "$$ansible" ]; then \
+		echo "Ansible is missing; install infrastructure/ansible/requirements.lock in its documented Python 3.12 environment" >&2; exit 1; \
+	fi; \
+	cd infrastructure/ansible && ANSIBLE_CONFIG=ansible.cfg "$$ansible" playbooks/configure-gpu-host.yml --syntax-check
 gpu-benchmark-plan:
 	$(PYTHON) benchmarks/gpu_inference/run_vllm_matrix.py --dry-run
 gpu-benchmark:
-	$(PYTHON) benchmarks/gpu_inference/run_vllm_matrix.py
+	$(PYTHON) benchmarks/gpu_inference/run_vllm_matrix.py --max-runtime-minutes "$${GPU_BENCHMARK_MAX_RUNTIME_MINUTES:-120}"
 gpu-gateway-benchmark-plan:
 	$(PYTHON) benchmarks/gpu_inference/run_gateway_benchmark.py --gateway-url http://127.0.0.1:8081 --gateway-url http://127.0.0.1:8082 --direct-url http://127.0.0.1:8000 --dry-run
 gpu-gateway-benchmark:
@@ -164,8 +171,24 @@ gpu-ec2-plan:
 	./scripts/gpu-ec2-plan.sh
 gpu-ec2-apply:
 	./scripts/gpu-ec2-apply.sh
+gpu-ec2-configure:
+	./scripts/gpu-ec2-host-action.sh configure
+gpu-ec2-deploy:
+	./scripts/gpu-ec2-host-action.sh deploy
+gpu-ec2-smoke:
+	GPU_EC2_SMOKE_CONFIRM="$${GPU_EC2_SMOKE_CONFIRM:-}" $(PYTHON) scripts/gpu_ec2_smoke.py
+gpu-ec2-benchmark:
+	./scripts/gpu-ec2-host-action.sh benchmark
+gpu-ec2-evaluate:
+	./scripts/gpu-ec2-host-action.sh evaluate
+gpu-ec2-incident-drills:
+	./scripts/gpu-ec2-redis-outage.sh
+gpu-ec2-evidence:
+	$(PYTHON) scripts/gpu_ec2_evidence.py
 gpu-ec2-destroy-plan:
 	./scripts/gpu-ec2-destroy-plan.sh
+gpu-ec2-destroy:
+	./scripts/gpu-ec2-destroy-apply.sh
 gpu-ec2-destroy-apply:
 	./scripts/gpu-ec2-destroy-apply.sh
 gpu-ec2-verify-clean:
