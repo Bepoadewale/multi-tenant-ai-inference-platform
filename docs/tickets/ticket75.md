@@ -27,6 +27,8 @@ handbook labels the architecture as proposed and points readers to current evide
 - Correct the manual reproduction guide's stale quota note: the latest recorded
   applied quota is 4.0 vCPUs, but request history and approval evidence remain
   unresolved, and other cloud gates still block a paid launch.
+- Refresh the implementation backlog's open-PR inventory using live GitHub metadata,
+  including the successful #74 CI result and the pending #75 run.
 
 ## Evidence and limitations
 
