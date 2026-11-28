@@ -1425,3 +1425,17 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Cloud/cost:** no AWS use, GPU hours, or spend.
 - **Next:** commit the fix, rebase PR #48 on the updated benchmark PR #47 head, then
   run one CI cycle and address the three review threads.
+
+## 2026-11-28 — Verify evaluation fixes and resolve review feedback
+
+- **Phase:** Phase 9 static preparation; PR #48.
+- **Head/base:** PR #48 head `a5bb235`, rebased on PR #47 head `260e249`.
+- **CI:** run `46108950555` passed all five required jobs, including the full Python
+  setup/test job and local E2E. This confirms the repository setup path that the
+  isolated local `make test` attempt could not reproduce without generating the
+  ignored ONNX fixtures in that worktree.
+- **Review:** all three findings were answered and resolved with the fixed numeric
+  check, failed-case response validation, and corrected private-vLLM/gateway
+  instructions. No model request was sent.
+- **Cloud/cost:** no AWS operation, GPU hour, or spend.
+- **Next:** update the evidence/status documentation, then rebase and continue PR #49.

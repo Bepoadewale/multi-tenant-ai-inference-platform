@@ -69,23 +69,27 @@ runtime. No LLM evaluation has run.
 - The first numeric-boundary test caught an overly strict period boundary that rejected
   `4.`; the matcher now allows sentence punctuation while rejecting `14` and `4.5`.
 - An initial Ruff run found one unused import; it was removed before the passing run.
-- No GPU, model, or AWS resource is used. PR CI remains pending.
+- No GPU, model, or AWS resource is used.
 - Review follow-up on 2026-11-28: Ruff passed and the focused evaluation suite passed
   9 tests. New cases reject signed-number mismatches and verify that null/list
   completions, non-object usage, and non-integer token counts become failed report
   rows. `make gpu-evaluation-plan` reported seven cases and zero network requests;
   Docker Compose configuration validation and `git diff --check` passed. No model,
-  container, AWS resource, or GPU was started. Updated PR CI is pending.
+  container, AWS resource, or GPU was started.
 - The first mocked-HTTP test attempt failed because `MagicMock`'s context manager
   returned a separate mock instead of the configured response. The test double now
   returns itself from `__enter__`; the production code was not changed for that test
   harness issue.
+- Restacked PR #48 head `a5bb235` passed all five required CI jobs in run
+  `46108950555`, including the complete Python job and local E2E. The three review
+  threads were answered and resolved. These checks still did not call a model or AWS.
 - An additional attempt to run the full repository test target with the existing
   shared virtual environment failed during collection in 10 gateway modules because
   this isolated worktree had no generated `models/tiny-intent-classifier.onnx` file.
   `make install` normally creates that ignored local artifact. It was not run here, so
   no hidden local model files were generated. The benchmark/evaluation-focused tests
-  and Ruff passed; the updated PR CI run remains the full-suite validation path.
+  and Ruff passed. The full-suite setup succeeded in current-head CI run
+  `46108950555`.
 - The code and status-document head `24b149c` passed all five required CI jobs in run
   `45996207684`. A follow-up documentation-only head `5af5562` is running through CI.
 
