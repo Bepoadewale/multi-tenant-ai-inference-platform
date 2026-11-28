@@ -11,8 +11,10 @@ PRs #77–#83 passed all six required checks on their refreshed heads, including
 local CPU end-to-end job. PR #84 head `f2963db` passed all six jobs, including
 local-e2e, in run `46173687147` after current-quota and clean-room-record corrections.
 Its local validation passed 67 focused tests, 12 mocked Terraform cases, Ruff, the
-35-file docs checker, and `git diff --check`. The single designated local clean-room run remains the one recorded
-in `docs/governance/VALIDATION.md`; no repeat is planned. PR #43 and #53 are now
+35-file docs checker, and `git diff --check`. Historical PR #31 records two local
+clean-room cycles. The single designated integrated clean-room evidence for this GPU
+goal is PR #65 CI run `46114955314`, recorded in `docs/gpu-lab/EVIDENCE_MANIFEST.md`.
+No extra manual clean-room run is planned. PR #43 and #53 are now
 reported mergeable in the current open-PR inventory, but still require owner review.
 The project Budget/verified recipient, remote state and lock, final plan/cost,
 capacity, expiry verification, and separate apply authorization remain open.

@@ -3036,3 +3036,19 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   expiry/teardown review, and separate apply authorization remain outstanding.
 - **Next:** continue non-billable review/readiness work; do not repeat the single
   designated local clean-room cycle.
+
+## 2026-11-28 18:10 UTC — Clarify historical and designated clean-room counts
+
+- **Phase and scope:** Phase 2 documentation accuracy, PR #84; no AWS or GPU action.
+- **Finding:** review of `docs/gpu-lab/VALIDATION.md` confirmed PR #31 recorded two
+  successful historical local clean-room cycles. Separately,
+  `docs/gpu-lab/EVIDENCE_MANIFEST.md` identifies PR #65 run `46114955314` as the one
+  designated integrated clean-room evidence item for this GPU goal. A prior status
+  edit incorrectly collapsed these into one and pointed to the governance record.
+- **Correction:** preserve the historical count and distinguish it from the selected
+  GPU-goal run. No new clean-room run was started; routine PR CI remains ordinary
+  validation and does not require another manually launched run.
+- **Limits:** these are local CPU/Compose checks, not AWS or GPU evidence. No cloud
+  resources or project spend.
+- **Next:** keep this distinction in the persistent goal and backlog; continue
+  non-billable work without repeating a manual clean-room cycle.
