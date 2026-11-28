@@ -193,9 +193,11 @@ make gpu-ec2-plan
 `gpu-ec2-plan` prepares a saved plan for review; it must not apply it automatically.
 Plans and Terraform state may contain sensitive data. Keep them outside public Git.
 The wrapper requires the exported `EXPECTED_AWS_ACCOUNT_ID`, `GPU_EC2_AZ`,
-`GPU_EC2_UBUNTU_AMI_ID`, and `GPU_EC2_EXPIRES_AT` values above. The plan prints a
-SHA-256 digest; record it privately as `GPU_EC2_PLAN_SHA256` after reviewing the
-exact saved plan.
+`GPU_EC2_UBUNTU_AMI_ID`, and `GPU_EC2_EXPIRES_AT` values above. It checks the saved
+plan's exact resources and key GPU, storage, metadata, tag, network, and expiry
+settings, then prints a bounded summary rather than Terraform's raw JSON plan. The
+plan prints a SHA-256 digest; record it privately as `GPU_EC2_PLAN_SHA256` after
+reviewing the exact saved plan.
 
 Before proceeding, inspect the exact saved plan and record:
 
@@ -214,9 +216,10 @@ export GPU_EC2_PLAN_SHA256='<reviewed saved-plan SHA-256>'
 GPU_EC2_CONFIRM=apply make gpu-ec2-apply
 ```
 
-The apply wrapper must verify the saved plan digest and AWS account before Terraform
-can change resources. Do not use plain `terraform apply`, do not regenerate an
-uncertain plan, and do not run two Terraform mutations against one state at once.
+The apply wrapper must verify the saved plan digest and AWS account, then repeat the
+structural plan check using the same exported AMI, AZ, and expiry values before
+Terraform can change resources. Do not use plain `terraform apply`, do not regenerate
+an uncertain plan, and do not run two Terraform mutations against one state at once.
 
 **Expected:** one approved host and only the reviewed support resources are proposed.
 The plan's estimated total remains below $25 with a reasonable reserve.
