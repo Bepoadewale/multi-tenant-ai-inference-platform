@@ -63,6 +63,7 @@ def _safe_plan_json(ami: str, az: str, expiry: str) -> str:
             "instance_type": "g6.xlarge",
             "ami": ami,
             "availability_zone": az,
+            "associate_public_ip_address": True,
             "instance_initiated_shutdown_behavior": "terminate",
             "root_block_device": [
                 {

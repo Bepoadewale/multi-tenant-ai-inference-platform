@@ -65,6 +65,7 @@ def _plan() -> dict:
             "instance_type": "g6.xlarge",
             "ami": AMI,
             "availability_zone": AZ,
+            "associate_public_ip_address": True,
             "instance_initiated_shutdown_behavior": "terminate",
             "root_block_device": [
                 {
@@ -284,6 +285,12 @@ def test_accepts_exact_safe_single_l4_plan() -> None:
         ),
         (
             lambda plan: _change(plan, "aws_instance.gpu").update(ami="ami-unapproved"),
+            "instance settings",
+        ),
+        (
+            lambda plan: _change(plan, "aws_instance.gpu").update(
+                associate_public_ip_address=False
+            ),
             "instance settings",
         ),
         (

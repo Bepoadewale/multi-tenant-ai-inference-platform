@@ -110,6 +110,7 @@ def validate(
         instance.get("instance_type") != "g6.xlarge"
         or instance.get("ami") != expected_ami
         or instance.get("availability_zone") != expected_az
+        or instance.get("associate_public_ip_address") is not True
         or instance.get("instance_initiated_shutdown_behavior") != "terminate"
     ):
         raise ValueError("saved plan does not match the reviewed single-L4 instance settings")

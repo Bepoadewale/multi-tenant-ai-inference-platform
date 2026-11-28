@@ -236,6 +236,8 @@ evidence.
 
 ## Entry format for future evidence
 
+| PR #84 instance public-IP plan guard follow-up | 2026-11-28 13:15 UTC | Phase 2 static plan review / PR #84 / local worktree changes after `c50b591` | 44 focused plan and fake-wrapper tests, Ruff, `make gpu-docs-validate` (35 files), `git diff --check` | Requires the saved plan's EC2 instance to receive a public IP for outbound access in the no-NAT, Systems Manager lab; a first test run exposed and fixed a missing value in the fake CLI fixture. | Local static/fixture evidence only; not published or CI-validated yet; does not prove AWS provider plan output, public routing, Systems Manager connection, or GPU operation. No AWS calls/resources/spend. |
+
 For every new item, record:
 
 - **Filename and capture time:** use UTC and a stable, readable name.

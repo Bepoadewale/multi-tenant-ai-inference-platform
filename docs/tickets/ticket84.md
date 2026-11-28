@@ -1,6 +1,6 @@
 # Ticket 84 — Verify the single-L4 network topology in the saved plan
 
-**Status:** [PR #84](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/84) is open on PR #83. Implementation head `724c45a` passed all six required CI jobs in run `46147292091`; owner review remains pending. No AWS operation.
+**Status:** [PR #84](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/84) is open on PR #83. Implementation head `724c45a` and documentation head `c50b591` passed all six required CI jobs in runs `46147292091` and `46148089116`. A follow-up review found a missing instance-level public IP assertion; the fix is being validated. Owner review remains pending. No AWS operation.
 
 ## Objective
 
@@ -23,6 +23,8 @@ egress; this ticket closes the separate topology-binding gap.
 - Require the project's reviewed VPC CIDR and DNS settings.
 - Require the single subnet CIDR, selected availability zone, and public address
   assignment needed for the SSM-only no-NAT lab.
+- Require the EC2 instance plan itself to enable a public IP, because enabling
+  public addresses on the subnet does not prove this instance will receive one.
 - Require one default route to the project internet gateway.
 - Verify that the internet gateway, subnet, route table, and security group reference
   the GPU VPC.
@@ -35,14 +37,15 @@ egress; this ticket closes the separate topology-binding gap.
 - [x] The saved-plan fixture passes with the approved VPC and subnet topology.
 - [x] Negative tests reject a changed subnet range and bindings to a different VPC,
   subnet, route table, or gateway.
-- [x] The focused plan and shell-wrapper suites pass (**43 tests**); Ruff and
-  `git diff --check` pass.
+- [x] The focused plan and shell-wrapper suites pass (**44 tests**); Ruff,
+  `make gpu-docs-validate` (35 files), and `git diff --check` pass after the
+  instance-level public-IP check.
 - [x] All six required CI jobs pass on implementation head `724c45a` in run
   `46147292091`.
 - [ ] A real AWS-provider plan confirms the configuration-expression shape when the
   authorized backend and cost gates permit it.
-- [ ] Publish PR, pass all required CI, and receive owner review. No merge or apply
-  is authorized by this ticket.
+- [ ] Publish the follow-up, pass all required CI, and receive owner review. No merge
+  or apply is authorized by this ticket.
 
 ## Validation
 
@@ -57,7 +60,10 @@ git diff --check
 ```
 
 The tests validate fixture behavior only. They do not prove live routing, public
-address assignment, Systems Manager connectivity, or that AWS accepts the plan.
+address assignment, Systems Manager connectivity, or that AWS accepts the plan. The
+first follow-up test run exposed an omitted public-IP value in the separate fake CLI
+fixture; that fixture now includes the same reviewed setting as the plan-summary
+fixture, and the focused suite passes.
 
 ## Security, cost, and remaining work
 
