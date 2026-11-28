@@ -1,6 +1,6 @@
 # Ticket 81 — Validate the exact saved GPU plan before apply
 
-**Status:** [PR #81](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/81) is open on PR #80; implementation head `8ff6f5f` passed all six required jobs in run `46141493735`. The documentation follow-up is pending CI; no AWS operation.
+**Status:** [PR #81](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/81) is open and restacked on refreshed PR #80 head `7e898b2`. Its earlier implementation head `8ff6f5f` passed all six jobs in run `46141493735`; that result predates this restack. Current-head CI is required. No AWS operation.
 
 ## Objective
 
@@ -43,8 +43,8 @@ The apply wrapper also did not repeat a structural review immediately before app
 - [x] Bind the apply operation to the reviewed plan digest and repeat structural
   validation before Terraform apply.
 - [x] Cover safe and unsafe plans using unit tests and fake CLI wrapper tests.
-- [x] Publish the focused PR and pass all six required checks on implementation head `8ff6f5f`.
-- [ ] Pass CI on the final documentation head and receive owner review.
+- [x] Publish the focused PR and pass all six required checks on earlier implementation head `8ff6f5f`.
+- [ ] Pass CI on this restacked final head and receive owner review.
 
 ## Commands and validation
 
@@ -66,7 +66,10 @@ the IMDS hop limit, malformed AZ shape, and malformed Terraform JSON. One tempor
 test-edit error placed a redaction assertion in the wrong test, producing a `NameError`;
 the assertion was moved back to the test that owns the subprocess result. The final
 focused run passed 33 tests.
-Current validation results are recorded in the execution journal and evidence manifest.
+The earlier implementation head's validation results are recorded in the execution
+journal and evidence manifest. On restacked local head `24b6606`, the focused suite
+passes 33 tests, Ruff passes, both shell wrappers pass `bash -n`, and the docs checker
+validates 32 Markdown files. Current-head CI is still required.
 
 Additional checks:
 
@@ -98,5 +101,5 @@ GPU instance hour, or spend is part of this package.
 - Terraform's actual AWS JSON shape remains to be confirmed by a future exact saved
   plan after the backend, budget recipient, quota, capacity, and authorization gates
   are met.
-- PR #81 must remain stacked on #80; neither this ticket nor its checks authorize a
+- PR #81 remains stacked on #80; neither this ticket nor its checks authorize a
   merge or cloud mutation.

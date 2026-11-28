@@ -2432,3 +2432,24 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   verification, and separate apply authorization remain open.
 - **Next:** publish PR #80 against its exact current remote head, then monitor its
   checks and continue with saved-plan PR #81 after the refreshed base checks pass.
+
+## 2026-11-28 — Restack and revalidate saved-plan guardrails
+
+- **Date and time:** 2026-11-28 17:27 UTC.
+- **Phase:** Phase 2 exact-plan safeguards; non-billable static and local tests.
+- **Starting state:** PR #81 was based on the previous PR #80 head `6145e25`; the
+  refreshed PR #80 head is `7e898b2`.
+- **Changes:** restacked the saved-plan summary and plan/apply wrapper checks on #80.
+  Conflict resolution retained the updated parent status records; PR #81-specific
+  implementation and validation history remains in `ticket81.md` and the evidence
+  manifest.
+- **Validation:** the focused test suite passed 33 tests; Ruff passed; plan/apply
+  shell scripts passed `bash -n`; documentation validation checked 32 files; and
+  `git diff --check` passed. No clean-room run was repeated.
+- **CI:** implementation head `8ff6f5f` passed run `46141493735`, but current-head
+  CI after this restack remains pending. PR #80 head `7e898b2` has a fresh run in
+  progress; PRs #77–#79 refreshed results are still being watched.
+- **AWS / GPU / cost:** no AWS request, plan, apply, instance, model download, GPU
+  operation, or spend.
+- **Next:** publish PR #81 with a force-with-lease against its verified old head, then
+  monitor its checks before restacking PR #82.
