@@ -9,8 +9,8 @@ output "instance_type" {
 }
 
 output "ubuntu_ami_id" {
-  value       = data.aws_ami.ubuntu.id
-  description = "Exact Canonical Ubuntu 24.04 image ID resolved by this plan."
+  value       = var.ubuntu_ami_id
+  description = "Exact Canonical Ubuntu 24.04 image ID verified by guarded preflight."
 }
 
 output "availability_zone" {

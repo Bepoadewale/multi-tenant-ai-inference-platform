@@ -1,25 +1,5 @@
 data "aws_caller_identity" "current" {}
 
-data "aws_ami" "ubuntu" {
-  most_recent = true
-  owners      = ["099720109477"] # Canonical
-
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"]
-  }
-
-  filter {
-    name   = "architecture"
-    values = ["x86_64"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-}
-
 data "aws_ec2_instance_type_offerings" "selected" {
   filter {
     name   = "instance-type"
@@ -137,7 +117,7 @@ resource "aws_iam_instance_profile" "gpu" {
 }
 
 resource "aws_instance" "gpu" {
-  ami                         = data.aws_ami.ubuntu.id
+  ami                         = var.ubuntu_ami_id
   instance_type               = var.instance_type
   availability_zone           = var.availability_zone
   subnet_id                   = aws_subnet.gpu.id

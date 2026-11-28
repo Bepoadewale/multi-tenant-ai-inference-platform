@@ -3,6 +3,7 @@ set -euo pipefail
 
 : "${EXPECTED_AWS_ACCOUNT_ID:?set EXPECTED_AWS_ACCOUNT_ID}"
 : "${GPU_EC2_AZ:?set GPU_EC2_AZ to an offered us-east-1 zone}"
+: "${GPU_EC2_UBUNTU_AMI_ID:?set the reviewed Canonical Ubuntu AMI ID}"
 : "${GPU_EC2_EXPIRES_AT:?set the exact approved UTC expiry, no more than 12 hours away}"
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -31,6 +32,7 @@ terraform -chdir="$terraform_root" plan -input=false \
   -var="expected_account_id=${EXPECTED_AWS_ACCOUNT_ID}" \
   -var="availability_zone=${GPU_EC2_AZ}" \
   -var="instance_type=g6.xlarge" \
+  -var="ubuntu_ami_id=${GPU_EC2_UBUNTU_AMI_ID}" \
   -var="expires_at=${GPU_EC2_EXPIRES_AT}" \
   -out="$plan_file"
 

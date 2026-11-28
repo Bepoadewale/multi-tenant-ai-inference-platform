@@ -28,11 +28,21 @@ GPU isolation between application tenants.
 The later `g6.2xlarge` option is intentionally not enabled in this first package; it
 requires measured CPU or host-memory evidence and a fresh cost review.
 
-The selected Canonical Ubuntu image is expected to include the Systems Manager Agent.
-Cloud-init enables either its Snap or Debian systemd service and fails visibly if
-neither service exists. AWS documents this as the common case for its Ubuntu Server
-AMIs; the instance still must be verified as online before the operator relies on
-Session Manager.
+The root takes an exact `ubuntu_ami_id`; it does not ask Terraform for `most_recent`.
+The example pins Canonical Ubuntu Server 24.04 amd64 AMI
+`ami-0a951420c495183dc`, named
+`ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20261120`. A read-only
+`DescribeImages` check on 2026-11-27 returned Canonical owner ID `099720109477`,
+`x86_64`, and `available`. The guarded preflight checks these properties before plan
+and apply and passes the same ID to Terraform. Review a new Canonical AMI and update
+the recorded ID deliberately; the saved plan then contains that exact image ID. If
+the image is later deregistered, the destroy plan uses the AMI ID from the project
+configuration and does not need to query Canonical's catalog.
+
+The image is expected to include the Systems Manager Agent. Cloud-init enables either
+its Snap or Debian systemd service and fails visibly if neither service exists. AWS
+documents this as common for Ubuntu Server AMIs; verify the instance is online before
+relying on Session Manager.
 
 The root reuses the repository's private, versioned state bucket and DynamoDB lock
 table created by `infrastructure/terraform/bootstrap/`. It must use a separate

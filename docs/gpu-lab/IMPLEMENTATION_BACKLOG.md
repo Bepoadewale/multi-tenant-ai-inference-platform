@@ -24,10 +24,16 @@ pull requests must include the repository's clean-room evidence.
   of GPU execution; exact target-AMI packages and real L4 validation remain open.
 - PR #38 is open as a focused model-artifact verification helper based on PR #37.
   Head `5256060` records the verifier, fixture tests, and Terraform validation; its
-  documentation-only check run is in progress. Fixture tests do not replace checking
-  the actual downloaded artifact.
+  head passed all four required checks in run `45946331836`. Fixture tests do not
+  replace checking the actual downloaded artifact.
 - PR #39 is open against PR #38 to record the quota denial, regional quota checks,
-  and an unsent appeal draft. It does not submit an AWS message or quota request.
+  and an unsent appeal draft. Its head `7605b0b` passed all four required checks in
+  run `45947503606`. It does not submit an AWS message or quota request.
+- PR #40 is open against PR #39 to pin the reviewed Canonical Ubuntu AMI
+  and fail closed when publisher, image family, architecture, or availability does
+  not match. All four required checks passed in the implementation run
+  `45949421928` and documentation follow-up run `45950217355`. No AWS resource or GPU
+  run is part of this package.
 - No AWS resources or GPU instance hours have been used by this goal.
 - The applied On-Demand G and VT quota is zero in `us-east-1`, `us-east-2`, and
   `us-west-2`. AWS email reports that the 4-vCPU `us-east-1` request was denied, while
@@ -112,6 +118,8 @@ cost and quota gate passes.
 - [x] Enforce the expected AWS account through the provider and fail an instance
   launch when the selected AZ does not offer the approved type.
 - [x] Render and parse the cloud-init YAML; actual host behavior remains unverified.
+- [x] Pin the exact Canonical Ubuntu 24.04 amd64 AMI and reject an untrusted or
+  unavailable image before plan/apply; keep destroy planning independent of AMI lookup.
 - [ ] Create and inspect the final remote-state saved plan and confirm the full current
   cost and budget recipient. A 4-vCPU quota request is already open; track its outcome.
   Do not apply until the $25 project gate is cleared.

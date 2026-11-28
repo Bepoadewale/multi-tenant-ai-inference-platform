@@ -8,6 +8,8 @@ import subprocess
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
+import pytest
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 EXPECTED_ACCOUNT = "654654474502"
 
@@ -29,6 +31,7 @@ def _fake_cli_bin(tmp_path: Path) -> tuple[Path, Path, Path]:
         f"pathlib.Path({str(aws_log)!r}).open('a').write(os.getenv('AWS_PROFILE', '<unset>') + ' ' + ' '.join(sys.argv[1:]) + '\\n')\n"
         "args = sys.argv[1:]\n"
         f"if args[:2] == ['sts', 'get-caller-identity']: print(os.getenv('FAKE_AWS_ACCOUNT', {EXPECTED_ACCOUNT!r}))\n"
+        "elif args[:2] == ['ec2', 'describe-images']: print(os.getenv('FAKE_AMI_METADATA', '099720109477 ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20261120 x86_64 available'))\n"
         "elif args[:2] == ['service-quotas', 'get-service-quota']: print(os.getenv('FAKE_AWS_QUOTA', '4'))\n"
         "elif args[:2] == ['ec2', 'describe-instance-type-offerings']: print('g6.xlarge')\n"
         "elif args[:2] == ['budgets', 'describe-budgets']: print('1')\n"
@@ -55,6 +58,7 @@ def _subprocess_env(bin_dir: Path) -> dict[str, str]:
     env["PATH"] = f"{bin_dir}{os.pathsep}{env['PATH']}"
     env["EXPECTED_AWS_ACCOUNT_ID"] = EXPECTED_ACCOUNT
     env["GPU_EC2_AZ"] = "us-east-1a"
+    env["GPU_EC2_UBUNTU_AMI_ID"] = "ami-0a951420c495183dc"
     expiry = datetime.now(UTC) + timedelta(hours=6)
     env["GPU_EC2_EXPIRES_AT"] = expiry.replace(microsecond=0).isoformat().replace("+00:00", "Z")
     return env
@@ -75,8 +79,10 @@ def test_gpu_ec2_plan_and_apply_share_the_default_profile(tmp_path: Path) -> Non
     )
     assert planned.returncode == 0, planned.stderr
     assert "ai-platform-pilot-key" in aws_log.read_text(encoding="utf-8")
+    assert "describe-images --image-ids ami-0a951420c495183dc" in aws_log.read_text(encoding="utf-8")
     plan_profiles = [line.split()[0] for line in terraform_log.read_text(encoding="utf-8").splitlines()]
     assert plan_profiles == ["ai-platform-pilot-key", "ai-platform-pilot-key"]
+    assert any("ubuntu_ami_id=ami-0a951420c495183dc" in line for line in terraform_log.read_text(encoding="utf-8").splitlines())
 
     env["GPU_EC2_CONFIRM"] = "apply"
     env["GPU_EC2_PLAN_SHA256"] = hashlib.sha256(plan_file.read_bytes()).hexdigest()
@@ -143,8 +149,39 @@ def test_preflight_stops_before_type_lookup_when_quota_is_too_small(tmp_path: Pa
     assert result.returncode != 0
     assert "quota is 0 vCPUs; 4 are required" in result.stderr
     calls = aws_log.read_text(encoding="utf-8").splitlines()
+    assert len(calls) == 3
+    assert "service-quotas get-service-quota" in calls[2]
+    assert not terraform_log.exists()
+
+
+@pytest.mark.parametrize(
+    "metadata",
+    [
+        "000000000000 ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20261120 x86_64 available",
+        "099720109477 ubuntu/images/hvm-ssd-gp2/ubuntu-noble-24.04-amd64-server-20261120 x86_64 available",
+        "099720109477 ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20261120 arm64 available",
+        "099720109477 ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20261120 x86_64 deregistered",
+    ],
+    ids=["wrong-owner", "wrong-name", "wrong-architecture", "unavailable"],
+)
+def test_preflight_rejects_untrusted_or_unusable_ami(tmp_path: Path, metadata: str) -> None:
+    bin_dir, aws_log, terraform_log = _fake_cli_bin(tmp_path)
+    env = _subprocess_env(bin_dir)
+    env["FAKE_AMI_METADATA"] = metadata
+
+    result = subprocess.run(
+        [str(REPO_ROOT / "scripts/gpu-ec2-preflight.sh")],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "AMI must be an available Canonical Ubuntu 24.04 amd64 server image" in result.stderr
+    calls = aws_log.read_text(encoding="utf-8").splitlines()
     assert len(calls) == 2
-    assert "service-quotas get-service-quota" in calls[1]
+    assert "ec2 describe-images" in calls[1]
     assert not terraform_log.exists()
 
 
@@ -274,3 +311,4 @@ def test_destroy_plan_uses_only_the_destroy_operation(tmp_path: Path) -> None:
     assert len(terraform_calls) == 2
     assert "plan -destroy" in terraform_calls[1]
     assert terraform_calls[1].split()[0] == "ai-platform-pilot-key"
+    assert "ubuntu_ami_id=ami-0a951420c495183dc" in terraform_calls[1]
