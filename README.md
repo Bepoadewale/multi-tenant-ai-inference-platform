@@ -129,7 +129,7 @@ Those are deliberate future claims with separate evidence requirements in
 
 ## Documentation
 
-- [Single-L4 GPU infrastructure goal](docs/goals/SINGLE_L4_GPU_INFRASTRUCTURE_GOAL.md) · [GPU lab status and execution journal](docs/gpu-lab/IMPLEMENTATION_STATUS.md)
+- [Single-L4 GPU infrastructure goal](docs/goals/SINGLE_L4_GPU_INFRASTRUCTURE_GOAL.md) · [GPU lab status and execution journal](docs/gpu-lab/IMPLEMENTATION_STATUS.md) · [AI infrastructure learning handbook](docs/gpu-lab/AI_INFRASTRUCTURE_HANDBOOK.md)
 
 - [Cloud architecture](docs/cloud-architecture.md) · [Cloud operations](docs/cloud-operations.md)
 - [Security and privacy](docs/security/security.md) · [Operator Console](docs/operations/operator-console.md)
