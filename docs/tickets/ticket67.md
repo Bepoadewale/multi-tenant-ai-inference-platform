@@ -8,7 +8,7 @@ target clear.
 
 ## Current state
 
-- PR #66 prior head `094576e` passed all six required jobs in run `46093702808`. Its current rebased head `12cc2eb` is on the updated PR #65 stack; fresh CI run `46115502844` is in progress.
+- PR #66 historical head `094576e` passed six checks in `46093702808`; that does not validate the current restack. Current PR #66 head `2c5766e` is rebased on PR #65 governance-record head `24ea5e8` and needs fresh CI. PR #67 has been locally rebased on #66 head `2c5766e`; current local head `5f1b911` is not yet published.
 - One read-only CLI snapshot on 2026-11-28 found 37 open PRs, #30–#66. Every PR was
   non-draft and all displayed check runs were completed successfully. The snapshot
   does not show review approval, merge permission, or merged code.
@@ -53,6 +53,7 @@ target clear.
   authorization gate.
 - [x] Preserve the historical pre-restack CI evidence and label it as such.
 - [x] Add the ticket to the documentation index, evidence manifest, and journal.
+- [x] Rebase PR #67 on current PR #66 head `2c5766e`.
 - [ ] Publish the rebased PR #67 and pass its current required CI.
 - [ ] Obtain human review; do not merge without owner authorization.
 
@@ -66,8 +67,9 @@ gh pr list --state open --limit 100 \
 ```
 
 The historical query found 37 open PRs with completed successful displayed checks at
-01:40Z, before PR #67 opened. It is only a point-in-time snapshot; the current draft
-state, PR count, and check results must be taken from GitHub after restacking. Local documentation checks and `git diff --check` are
+01:40Z, before PR #67 opened. A later live inventory (2026-11-28) found 41 open PRs
+from #30–#71 except #54, with drafts #46, #55, and #65. Both are snapshots; query
+GitHub for current state. Local documentation checks and `git diff --check` are
 recorded in the execution journal. PR #66's final head and PR #67's initial commit
 each passed the workflow local E2E once; no separate manual clean-room run was started.
 

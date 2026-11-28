@@ -170,6 +170,8 @@ evidence.
 
 | PR #67 rebase onto current PR #66 | 2026-11-28 | Readiness tracking / PR #67 | Git rebase and documentation review | PR #67's current branch is locally replayed on PR #66 head `12cc2eb`; old status conflicts were kept from newer parent documentation and historical PR #67 evidence remains labeled by capture time. | The new PR #67 head is not yet published or CI-validated; no AWS/GPU action or manual clean-room run occurred. |
 
+| PR #67 restack after PR #66 clean-room record | 2026-11-28 | Backlog status / PR #67 | Local rebase and conflict review | PR #67 is locally rebased on PR #66 head `2c5766e` and retains its ticket and current-state snapshot. | Current head `5f1b911` is unpublished and has no current CI; no AWS/GPU action or spend. |
+
 ## Entry format for future evidence
 
 For every new item, record:
