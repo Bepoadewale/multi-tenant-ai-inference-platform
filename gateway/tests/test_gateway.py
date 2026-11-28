@@ -3,6 +3,7 @@ import asyncio
 import pytest
 from fastapi import HTTPException
 from inference_gateway.catalog.store import Catalog
+from inference_gateway.limiting import redis_service
 from inference_gateway.models import ChatCompletionRequest, ChatMessage
 from inference_gateway.services.gateway import GatewayService
 
@@ -48,3 +49,22 @@ def test_unhealthy_backends_fail_closed():
     with pytest.raises(HTTPException) as error:
         asyncio.run(service.chat(Catalog().tenant("team-search"), request()))
     assert error.value.status_code == 503
+
+
+def test_redis_admission_outage_fails_closed_and_releases_capacity():
+    class UnavailableRedis:
+        async def eval(self, *_args):
+            raise redis_service.redis.RedisError("test Redis outage")
+
+    service = GatewayService()
+    limiter = redis_service.RedisTenantLimiter("redis://unavailable.test/0")
+    limiter.client = UnavailableRedis()
+    service.limiter = limiter
+    tenant = Catalog().tenant("team-search")
+
+    with pytest.raises(HTTPException) as error:
+        asyncio.run(service.chat(tenant, request()))
+
+    assert error.value.status_code == 503
+    assert error.value.detail == "shared admission unavailable"
+    assert service.capacity.pool_allocated == 0
