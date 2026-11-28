@@ -44,8 +44,9 @@ pull requests must include the repository's clean-room evidence.
 - No AWS resources or GPU instance hours have been used by this goal.
 - The applied On-Demand G and VT quota is zero in `us-east-1`, `us-east-2`, and
   `us-west-2`. AWS email reports that the 4-vCPU `us-east-1` request was denied, while
-  Service Quotas history still returns `CASE_OPENED`. See the journal and the unsent
-  `QUOTA_APPEAL_DRAFT.md`. Do not submit a duplicate request or launch.
+  Service Quotas history still returns `CASE_OPENED`. The owner reports appealing
+  through the existing case; see `QUOTA_APPEAL_DRAFT.md`. Do not duplicate the request
+  or launch while quota is zero.
 - The existing repository budget and Terraform state guardrails use a repository-
   scoped bucket and lock table. GPU state must use a unique key namespace, not create
   duplicate guardrails. The budget uses email notifications. A recipient must be
@@ -156,10 +157,18 @@ sanitized output are retained, and a repeated Ansible run makes no unintended ch
 
 ### Package 4 — CUDA performance laboratory
 
-**Status:** not started. Prepare source and validation locally before GPU runtime.
+**Status:** PR #49 (`codex/gpu-cuda-lab-preparation`) is open and its current CI run
+`45998860857` passed all five required jobs on code head `ce8bbba`. The bounded CUDA C++ vector-add and synchronized PyTorch
+matrix/transfer lab is static preparation. No kernel has been compiled and no real
+measurements exist.
 
-- [ ] Implement bounded CPU/GPU vector and matrix operations, copy/memory/precision/
-  batch experiments, timing synchronization, and optional Triton/Nsight exercises.
+- [x] Prepare bounded CPU/GPU vector and matrix operations, separate host/device
+  copies, supported precision checks, and warmup/repeat controls.
+- [x] Use CUDA events plus explicit synchronization for GPU timings; test the dry-run
+  without importing PyTorch or touching a GPU.
+- [ ] Prepare optional Triton/Nsight exercises after runtime compatibility and tool
+  availability are confirmed.
+- [ ] Compile and execute the experiments on the real single L4.
 - [ ] Record design, warm-up, repetitions, hardware/software context, raw values, and
   profiler availability before interpreting results.
 
@@ -298,8 +307,8 @@ cost status, educational artifacts, and goal closure are complete.
   ceiling or changing the design.
 - The applied G/VT On-Demand quota is zero in three checked regions. The first
   4-vCPU request was denied by email, though the API history remains `CASE_OPENED`.
-  Do not duplicate it or launch. Resolve the status and, if the owner elects to
-  appeal, reopen the existing case using the documented use case.
+  The owner reports an appeal through the existing Support Center case. Wait for
+  AWS's response; do not send a duplicate appeal or launch with zero applied quota.
 - Provisional 12-hour estimate: about `$10.68` before tax for one g6.xlarge, one public
   IPv4, 100 GiB gp3, short-lived S3 state and lock objects, one scheduler invocation,
   and 1 GiB of internet egress. A 25% tax allowance plus `$5` general reserve gives

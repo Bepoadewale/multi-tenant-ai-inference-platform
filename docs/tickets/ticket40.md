@@ -14,8 +14,9 @@ on `codex/pin-ubuntu-ami`, based on PR #39. All four required checks passed in t
 implementation run `45949421928` and documentation follow-up run `45950217355`, each
 including the local end-to-end job. No AWS resource was created and no GPU was used. The
 existing G/VT request was denied by the email supplied by the owner; quota history
-still says `CASE_OPENED`, and applied quota remains zero. The appeal draft remains
-unsent.
+still says `CASE_OPENED`, and applied quota remains zero. The owner later reported
+manually submitting the appeal through the existing case; see the current quota appeal
+record. No approval or AWS response is confirmed.
 
 ## Research and design
 
@@ -103,5 +104,5 @@ blocked on quota and later authorization.
 - Rerun `git diff --check`, commit the focused changes, open PR #40 against PR #39,
   and monitor its single required workflow.
 - Continue the non-billable Phase 2 preparation while the quota decision is
-  unresolved. Do not send the appeal or submit another quota request without the
-  owner's explicit direction.
+  unresolved. The owner reports already sending the appeal; do not submit a duplicate
+  request or appeal communication.

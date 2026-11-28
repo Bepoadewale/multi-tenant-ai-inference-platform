@@ -1439,3 +1439,92 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   instructions. No model request was sent.
 - **Cloud/cost:** no AWS operation, GPU hour, or spend.
 - **Next:** update the evidence/status documentation, then rebase and continue PR #49.
+## 2026-11-27 — Prepare CUDA and PyTorch performance experiments
+
+- **Phase:** Phase 4 static preparation; no CUDA compilation or GPU execution.
+- **Branch:** `codex/gpu-cuda-lab-preparation`, based on the PR #48 evaluation branch.
+- **Starting state:** the local machine is macOS arm64 without `nvcc`, `nvidia-smi`, or
+  an NVIDIA device. The repository had no CUDA performance lab.
+- **Change:** added a bounded CUDA C++ vector-add example with L4/single-GPU guards,
+  CPU correctness comparison, warmups, CUDA-event kernel timing, and separate transfer
+  timings. Added a PyTorch matrix benchmark comparing CPU FP32 with L4 FP32/FP16 and
+  BF16 only if supported, using synchronized CUDA-event measurements and explicit
+  numerical tolerances. Added a plan-only Make target, static CI wiring, tests, and a
+  learning README. Runtime measurements write aggregate JSON outside Git with owner-only
+  permissions.
+- **Validation:** plan reports sizes 256/512/1024, 3 warmups, 10 repetitions, and zero
+  GPU operations. Three Python 3.12 tests passed; Ruff, bytecode compilation, and
+  `git diff --check` passed. The `.cu` file was not compiled because the local
+  workstation has no CUDA compiler.
+- **Financial/security boundary:** no model, GPU, CUDA container, AWS resource, or spend.
+  Runtime remains prohibited until the full $25 plan/expiry/teardown gates pass.
+- **Next:** open PR #49 after updating docs, validate static CI, and later compile/run on
+  the pinned Ubuntu/L4 environment before using any result in reports.
+
+## 2026-11-27 — Confirm evaluation preparation PR checks
+
+- **Branch / PR / head:** `codex/gpu-evaluation-preparation`, PR #48, `71637d7`.
+- **Result:** all five required checks passed in run `45997259460`, including the
+  local E2E workflow, Python tests and dry-run, Terraform manifests, supply-chain, and
+  GPU observability schema validation.
+- **Evidence limits:** CI did not contact a language model or AWS. The evaluation
+  remains static; no quality score or release approval exists.
+- **Cost:** no AWS resources, GPU hours, model download, or spend.
+
+## 2026-11-27 — Open CUDA preparation PR
+
+- **Phase:** Phase 4 static preparation; AWS/GPU execution remains blocked on quota
+  and the approved cost plan.
+- **Branch / PR / head:** `codex/gpu-cuda-lab-preparation`, PR #49, `ce8bbba`.
+- **Starting state:** local macOS arm64; no NVIDIA device or `nvcc`. The CUDA sample
+  could not be compiled locally.
+- **Work:** opened PR #49 with the bounded CUDA/PyTorch lab, dry-run, tests, and
+  learning documentation. Updated the goal, implementation status, backlog, ticket,
+  and evidence records to reflect the opened PR.
+- **CI:** run `45998860857`; at journal time Python, manifests, GPU observability,
+  and supply-chain passed, while local E2E remained pending.
+- **Validation limits:** CI/static checks do not establish CUDA compilation, L4
+  compatibility, GPU timings, or real performance.
+- **Cost/resources:** no AWS resource, GPU hour, model download, or spend.
+- **Next:** finish CI observation, then prepare the manual Ubuntu/GPU setup checklist
+  and consolidate required host artifacts before the authorized GPU batch.
+
+## 2026-11-27 — Owner reports manual quota appeal submitted
+
+- **Phase:** Phase 2 remains blocked; all work this session is non-billable.
+- **Status source:** the owner reports manually submitting the appeal through the
+  existing AWS Support Center case. No independent delivery receipt or new AWS
+  decision has been recorded here. The prior AWS email says denied; the last recorded
+  Service Quotas history still says `CASE_OPENED`, with applied quota zero.
+- **Action:** updated current-state documentation to avoid asking the owner to submit
+  the appeal again. No AWS case message, quota request, or infrastructure mutation was
+  sent by the agent.
+- **Cost/resources:** no AWS calls, GPU time, resources, or spend in this update.
+- **Next:** continue preparation; check the appeal outcome and applied quota before
+  any launch preflight, and do not launch with zero applied quota.
+
+
+## 2026-11-28 — Correct CUDA reduced-precision checks and transfer timing
+
+- **Phase:** Phase 4 static CUDA performance preparation; PR #49.
+- **Branch / starting head:** `codex/gpu-cuda-lab-preparation`, remote head
+  `9430af6`; the fix is committed locally and rebased on PR #48 head `33e4d2a`.
+- **Starting state:** review found a BF16 correctness comparison that included input
+  quantization error, and a device-to-host transfer sample that allocated pageable
+  memory inside each timed iteration.
+- **Changes:** compare each GPU result with an FP32 multiplication of those same
+  precision-rounded inputs. Preallocate a pinned CPU destination before the timing loop,
+  enqueue a nonblocking device-to-host copy between CUDA events, then synchronize after
+  recording the end event. Updated the learning notes to explain the distinction.
+- **Validation:** Ruff passed; 3 focused plan/calculation tests passed; Python bytecode
+  compilation and `git diff --check` passed. `make gpu-cuda-plan` reported the bounded
+  sizes, warmups, repetitions, and zero GPU operations. No CUDA code was compiled and
+  no GPU or AWS resource was used.
+- **Limit:** the workstation has no NVIDIA GPU. The timing code and numerical tolerance
+  still require confirmation on the actual L4; these checks are static/local only.
+- **Previous-head CI:** the initial PR #49 update at `5496324`, based on PR #48
+  `a5bb235`, passed all five required jobs in run `46109166340`. The current rebase
+  includes the same code plus the newer PR #48 evidence commit, so its own checks are
+  still required.
+- **Next:** publish the rebased branch using the exact expected remote head, watch one
+  current-head CI cycle, and resolve both review threads after it passes.

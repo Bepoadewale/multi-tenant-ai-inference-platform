@@ -1,20 +1,20 @@
 # GPU Lab Implementation Status
 
-**Overall:** ACTIVE — Phase 2, isolated EC2 Terraform preparation. This is static-only work; no GPU cloud execution has occurred in this goal.
+**Overall:** ACTIVE — Phase 2 infrastructure is prepared but blocked on quota; Phase 4 CUDA lab is in static PR review. No GPU cloud execution has occurred in this goal.
 
 | Phase | Status | Evidence / next gate |
 | --- | --- | --- |
 | 1. Audit, research, architecture | Complete | Baseline, direct request/admission audit, proposed diagrams, official-source research notes, risk register, cost estimate, backlog, evidence manifest, and passing PR checks are recorded. PR human review/merge remains open; exact package versions and cost inputs are rechecked before implementation/apply. |
-| 2. Single-L4 EC2 Terraform | In progress — static only | Separate root, account/quota/AZ preflight, checksum-gated plan/apply/destroy scripts, guest plus AWS expiry, and read-only cleanup verifier are drafted. Ten fake-CLI regression cases cover profile propagation, absent Scheduler group, wrong account/quota, missing apply confirmation, changed create/destroy plan checksums, destroy account guard, and destroy-only plan generation. `make verify` passes locally (60 tests). PR #32 head `da2567e` passed all four required CI jobs in run `45933749318`. Backend-free validation passed; latest AWS-backed local-state preview proposed 14 creates for one `g6.xlarge` in `us-east-1c`, not an apply plan. Applied quota remains zero; the increase request is `CASE_OPENED`. |
+| 2. Single-L4 EC2 Terraform | In progress — static only; quota blocked | Separate root, account/quota/AZ/AMI preflight, checksum-gated plan/apply/destroy scripts, guest plus AWS expiry, and read-only cleanup verifier are drafted. PR #40 pins the reviewed Canonical Ubuntu 24.04 AMI; preflight checks owner, image family, x86_64 architecture, and availability. Local validation passed; all four required checks passed in runs `45949421928`, `45950217355`, and `45951027403`. A fresh AWS-backed local-state preview proposes 14 creates for one `g6.xlarge` in `us-east-1c` (plan digest in ticket42); it is not a remote-state or apply-ready plan. Regression tests cover passing both remote-lock settings to Terraform init, but real lock behavior is untested. AWS email says the 4-vCPU request was denied, while quota history still says `CASE_OPENED`. The owner reports manually submitting an appeal through the existing Support Center case; no AWS reply is confirmed. Applied quota remains zero. |
 | 3. Ubuntu/NVIDIA/CUDA/Ansible | Not started | Manual host and container GPU computation, followed by repeat Ansible run. |
-| 4. CUDA performance lab | Not started | Synchronized real-GPU experiments and profiler evidence. |
-| 5. vLLM and Qwen serving | Not started | Pinned artifacts and actual L4 inference/streaming. |
-| 6. Multi-tenant GPU gateway | Local correctness work in progress; no GPU integration | PR #33 checks passed. PR #34 head `b51aedd` passed all four checks in run `45936485832`; both review threads are resolved. PR #35 head `5cd8dfb` passed all four checks in run `45937540562`; both review threads are resolved. PR #36 head `774bc71` is pushed on the updated stack; run `45938444604` is in progress. Latest `make verify`: 90 passed, 2 optional Redis skips; PR #35 Redis 7.4 integration: 2 passed. No live vLLM, separate gateway-process failure, or GPU routing evidence exists. |
-| 7. GPU/AI observability | Not started | Live metrics, dashboards, alert, trace correlation. |
-| 8. Benchmarks and FinOps | Not started | Reproducible measured report with raw evidence references and cost method. |
-| 9. Evaluation and releases | Not started | Actual evaluation, candidate rejection and rollback. |
+| 4. CUDA performance lab | Prepared — static PR #49 open | CUDA vector-add and synchronized PyTorch matrix experiments, bounded sizes, a no-GPU plan, tests, and instructions are prepared on `codex/gpu-cuda-lab-preparation`. All five required CI checks passed in run `45998860857` on code head `ce8bbba`. The `.cu` source is not compiled; L4 measurements and profiler evidence remain outstanding. |
+| 5. vLLM and Qwen serving | Prepared — static only | Separate one-GPU Compose profile and pinned image/model candidates exist; no image pull, model download, L4 load, or inference has occurred. |
+| 6. Multi-tenant GPU gateway | Prepared — static integration | Opt-in catalog selection routes `chat-default` to one vLLM endpoint; existing ONNX defaults remain. Gateway readiness checks backend and shared capacity state. No real GPU requests, quota accounting, or cancellation behavior has been verified. |
+| 7. GPU/AI observability | Prepared — static only | PR #46 passed all five required checks after rebasing, run `45992409372`. It configures digest-pinned exporters, Prometheus, Grafana, Alertmanager, a privacy-filtered OTel Collector, Tempo, rules, and dashboards. It has not started on a GPU; current metric names/units, PromQL, exporter compatibility, host access, alerts, and trace propagation still need runtime validation. |
+| 8. Benchmarks and FinOps | In progress — static PR #47 | A direct vLLM matrix and bounded runner are prepared on `codex/gpu-benchmark-preparation`; its cleanup regression test and all five required CI checks passed in run `45994609421` on head `9936e11`. No L4 measurements exist. |
+| 9. Evaluation and releases | In progress — static PR #48 | Seven synthetic cases, deterministic checks, a human-review marker, metadata-safe report output, and a no-network dry-run passed all five required checks on head `71637d7` in run `45997259460`. No LLM evaluation, candidate decision, or rollback has run. |
 | 10. Incidents and recovery | Not started | Safe real fault injection, diagnosis and verified recovery reports. |
-| 11. Automation and CI | Not started | Repeatable Terraform/Ansible/Compose and gated non-billable PR CI. |
+| 11. Automation and CI | In progress — static only | `make verify` validates the dedicated single-GPU Compose file. PR #45's latest full run `45990929878` passed all four required checks, including the capacity demo and queue path. Terraform apply, Ansible roles, and cloud execution remain unrun. |
 | 12. Clean-room and teardown | Not started | Independent recreation, export and provider-side absence checks. |
 
 ## Baseline verified directly
@@ -37,18 +37,31 @@
   7-resource bootstrap preview; no bootstrap apply has occurred.
 - Read-only `us-east-1` resource-group tag and EC2 instance lookups for the exact project tag: **no matches**. Untagged or differently tagged leftovers are not excluded.
 - EC2 instance type offerings list G6 in multiple `us-east-1` AZs; this is not a capacity reservation.
-- On-Demand G and VT applied quota: **0 vCPUs** (`L-DB2E81BA`). A request for **4 vCPUs** for one `g6.xlarge` was submitted after the user's direct instruction; its AWS status is **PENDING**. The request does not allow launch until AWS approves it and the separate cost/apply gates pass.
+- On-Demand G and VT applied quota: **0 vCPUs** (`L-DB2E81BA`) in `us-east-1`, `us-east-2`, and `us-west-2`. One 4-vCPU request was submitted for a single `g6.xlarge`. AWS email reports denial; read-only quota history still reports `CASE_OPENED`. The owner reports manually submitting an appeal through the existing Support Center case; no AWS reply or quota change is confirmed. Do not submit a duplicate request.
 - Price List API on 2026-11-26: Linux shared On-Demand `g6.xlarge` **$0.8048/hour**. An 8–12 hour instance window costs **$6.44–$9.66** before all other charges. A provisional 12-hour envelope including IPv4, gp3, repository S3/DynamoDB state requests, expiry, egress, tax contingency, and reserve is about **$18.35**; see `COST_REPORT.md` for assumptions and exclusions. This is not a final quote or authorization.
 - Credentials are never recorded here.
 
+**GPU preparation:** [GPU batch runbook](GPU_BATCH_RUNBOOK.md) groups preflight,
+manual driver/CUDA/container/PyTorch setup, vLLM, tenant validation, telemetry,
+benchmark/evaluation, evidence export, and teardown. It is a static procedure only;
+all package candidates must be rechecked and no L4 command has run. A fresh
+read-only AWS check on 2026-11-27 verified the configured key profile is in the
+expected project account, applied G/VT quota is still zero, and exact project-tag
+EC2/resource-group queries returned no resources in `us-east-1`. A separate EC2
+Compose profile now statically configures one vLLM GPU service, two loopback-only
+gateway replicas, and shared Redis. Catalog routing and health checks are opt-in and
+unit-tested; the profile has not run on an L4.
+
 ## Current Next Actions
 
-1. Resolve PR #33 CI results and remaining review feedback; keep it stacked on #32.
-2. Resolve human review for PR #32; keep it stacked on #30 until the goal
-   registration base is merged.
-3. Track the pending four-vCPU G/VT quota request while preparing the exact
-   remote-state plan and full resource/cost summary. Do not apply.
-4. Keep PRs #30–#36 on their current review branches; none is merged or has been pushed
-   directly to `main`.
+1. Validate the rebased PR #46 observability branch in CI after the parent PR #45
+   capacity demo passed all four required checks in run `45990929878`.
+2. Preserve the accurate owner-reported appeal status; quota remains zero and no
+   follow-up should duplicate the submitted appeal.
+3. Continue remote-state, expiry, cost, and local gateway correctness work without
+   applying infrastructure or duplicating the submitted appeal.
+4. Keep work in the PR-only workflow. All current project PRs remain unmerged; human
+   review is outstanding. PR #46 contains the rebased, static GPU observability
+   preparation; live GPU validation remains outstanding.
 
 Update this table and the detailed goal after each implementation package. A phase is complete only when its acceptance gate has actual evidence.
