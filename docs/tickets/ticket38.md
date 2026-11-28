@@ -94,3 +94,12 @@ open.
   remains pending.
 - Wait for all required checks to finish on head `b027a18`.
 - Verify the downloaded pinned model file in the authorized GPU execution batch.
+
+## Review follow-up
+
+The CLI now reports sanitized filesystem failures rather than printing exception
+text that can reveal the private cache path. The new CLI test simulates a
+`PermissionError` containing the full path and checks that neither the cache root nor
+snapshot path appears in stderr. Ruff, Python compilation, all 9 focused tests, and
+`git diff --check` passed locally. Updated PR CI is required before resolving the
+review finding. No model download, AWS call, or GPU was used.

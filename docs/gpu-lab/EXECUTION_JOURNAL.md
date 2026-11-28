@@ -792,3 +792,19 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** validate documentation formatting, commit the focused research package,
   push its branch, open PR #37 against PR #32, and let its required checks reach a
   terminal state. Continue using the existing PR #36 watcher only.
+
+## 2026-11-28 — Sanitize model-cache filesystem errors
+
+- **Phase:** Phase 5 model-integrity preparation; PR #38 review follow-up.
+- **Branch / starting head:** `codex/model-artifact-integrity`, PR #38 head `2d2d417`.
+- **Finding:** a permission failure from `Path.open()` can include the complete local
+  cache path, and the CLI printed that exception verbatim.
+- **Change:** classify missing-file and permission errors with safe fixed messages;
+  report other operating-system failures by error class only. Added a CLI test whose
+  simulated `PermissionError` contains the secret path and asserts it is absent from
+  stderr.
+- **Validation:** Ruff passed, 9 focused tests passed, bytecode compilation passed,
+  and `git diff --check` passed. No model file was downloaded and no AWS/GPU work was
+  performed.
+- **Next:** publish the fix, watch current-head CI, then resolve the review thread with
+  the exact passing evidence.

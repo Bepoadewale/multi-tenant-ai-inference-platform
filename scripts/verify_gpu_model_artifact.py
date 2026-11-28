@@ -63,7 +63,19 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         result = verify_file(path, MODEL_SIZE_BYTES, MODEL_SHA256)
-    except (OSError, ValueError) as exc:
+    except FileNotFoundError:
+        print("model artifact verification failed: model artifact is missing or not a file", file=sys.stderr)
+        return 1
+    except PermissionError:
+        print("model artifact verification failed: filesystem permissions prevent reading the artifact", file=sys.stderr)
+        return 1
+    except OSError as exc:
+        print(
+            f"model artifact verification failed: filesystem error ({type(exc).__name__})",
+            file=sys.stderr,
+        )
+        return 1
+    except ValueError as exc:
         print(f"model artifact verification failed: {exc}", file=sys.stderr)
         return 1
 

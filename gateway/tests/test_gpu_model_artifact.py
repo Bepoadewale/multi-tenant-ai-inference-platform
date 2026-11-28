@@ -104,3 +104,19 @@ def test_cli_failure_does_not_disclose_cache_path(tmp_path, capsys):
     error = capsys.readouterr().err
     assert "missing or not a file" in error
     assert str(tmp_path) not in error
+
+
+def test_cli_permission_failure_sanitizes_private_cache_path(tmp_path, monkeypatch, capsys):
+    verifier = _verifier_module()
+    private_path = verifier.snapshot_file(tmp_path)
+
+    def unreadable_file(path, *_args):
+        raise PermissionError(f"permission denied: {path}")
+
+    monkeypatch.setattr(verifier, "verify_file", unreadable_file)
+
+    assert verifier.main(["--cache-dir", str(tmp_path)]) == 1
+    error = capsys.readouterr().err
+    assert "filesystem permissions" in error
+    assert str(private_path) not in error
+    assert str(tmp_path) not in error
