@@ -69,10 +69,12 @@ the 24 GB L4. The 22 GiB figure is the relevant planning number for model capaci
 The instance is a virtual machine: AWS manages the physical host. This project does
 not demonstrate bare-metal control.
 
-GPU memory stores model weights, activations, CUDA work buffers, communication data,
-and the key/value cache used during text generation. A GPU can report high memory
-usage even when arithmetic utilization is low, or high utilization while memory is
-close to full. Both measurements matter.
+GPU memory is often called **video RAM (VRAM)**. It is local to the accelerator and
+stores model weights, activations, CUDA work buffers, communication data, and the
+key/value cache used during text generation. It is different from the EC2 host's
+system memory: adding host RAM does not make the L4's VRAM larger. A GPU can report
+high VRAM use while arithmetic utilization is low, or high utilization while memory
+is close to full. Both measurements matter.
 
 ### Streaming multiprocessors and execution units
 
@@ -103,6 +105,13 @@ divergence**. It can reduce the benefit of parallel execution.
   It has much higher bandwidth than host memory but more latency than registers.
 - **Host memory** is system RAM owned by the EC2 guest. Moving data between host and
   GPU memory over PCIe takes time and should be measured separately.
+
+**Memory bandwidth** is how many bytes a memory system can move per second. It is
+different from memory capacity: capacity answers whether the weights and temporary
+state fit, while bandwidth affects how quickly data can be read and written. LLM
+decoding repeatedly reads model weights, so a model can be limited by VRAM bandwidth
+even when its arithmetic units are not fully occupied. Profile before assuming that
+more CPU cores, a larger context, or a higher GPU-utilization target will help.
 
 An optimization can be **compute-bound** when arithmetic throughput is the limit, or
 **memory-bound** when moving data is the limit. Matrix multiplication is often
@@ -330,6 +339,18 @@ to an immutable revision, artifact digest, runtime image, evaluation suite, and 
 commit. A **release plan** is a reviewable proposal for a precise change. An independent
 approver should approve the plan digest rather than a mutable branch name.
 
+A **model registry** is a catalog of named model versions and their metadata, such as
+the source revision, evaluation result, and promotion state. A registry may store the
+model bytes itself, or it may store references and digests while the bytes remain in a
+separate artifact store. Do not confuse a registry record with proof that the model is
+currently loaded in a serving process. In this repository, the GPU profile prepares a
+private MLflow tracking service for run metadata and sanitized evaluation reports;
+model weights stay in the pinned Hugging Face cache. The release API and host
+controller keep their own immutable plan and active-state records. The design notes
+that the controller does not update an MLflow model alias or prove live state until a
+real-host release has been exercised. A larger platform might add a durable registry,
+artifact storage, access review, approval history, and an auditable promotion API.
+
 With one GPU, the project uses sequential releases: stop or unload the old model, load
 the candidate, verify readiness and a real inference, then either record the candidate
 as champion or restore the known-good version. This can have downtime. Two running
@@ -382,11 +403,19 @@ total_lab_cost = instance_hours × instance_price
 ```
 
 Cost per request is the relevant total cost divided by successful requests. Cost per
-million output tokens is:
+million input tokens and cost per million output tokens are:
 
 ```text
-total_cost ÷ successful_output_tokens × 1,000,000
+cost_per_million_input_tokens = allocated_total_cost ÷ successful_input_tokens × 1,000,000
+cost_per_million_output_tokens = allocated_total_cost ÷ successful_output_tokens × 1,000,000
 ```
+
+Use an explicitly stated allocation period and count only successful requests for the
+chosen measure. Do not divide by zero or silently mix input and output tokens. Fixed
+instance costs can be allocated over the experiment's total tokens, but that number
+will change with utilization; report the run duration, successful token totals, and
+whether the cost is estimated or billed. Cost per successful evaluation task is often
+more useful when two models have different quality or failure rates.
 
 State whether a value is an estimate or actual billing evidence. The AWS Price List
 estimate is not a bill. A budget alert is not a hard spending limit. This project caps
@@ -411,9 +440,26 @@ preparing reports.
 - **Readiness** answers whether the instance can serve traffic now. **Liveness** asks
   whether the process should be restarted. They are different checks.
 - **Idempotency** lets a repeated control request avoid applying an operation twice.
+- **Concurrency** is how many operations run at the same time. One GPU and one model
+  server share finite VRAM and scheduling capacity; the gateway's concurrency limit
+  is an admission rule, not a hardware reservation.
 - A **service-level objective (SLO)** is a measurable reliability target. An **error
-  budget** is the allowed unreliability within a period. A lab should derive targets
-  from actual measurements and user needs rather than invent production promises.
+  budget** is the amount of unreliability allowed by that target over a stated period.
+  For example, if an SLO allowed 99 successful responses per 100 eligible requests,
+  the remaining one failure would consume that period's error budget. A lab should
+  derive targets from measured behavior and user needs rather than invent production
+  promises.
+
+**Fault isolation** limits how far one failure can spread. Separate processes, private
+network boundaries, bounded queues, and per-tenant admission can reduce some effects;
+they do not isolate tenants from a shared host, Redis process, or physical GPU. In this
+lab the EC2 host and L4 are shared failure domains. **Incident response** is the
+repeatable work of detecting a symptom, collecting safe evidence, testing possible
+causes, identifying the root cause, applying a reversible fix, and independently
+checking recovery. The project's observed Redis outage is a local CPU incident: one
+gateway returned HTTP 500 instead of 503, the exception path was corrected, and a
+later CI drill observed 503 from both gateways and readiness after Redis recovered.
+That example teaches the method; it is not a GPU or production incident.
 
 The single EC2 host, one L4, one Redis service, and one model endpoint are single points
 of failure. The project does not claim high availability. Recovery time measured in a
@@ -538,14 +584,20 @@ pages must be checked again before a GPU run.
 | CUDA | NVIDIA's programming model, compiler tools, and runtime ecosystem for GPU computation. |
 | Decode | The iterative generation of output tokens after prompt prefill. |
 | Embedding | A numeric vector representing a token or other input. |
+| Error budget | The failure or latency allowance implied by an SLO during its measurement period. |
+| Fault isolation | Limits that prevent one component or workload failure from spreading to others. |
 | FP16 / FP32 | 16-bit / 32-bit floating-point representations. |
+| Incident response | The process of detecting, diagnosing, fixing, and verifying recovery from a service failure. |
 | KV cache | Stored attention keys and values reused during token generation. |
 | LLM | Large language model, a neural network trained to predict and generate token sequences. |
+| Memory bandwidth | The rate at which a memory system can transfer bytes; distinct from how much data it can hold. |
+| Model registry | A versioned catalog of model identities, provenance, evaluations, and promotion state; it may reference model bytes stored elsewhere. |
 | PagedAttention | A vLLM approach that manages attention-cache memory in reusable blocks. |
 | Prefill | Processing the prompt input and creating initial transformer state before output generation. |
 | Quantization | Representing model weights or activations with fewer bits to reduce memory and computation. |
 | SLO | Service-level objective: a stated reliability or performance target measured over time. |
 | Tensor Core | NVIDIA GPU hardware unit that accelerates supported matrix operations. |
 | Token | A unit produced by a tokenizer; it may be a word, part of a word, punctuation, or another symbol. |
+| VRAM | GPU-local memory that stores weights, intermediate tensors, and active request state. |
 | vLLM | An inference-serving engine that schedules LLM requests and manages GPU attention memory. |
 | Warp | A group of GPU threads scheduled together by an NVIDIA streaming multiprocessor. |

@@ -23,6 +23,9 @@ claim that static preparation is proof of live GPU operation.
   observability, performance, cost, reliability, and cloud security.
 - Explain single-host and logical tenant limitations, and distinguish background
   distributed-GPU concepts from work performed in this project.
+- Explain GPU-local video RAM and bandwidth, model registry versus artifact storage,
+  cost per million input/output tokens, error budgets, fault isolation, and the real
+  local Redis incident without upgrading it to a GPU or production claim.
 - Include troubleshooting steps, project file locations, official sources, and a
   glossary.
 - Link the handbook from `docs/README.md` and update project status and evidence.
@@ -33,13 +36,17 @@ claim that static preparation is proof of live GPU operation.
 - [x] Claims label planned and local evidence accurately; no GPU result is invented.
 - [x] Relative links in the handbook and docs index resolve.
 - [x] `git diff --check` passes.
-- [ ] PR #59 CI passes.
+- [x] Previous handbook head `34c4a44` passed all six required jobs in run
+  `46112594557`.
+- [ ] The concept-coverage follow-up passes its fresh PR checks.
 - [ ] Human review is complete; PR remains unmerged until authorized.
 
 ## Validation and evidence
 
 - `git diff --check` passed.
 - A local relative-link check passed for the handbook and documentation index.
+- Previous head `34c4a44` passed six checks in run `46112594557`; this documentation
+  follow-up requires fresh CI.
 - Prior PR #58 evidence: run `46068015904`, all six checks passed. This is local CPU
   Compose validation only and is not evidence that this handbook's CI has passed.
 - No GPU, AWS, model download, benchmark, or cloud spending occurred.
@@ -59,3 +66,15 @@ now includes the rebase and CI-failure history; both the updated PR #57/58 recor
 the handbook work record were retained. The documentation links and `git diff --check`
 pass. This PR still needs a fresh CI run and review. No AWS, GPU, model download, or
 cloud spend occurred.
+
+## Concept-coverage follow-up — 2026-11-28
+
+An audit against the requested learning topics found that the handbook explained most
+of the GPU and reliability behavior but did not name several terms directly. Added
+plain-English definitions for VRAM and memory bandwidth, explained the boundary
+between an MLflow tracking record, a model registry, artifact storage, and the live
+model process, and added cost-per-million-input/output-token formulas. Expanded the
+explanations of concurrency, SLO error budgets, fault isolation, and the actual local
+Redis incident. These are concept and repository explanations; no runtime behavior or
+new GPU evidence is claimed. `git diff --check` passed. The revised handbook requires
+fresh CI on this branch.

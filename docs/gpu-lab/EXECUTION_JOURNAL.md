@@ -2152,3 +2152,22 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Remaining launch gates:** remote-state bootstrap, valid private Budget alert recipient and project Budget, current exact price and AZ-capacity check, remote saved-plan review, expiry safeguards, and separate apply authorization. Keep the $25 ceiling and one bounded GPU batch.
 - **CI results:** PR #56 run `46160784399` passed all five required checks, including local E2E. PR #57 run `46161064613` passed all six required checks, including Ansible and local E2E. PR #58 fresh CI has not yet been published at this journal entry.
 - **Next:** review the final PR #58 diff, push with exact lease against `59925fd`, update the PR description, and watch the single triggered run. Then carry descendants from their respective old parent heads, preserving only each PR's own commit range.
+
+
+## 2026-11-28 — Audit and complete handbook concept coverage
+
+- **Phase:** non-billable learning-document preparation; no AWS or GPU work.
+- **Branch / PR:** `codex/ai-infrastructure-handbook`, PR #59, based on PR #58.
+- **Audit finding:** the handbook described most required ideas but left several
+  important terms implicit. It did not clearly distinguish VRAM from host RAM, memory
+  bandwidth from capacity, MLflow tracking from a model registry and artifact store,
+  or error-budget and fault-isolation concepts.
+- **Change:** added those explanations, separate input/output cost-per-million-token
+  formulas, and an evidence-limited explanation of the observed local Redis incident.
+  The glossary now names the concepts directly.
+- **Validation:** `git diff --check` passed. A fresh CI run is needed for the updated
+  handbook. No additional clean-room run was performed.
+- **AWS / GPU / cost:** no AWS query or mutation, model download, GPU operation, or
+  spend.
+- **Next:** finish Markdown link validation, publish the focused handbook update, and
+  track its six standard PR checks.
