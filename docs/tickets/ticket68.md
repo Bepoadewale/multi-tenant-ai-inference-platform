@@ -16,10 +16,17 @@ AWS/host execution clearly separate.
   paid AWS actions.
 - The separate AWS workflow uses `workflow_dispatch` with explicit operation and
   confirmation inputs. It is not invoked by ordinary pull-request CI.
-- The guarded host wrappers and fake-based tests are in PR #64; all six required CI jobs passed on head `06f1a11` in run `46114151883`. No AWS host or GPU operation has been performed.
-- PR #65 source head `49076a5` passed all six jobs in `46114955314`; the designated local clean-room record is in `docs/governance/VALIDATION.md`. PR #65 governance follow-up head `24ea5e8` needs fresh CI. PR #66 head `2c5766e` and PR #67 head `7b9fb9f` are newly published and need current checks. PR #68 has been locally rebased onto #67 head `7b9fb9f`; current head `224b035` is not yet published.
-- The remote plan remains blocked by zero applied G/VT quota and absent shared
-  bootstrap resources. The $25 ceiling and separate apply authorization remain.
+- The guarded host wrappers and fake-based tests are in PR #64; refreshed head
+  `2e2e4dd` passed all six required jobs in run `46163910205`. No AWS host or GPU
+  operation has been performed.
+- PR #65 current head `37b3b30` passed all six jobs in run `46164362977`. Its earlier
+  head `49076a5` contains the designated local CPU clean-room run documented in
+  `docs/governance/VALIDATION.md`; this is not GPU/cloud reproduction evidence.
+- PR #66 current head `846b5cf` has run `46164644804` active. PR #67 current head
+  `5dc225f` has run `46164896175` active. PR #68 is rebased on #67 head `5dc225f`;
+  its current local head is not yet published.
+- The remote plan is blocked by absent shared state/locking and Budget controls, not
+  quota. The $25 ceiling and separate apply authorization remain.
 
 ## Research and design
 
@@ -38,7 +45,7 @@ AWS/host execution clearly separate.
 - [x] Update the backlog and implementation status to mark automation source ready,
   with host/AWS execution still outstanding.
 - [x] Add this ticket to the documentation index, goal, journal, and evidence manifest.
-- [x] Rebase PR #68 on PR #67 head `7b9fb9f`.
+- [x] Rebase PR #68 on PR #67 head `5dc225f`.
 - [ ] Publish rebased PR #68 and pass current required CI.
 - [ ] Obtain human review; do not merge without owner authorization.
 
@@ -46,7 +53,7 @@ AWS/host execution clearly separate.
 
 Static source inspection checked Makefile targets, `.github/workflows/ci.yml`, and
 `.github/workflows/aws-pilot-oidc.yml`. PR #64's recorded required CI and local fake
-tests provide implementation evidence; this ticket does not rerun them. The current PR workflow must validate the rebased head; prior parent checks do not cover this change. No separate manual clean-room run was started. One integrated run remains planned after the non-GPU stack settles.
+tests provide implementation evidence; this ticket does not rerun them. The current PR workflow must validate the rebased head; prior parent checks do not cover this change. The one designated integrated local CPU clean-room run is recorded in `docs/governance/VALIDATION.md`; no second manual clean-room run is planned.
 
 ## Security and financial considerations
 
@@ -58,5 +65,5 @@ limit, not authority to bypass quota, bootstrap, plan review, or apply confirmat
 
 The source audit and CI workflow demonstrate automation readiness only. The selected local CPU clean-room record is `docs/governance/VALIDATION.md` (source `49076a5`, run `46114955314`). Terraform
 apply, Ansible on Ubuntu, Docker GPU access, real inference, teardown, and independent
-cleanup verification remain unexecuted. The quota and bootstrap authorization gates
-remain open.
+cleanup verification remain unexecuted. The quota is approved, but bootstrap and other
+launch authorization gates remain open.
