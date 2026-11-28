@@ -2143,3 +2143,23 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Remaining launch gates:** remote-state bootstrap, valid private Budget alert recipient and project Budget, current exact price and AZ-capacity check, remote saved-plan review, expiry safeguards, and separate apply authorization. Keep the $25 ceiling and one bounded GPU batch.
 - **CI results:** PR #56 run `46160784399` passed all five required checks, including local E2E. PR #57 run `46161064613` passed all six required checks, including Ansible and local E2E. PR #58 fresh CI has not yet been published at this journal entry.
 - **Next:** review the final PR #58 diff, push with exact lease against `59925fd`, update the PR description, and watch the single triggered run. Then carry descendants from their respective old parent heads, preserving only each PR's own commit range.
+
+## 2026-11-28 — Revalidate rebased PR #60 gateway benchmark
+
+- **Phase:** Phase 8 benchmark preparation; GPU execution remains pending L4 quota and
+  the bounded spend gates.
+- **Branch / PR:** PR #60 (`codex/authenticated-gateway-benchmark`), rebased onto the
+  current PR #58 guide head `59925fd`; implementation head at validation was `840f8c0`.
+- **Starting state:** PR #60's earlier passing run applied to its former head
+  `2e2d177`. New automated-review fixes had been added for truncated HTTP responses
+  and P50 comparisons that included failed requests.
+- **Commands / results:** focused gateway benchmark tests passed (8); focused Ruff
+  passed; `make gpu-gateway-benchmark-plan` printed its bounded no-network plan;
+  `git diff --check` passed.
+- **Changes:** updated ticket, status, and goal records to mark the earlier CI result
+  as historical and require fresh checks for the rebased code. No implementation
+  changes in this validation session.
+- **Cost / security:** no AWS call, resource, model download, live inference, GPU,
+  credential, or spend. No local clean-room run was launched.
+- **Next:** publish the documentation update on PR #60, watch its single fresh CI run,
+  then rebase PR #61 and continue with the remaining pre-GPU stack.

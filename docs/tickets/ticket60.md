@@ -10,7 +10,7 @@ any live benchmark run.
 
 ## Starting state
 
-- Work is on `codex/authenticated-gateway-benchmark`, based on PR #58 head `351f164`.
+- Work is on `codex/authenticated-gateway-benchmark`, based on PR #58 head `59925fd`.
 - PR #58's corrected local Redis outage and cross-gateway cancellation drills passed
   all six CI jobs in run `46068015904`.
 - PR #59 handbook passed all six jobs in run `46069680564` and is ready for review.
@@ -48,6 +48,21 @@ any live benchmark run.
   local E2E, in run `46072579851`.
 - [ ] Human review completes; no merge without authorization.
 - [ ] Actual benchmark execution remains a GPU-phase acceptance item, not this PR.
+
+## Rebase and follow-up validation — 2026-11-28
+
+PR #58 was advanced with the manual reproduction guide, so PR #60 was rebased onto
+its updated head. Its implementation history is preserved; current head checks must
+be distinguished from the prior CI result above.
+
+- Rebased PR #60 onto PR #58 head `59925fd`; implementation head before this record:
+  `840f8c0` (`fix: preserve gateway benchmark samples on failures`).
+- `PYTHONPATH=.:gateway/src .../bin/python -m pytest gateway/tests/test_gpu_gateway_benchmark.py -q`
+  — 8 passed.
+- Focused Ruff check and `git diff --check` — passed.
+- Fresh CI for the rebased head is pending; the prior run `46072579851` applies only
+  to the former head `2e2d177` and is not proof for the current source.
+- No GPU, AWS, network inference, clean-room run, or spend was involved.
 
 ## Commands and results
 
