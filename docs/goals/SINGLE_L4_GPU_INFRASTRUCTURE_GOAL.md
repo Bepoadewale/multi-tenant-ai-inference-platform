@@ -176,6 +176,6 @@ fundamentals, GPU/CUDA layers, request admission, vLLM KV cache, logical tenancy
 observability, and reliability; it adds a glossary and ticket72. See the execution
 journal for the branch, validation, and evidence limits. This does not change the
 quota or cloud authorization gates. The report remains a pre-GPU draft. The next
-action is to review and publish this docs-only package through a focused PR, then
-continue other independently useful non-billable readiness work while the existing
-AWS appeal is pending. Do not repeat the designated local clean-room run.
+action is to review the docs-only PR #72, then continue other independently useful
+non-billable readiness work while the existing AWS appeal is pending. Do not repeat
+the designated local clean-room run.

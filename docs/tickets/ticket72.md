@@ -1,5 +1,7 @@
 # Ticket 72 — Expand the pre-GPU project report foundations
 
+**Pull request:** [#72](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/72), open and stacked on PR #71.
+
 ## Objective
 
 Make the report useful as an educational narrative before GPU approval, while
