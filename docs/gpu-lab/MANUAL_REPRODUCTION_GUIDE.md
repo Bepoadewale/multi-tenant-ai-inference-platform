@@ -531,11 +531,12 @@ GPU_EC2_TRITON_CONFIRM=run make gpu-ec2-triton
 
 The wrapper checks IMDSv2 account, instance, region, instance type, and one visible L4,
 then uses the pinned `/opt/gpu-lab/torch-venv` Python environment. It limits runtime to
-60 seconds by default (120 maximum) and writes a mode-0600 aggregate JSON result under
-`/var/tmp/gpu-lab/cuda-performance/`. **Expected:** one L4 is reported, the output
-matches PyTorch exactly, and the private result file contains timing and software
-metadata. The byte-rate is only an effective traffic estimate, not measured DRAM
-bandwidth.
+60 seconds by default (120 maximum) and writes a uniquely named mode-0600 aggregate
+JSON file under `/var/tmp/gpu-lab/cuda-performance/`. It refuses to overwrite an
+existing result; an explicit `--output` path must also be new and outside the public
+repository. **Expected:** one L4 is reported, the output matches PyTorch exactly, and
+the private result file contains timing and software metadata. The byte-rate is only
+an effective traffic estimate, not measured DRAM bandwidth.
 
 For **Nsight Systems**, first check whether `nsys` is present in the installed toolkit.
 Use it on the small CUDA C++ vector-add program, which verifies the L4 before running:

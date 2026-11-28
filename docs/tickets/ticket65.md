@@ -42,6 +42,8 @@ unverified.
   visibility before loading the CUDA Python environment.
 - [x] Add focused tests for plan output, bounds, no-CUDA import behavior, and confirmation
   refusal before metadata access.
+- [x] Preserve earlier evidence by writing unique private result files and refusing
+  to overwrite an existing path.
 - [x] Document Nsight Systems and optional Nsight Compute commands and their limits in
   the CUDA lab, manual reproduction guide, and GPU batch runbook.
 - [x] Record current official NVIDIA and Triton references and the version decision.
@@ -52,6 +54,8 @@ unverified.
 - [x] Publish the final kernel declaration fix; all six checks passed on code commit
   `39ecace` in run `46087597029`, including the workflow local E2E job.
 - [ ] Obtain human review; do not merge without owner authorization.
+- [ ] Complete the single integrated clean-room reproduction after the stack settles;
+  keep this PR draft until that project review gate is satisfied.
 
 ## Acceptance criteria
 
@@ -97,3 +101,25 @@ not grant approval for the later GPU batch.
 Local evidence proves only parameter validation and dry-run safety. The L4 kernel,
 Nsight capture, compatibility, performance counters, and measured performance remain
 unproven until the quota, exact-plan, and batch-authorization gates pass.
+
+## Rebase and evidence-preservation follow-up — 2026-11-28
+
+This PR was rebased onto PR #64's current code head `06f1a11`. Parent PRs #59–#63
+passed all six required jobs on current heads in runs `46112594557`, `46112810861`,
+`46113035567`, `46113162785`, and `46113289587`. PR #64 passed all six jobs,
+including local E2E, in run `46114151883`. PR #65 remains local and needs fresh CI on
+the updated base.
+
+Review found that repeated Triton runs used `O_TRUNC` on a fixed default result path,
+which could erase earlier benchmark evidence. The default now generates a timestamped
+filename; explicit paths use exclusive creation and fail if the file already exists.
+A new test verifies existing evidence remains unchanged. Twelve focused Triton tests,
+Ruff, shell syntax, dry-run, and whitespace checks pass. Full `make verify` passes 193
+tests (2 skipped), dependency audit with no known vulnerabilities, Compose and
+monitoring checks, and all benchmark/evaluation/CUDA/Triton dry runs. The first full
+test collection in this worktree lacked ignored ONNX fixtures; after generating them
+locally, the rerun passed. No L4 kernel, profiler, AWS operation, or spend occurred.
+
+The current documentation diff also passes a check of 114 relative Markdown links
+across 13 changed Markdown files, with no unresolved rebase markers and clean
+whitespace validation.

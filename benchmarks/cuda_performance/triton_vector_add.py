@@ -12,7 +12,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_OUTPUT = Path("/var/tmp/gpu-lab/cuda-performance/triton-vector-add.json")
+DEFAULT_OUTPUT = Path("/var/tmp/gpu-lab/cuda-performance")
 MAX_ELEMENTS = 16_777_216
 MAX_RUNTIME_SECONDS = 120
 
@@ -47,6 +47,15 @@ def plan_record(
         "network_requests": 0,
         "gpu_operations": 0,
     }
+
+
+def write_report(output: Path, report: dict) -> Path:
+    output.parent.mkdir(parents=True, exist_ok=True)
+    descriptor = os.open(output, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    os.fchmod(descriptor, 0o600)
+    with os.fdopen(descriptor, "w", encoding="utf-8") as report_file:
+        report_file.write(json.dumps(report, indent=2) + "\n")
+    return output
 
 
 def _driver_version() -> str | None:
@@ -161,7 +170,7 @@ def main() -> int:
     parser.add_argument("--warmups", type=int, default=3)
     parser.add_argument("--repeats", type=int, default=10)
     parser.add_argument("--max-runtime-seconds", type=int, default=60)
-    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--output", type=Path, help="new private result file outside the repository")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
     try:
@@ -182,7 +191,11 @@ def main() -> int:
         )
         return 0
 
-    output = args.output.resolve()
+    if args.output is None:
+        stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%S.%fZ")
+        output = DEFAULT_OUTPUT / f"triton-vector-add-{stamp}.json"
+    else:
+        output = args.output.resolve()
     if output.is_relative_to(REPOSITORY_ROOT):
         parser.error("result output must be outside the public repository")
     try:
@@ -198,11 +211,10 @@ def main() -> int:
     except (AssertionError, RuntimeError, subprocess.SubprocessError) as error:
         parser.error(str(error))
 
-    output.parent.mkdir(parents=True, exist_ok=True)
-    descriptor = os.open(output, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-    os.fchmod(descriptor, 0o600)
-    with os.fdopen(descriptor, "w", encoding="utf-8") as report_file:
-        report_file.write(json.dumps(report, indent=2) + "\n")
+    try:
+        write_report(output, report)
+    except FileExistsError:
+        parser.error("result file already exists; choose a new output path")
     print(json.dumps({"gpu": report["platform"]["gpu_name"], "output": str(output)}))
     return 0
 

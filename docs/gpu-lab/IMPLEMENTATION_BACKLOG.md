@@ -286,10 +286,12 @@ sanitized output are retained, and a repeated Ansible run makes no unintended ch
 
 ### Package 4 — CUDA performance laboratory
 
-**Status:** PR #49 (`codex/gpu-cuda-lab-preparation`) is open. Its current restacked
-head passes all five required jobs. PR #65 prepares a Triton vector-add experiment and
-documented Nsight Systems/Compute profiling commands. These are static/local checks;
-no kernel has been compiled on a GPU and no real measurements exist.
+**Status:** PR #49 (`codex/gpu-cuda-lab-preparation`) is open. PR #65's bounded Triton
+vector-add and Nsight instructions are restacked locally on PR #64 head `06f1a11`.
+Twelve focused tests and full `make verify` (193 passed, 2 skipped) pass locally.
+Parent PR #64 passed all six checks in run `46114151883`; PR #65 requires a new check
+after publication and remains draft pending the one integrated clean-room evidence
+gate. No kernel has been compiled on a GPU and no real measurements exist.
 
 - [x] Prepare bounded CPU/GPU vector and matrix operations, separate host/device
   copies, supported precision checks, and warmup/repeat controls.

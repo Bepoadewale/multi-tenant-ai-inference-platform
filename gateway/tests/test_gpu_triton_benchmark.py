@@ -97,6 +97,16 @@ def test_triton_result_is_created_with_owner_only_permissions(tmp_path, monkeypa
     assert stat.S_IMODE(output.stat().st_mode) == 0o600
 
 
+def test_triton_result_writer_preserves_existing_evidence(tmp_path):
+    output = tmp_path / "existing.json"
+    output.write_text('{"original": true}\n')
+
+    with pytest.raises(FileExistsError):
+        triton_vector_add.write_report(output, {"replacement": True})
+
+    assert output.read_text() == '{"original": true}\n'
+
+
 @pytest.mark.parametrize(
     ("elements", "block_size", "warmups", "repeats", "runtime"),
     [
