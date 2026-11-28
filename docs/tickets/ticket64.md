@@ -128,6 +128,10 @@ Validation evidence for the clean GitHub runner cycle in run `46084793573` is no
 its CPU/local limits. The focused local check passed Ruff, 19 tests, and both direct
 entrypoint help commands without `PYTHONPATH`. No AWS or GPU operation occurred.
 
+The updated PR head `81362cb` passed all six required jobs in GitHub Actions run
+`46104868080`, including its local CPU E2E job and project-scoped cleanup. The
+workflow does not exercise the EC2 host wrappers or claim GPU behavior.
+
 ## Outstanding work
 
 - Complete required PR CI and address automated review.
