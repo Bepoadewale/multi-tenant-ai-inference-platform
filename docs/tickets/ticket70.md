@@ -10,10 +10,11 @@ the stack works on an NVIDIA L4.
 ## Current state
 
 PR #69 is open on branch `codex/gpu-price-refresh`; its head passed all six required
-checks, including the workflow's one local end-to-end cycle. The new documentation
-change is prepared on top of that branch. The unrelated, user-owned untracked
-`uv.lock` remains untouched. The project has no confirmed GPU quota, and no GPU or
-AWS resources have been created for this lab.
+checks, including the workflow's one local end-to-end cycle. PR #70 is open on
+`codex/gpu-readiness-architecture-facts`, stacked on #69. Its head passed all six
+required jobs in run `46100965350`, including local E2E. No review decision is
+recorded. Applied G/VT quota remains zero, and no GPU or AWS resources have been
+created for this lab.
 
 ## Research and architecture
 
@@ -32,14 +33,15 @@ candidate pending a fresh review and real host validation.
   driver installation, CUDA computation, container access, and inference evidence.
 - [x] The L4 remains labeled as the required validation boundary.
 - [x] Local documentation links and whitespace validation pass.
-- [ ] The single required PR workflow completes successfully.
+- [x] The single required PR workflow completes successfully.
 
 ## Commands and validation
 
 `git diff --check` passed. A relative-link scan over the seven changed Markdown files
-found no missing targets. GitHub required workflow remains pending publication. No
-clean-room rerun is planned; the documentation change does not modify implementation,
-and the PR workflow owns its one local cycle.
+found no missing targets. PR #70 head `6505de52ab2a691af1e3171375df68b5d97aa123`
+passed all six required jobs in run `46100965350`, including the workflow's local
+end-to-end job. No separate clean-room rerun was performed; the documentation change
+does not modify implementation, and the PR workflow owns its one local cycle.
 
 ## Issues, alternatives, and limitations
 
@@ -61,6 +63,6 @@ added. No AWS calls, downloads, infrastructure changes, GPU runtime, or cost.
 
 ## Evidence and outstanding work
 
-Evidence will include the diff, local link/whitespace checks, and the GitHub workflow
-run. Those establish documentation consistency only, not runtime compatibility.
-Human review and merge remain open.
+Evidence includes the diff, local link/whitespace checks, and GitHub run
+`46100965350`. Those establish documentation consistency only, not runtime
+compatibility. Human review and merge remain open.
