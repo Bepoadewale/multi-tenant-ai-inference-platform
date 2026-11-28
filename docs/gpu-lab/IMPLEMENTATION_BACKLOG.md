@@ -8,9 +8,10 @@ pull requests must include the repository's clean-room evidence.
 ## Latest PR and engineering status — 2026-11-28 17:32 UTC
 
 PRs #77–#83 passed all six required checks on their refreshed heads, including the
-local CPU end-to-end job. PR #84 is restacked on #83 head `142d0f3`; 67 focused tests,
-Ruff, the 35-file docs checker, and `git diff --check` pass locally. Its refreshed CI
-has not yet run. The single designated local clean-room run remains the one recorded
+local CPU end-to-end job. Restacked PR #84 head `798b2e8` passed all six required jobs,
+including local-e2e, in run `46171879043`. Its local validation passed 67 focused
+tests, 12 mocked Terraform cases, Ruff, the 35-file docs checker, and
+`git diff --check`. The single designated local clean-room run remains the one recorded
 in `docs/governance/VALIDATION.md`; no repeat is planned. PR #43 and #53 are now
 reported mergeable in the current open-PR inventory, but still require owner review.
 The project Budget/verified recipient, remote state and lock, final plan/cost,
@@ -98,11 +99,11 @@ manual local clean-room run is planned. The cloud/GPU clean-room remains Phase 1
   `46145456879` caught a stale fake plan in the wrapper suite; the corrected head
   passed all six jobs. A real AWS-provider plan is still required to confirm the
   expression shape. No AWS resource or GPU execution occurred.
-- PR #84 is open on top of #83 at head `724c45a`; all six required CI jobs passed in
-  run `46147292091`. It extends the saved-plan review to the VPC, subnet, route,
-  gateway, route-table association, security group, and instance topology.
-  Forty-three focused plan/wrapper tests pass locally. Live AWS plan evidence remains
-  open.
+- PR #84 is open on top of refreshed #83 head `142d0f3`; restacked head `798b2e8`
+  passed all six required CI jobs in run `46171879043`. It extends saved-plan review
+  to the VPC, subnet, route, gateway, route-table association, security group, and
+  instance topology. The refreshed branch passes 67 focused tests and 12 mocked
+  Terraform cases. Live AWS plan evidence remains open.
 - Current restacked heads #66–#71 all passed their six required jobs: #66 `2c5766e`
   (`46117369933`), #67 `7b9fb9f` (`46117439007`), #68 `6afa0ef` (`46117499822`),
   #69 `f21d61a` (`46117561667`), #70 `5f70852` (`46117637674`), and #71 `63df036`

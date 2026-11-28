@@ -2,11 +2,11 @@
 
 ## Latest PR and validation status — 2026-11-28 17:32 UTC
 
-PRs #77–#83 passed all six required jobs on refreshed heads: runs `46169578415`,
+PRs #77–#83 passed all six required jobs on refreshed heads in runs `46169578415`,
 `46170127067`, `46170178018`, `46170356996`, `46170595453`, `46170895199`, and
-`46171131696`. PR #84 is locally restacked on #83; 67 focused tests, Ruff, the
-35-file docs checker, and `git diff --check` pass. Current-head PR #84 CI is pending.
-No AWS resources, GPU execution, or spend occurred.
+`46171131696`. Restacked PR #84 head `798b2e8` passed all six jobs in run
+`46171879043`. Its local validation passed 67 focused tests, 12 mocked Terraform
+cases, Ruff, and the 35-file docs checker. No AWS resources, GPU execution, or spend.
 
 ## Historical read-only AWS gate snapshot — 2026-11-28 15:06 UTC
 
@@ -37,7 +37,7 @@ ready. The signed-tenant API denial test and ten-stream cancellation drill also
 passed in earlier runs. This is local CPU Compose evidence, not live GPU evidence.
 PR #58 remains open and unmerged.
 
-**Latest Phase 2 plan-review follow-up:** PR #84's earlier code and documentation
+**Earlier Phase 2 plan-review history:** PR #84's earlier code and documentation
 heads passed all six checks in runs `46147292091` and `46148089116`. Review then
 found that the guard checked public-IP assignment on the subnet but not the EC2
 instance plan value. The validator and both plan fixtures now require the instance
@@ -179,13 +179,13 @@ suites now pass 39 tests, while the CI rerun remains pending. This validates the
 documented fixture shape only; a real
 provider plan remains required before any apply. No AWS, GPU, or spend occurred.
 
-**Network topology guard (PR #84 open on #83):** the saved-plan validator now
-checks the configured VPC and subnet ranges, DNS, public-IP assignment, single
-default route, and references connecting the gateway, route table, subnet,
-association, security group, and EC2 instance. The focused plan/wrapper suites pass
-43 tests and Ruff passes. All six required PR checks passed on head `724c45a` in run
-`46147292091`. A real provider plan must still confirm the fixture's JSON shape; no
-AWS resource or GPU execution occurred.
+**Network topology guard (PR #84):** the saved-plan validator checks the configured
+VPC and subnet ranges, DNS, public-IP assignment, single default route, and references
+connecting the gateway, route table, subnet, association, security group, and EC2
+instance. After restacking on PR #83 head `142d0f3`, 67 focused tests, all 12 mocked
+Terraform cases, Ruff, and 35-file documentation validation pass. Current head
+`798b2e8` passed all six checks in run `46171879043`. A real provider plan must still
+confirm the fixture's JSON shape; no AWS resource or GPU execution occurred.
 
 **Readiness target:** finish every feasible non-GPU source, configuration, deployment
 automation, documentation, local/static check, CI, benchmark/evaluation/incident plan,

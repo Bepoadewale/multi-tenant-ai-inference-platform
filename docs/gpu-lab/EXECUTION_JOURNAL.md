@@ -40,6 +40,21 @@
   an exact lease, and monitor its required checks. Keep the designated local
   clean-room record unchanged.
 
+## 2026-11-28 — PR #84 refreshed CI passed
+
+- **Date and time:** 2026-11-28 17:34 UTC.
+- **Phase:** Phase 2 static infrastructure readiness; no AWS or GPU operation.
+- **Result:** PR #84 head `798b2e8`, based on PR #83 head `142d0f3`, passed all six
+  required GitHub Actions jobs in run `46171879043`, including local-e2e (5m10s).
+- **Local evidence:** 67 focused tests, all 12 mocked Terraform tests, Ruff, the
+  35-file docs checker, and `git diff --check` passed before publication.
+- **Limits:** this is CI/static evidence. No live AWS plan, resource, networking,
+  Session Manager, GPU, or billing behavior was exercised. Owner review and approval
+  remain pending; no PR was merged.
+- **Next:** continue the non-billable review of the open PR stack and reconcile the
+  AWS budget-recipient and remote-state gates. Do not apply until exact-plan, cost,
+  expiry, cleanup, and separate authorization checks are satisfied.
+
 ## 2026-11-28 — Refresh static package candidates and quota/backend status
 
 - **Phase:** Phase 2 static infrastructure readiness; no AWS or GPU mutation.

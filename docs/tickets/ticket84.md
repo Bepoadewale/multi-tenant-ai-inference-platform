@@ -1,6 +1,6 @@
 # Ticket 84 — Verify the single-L4 network topology in the saved plan
 
-**Status:** [PR #84](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/84) is restacked locally on refreshed PR #83 head `142d0f3`. Earlier heads listed below passed CI, but those results predate this restack. The refreshed branch passes 67 focused tests, Ruff on the changed Python modules, documentation validation across 35 files, and `git diff --check`. It needs publication and current-head CI. Owner review remains pending. No AWS operation.
+**Status:** [PR #84](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/84) is restacked on refreshed PR #83 head `142d0f3`. Current head `798b2e8` passed all six CI jobs in run `46171879043`. The branch passes 67 focused tests, 12 mocked Terraform cases, Ruff, documentation validation across 35 files, and `git diff --check`. Owner review remains pending. No AWS operation.
 
 ## Objective
 
@@ -46,7 +46,8 @@ egress; this ticket closes the separate topology-binding gap.
   authorized backend and cost gates permit it.
 - [x] Publish the public-IP follow-up and pass all required CI on earlier head `8349510` in run
   `46148953601`.
-- [ ] Publish the restacked branch and pass required CI on its current head.
+- [x] Publish the restacked branch and pass all required CI on head `798b2e8` in run
+  `46171879043`.
 - [ ] Receive owner review. No merge or apply is authorized by this ticket.
 
 ## Validation
@@ -98,6 +99,6 @@ PR #84 has been rebased onto refreshed PR #83 head `142d0f3`. On the resulting l
 tree, the saved-plan, wrapper, benchmark-runner, language-model evaluation, and model
 artifact tests pass (**67 tests**), Ruff passes for the changed Python files,
 `make gpu-docs-validate` checks 35 Markdown files, and `git diff --check` passes.
-Earlier PR #84 heads passed the CI runs listed at the top of this ticket; current-head
-CI must run after publication. No AWS plan, apply, infrastructure, GPU operation,
-model download, or spend occurred during this restack.
+Current head `798b2e8` passed all six required CI jobs, including local-e2e, in run
+`46171879043`. No AWS plan, apply, infrastructure, GPU operation, model download, or
+spend occurred during this restack.
