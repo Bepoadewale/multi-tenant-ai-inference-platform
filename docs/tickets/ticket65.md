@@ -13,8 +13,9 @@ this ticket.
 The repository already contains a CUDA C++ vector-add program and a synchronized
 PyTorch matrix/transfer experiment. Its workstation dry-run cannot compile CUDA code
 or establish GPU measurements. The standalone PyTorch dependency lock contains Triton
-3.8.0. The approved L4 and the availability of profiler performance counters remain
-unverified.
+3.8.0. AWS has approved 4.0 On-Demand G/VT vCPUs, sufficient by quota for one
+`g6.xlarge`; regional capacity and the project launch controls remain unverified.
+The actual L4 and profiler performance counters remain untested.
 
 ## Research and design
 
@@ -110,11 +111,11 @@ unproven until the quota, exact-plan, and batch-authorization gates pass.
 
 ## Rebase and evidence-preservation follow-up — 2026-11-28
 
-This PR was rebased onto PR #64's current code head `06f1a11`. Parent PRs #59–#63
-passed all six required jobs on current heads in runs `46112594557`, `46112810861`,
-`46113035567`, `46113162785`, and `46113289587`. PR #64 passed all six jobs,
-including local E2E, in run `46114151883`. PR #65 remains local and needs fresh CI on
-the updated base.
+This PR was rebased onto refreshed PR #64 head `2e2e4dd`, replacing old parent
+`06f1a11`. PRs #59–#61 passed refreshed checks in runs `46162611345`, `46162969703`,
+and `46163194154`; runs `46163327188` and `46163484312` for PRs #62 and #63 were
+still active at this documentation snapshot. PR #64 needs fresh CI on `2e2e4dd`, and
+PR #65 needs its own fresh run on this rebased stack.
 
 Review found that repeated Triton runs used `O_TRUNC` on a fixed default result path,
 which could erase earlier benchmark evidence. The default now generates a timestamped
@@ -126,6 +127,7 @@ monitoring checks, and all benchmark/evaluation/CUDA/Triton dry runs. The first 
 test collection in this worktree lacked ignored ONNX fixtures; after generating them
 locally, the rerun passed. No L4 kernel, profiler, AWS operation, or spend occurred.
 
-The current documentation diff also passes a check of 114 relative Markdown links
-across 13 changed Markdown files, with no unresolved rebase markers and clean
-whitespace validation.
+On the rebased source, 12 focused Triton tests pass, Ruff passes for the module and
+tests, `bash -n` passes, and `make gpu-triton-plan` reports zero network requests and
+zero GPU operations. The current restack passes a check of 107 relative Markdown links
+across nine changed Markdown files and `git diff --check`. Fresh CI is still required.

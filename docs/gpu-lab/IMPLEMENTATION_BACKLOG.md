@@ -66,13 +66,14 @@ Old quota-denial statements below are dated historical snapshots, not current st
   invocation, data-transfer allowance, tax contingency, and a reserve. It still
   requires exact AMI, price, egress, tax-profile, and state-retention confirmation;
   it is not permission to apply.
-- PRs #30–#64 remain open and unmerged; merge authorization is outstanding. PR #59
+- PRs #30–#65 remain open and unmerged; merge authorization is outstanding. PR #59
   head `0cfbedb` passed six checks in `46162611345`; #60 head `9fc23f2` passed six
   checks in `46162969703`; #61 head `1474752` passed six checks in `46163194154`.
-  PR #62 run `46163327188` and #63 run `46163484312` are still running. PR #64 is
-  being restacked after review found configuration must work before the NVIDIA
-  driver exists. Twenty focused tests and full `make verify` passed on its earlier
-  base; fresh PR CI remains pending. PR #53
+  PR #62 run `46163327188` and #63 run `46163484312` are still running. PR #64
+  refreshed head `2e2e4dd` is published with fresh CI pending. PR #65 is rebased onto
+  #64 head `2e2e4dd`; its earlier head `49076a5` passed six checks in `46114955314`
+  and includes the designated local CPU clean-room record. Current-head checks for
+  #65 are pending. PR #53
   code head `e623b75` passed all five checks in `46023306230`, including a Linux AMD64
   gateway image build and CPU end-to-end. PR #56 head `852c873` passed all five checks
   in `46040861818`; PR #57 Ansible head `4795f12` passed all six checks, including a
@@ -287,9 +288,12 @@ sanitized output are retained, and a repeated Ansible run makes no unintended ch
 ### Package 4 — CUDA performance laboratory
 
 **Status:** PR #49 (`codex/gpu-cuda-lab-preparation`) is open. PR #65's bounded Triton
-vector-add and Nsight instructions are restacked locally on PR #64 head `06f1a11`.
-Twelve focused tests and full `make verify` (193 passed, 2 skipped) pass locally.
-Parent PR #64 passed all six checks in run `46114151883`. PR #65 head `49076a5` passed all six required jobs in run `46114955314`; the local-e2e job is recorded as the single integrated local CPU clean-room acceptance run in `docs/governance/VALIDATION.md`. A documentation follow-up with that record needs fresh CI before the P1 gate is rechecked. No kernel has been compiled on a GPU and no real measurements exist.
+vector-add and Nsight instructions are rebased onto current PR #64 head `2e2e4dd`.
+Earlier PR #65 head `49076a5` passed all six required jobs in run `46114955314`; its
+local-e2e job is recorded as the single integrated local CPU clean-room acceptance
+run in `docs/governance/VALIDATION.md`. The current PR #65 head requires fresh checks.
+The designated run validates the local CPU stack only; no kernel has been compiled on
+a GPU and no real measurements exist.
 
 - [x] Prepare bounded CPU/GPU vector and matrix operations, separate host/device
   copies, supported precision checks, and warmup/repeat controls.

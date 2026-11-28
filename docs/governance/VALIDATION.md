@@ -921,3 +921,26 @@ This is local CPU clean-room evidence for an earlier PR #64 head. It does not
 validate the host wrappers against EC2, NVIDIA L4 access, CUDA, Docker GPU passthrough,
 or vLLM inference. Fake-based unit tests cover host-guard and operator-wrapper logic.
 The current PR #64 restack and pre-driver configuration fix require fresh CI.
+
+## Single integrated local clean-room validation for the single-L4 goal
+
+**Date:** 2026-11-28 06:04–06:09 UTC
+**Source commit:** `49076a5bf2c24a8122b787f2c119480d705be2a8` (PR #65)
+**GitHub Actions run:** [46114955314](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/actions/runs/46114955314)
+**Job:** `local-e2e` (all six required jobs in the run passed)
+**Environment:** fresh GitHub-hosted Ubuntu 24.04 runner, Python 3.12, fresh repository checkout, Docker Compose. No AWS credentials or paid cloud operations were used.
+
+This is the one designated integrated local clean-room acceptance run for the single-L4 project. The workflow ran these exact commands from the repository root:
+
+```bash
+make install
+make bootstrap-local
+make smoke
+make demo-flagship
+make verify
+make clean-local
+```
+
+Every command completed successfully. The local Compose path used the existing CPU inference implementation. `make verify` reported **193 passed, 2 skipped, and 1 warning**; the dependency audit reported no known vulnerabilities. The workflow's final cleanup completed and printed: `Removed only multi-tenant-ai-inference-platform Compose resources, locally built images, volumes, and generated artifacts.` Failure-only diagnostics (`docker compose ps -a` and `docker compose logs --no-color`) did not run.
+
+This validates local CPU setup and cleanup. It does not validate L4 access, NVIDIA drivers, CUDA, GPU containers, PyTorch GPU execution, vLLM, AWS provisioning, cloud reproduction, GPU performance, model release on a real host, or AWS teardown. Later per-PR CI jobs may run ordinary local E2E checks; this record identifies the single designated project-level clean-room run. GPU and AWS criteria remain open.
