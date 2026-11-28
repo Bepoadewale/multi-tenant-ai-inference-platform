@@ -3014,3 +3014,25 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** publish this factual status reconciliation through PR #84; then restack
   PRs #43 and #53 on their updated parents and revalidate each current head. Continue
   static review while keeping AWS read-only.
+
+## 2026-11-28 18:09 UTC — Publish quota and clean-room record corrections
+
+- **Phase and branch:** Phase 2 static readiness, PR #84, branch
+  `codex/gpu-network-plan-review`; follow-up commit `f2963db`.
+- **Starting state:** PR #84 head `4a4f542` had passed all six required checks. Current
+  documentation still said the quota correction awaited publication and one goal
+  summary repeated an older count of two local clean-room cycles.
+- **Work:** corrected the goal and current status records to show the published quota
+  reconciliation (`CASE_CLOSED`, 4.0 applied vCPUs), and aligned the clean-room count
+  with the single designated run in `docs/governance/VALIDATION.md`. Historical journal
+  and evidence entries were retained. Updated the ticket and PR description.
+- **Validation:** `make gpu-docs-validate` checked 35 Markdown files; `git diff
+  --check` passed; 67 focused tests, 12 mocked Terraform cases, and Ruff had passed in
+  the same PR package. GitHub Actions run `46173687147` passed all six required jobs,
+  including local-e2e (4m56s).
+- **Cloud, cost, and limits:** no AWS calls or changes, GPU use, model download, or
+  project spend. This validates source/docs and CI only. PR #84 remains open for owner
+  review; Budget recipient, project remote state/lock, exact cost plan, capacity,
+  expiry/teardown review, and separate apply authorization remain outstanding.
+- **Next:** continue non-billable review/readiness work; do not repeat the single
+  designated local clean-room cycle.
