@@ -1,6 +1,14 @@
 # GPU Lab Implementation Status
 
-## Current gate snapshot — 2026-11-28 15:06 UTC
+## Latest PR and validation status — 2026-11-28 17:32 UTC
+
+PRs #77–#83 passed all six required jobs on refreshed heads: runs `46169578415`,
+`46170127067`, `46170178018`, `46170356996`, `46170595453`, `46170895199`, and
+`46171131696`. PR #84 is locally restacked on #83; 67 focused tests, Ruff, the
+35-file docs checker, and `git diff --check` pass. Current-head PR #84 CI is pending.
+No AWS resources, GPU execution, or spend occurred.
+
+## Historical read-only AWS gate snapshot — 2026-11-28 15:06 UTC
 
 - AWS Service Quotas history reports the existing request `CASE_CLOSED` with desired
   value 4.0; `get-service-quota` confirms 4.0 applied On-Demand G/VT vCPUs in

@@ -5,7 +5,18 @@ claim that any cloud or GPU phase has run. Every package uses its own focused br
 and pull request. Review and required CI checks must pass before merge; implementation
 pull requests must include the repository's clean-room evidence.
 
-## Current state — 2026-11-28 snapshot
+## Latest PR and engineering status — 2026-11-28 17:32 UTC
+
+PRs #77–#83 passed all six required checks on their refreshed heads, including the
+local CPU end-to-end job. PR #84 is restacked on #83 head `142d0f3`; 67 focused tests,
+Ruff, the 35-file docs checker, and `git diff --check` pass locally. Its refreshed CI
+has not yet run. The single designated local clean-room run remains the one recorded
+in `docs/governance/VALIDATION.md`; no repeat is planned. PR #43 and #53 are now
+reported mergeable in the current open-PR inventory, but still require owner review.
+The project Budget/verified recipient, remote state and lock, final plan/cost,
+capacity, expiry verification, and separate apply authorization remain open.
+
+## Read-only AWS gate snapshot — 2026-11-28 15:06 UTC
 
 **Read-only refresh:** the expected AWS account matched. Applied On-Demand G/VT quota
 is `4.0` vCPUs, enough numerically for one `g6.xlarge`; request history now
@@ -17,7 +28,7 @@ The current `$0.8048/hour` price matches the `$18.5193` 12-hour planning envelop
 guarded preflight stopped at the absent state bucket. No Billing alternate contact or
 verified private alert recipient is configured. No paid apply is ready or authorized.
 
-This section is the current handoff. Detailed package notes below are dated historical
+At capture time, this section was the handoff. Detailed package notes below are dated historical
 records; use the goal, implementation status, tickets, and live GitHub records for newer
 state. The owner wants every feasible code, automation, local/static validation,
 documentation, and CI task finished before the paid GPU batch. Only real-L4 execution

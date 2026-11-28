@@ -17,6 +17,29 @@
 - **Next:** validate and publish this sanitization on PR #84; then continue with
   independent PR conflict repair. Do not merge without owner review.
 
+## 2026-11-28 — Restack GPU network-plan checks on current expiry bindings
+
+- **Date and time:** 2026-11-28 17:32 UTC.
+- **Phase:** Phase 2 static saved-plan guardrails; no AWS or GPU operations.
+- **Starting state:** PR #84 was based on old PR #83 head `4c75115`; PR #83 has now
+  passed all six refreshed CI jobs in run `46171131696` at head `142d0f3`.
+- **Changes:** rebased PR #84's network-topology plan guard, instance public-IP
+  check, benchmark/evaluation test fixes, and documentation onto PR #83. Preserved
+  the quota-request redaction and the owner-approved 4-vCPU quota record; resolved
+  stale status conflicts in favor of the refreshed parent and updated PR #84's own
+  ticket.
+- **Validation:** five focused test modules passed **67 tests**; Ruff passed for
+  changed Python modules; `make gpu-docs-validate` checked **35 files**;
+  `git diff --check` passed. This was not a clean-room run.
+- **CI state:** PRs #77–#83 pass all six required jobs on current refreshed heads.
+  PR #84's current local tree has not yet been published and requires a fresh CI run.
+- **AWS / GPU / cost:** no AWS API calls, Terraform plan/apply, resources, instance,
+  model download, GPU operation, or spend. Remote state, Budget recipient, exact full
+  cost, capacity, expiry, teardown, and separate apply authorization remain open.
+- **Next:** reconcile the current PR inventory in the status docs, publish PR #84 with
+  an exact lease, and monitor its required checks. Keep the designated local
+  clean-room record unchanged.
+
 ## 2026-11-28 — Refresh static package candidates and quota/backend status
 
 - **Phase:** Phase 2 static infrastructure readiness; no AWS or GPU mutation.

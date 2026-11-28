@@ -1,6 +1,6 @@
 # Ticket 84 — Verify the single-L4 network topology in the saved plan
 
-**Status:** [PR #84](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/84) is open on PR #83. Implementation head `724c45a` and documentation head `c50b591` passed all six required CI jobs in runs `46147292091` and `46148089116`. The instance-level public-IP follow-up at `8349510` passed all six checks in run `46148953601`; documentation head `355deba` passed all six in run `46149649470`. Head `3aeef02` passed all six jobs in run `46151077506`; package/status commit `9520b6e` passed all six in run `46152355082`; status/evidence closeout `e8675be` passed all six in run `46152999772`. Owner review remains pending. No AWS operation.
+**Status:** [PR #84](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/84) is restacked locally on refreshed PR #83 head `142d0f3`. Earlier heads listed below passed CI, but those results predate this restack. The refreshed branch passes 67 focused tests, Ruff on the changed Python modules, documentation validation across 35 files, and `git diff --check`. It needs publication and current-head CI. Owner review remains pending. No AWS operation.
 
 ## Objective
 
@@ -40,14 +40,13 @@ egress; this ticket closes the separate topology-binding gap.
 - [x] The focused plan and shell-wrapper suites pass (**44 tests**); Ruff,
   `make gpu-docs-validate` (35 files), and `git diff --check` pass after the
   instance-level public-IP check.
-- [x] All six required CI jobs pass on implementation head `724c45a` in run
+- [x] All six required CI jobs passed on earlier implementation head `724c45a` in run
   `46147292091`.
 - [ ] A real AWS-provider plan confirms the configuration-expression shape when the
   authorized backend and cost gates permit it.
-- [x] Publish the public-IP follow-up and pass all required CI on `8349510` in run
+- [x] Publish the public-IP follow-up and pass all required CI on earlier head `8349510` in run
   `46148953601`.
-- [ ] Validate and publish the 2026-11-28 package-index and status-documentation
-  follow-up; checks for its new head are pending.
+- [ ] Publish the restacked branch and pass required CI on its current head.
 - [ ] Receive owner review. No merge or apply is authorized by this ticket.
 
 ## Validation
@@ -92,3 +91,13 @@ The remaining gates are a valid private notification recipient, reviewed bootstr
 saved plan, remote state and lock, exact GPU-root saved plan, refreshed total cost and
 capacity, expiry and teardown review, and separate apply authorization. This note is
 read-only evidence and does not authorize cloud spending.
+
+## Restack validation (2026-11-28 17:32 UTC)
+
+PR #84 has been rebased onto refreshed PR #83 head `142d0f3`. On the resulting local
+tree, the saved-plan, wrapper, benchmark-runner, language-model evaluation, and model
+artifact tests pass (**67 tests**), Ruff passes for the changed Python files,
+`make gpu-docs-validate` checks 35 Markdown files, and `git diff --check` passes.
+Earlier PR #84 heads passed the CI runs listed at the top of this ticket; current-head
+CI must run after publication. No AWS plan, apply, infrastructure, GPU operation,
+model download, or spend occurred during this restack.
