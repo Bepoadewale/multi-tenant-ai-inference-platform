@@ -3,23 +3,24 @@
 ## Objective
 
 Make the current source-of-truth documents agree with verified model metadata,
-AWS quota status, GitHub checks, and public evidence redaction. Clarify the project
-readiness target: complete non-GPU work before quota approval so that the remaining
-engineering is predominantly real L4 execution and validation.
+AWS quota status, GitHub checks, and public evidence redaction. Clarify the readiness
+target: complete all feasible non-GPU work and launch controls before the authorized
+L4 batch, so the remaining engineering is predominantly real GPU execution and
+validation.
 
 ## Current state
 
-- PR #65 remains draft. Source head `49076a5` passed all six required jobs in run
-  `46114955314`, including the designated local CPU clean-room cycle. The governance
-  record is now added in PR #65 follow-up head `24ea5e8`; that head needs fresh CI.
-  PR #66 has been locally rebased onto #65 head `24ea5e8`; its rebased head is not yet
-  published and needs current CI.
+- PR #65 remains open. Source head `49076a5` passed all six required jobs in run
+  `46114955314`, including the designated local CPU clean-room cycle. Its evidence
+  record is in the refreshed PR #65 stack; current head `37b3b30` needs fresh CI.
+  PR #66 is being restacked onto that current head and needs CI after publication.
 - PR #50 remains open; its historical checks passed on the recorded head in run
   `46016503614`.
-- The latest recorded read-only AWS CLI check found applied On-Demand G/VT quota `0.0`.
-  The existing four-vCPU request still reports `CASE_OPENED`. The owner reported an
-  AWS denial email and manually submitted an appeal through the existing case; AWS
-  has not confirmed its outcome. No duplicate request or AWS mutation was made.
+- The latest read-only AWS CLI check on 2026-11-28 confirms 4.0 applied On-Demand
+  G/VT vCPUs in `us-east-1` and history status `CASE_CLOSED`. This allows one
+  `g6.xlarge` by quota but does not reserve Availability Zone capacity or authorize
+  provisioning. The project state bucket, lock table, and Budget are absent; the
+  recipient is not verified. No AWS mutation was made.
 - The immutable Qwen metadata and weight digest were already recorded in the research
   matrix, but two older paragraphs still described them as unpinned. No weight file
   has been downloaded.
@@ -65,13 +66,14 @@ AWS_PROFILE=ai-platform-pilot-key aws service-quotas \
   --service-code ec2 --quota-code L-DB2E81BA --region us-east-1
 ```
 
-The CLI returned zero applied quota and `CASE_OPENED` for the existing four-vCPU
-request. PR #50 and #65 had successful required checks on the recorded heads. On
-implementation commit `637eb7d`, all six PR #66 checks passed in run `46092847166`,
-including the workflow's local E2E cycle. `git diff --check` passed. A local scan
-excluding the virtual environment checked 111 Markdown files and 200 relative file
-targets; none was missing. Check the current PR head's required checks in GitHub before
-review. No separate manual clean-room cycle is planned.
+Historical quota queries in the earlier PR #66 run returned zero applied quota and
+`CASE_OPENED`. A new read-only check on 2026-11-28 confirms 4.0 applied vCPUs and
+`CASE_CLOSED`. PR #50 and #65 had successful required checks on recorded historical
+heads. On implementation commit `637eb7d`, all six PR #66 checks passed in run
+`46092847166`, including the workflow's local E2E cycle. `git diff --check` passed. A
+local scan excluding the virtual environment checked 111 Markdown files and 200
+relative file targets; none was missing. The current rebased PR #66 head needs fresh
+CI. No separate manual clean-room cycle is planned.
 
 ## Security and financial considerations
 
@@ -79,7 +81,8 @@ Only read-only GitHub and AWS queries were used. No credentials, account numbers
 AWS request identifiers, private artifacts, or model weights are intentionally added.
 No AWS mutation, GPU operation, model download, or spend occurred. The $25 ceiling,
 quota gate, exact-plan review, expiry safeguards, and explicit apply authorization
-remain in force.
+remain in force. The $25 ceiling is a hard project limit, not an automatic apply
+approval.
 
 ## Evidence and outstanding work
 
