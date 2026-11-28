@@ -16,6 +16,7 @@ has run locally, and what the AWS plan reviewed.
 | how to prepare for AI infrastructure interviews using this project | [GPU lab interview preparation](gpu-lab/INTERVIEW_PREPARATION.md) · [ticket 61](tickets/ticket61.md) |
 | how to diagnose GPU-lab failures and report benchmark results | [incident response handbook](gpu-lab/INCIDENT_RESPONSE_HANDBOOK.md) · [benchmark report framework](gpu-lab/BENCHMARK_REPORT.md) · [ticket 62](tickets/ticket62.md) |
 | the current, evidence-labeled project report draft | [final report draft](gpu-lab/FINAL_PROJECT_REPORT.md) · [ticket 63](tickets/ticket63.md) |
+| expanded learning chapters in the pre-GPU report draft | [final report draft](gpu-lab/FINAL_PROJECT_REPORT.md) · [ticket 72](tickets/ticket72.md) |
 | guarded EC2 host configuration, deployment, smoke checks, incident drill, and evidence capture | [manual reproduction guide](gpu-lab/MANUAL_REPRODUCTION_GUIDE.md#use-the-guarded-host-operation-wrappers-after-the-manual-lesson) · [ticket 64](tickets/ticket64.md) |
 | bounded Triton kernel and Nsight profiler preparation | [CUDA performance lab](../benchmarks/cuda_performance/README.md) · [ticket 65](tickets/ticket65.md) |
 | reconciliation of model, quota, CI, and public-evidence facts | [ticket 66](tickets/ticket66.md) |

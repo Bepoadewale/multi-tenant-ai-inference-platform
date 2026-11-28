@@ -191,6 +191,8 @@ evidence.
 
 | PR #71 rebase on current architecture branch | 2026-11-28 | Release-readiness backlog / PR #71 | Local rebase and documentation validation | Release source remains distinct from real host acceptance; PR #71 is locally rebased on PR #70 head `5f70852`. | Current head `7e2824d` is unpublished and has no current CI; prior run `46116269039` validates an older head only. |
 
+| PR #72 report-learning restack | 2026-11-28 | Educational report preparation / PR #72 / local head `0b1f4df` | Local Git rebase and documentation review | Retains the PRE-GPU draft and adds explanations while updating quota and launch-gate status from refreshed parent PR #71 head `127d0a8`. | Local head is not yet published or CI-validated; no AWS/GPU execution, benchmark, or runtime compatibility is demonstrated. |
+
 ## Entry format for future evidence
 
 For every new item, record:

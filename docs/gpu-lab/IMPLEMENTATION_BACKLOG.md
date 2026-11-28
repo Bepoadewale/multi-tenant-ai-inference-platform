@@ -75,8 +75,10 @@ Old quota-denial statements below are dated historical snapshots, not current st
   head `49076a5` passed six checks in `46114955314` and includes the designated local
   CPU clean-room record. PRs #66 and #67 passed `46164644804` and `46164896175`. PR
   #68 head `ff88165` run `46165126075`, #69 head `f5915e8` run `46165420078`, and
-  #70 head `1679aa7` run `46165597103` are active. PR #71 is restacked locally onto #70
-  and needs fresh CI. The catalog-based cost estimate is `$18.51932705`, not
+  #70 head `1679aa7` run `46165597103`, and #71 head `127d0a8` run `46166173924` are
+  active. PR #72 head `0b1f4df` is restacked locally onto #71 head `127d0a8` and needs
+  fresh CI. The catalog-based
+  cost estimate is `$18.51932705`, not
   authorization. PR #53
   code head `e623b75` passed all five checks in `46023306230`, including a Linux AMD64
   gateway image build and CPU end-to-end. PR #56 head `852c873` passed all five checks

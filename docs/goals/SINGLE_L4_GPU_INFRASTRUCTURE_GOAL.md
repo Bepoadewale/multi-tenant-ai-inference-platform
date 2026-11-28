@@ -3,13 +3,13 @@
 **Status: ACTIVE — Phase 2, isolated EC2 infrastructure (static preparation only)**
 **Source of truth:** this document, the linked execution journal, pull requests, and evidence records.  
 **Last updated:** 2026-11-28
-**Current branch:** PRs #64–#67 passed refreshed checks in runs `46163910205`, `46164362977`, `46164644804`, and `46164896175`. PR #68 head `ff88165` run `46165126075`, PR #69 head `f5915e8` run `46165420078`, and PR #70 head `1679aa7` run `46165597103` are active. PR #71 release-backlog work is rebased locally on #70 and needs fresh CI. No AWS resource or GPU activity.
+**Current branch:** PRs #64–#67 passed refreshed checks in runs `46163910205`, `46164362977`, `46164644804`, and `46164896175`. PR #68 run `46165126075`, #69 run `46165420078`, #70 run `46165597103`, and #71 run `46166173924` are active. PR #72 report-learning changes are rebased locally at `0b1f4df` onto #71 head `127d0a8` and need fresh CI. No AWS resource or GPU activity.
 **Registration PR:** [#30 — docs: register single-L4 GPU infrastructure goal](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/30) (open; current head `04cb564`, required checks passed). **Phase 2 PR:** [#32 — guarded single-L4 EC2 foundation](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/32) (open and ready for review; current head `da2567e`).
 **Baseline repair PR:** [#31 — fix: apply audited dependency constraints](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/31) (open; head `9710932`, required checks passed).
 **GPU quota:** the latest read-only CLI check confirms the existing request is `CASE_CLOSED` with desired value 4.0 and applied On-Demand G/VT quota is 4.0 vCPUs in `us-east-1`, sufficient numerically for one `g6.xlarge`. This does not reserve AZ capacity or authorize provisioning. Do not submit another quota request.
 **Launch gates still open:** exact project remote state and locking, a valid private Budget-alert recipient and project Budget, exact saved-plan/cost review, fresh regional capacity validation, independent expiry verification, and a separate explicit apply authorization. No GPU instance or other project AWS resources exist.
 
-**Latest progress (2026-11-28):** PRs #59–#67 passed refreshed CI. Runs #68 `46165126075`, #69 `46165420078`, and #70 `46165597103` are active. PR #69's documented estimate is `$18.51932705` under assumptions and leaves `$6.48067295` under the $25 ceiling; the final plan and separate authorization remain required. PR #70 aligns architecture text with pinned candidates without claiming compatibility. PR #71 reconciles release-controller source status with unverified L4 acceptance. No L4 or AWS deployment has occurred.
+**Latest progress (2026-11-28):** PRs #59–#67 passed refreshed CI. Runs #68–#71 (`46165126075`, `46165420078`, `46165597103`, `46166173924`) are active. PR #69's estimate is `$18.51932705` under assumptions and leaves `$6.48067295` under the $25 ceiling; final plan and separate authorization remain required. PRs #70 and #71 align architecture and release-backlog claims with current evidence. PR #72 expands the report's educational explanations while keeping GPU results marked pending; its current restack needs CI.
 
 ## Project objective
 
@@ -168,3 +168,18 @@ Plan for at most 8–12 cumulative GPU instance hours where feasible. Bundle GPU
 - 2026-11-27: PR #55 documentation head `de4c6e7` passed all five required jobs in run `46034523863`. Prepared PR #56's host-side sequential release controller: it checks active champion state, the live container image/arguments/cache volume, the full pinned model snapshot digest, and vLLM plus both loopback gateway readiness ports; it writes a private transaction journal and attempts to restore the prior model on failure. Wiring review found and fixed a mismatch between host checks and Compose ports; vLLM is mapped to loopback only. Fifteen focused tests passed; full `make verify` passed Ruff, 143 tests (2 skipped), dependency audit, Compose/monitoring validation, and benchmark/evaluation/CUDA dry runs. Relative Markdown links and `git diff --check` passed. PR #56 CI remains pending publication. No AWS resource, model/image pull, GPU hour, or cost occurred. The owner has manually submitted the existing quota appeal; AWS confirmation is still absent and applied quota remains zero. Next: publish the controller through PR #56 and run one CI clean-room cycle.
 - 2026-11-27: Published draft PR #56 at `70a0227`, stacked on PR #55. All local verification is complete; the single required GitHub check workflow, including its local end-to-end clean-room job, is pending. No cloud mutation occurred.
 - 2026-11-27: PR #56 initial head `ad10699` passed all five required jobs, including one fresh-runner clean-room local end-to-end cycle, in run `46039778508`. A subsequent source review caught that `tensor_parallel_size: 1.0` passed numeric equality despite the vLLM command requiring an integer. Added strict integer validation and a regression test, then reran full local validation: Ruff passed, 144 tests passed, 2 skipped, audit was clean, Compose and monitoring files validated, and GPU benchmark/evaluation/CUDA targets remained dry runs. The host runbook now explains root access for Docker through Session Manager. This material follow-up requires CI revalidation; no AWS, GPU, model download, or cost occurred.
+
+## Latest non-billable progress (2026-11-28)
+
+The report-learning package expands the pre-GPU report's teaching sections for AI
+fundamentals, GPU/CUDA layers, request admission, vLLM KV cache, logical tenancy,
+observability, and reliability; it adds a glossary and ticket72. See the execution
+journal for the branch, validation, and evidence limits. This does not change the
+quota or cloud authorization gates. The report remains a pre-GPU draft. The next
+action is to review the docs-only PR #72, then continue other independently useful
+non-billable readiness work while the existing AWS appeal is pending. Do not repeat
+the designated local clean-room run.
+
+PR #72 initial head `c01fbca` passed all six required GitHub CI jobs in run
+`46123579368`; the routine PR local end-to-end job is not a second project-level
+clean-room run. The PR remains open and unmerged for owner review.
