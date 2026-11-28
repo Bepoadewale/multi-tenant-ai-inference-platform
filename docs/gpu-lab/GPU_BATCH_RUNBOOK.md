@@ -489,10 +489,11 @@ After completing that manual pass, the guarded host wrappers documented in the
 [manual reproduction guide](MANUAL_REPRODUCTION_GUIDE.md#use-the-guarded-host-operation-wrappers-after-the-manual-lesson)
 can repeat configuration, build/deploy Compose, run the bounded tenant smoke,
 evaluation and benchmark, execute the Redis outage drill, and capture a private host
-snapshot. They are prepared automation, not executed evidence. Each host action checks
-the exact EC2 identity and visible L4; workload actions also require a distinct
-confirmation variable. Keep their runtime inside the reviewed batch. A confirmation
-variable does not grant spending approval.
+snapshot. They are prepared automation, not executed evidence. Every host action
+checks the exact EC2 identity. The first Ansible configuration pass does not require
+the NVIDIA driver to be present; later GPU workloads require a visible L4. Workload
+actions also require a distinct confirmation variable. Keep their runtime inside the
+reviewed batch. A confirmation variable does not grant spending approval.
 
 ## Current research set and compatibility decision
 

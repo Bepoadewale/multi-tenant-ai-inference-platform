@@ -9,8 +9,8 @@ they have not been injected on an L4. Do not report them as completed drills.
 
 - Confirm the current project goal, AWS account, region, quota, Terraform state, and
   resource inventory before touching infrastructure. The recorded applied G/VT
-  quota is zero and the existing appeal is awaiting AWS; do not launch a host while
-  the applied quota remains zero.
+  quota is approved at 4.0 vCPUs, but launch controls are still open; do not launch
+  a host until every gate in the project goal is independently verified.
 - The project spending ceiling is USD $25. An alert is not a hard cap. Follow the
   approved run window and expiry in the [GPU batch runbook](GPU_BATCH_RUNBOOK.md).
 - Use only the project Terraform root, exact reviewed plan, project tags, and

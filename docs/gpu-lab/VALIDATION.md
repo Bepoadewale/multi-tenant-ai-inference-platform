@@ -78,7 +78,8 @@ state before review; no AWS, GPU, CUDA, or vLLM execution is claimed.
   activation, and scheduled termination still require a real host.
 - **Limits:** source/static validation does not prove a valid AWS plan, SSM online
   status, EC2 capacity, driver setup, GPU availability, or Scheduler execution. The
-  quota remains 0 vCPUs, so no GPU apply is eligible.
+  quota is approved at 4.0 vCPUs, but remote-state/locking, Budget, plan/cost,
+  expiry, capacity, and separate apply authorization gates remain open.
 
 - **AWS-backed preview:** separate local-state plans read AWS identity, Ubuntu AMI,
   and the selected type offering. The bootstrap preview proposed 7 creates; the latest

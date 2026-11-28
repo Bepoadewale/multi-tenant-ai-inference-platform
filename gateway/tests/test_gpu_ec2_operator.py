@@ -16,6 +16,7 @@ IDENTITY = {
     "region": "us-east-1",
 }
 REPO_ROOT = Path(__file__).resolve().parents[2]
+HOST_ACTION = REPO_ROOT / "scripts/gpu-ec2-host-action.sh"
 
 
 @pytest.mark.parametrize("script", ["gpu_ec2_smoke.py", "gpu_ec2_evidence.py"])
@@ -48,6 +49,18 @@ def test_host_guard_matches_explicit_account_and_instance(monkeypatch):
 
     assert result["instance_type"] == "g6.xlarge"
     assert "account_id" in result
+    assert "gpu" not in result
+
+
+def test_pre_driver_configuration_checks_identity_without_requiring_nvidia_smi():
+    source = HOST_ACTION.read_text(encoding="utf-8")
+    configure = source.split("  configure)", maxsplit=1)[1].split("  deploy)", maxsplit=1)[0]
+    deploy = source.split("  deploy)", maxsplit=1)[1].split("  evaluate)", maxsplit=1)[0]
+
+    assert 'identity_guard=(python3 "${repo_root}/scripts/gpu_ec2_host_guard.py")' in source
+    assert '"${identity_guard[@]}"' in configure
+    assert '"${gpu_guard[@]}"' not in configure
+    assert '"${gpu_guard[@]}"' in deploy
 
 
 @pytest.mark.parametrize(

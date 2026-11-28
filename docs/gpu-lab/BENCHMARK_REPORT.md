@@ -25,7 +25,8 @@ The benchmark code and workloads are in:
 
 ## Evidence boundary
 
-As of this report preparation, applied AWS G/VT quota is zero and no GPU instance has
+As of this report preparation, applied AWS G/VT quota is 4.0 vCPUs, but the launch
+gates in the project goal remain open and no GPU instance has
 run. Static dry-runs validate command generation and bounds. Mock-transport tests
 validate privacy and client behavior. CI validates repository behavior, including
 the local CPU path. None of those results are L4 measurements.

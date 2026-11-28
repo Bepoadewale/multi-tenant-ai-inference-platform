@@ -3,7 +3,8 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 profile="${repo_root}/deployments/single-gpu"
-guard=(python3 "${repo_root}/scripts/gpu_ec2_host_guard.py" --require-l4)
+identity_guard=(python3 "${repo_root}/scripts/gpu_ec2_host_guard.py")
+gpu_guard=(python3 "${repo_root}/scripts/gpu_ec2_host_guard.py" --require-l4)
 
 require_confirmation() {
   local variable="$1" expected="$2"
@@ -20,7 +21,8 @@ compose() {
 case "${1:-}" in
   configure)
     require_confirmation GPU_EC2_CONFIGURE_CONFIRM apply
-    "${guard[@]}"
+    # The first Ansible pass installs the driver, so nvidia-smi cannot be required yet.
+    "${identity_guard[@]}"
     ansible_dir="${repo_root}/infrastructure/ansible"
     ansible="${ansible_dir}/.venv/bin/ansible-playbook"
     [[ -x "$ansible" ]] || { echo "missing pinned Ansible environment; follow infrastructure/ansible/README.md" >&2; exit 1; }
@@ -30,7 +32,7 @@ case "${1:-}" in
   deploy)
     require_confirmation GPU_EC2_DEPLOY_CONFIRM deploy
     [[ "${EUID}" -eq 0 ]] || { echo "run Compose from a root shell; Docker socket access is root-level" >&2; exit 1; }
-    "${guard[@]}"
+    "${gpu_guard[@]}"
     python3 "${repo_root}/scripts/gpu_ec2_deploy_preflight.py" "${profile}/.env"
     compose config --quiet
     if ! timeout 45m docker compose --env-file "${profile}/.env" \
@@ -48,14 +50,14 @@ case "${1:-}" in
   evaluate)
     require_confirmation GPU_EC2_EVALUATE_CONFIRM run
     [[ "${EUID}" -eq 0 ]] || { echo "run the Docker evaluation from a root shell" >&2; exit 1; }
-    "${guard[@]}"
+    "${gpu_guard[@]}"
     timeout 20m docker compose --env-file "${profile}/.env" \
       -f "${profile}/compose.yaml" --profile gpu-evaluation run --build --rm evaluator
     ;;
   benchmark)
     require_confirmation GPU_EC2_BENCHMARK_CONFIRM run
     [[ "${EUID}" -eq 0 ]] || { echo "run the Docker benchmark from a root shell" >&2; exit 1; }
-    "${guard[@]}"
+    "${gpu_guard[@]}"
     max_minutes="${GPU_EC2_BENCHMARK_MAX_MINUTES:-60}"
     [[ "$max_minutes" =~ ^[0-9]+$ ]] && (( max_minutes >= 1 && max_minutes <= 120 )) || {
       echo "GPU_EC2_BENCHMARK_MAX_MINUTES must be an integer from 1 to 120" >&2

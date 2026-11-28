@@ -10,18 +10,21 @@ sanitized evidence. No AWS provisioning or GPU execution is part of this ticket.
 
 ## Current state
 
-Terraform and the GPU stack are prepared, but there were no single-command wrappers
-for most post-provisioning host operations. The current AWS applied On-Demand G/VT
-quota is recorded as zero, and the owner's appeal outcome is not confirmed. No L4
-host or project AWS resource has been created.
+Terraform and the GPU stack are prepared, and this ticket adds single-command
+post-provisioning host wrappers. They have only been validated locally and in CI;
+none has run on EC2. The current AWS applied On-Demand G/VT quota is 4.0 vCPUs, but
+remote state/locking, Budget controls, exact plan and cost review, expiry checks,
+fresh capacity verification, and separate apply authorization still gate launch. No
+L4 host or project AWS resource has been created.
 
 ## Research and design
 
 - Follow the repository's single-host Docker Compose profile and local Ansible
   connection. Run these operations through Systems Manager Session Manager on the
   EC2 host; do not open public service ports or give CI AWS credentials.
-- Validate the host against IMDSv2 identity, the expected account and exact instance
-  ID, `us-east-1`, `g6.xlarge`, and exactly one visible NVIDIA L4 before host actions.
+- Validate each host against IMDSv2 identity, the expected account and exact instance
+  ID, `us-east-1`, and `g6.xlarge`. The first configuration run checks identity only
+  because it installs the driver; later GPU actions require exactly one visible L4.
 - Keep tenant tokens mode `0600`; never print prompt, response, token, `.env`, or raw
   logs in operator output or evidence.
 - Bound configure (90 minutes), Compose build/start (45 minutes), readiness (20 minutes), evaluation (20
@@ -48,6 +51,8 @@ host or project AWS resource has been created.
   evidence limits, and Terraform-only teardown in the reproduction and batch guides.
 - [x] Align Ansible validation with the hash-locked local environment and keep a CI
   fallback for the workflow that installs those same locked dependencies.
+- [x] Allow first-pass host configuration before the driver exists while retaining
+  the L4 guard for inference and post-install GPU operations.
 - [x] Run focused local fake-based tests, Ruff, shell parsing, static command previews,
   and documentation/link checks.
 - [x] Pass required pull request CI and resolve any findings.
@@ -128,9 +133,33 @@ Validation evidence for the clean GitHub runner cycle in run `46084793573` is no
 its CPU/local limits. The focused local check passed Ruff, 19 tests, and both direct
 entrypoint help commands without `PYTHONPATH`. No AWS or GPU operation occurred.
 
-The updated PR head `81362cb` passed all six required jobs in GitHub Actions run
+The prior PR head `81362cb` passed all six required jobs in GitHub Actions run
 `46104868080`, including its local CPU E2E job and project-scoped cleanup. The
-workflow does not exercise the EC2 host wrappers or claim GPU behavior.
+workflow does not exercise the EC2 host wrappers or claim GPU behavior. Refreshed
+CI for the current PR #64 head is pending.
+
+## Rebase and pre-driver guard follow-up — 2026-11-28
+
+PR #64 was restacked onto PR #63 current head `d25413f`. Review found the initial
+Ansible configuration wrapper required `nvidia-smi` before the driver installation
+that the wrapper is meant to perform. Configuration now uses the identity-only guard;
+deployment, smoke, evaluation, benchmark, evidence, and incident operations still
+require a visible L4. A regression checks that command split.
+
+Validation: 20 focused operator tests passed; Ruff and Bash syntax checks passed;
+`make gpu-ansible-validate`, `make gpu-ec2-validate`, Compose validation, and
+observability validation passed. Full `make verify` first failed collection because
+this fresh worktree lacked ignored generated ONNX fixtures. After generating the two
+local fixtures with `scripts/create_model.py`, it passed Ruff, 181 tests (2 skipped),
+the dependency audit with no known vulnerabilities, Compose and observability checks,
+and the benchmark/evaluation/CUDA dry-run plans. An existing Starlette/httpx
+deprecation warning remains. These checks used no AWS, GPU, model download, or
+clean-room teardown.
+
+The CI runs for PRs #60–#63 passed on their current pre-#64-update heads: #60
+`46112810861`, #61 `46113035567`, #62 `46113162785`, and #63 `46113289587`. The
+rebase and pre-driver fix require fresh PR #64 checks. The earlier PR #64 runs apply
+to prior source heads only.
 
 ## Outstanding work
 

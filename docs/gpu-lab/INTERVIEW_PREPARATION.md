@@ -12,7 +12,8 @@ Redis-backed admission controls, local multi-gateway failure drills, and CI-chec
 preparation for an isolated single-L4 environment. Terraform, Ansible, the GPU
 Compose profile, vLLM model serving, GPU benchmarks, live GPU metrics, and rollback
 are prepared or statically validated. They have not run on an AWS L4 because applied
-On-Demand G/VT quota is zero. The user's appeal is pending; do not claim a GPU result,
+On-Demand G/VT quota is approved at 4.0 vCPUs, but cloud launch controls remain open;
+do not claim a GPU result,
 AWS deployment, production incident, or measured cloud cost.
 
 When answering a question about the L4, say what the prepared design intends to do,

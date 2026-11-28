@@ -798,12 +798,15 @@ dry-run output.
 ### Use the guarded host-operation wrappers after the manual lesson
 
 The commands below automate repeated host work only after the matching manual steps
-above have been understood and verified. They have not run on an EC2 host. They fail
-closed unless the host's Instance Metadata Service v2 identity matches the expected
-AWS account, exact GPU instance ID, `us-east-1`, and one `g6.xlarge` with one visible
-L4. Get the exact instance ID from the reviewed Terraform output and keep it in the
-Session Manager shell only; do not add it to public evidence. These commands run in
-the EC2 host's **root shell** from the repository root. They do not provision AWS.
+above have been understood and verified. They have not run on an EC2 host. Every host
+operation checks the Instance Metadata Service v2 identity against the expected AWS
+account, exact GPU instance ID, `us-east-1`, and `g6.xlarge`. Configuration checks
+identity only because the first Ansible pass must install the driver before
+`nvidia-smi` can work. Deploy, inference, benchmark, evaluation, and incident commands
+also require exactly one visible L4. Get the instance ID from reviewed Terraform
+output and keep it in the Session Manager shell only; do not add it to public
+evidence. These commands run in the EC2 host's **root shell** from the repository
+root. They do not provision AWS.
 
 Set the two identity checks in that shell, using the account value from the approved
 deployment record and the exact instance ID:
