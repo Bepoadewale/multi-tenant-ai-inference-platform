@@ -2301,3 +2301,16 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **GitHub/CI:** PR #71 head `127d0a8` has run `46166173924` active. PR #72 remote still points to old head `ef1f5e3`; fresh CI must run after the updated branch is published. Historical CI on `c01fbca` does not validate the restacked code.
 - **AWS / GPU / cost:** read-only status carried forward from the recorded 2026-11-28 check: quota 4.0 is sufficient numerically for one `g6.xlarge`, but AZ capacity, project remote state and locking, Budget and verified recipient, exact plan/cost, independent expiry, and separate apply authorization are not ready. No AWS mutation, GPU operation, model download, or spend occurred.
 - **Next:** finish link/diff review, push with an exact lease against `ef1f5e3`, update PR #72 details, then monitor one fresh CI run and continue the PR stack.
+
+## 2026-11-28 — Reconcile quota and launch readiness in PR #73
+
+- **Date and time:** 2026-11-28 16:46 UTC.
+- **Phase:** Phase 2 read-only readiness and non-billable documentation.
+- **Starting repository state:** PR #73 branch `codex/gpu-applied-quota-reconcile` was based on old PR #72 head `ef1f5e3`; PR #72 was refreshed to `81cb61f`.
+- **Objective:** rebase quota-readiness notes onto the current stack and preserve the reported read-only preflight evidence without widening the launch authorization.
+- **Conflict handling:** kept refreshed parent versions of the goal, status, backlog, journal, evidence manifest, and expanded final report; retained PR #73's cost, research, Terraform guide, risk, and ticket updates. Two follow-up documentation commits were redundant with refreshed parent status and were not retained. Updated stale `CASE_OPENED` wording to preserve it as an earlier snapshot and record the later `CASE_CLOSED` result.
+- **Observed evidence (from ticket73's recorded commands):** applied quota was 4.0 vCPUs; five AZ offerings were listed; exact project resources, backend bucket, lock table, and Budget were absent; no usable Budget recipient was available; guarded preflight stopped at missing-bucket `HeadBucket: 404` before plan or mutation. User subsequently confirmed quota approval. AZ offerings are not capacity reservation.
+- **Validation:** 130 relative Markdown links across 17 changed Markdown files resolve; `git diff --check` passes. No GPU-dependent test applies.
+- **GitHub/CI:** PR #72 refreshed run `46166571475` and PR #71 run `46166173924` were still being watched. PR #73 must be published with an exact lease against old head `b50c5a96`, then its current CI must be observed.
+- **AWS / GPU / cost:** no AWS calls or mutations in this work session; no GPU, model download, instance-hour, or spend. The $25 ceiling remains. Quota approval does not clear remote-state, Budget/recipient, exact plan/cost, capacity, expiry, or separate apply gates.
+- **Next:** complete links/diff validation, correct the ticket and PR body for the current state, push the refreshed PR, and watch one CI run.

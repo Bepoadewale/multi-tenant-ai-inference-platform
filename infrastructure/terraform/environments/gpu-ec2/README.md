@@ -92,8 +92,9 @@ cloud-pilot authorization sequence, refresh the estimate, verify the account and
 quota, select an offered AZ, record a future expiry, review the exact saved plan, and
 confirm teardown. A read-only check on 2026-11-28 returned an applied G/VT quota of
 4 vCPUs, enough on paper for one `g6.xlarge`; the existing quota-request history
-still reads `CASE_OPENED`. Five us-east-1 AZ offerings appeared in the CLI query, but
-an offering is not a capacity reservation. No GPU resource or Terraform apply exists.
+earlier read `CASE_OPENED`; a later read-only check reports `CASE_CLOSED`. Five
+us-east-1 AZ offerings appeared in the CLI query, but an offering is not a capacity
+reservation. No GPU resource or Terraform apply exists.
 The exact remote-state plan, verified budget-alert recipient, full cost, expiry, and
 apply-authorization gates still prevent launch.
 

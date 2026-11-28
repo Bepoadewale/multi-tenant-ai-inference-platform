@@ -14,7 +14,8 @@ AWS resource.
   number is omitted from public documentation.
 - Service Quotas now returns applied On-Demand G/VT quota `4.0` vCPUs, enough on paper
   for the one selected `g6.xlarge`. The existing request history still says
-  `CASE_OPENED`; no approval notice was confirmed. Do not create a duplicate request.
+  `CASE_OPENED` in this snapshot. A later read-only check recorded in PR #71 returned
+  `CASE_CLOSED`; the owner also confirmed approval. Do not create a duplicate request.
 - EC2 lists `g6.xlarge` in us-east-1a, 1b, 1c, 1d, and 1f. This does not reserve live
   capacity.
 - The current AWS Price List API query returns `$0.8048/hour`, consistent with the
@@ -35,7 +36,8 @@ AWS resource.
   README. Older journal and validation entries remain unchanged as historical evidence.
 - Recorded the read-only results and preflight stop condition in the execution journal
   and evidence manifest.
-- PR #72's six checks passed at `ef1f5e3` in run `46124118809`.
+- PR #72's six checks passed at `ef1f5e3` in run `46124118809`; that was before the
+  latest rebase and is historical only.
 
 ## Validation and evidence limits
 
@@ -44,7 +46,7 @@ AWS resource.
   state bucket; no mutation occurred.
 - No Terraform plan/apply, model download, instance launch, GPU hour, or AWS spend.
 - Five AZ offerings do not prove current capacity. An applied quota value does not
-  prove that AWS sent an approval notice or authorize spending.
+  authorize spending.
 - This PR does not address historical dated quota snapshots in the execution journal
   or validation records.
 
