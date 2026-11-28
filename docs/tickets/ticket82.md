@@ -1,7 +1,6 @@
 # Ticket 82 — Validate the GPU expiry schedule target
 
-**Status:** implementation prepared in a focused branch stacked on PR #81; no AWS
-operation.
+**Status:** [PR #82](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/82) is open on PR #81; implementation head `3c50b00` passed all six required jobs in run `46143239396`. This documentation follow-up needs CI; no AWS operation.
 
 ## Objective
 
@@ -32,7 +31,8 @@ operation.
 - [x] Reject a schedule invoking a different AWS action.
 - [x] Keep the exact reviewed deadline and one-time schedule checks.
 - [x] Pass the focused plan and wrapper tests, Ruff, and diff checks.
-- [ ] Publish PR #82 on top of #81 and pass final-head CI.
+- [x] Publish PR #82 on top of #81 and pass all six checks on implementation head `3c50b00`.
+- [ ] Pass CI on the final documentation head.
 - [ ] Receive owner review; no merge or AWS apply is authorized by this ticket.
 
 ## Validation and troubleshooting
