@@ -2277,3 +2277,15 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **CI:** PR #67 run `46164896175` passed. PR #68 run `46165126075` and #69 run `46165420078` are active. PR #70 needs fresh CI after publication.
 - **Validation:** 68 relative links across four changed Markdown files resolve and `git diff --check` passes. No GPU compatibility, software install, AWS operation, or spend is claimed.
 - **Next:** complete links and diff review, publish using exact lease against old PR #70 head `5f70852`, update PR details, and monitor one current-head CI run.
+
+## 2026-11-28 — Restack model-release backlog in PR #71
+
+- **Phase:** Phase 9 source/readiness documentation and PR-stack maintenance.
+- **Branch / PR:** PR #71 (`codex/gpu-release-backlog-truth`) replayed its documentation commits onto refreshed PR #70 head `1679aa7`, replacing old parent `5f70852`.
+- **Change retained:** backlog checkboxes distinguish implemented host-controller source from real L4 release, champion verification, inference, rollback, and interruption recovery, which remain untested.
+- **Quota evidence reconciliation:** an earlier 2026-11-28 read-only snapshot recorded 0 applied vCPUs and `CASE_OPENED`; a later check recorded 4.0 applied vCPUs and `CASE_CLOSED`. These are time-ordered snapshots, not conflicting current claims. Exact project state, lock table, and Budget remain absent; quota does not authorize provisioning.
+- **Live GitHub inventory:** 54 open PRs from #30–#84 excluding #54; no drafts were returned at the snapshot. This is not a review/merge approval.
+- **CI:** PR #67 run `46164896175` passed. PR #68 run `46165126075`, #69 run `46165420078`, and #70 run `46165597103` were active at the check. PR #71 requires fresh CI after publication.
+- **Validation:** 66 relative links across four changed Markdown files resolve and `git diff --check` passes; no runtime test is needed for this documentation-only change.
+- **AWS / GPU / cost:** no mutation, no GPU/model operation, no spend. The catalog estimate remains `$18.51932705` under assumptions and below the $25 ceiling; final exact plan/cost and separate apply authorization remain open.
+- **Next:** publish #71 using an exact lease against old head `a35c6a4`, update its PR body, and watch one CI run.
