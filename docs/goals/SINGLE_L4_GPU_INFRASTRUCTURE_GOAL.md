@@ -3,13 +3,13 @@
 **Status: ACTIVE — Phase 2, isolated EC2 infrastructure (static preparation only)**
 **Source of truth:** this document, the linked execution journal, pull requests, and evidence records.  
 **Last updated:** 2026-11-28 16:01 UTC
-**Current branch:** PR #60 authenticated gateway benchmark has been restacked onto updated PR #58 head `fa4d819`; 8 focused tests, Ruff, and a no-network dry run pass; fresh PR #60 CI is pending. PR #56 run `46160784399` and PR #57 run `46161064613` passed. PR #58 run `46162221680` passed all six required checks; PR #59 run `46162611345` remains in progress.
+**Current branch:** PR #61 interview guide has been rebased onto refreshed PR #60 head `9fc23f2`; its 106 questions and answers and relative links pass local checks, with fresh CI pending. PR #58 run `46162221680` passed; PR #59 run `46162611345` and PR #60 run `46162969703` are in progress.
 **Registration PR:** [#30 — docs: register single-L4 GPU infrastructure goal](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/30) (open; current head `04cb564`, required checks passed). **Phase 2 PR:** [#32 — guarded single-L4 EC2 foundation](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/32) (open and ready for review; current head `da2567e`).
 **Baseline repair PR:** [#31 — fix: apply audited dependency constraints](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/31) (open; head `9710932`, required checks passed).
 **GPU quota:** the latest read-only CLI check confirms the existing request is `CASE_CLOSED` with desired value 4.0 and applied On-Demand G/VT quota is 4.0 vCPUs in `us-east-1`, sufficient numerically for one `g6.xlarge`. This does not reserve AZ capacity or authorize provisioning. Do not submit another quota request.
 **Launch gates still open:** exact project remote state and locking, a valid private Budget-alert recipient and project Budget, exact saved-plan/cost review, fresh regional capacity validation, independent expiry verification, and a separate explicit apply authorization. No GPU instance or other project AWS resources exist.
 
-**Latest progress (2026-11-28):** PR #58's current guide head is `59925fd`; its earlier six-job CI result predates that head. PR #59 was rebased onto it, and PR #60 was rebased onto it with benchmark error-handling and successful-sample comparison fixes. PR #60's current source passes 8 focused tests and Ruff locally; fresh CI is pending. No AWS resources, L4 execution, or spend.
+**Latest progress (2026-11-28):** PR #58's current guide head is `59925fd`; its earlier six-job CI result predates that head. PR #59 and PR #60 were rebased onto it. PR #60's latest head `9a8bd28` has fresh six-job CI in progress after passing 8 focused tests, Ruff, and the no-network plan locally. PR #61 was rebased onto #60 head `9a8bd28`; its 106 interview questions and links are being revalidated, and fresh CI is required. No AWS resources, L4 execution, or spend.
 
 ## Project objective
 
