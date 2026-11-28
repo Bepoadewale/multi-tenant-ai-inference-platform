@@ -19,7 +19,10 @@ the `.cu` file has not been compiled. PR [#49](https://github.com/Bepoadewale/mu
   supported, and compare output against a CPU reference.
 - Use CUDA events and explicit synchronization for GPU timing. Do not time only the
   asynchronous kernel launch with the host clock.
-- Measure host/device transfers separately from matrix compute.
+- Measure host/device transfers separately from matrix compute. Allocate both the
+  pinned source and pinned destination before timed device-to-host transfers.
+- Compare each reduced-precision product against an FP32 product of the same rounded
+  inputs so input quantization is not confused with multiplication error.
 - Keep shapes and repetitions bounded and outputs outside public Git with restrictive
   file permissions.
 - Require exactly one NVIDIA L4 and fail rather than silently falling back to CPU.
@@ -30,6 +33,10 @@ the `.cu` file has not been compiled. PR [#49](https://github.com/Bepoadewale/mu
   checks, warmups, repeated CUDA-event timings, and separate copy timings.
 - Added a PyTorch CPU/GPU matrix benchmark with FP32, FP16, supported BF16, correctness
   checks, device/framework metadata, and synchronized event samples.
+- Allocate a pinned host destination before the device-to-host timing loop and use an
+  asynchronous copy bracketed by CUDA events, with synchronization after the end event.
+- Compare reduced-precision output against FP32 multiplication of the same
+  precision-rounded inputs, isolating multiply error from input rounding.
 - Bounded matrix size, repetitions, and the overall PyTorch run to at most 600 seconds;
   bounded C++ vector size and repetitions too.
 - Added a zero-operation dry-run, focused unit tests, Makefile targets, and static CI
@@ -60,6 +67,15 @@ runtime, expiry, and teardown gates.
   correctness, transfer behavior, and reported utilization.
 - Collect actual CPU/GPU measurements and profiler evidence; no performance result is
   claimed by the static preparation.
+
+## Review follow-up
+
+Static review found two measurement correctness issues: BF16 output was compared with
+an FP32 result from unrounded input, and the device-to-host sample allocated pageable
+memory during each timing iteration. Both are corrected in the candidate update. The
+workstation has no NVIDIA device, so timing behavior cannot be established locally;
+the PR CI and source-level checks validate packaging only, and the actual L4 run must
+confirm numerical tolerances and transfer measurements.
 
 ## Acceptance status
 

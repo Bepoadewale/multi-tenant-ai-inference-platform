@@ -1502,3 +1502,29 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Cost/resources:** no AWS calls, GPU time, resources, or spend in this update.
 - **Next:** continue preparation; check the appeal outcome and applied quota before
   any launch preflight, and do not launch with zero applied quota.
+
+
+## 2026-11-28 — Correct CUDA reduced-precision checks and transfer timing
+
+- **Phase:** Phase 4 static CUDA performance preparation; PR #49.
+- **Branch / starting head:** `codex/gpu-cuda-lab-preparation`, remote head
+  `9430af6`; the fix is committed locally and rebased on PR #48 head `33e4d2a`.
+- **Starting state:** review found a BF16 correctness comparison that included input
+  quantization error, and a device-to-host transfer sample that allocated pageable
+  memory inside each timed iteration.
+- **Changes:** compare each GPU result with an FP32 multiplication of those same
+  precision-rounded inputs. Preallocate a pinned CPU destination before the timing loop,
+  enqueue a nonblocking device-to-host copy between CUDA events, then synchronize after
+  recording the end event. Updated the learning notes to explain the distinction.
+- **Validation:** Ruff passed; 3 focused plan/calculation tests passed; Python bytecode
+  compilation and `git diff --check` passed. `make gpu-cuda-plan` reported the bounded
+  sizes, warmups, repetitions, and zero GPU operations. No CUDA code was compiled and
+  no GPU or AWS resource was used.
+- **Limit:** the workstation has no NVIDIA GPU. The timing code and numerical tolerance
+  still require confirmation on the actual L4; these checks are static/local only.
+- **Previous-head CI:** the initial PR #49 update at `5496324`, based on PR #48
+  `a5bb235`, passed all five required jobs in run `46109166340`. The current rebase
+  includes the same code plus the newer PR #48 evidence commit, so its own checks are
+  still required.
+- **Next:** publish the rebased branch using the exact expected remote head, watch one
+  current-head CI cycle, and resolve both review threads after it passes.

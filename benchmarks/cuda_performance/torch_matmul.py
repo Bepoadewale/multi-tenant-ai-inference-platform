@@ -97,6 +97,7 @@ def cuda_benchmark(
 
 def transfer_benchmark(torch, host_tensor, repeats: int, deadline: float) -> dict:
     pinned = host_tensor.pin_memory()
+    host_destination = torch.empty_like(pinned, device="cpu", pin_memory=True)
     device_tensor = torch.empty_like(pinned, device="cuda")
     h2d, d2h = [], []
     for _ in range(repeats):
@@ -111,7 +112,7 @@ def transfer_benchmark(torch, host_tensor, repeats: int, deadline: float) -> dic
 
         start, end = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
         start.record()
-        _ = device_tensor.to("cpu", non_blocking=False)
+        host_destination.copy_(device_tensor, non_blocking=True)
         end.record()
         torch.cuda.synchronize()
         d2h.append(start.elapsed_time(end))
@@ -153,7 +154,7 @@ def execute(
     for size in sizes:
         a_cpu = torch.randn((size, size), dtype=torch.float32)
         b_cpu = torch.randn((size, size), dtype=torch.float32)
-        cpu_samples, cpu_reference = cpu_benchmark(
+        cpu_samples, _ = cpu_benchmark(
             torch, a_cpu, b_cpu, warmups, repeats, deadline
         )
         a_gpu_fp32 = a_cpu.to("cuda")
@@ -167,8 +168,11 @@ def execute(
             )
             torch.cuda.synchronize()
             tolerance = {"float32": (1e-4, 1e-4), "float16": (1e-2, 1e-2), "bfloat16": (2e-2, 2e-2)}[name]
+            # Compare the multiply against FP32 using the same rounded inputs.
+            # This isolates multiplication error from input-quantization error.
+            reference = torch.mm(a_gpu.float(), b_gpu.float()).cpu()
             torch.testing.assert_close(
-                result.float().cpu(), cpu_reference, rtol=tolerance[0], atol=tolerance[1]
+                result.float().cpu(), reference, rtol=tolerance[0], atol=tolerance[1]
             )
             precision_results.append(
                 {

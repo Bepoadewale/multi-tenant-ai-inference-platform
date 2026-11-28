@@ -18,8 +18,10 @@ there are no measurements from this code yet. The dry-run is safe on the worksta
   device-to-host transfer time separately from kernel time. The PyTorch program uses
   pinned host memory for its transfer sample and synchronizes around each sample.
 - **Precision:** the PyTorch experiment tests FP32 and FP16 and includes BF16 only when
-  PyTorch reports support. Each output is compared with a CPU FP32 reference using a
-  precision-specific tolerance. Unsupported precision is omitted, not silently
+  PyTorch reports support. For correctness, each output is compared with an FP32
+  multiply using the same values after they have been rounded to the test precision.
+  This checks multiplication error without incorrectly counting input-quantization
+  error as a broken GPU result. Unsupported precision is omitted, not silently
   replaced.
 
 These are microbenchmarks. They do not represent LLM serving throughput, user latency,
