@@ -290,8 +290,55 @@ This establishes current local lint/test/static configuration outcomes and read-
   model/image download, GPU, rollback after process interruption, or billing evidence.
   Full `make verify` passed Ruff, **144 tests** (2 skipped), the dependency audit,
   Compose and monitoring validation, and benchmark/evaluation/CUDA dry-run plans.
-  Initial head `ad10699` passed all five PR jobs, including one fresh-runner clean-room
-  cycle, in run `46039778508`. A later type-safety fix needs its own required checks.
+  Initial head `ad10699` passed all five PR jobs in run `46039778508`; updated head
+  `852c873` passed all five jobs, including the required clean-room cycle, in run
+  `46040861818`. See the updated-head record below.
+
+## PR #56 host release controller updated-head clean-room validation
+
+**Date:** 2026-11-27 17:21 UTC
+
+**Branch / PR:** `codex/gpu-release-host-controller`, PR #56, source head `852c873`.
+
+GitHub Actions run [46040861818](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/actions/runs/46040861818)
+passed all five required jobs plus the repository's `local-e2e` clean-run job. That
+job executed the following on a fresh Linux runner:
+
+```console
+make install
+make bootstrap-local
+make smoke
+make demo-flagship
+make verify
+make clean-local
+```
+
+The run passed after a code change fixed acceptance of `1.0` where the runtime
+requires an integer. This is the one clean-room cycle for the material follow-up.
+It proves local CPU and static repository flows on GitHub's runner; it does not prove
+AWS, Docker-on-L4, model deployment, live inference, or rollback on the EC2 host.
+No cloud resource or spend was used.
+
+## PR #57 Ansible preparation local validation
+
+**Date:** 2026-11-27 17:42 UTC
+
+**Branch:** `codex/gpu-ansible-host-configuration`, stacked on PR #56 head `852c873`.
+
+The Ansible 2.21.6 universal hash lock installed successfully into an isolated
+`/tmp/gpu-ansible-venv` using `--require-hashes`. `make gpu-ansible-validate` passed;
+`ansible-playbook --list-tasks` enumerated the host checks, package/repository setup,
+PyTorch lock installation, Docker runtime setup, and verification tasks. A temporary
+local assertion with a representative `lspci` L4 line also passed. No role task was
+executed on the workstation or an EC2 host.
+
+The new worktree initially lacked the project's `.venv`; `make install` created it,
+then `make verify` passed Ruff, **144 tests** (2 skipped), the dependency audit,
+Compose and monitoring validation, and GPU benchmark/evaluation/CUDA dry-run plans.
+The first bare system-Python pip dry-run was rejected by macOS's externally managed
+environment guard; the actual hash-locked Ansible install was performed in the
+isolated temporary virtual environment. `git diff --check` and relative Markdown-link
+validation passed. These are local/static checks, not package or GPU execution.
 
 ## Future GPU execution template
 

@@ -1,0 +1,175 @@
+---
+- name: Download the reviewed NVIDIA CUDA repository keyring package
+  ansible.builtin.get_url:
+    url: "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_{{ gpu_host_cuda_keyring_version }}_all.deb"
+    dest: /var/tmp/gpu-lab-cuda-keyring.deb
+    checksum: "sha256:{{ gpu_host_cuda_keyring_sha256 }}"
+    mode: "0644"
+
+- name: Install the NVIDIA CUDA repository keyring
+  ansible.builtin.apt:
+    deb: /var/tmp/gpu-lab-cuda-keyring.deb
+    state: present
+
+- name: Refresh signed NVIDIA CUDA package metadata
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 0
+
+- name: Install the pinned headless NVIDIA driver and CUDA Toolkit
+  ansible.builtin.apt:
+    name:
+      - "nvidia-driver-pinning-580.196.11={{ gpu_host_nvidia_driver_version }}"
+      - "nvidia-headless-580={{ gpu_host_nvidia_driver_version }}"
+      - "nvidia-utils-580={{ gpu_host_nvidia_driver_version }}"
+      - "cuda-toolkit-13-0={{ gpu_host_cuda_toolkit_version }}"
+    state: present
+    update_cache: false
+  register: gpu_host_driver_install
+
+- name: Download the reviewed NVIDIA Container Toolkit repository key
+  ansible.builtin.get_url:
+    url: https://nvidia.github.io/libnvidia-container/gpgkey
+    dest: /var/tmp/gpu-lab-nvidia-container-repo.asc
+    checksum: "sha256:{{ gpu_host_nvidia_container_repo_key_sha256 }}"
+    mode: "0644"
+
+- name: Create keyring directory for the NVIDIA Container Toolkit repository
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install the NVIDIA Container Toolkit repository key
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --dearmor
+      - --batch
+      - --yes
+      - --output
+      - /etc/apt/keyrings/nvidia-container-toolkit.gpg
+      - /var/tmp/gpu-lab-nvidia-container-repo.asc
+    creates: /etc/apt/keyrings/nvidia-container-toolkit.gpg
+  register: gpu_host_nvidia_key_import
+  changed_when: gpu_host_nvidia_key_import.rc == 0
+
+- name: Restrict NVIDIA Container Toolkit keyring permissions
+  ansible.builtin.file:
+    path: /etc/apt/keyrings/nvidia-container-toolkit.gpg
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Add the signed NVIDIA Container Toolkit repository
+  ansible.builtin.deb822_repository:
+    name: nvidia-container-toolkit
+    types: [deb]
+    uris: https://nvidia.github.io/libnvidia-container/stable/deb/amd64
+    suites: ["/"]
+    signed_by: /etc/apt/keyrings/nvidia-container-toolkit.gpg
+    state: present
+  register: gpu_host_nvidia_repo
+
+- name: Download the reviewed Docker repository signing key
+  ansible.builtin.get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /var/tmp/gpu-lab-docker-repo.asc
+    checksum: "sha256:{{ gpu_host_docker_repo_key_sha256 }}"
+    mode: "0644"
+
+- name: Install the Docker repository key
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --dearmor
+      - --batch
+      - --yes
+      - --output
+      - /etc/apt/keyrings/docker.gpg
+      - /var/tmp/gpu-lab-docker-repo.asc
+    creates: /etc/apt/keyrings/docker.gpg
+  register: gpu_host_docker_key_import
+  changed_when: gpu_host_docker_key_import.rc == 0
+
+- name: Restrict Docker keyring permissions
+  ansible.builtin.file:
+    path: /etc/apt/keyrings/docker.gpg
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Add the signed Docker Engine repository
+  ansible.builtin.deb822_repository:
+    name: docker
+    types: [deb]
+    uris: https://download.docker.com/linux/ubuntu
+    suites: "{{ ansible_distribution_release }}"
+    components: [stable]
+    architectures: [amd64]
+    signed_by: /etc/apt/keyrings/docker.gpg
+    state: present
+  register: gpu_host_docker_repo
+
+- name: Refresh signed vendor package metadata
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 0
+  when: gpu_host_nvidia_repo.changed or gpu_host_docker_repo.changed
+
+- name: Install pinned NVIDIA Container Toolkit packages
+  ansible.builtin.apt:
+    name:
+      - "nvidia-container-toolkit={{ gpu_host_nvidia_toolkit_version }}"
+      - "nvidia-container-toolkit-base={{ gpu_host_nvidia_toolkit_version }}"
+      - "libnvidia-container-tools={{ gpu_host_nvidia_toolkit_version }}"
+      - "libnvidia-container1={{ gpu_host_nvidia_toolkit_version }}"
+    state: present
+
+- name: Install pinned Docker Engine and plugins
+  ansible.builtin.apt:
+    name:
+      - "docker-ce={{ gpu_host_docker_engine_version }}"
+      - "docker-ce-cli={{ gpu_host_docker_engine_version }}"
+      - "containerd.io={{ gpu_host_containerd_version }}"
+      - "docker-buildx-plugin={{ gpu_host_buildx_version }}"
+      - "docker-compose-plugin={{ gpu_host_compose_version }}"
+    state: present
+
+- name: Read Docker daemon configuration before adding the NVIDIA runtime
+  ansible.builtin.stat:
+    path: /etc/docker/daemon.json
+    checksum_algorithm: sha256
+  register: gpu_host_docker_config_before
+
+- name: Configure Docker to use the NVIDIA Container Runtime
+  ansible.builtin.command:
+    argv:
+      - nvidia-ctk
+      - runtime
+      - configure
+      - --runtime=docker
+  changed_when: false
+
+- name: Read Docker daemon configuration after adding the NVIDIA runtime
+  ansible.builtin.stat:
+    path: /etc/docker/daemon.json
+    checksum_algorithm: sha256
+  register: gpu_host_docker_config_after
+
+- name: Restart Docker only when the daemon configuration changed
+  ansible.builtin.systemd_service:
+    name: docker
+    enabled: true
+    state: restarted
+  when: >-
+    gpu_host_docker_config_before.stat.checksum | default('absent') !=
+    gpu_host_docker_config_after.stat.checksum | default('absent')
+
+- name: Ensure Docker remains enabled and running
+  ansible.builtin.systemd_service:
+    name: docker
+    enabled: true
+    state: started

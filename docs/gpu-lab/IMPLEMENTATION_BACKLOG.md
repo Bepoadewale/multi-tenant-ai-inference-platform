@@ -64,6 +64,10 @@ pull requests must include the repository's clean-room evidence.
   run `46023306230`, including a Linux amd64 Docker image build and CPU end-to-end.
   A documentation-only PR #53 follow-up awaits checks. No AWS resources or GPU
   execution.
+- PR #56 controller head `852c873` passed all five required checks in run
+  `46040861818`, including its one clean-room local end-to-end cycle. PR #56 is ready
+  for review and remains open. PR #57 prepares the Ansible host role; its CI and host
+  execution are pending. No AWS or GPU work is eligible.
 
 ## Ordered implementation packages
 
@@ -227,7 +231,7 @@ and teardown/absence commands are ready.
 
 ### Package 3 — Manual Linux, NVIDIA, CUDA, Docker, and Ansible
 
-**Status:** PR #50 contains a non-billable ordered install manifest and hashed PyTorch lock. Its current restacked head passes all five required jobs. No GPU host has been configured; candidate versions are not runtime-verified.
+**Status:** PR #50 contains a non-billable ordered install manifest and hashed PyTorch lock. PR #57 adds a universal hash-locked Ansible 2.21.6 controller and local-host role for the dated Ubuntu/NVIDIA/CUDA/Docker candidate set. Local syntax checking passes; CI is pending. No GPU host has been configured; candidates are not runtime-verified.
 
 - [ ] Select and pin a standard Ubuntu 24.04 x86_64 AMI, kernel, NVIDIA driver,
   CUDA Toolkit, Docker Engine, NVIDIA Container Toolkit, Python, and PyTorch after
@@ -243,7 +247,10 @@ and teardown/absence commands are ready.
   launching paid compute.
 - [ ] Manually install the driver and run `nvidia-smi`, a CUDA container, and a
   synchronized PyTorch computation on the L4.
-- [ ] Then implement Ansible roles/playbooks and run them twice to test idempotency.
+- [x] Prepare the Ansible role, signed-repository configuration, version pins, and
+  CI syntax check before the GPU session. Do not run it until the manual learning pass.
+- [ ] Run the playbook twice on the approved host and verify the second run has no
+  configuration changes.
 - [x] Add a private MLflow tracking service to the dedicated GPU Compose profile and
   publish only sanitized evaluation metadata/reports to it. PR #52 implements the
   static/local path; the optional operator UI/API port binds only to loopback. Live

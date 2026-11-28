@@ -17,6 +17,16 @@
   remaining non-billable work and do not merge without authorization.
 
 
+## 2026-11-28 — Rebase and validate Ansible host configuration
+
+- **Phase:** Phase 3 static host-configuration preparation; no GPU host access.
+- **Branch / PR:** `codex/gpu-ansible-host-configuration`, PR #57, rebased from PR #56 head `3292af9` onto updated PR #56 head `b9d41f6`.
+- **Rebase:** three PR #57 commits replayed. Preserved the newer PR #55/56 goal and journal state, and retained the PR #57 implementation and review-fix history.
+- **Failed command:** `make gpu-ansible-validate` initially failed because the isolated Ansible executable was not on `PATH` (`ansible-playbook: command not found`). No configuration ran.
+- **Successful validation:** reran with `PATH=/tmp/gpu-ansible-venv/bin:$PATH`; playbook syntax passed. Ruff and `git diff --check` passed.
+- **Cost and limits:** local static validation only; no AWS, host setup, GPU, package installation on EC2, or spend. A fresh PR CI run remains necessary after publication.
+- **Next:** publish the rebased PR #57 branch with an exact force-with-lease, then continue restacking its descendants.
+
 ## 2026-11-28 — PR #56 release-manifest review fix passed CI
 
 - **Phase:** Phase 9 static release tooling; Phase 2 remains quota-blocked.
@@ -2042,3 +2052,71 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** record this CI result in the PR and status documents, then continue the
   non-billable host-side release-controller work as a separate PR package. Human review
   and merge remain pending; no merge is authorized by this task.
+
+## 2026-11-27 — PR #56 updated-head checks and Ansible host preparation
+
+- **Time / phase:** 17:42 UTC; Phase 2 remains static and quota-blocked; preparing
+  Phase 3 automation without GPU execution.
+- **Branch / PR:** `codex/gpu-ansible-host-configuration`, stacked on PR #56 head
+  `852c873`. PR #56 passed all five checks including its one clean-room cycle in run
+  `46040861818` and is ready for review. PR #57 is being prepared as a focused draft.
+- **Research:** queried PyPI's JSON metadata and official NVIDIA/Docker repository
+  package indexes and key files through read-only CLI requests. Recorded Ansible
+  2.21.6, dated OS package versions, signing-key hashes, and remaining signature and
+  compatibility checks. No APT package, model, or container image was installed or
+  downloaded.
+- **Changes:** added a hash-locked Ansible controller, local host playbook, Ubuntu
+  24.04/amd64/one-L4 guards, signed NVIDIA/Docker repository configuration, pinned
+  headless driver/CUDA/Docker/Container Toolkit packages, isolated hash-locked
+  PyTorch install, reboot checkpoint, Docker runtime setup, and a small synchronized
+  GPU matrix check. Added CI syntax validation, runbook instructions, research,
+  ticket #57, evidence/status records, and documentation index links.
+- **Commands/results:** universal Ansible lock compiled and installed with hashes in
+  `/tmp/gpu-ansible-venv`; playbook syntax, task list, and a temporary local `lspci`
+  assertion passed. `make install` prepared the project `.venv`; `make verify` then
+  passed Ruff, 144 tests (2 skipped), audit, Compose/monitoring checks, and
+  benchmark/evaluation/CUDA dry-run plans. `make gpu-ansible-validate`, relative
+  Markdown-link validation, and `git diff --check` passed. Initial commands found
+  macOS PEP 668 protection on system pip, a missing `.venv` in the new worktree, and
+  a wrong working directory for the first Ansible invocation; each was corrected
+  with an isolated venv, `make install`, or the documented working directory. No
+  local clean-room command was run.
+- **Cloud / cost:** no AWS request or mutation, host configuration, image/model pull,
+  GPU operation, or spend. A new read-only check with the specified key profile
+  confirmed the expected account and applied us-east-1 G/VT quota of `0.0` vCPUs;
+  no account identifier was printed. The owner's existing appeal has no confirmed
+  result in the API. The USD $25 ceiling and separate exact-plan authorization gates
+  remain unchanged.
+- **Next:** review the complete diff, publish PR #57 as a draft stacked on PR #56,
+  then watch its single CI run. No merge or paid operation is authorized.
+
+- 2026-11-27: Final Ansible review found that a minimal Ubuntu AMI may not contain
+  `lspci`, and Ansible normally skips read-only `command` tasks in check mode. Added
+  a conditional `pciutils` install before the L4 guard and explicitly enabled only
+  read-only inventory/verification commands in check mode. The updated syntax check
+  passed. These execution-safety changes are a material follow-up to PR #57 head
+  `cd8b9a9`; its first CI run `46044432387` had passed five jobs while the local
+  end-to-end job was pending. A new required CI run is needed for the updated code.
+
+## 2026-11-28 — Fix Ansible check-mode and reboot verification gates
+
+- **Phase:** Phase 3 static Ansible preparation; real host configuration still waits
+  for quota and the approved GPU batch.
+- **Branch / PR:** `codex/gpu-ansible-host-configuration`, PR #57.
+- **Starting state:** review found two failures in the host role. In check mode, the
+  play installed `pciutils` only as a preview but forced `lspci` to run anyway; on a
+  base image without `lspci`, the preview failed. After a driver change or pending
+  reboot, the GPU discovery command was correctly skipped but its assertion still
+  ran against an empty result and hid the required reboot message.
+- **Changes:** defer PCI inventory and its assertion when check mode cannot install
+  missing `pciutils`, and print a clear message that this hardware check runs during
+  normal configuration. Gate the post-reboot GPU assertion on the same condition as
+  the NVIDIA command and CUDA/PyTorch verification tasks.
+- **Validation:** the hash-locked Ansible 2.21.6 environment installed into the
+  project `.venv`; `make gpu-ansible-validate` passed using that environment and
+  `git diff --check` passed. PR checks remain to be run for the updated source. No
+  host playbook or GPU task ran.
+- **AWS / GPU / cost:** none; no AWS call, resource, package installation on EC2,
+  GPU access, or spend.
+- **Next:** include the exact changed-head syntax-check result in the ticket, publish
+  the fixes, and use one PR CI run to validate the updated package.
