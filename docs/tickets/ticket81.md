@@ -1,6 +1,6 @@
 # Ticket 81 — Validate the exact saved GPU plan before apply
 
-**Status:** implementation prepared in PR #81; no AWS operation.
+**Status:** [PR #81](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/81) is open on PR #80; implementation head `8ff6f5f` passed all six required jobs in run `46141493735`. The documentation follow-up is pending CI; no AWS operation.
 
 ## Objective
 
@@ -43,7 +43,8 @@ The apply wrapper also did not repeat a structural review immediately before app
 - [x] Bind the apply operation to the reviewed plan digest and repeat structural
   validation before Terraform apply.
 - [x] Cover safe and unsafe plans using unit tests and fake CLI wrapper tests.
-- [ ] Pass final PR checks on the published head and receive owner review.
+- [x] Publish the focused PR and pass all six required checks on implementation head `8ff6f5f`.
+- [ ] Pass CI on the final documentation head and receive owner review.
 
 ## Commands and validation
 
