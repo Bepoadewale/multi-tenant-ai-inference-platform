@@ -114,6 +114,51 @@ class Catalog:
                     simulated_gpu_slots=1,
                 ),
             ),
+            # GPU lab identities use realistic workload names and intentionally
+            # different limits. These are logical controls over one shared GPU;
+            # they do not provide hardware isolation.
+            "customer-support": Tenant(
+                id="customer-support",
+                allowed_models={"chat-default"},
+                cost_center="SUPPORT",
+                quotas=TenantQuota(
+                    requests_per_minute=30,
+                    tokens_per_minute=12_000,
+                    concurrent_requests=2,
+                    daily_token_quota=250_000,
+                    max_input_tokens=4096,
+                    max_output_tokens=512,
+                    simulated_gpu_slots=1,
+                ),
+            ),
+            "internal-engineering": Tenant(
+                id="internal-engineering",
+                allowed_models={"chat-default", "embeddings"},
+                cost_center="ENGINEERING",
+                quotas=TenantQuota(
+                    requests_per_minute=60,
+                    tokens_per_minute=30_000,
+                    concurrent_requests=4,
+                    daily_token_quota=750_000,
+                    max_input_tokens=8192,
+                    max_output_tokens=1024,
+                    simulated_gpu_slots=1,
+                ),
+            ),
+            "research": Tenant(
+                id="research",
+                allowed_models={"chat-default", "embeddings", "chat-timeout-demo"},
+                cost_center="RESEARCH",
+                quotas=TenantQuota(
+                    requests_per_minute=15,
+                    tokens_per_minute=20_000,
+                    concurrent_requests=1,
+                    daily_token_quota=500_000,
+                    max_input_tokens=8192,
+                    max_output_tokens=2048,
+                    simulated_gpu_slots=1,
+                ),
+            ),
         }
         self.models = {
             "chat-default": chat_default,

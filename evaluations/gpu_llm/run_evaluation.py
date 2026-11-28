@@ -11,7 +11,7 @@ import time
 from datetime import UTC, datetime
 from pathlib import Path
 from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 DEFAULT_SUITE = Path(__file__).with_name("tasks.json")
 DEFAULT_OUTPUT = Path("/var/tmp/gpu-lab/evaluation/results.json")
@@ -24,6 +24,16 @@ ALLOWED_CHECKS = {
     "required_terms",
     "http_status",
 }
+
+
+class NoRedirectHandler(HTTPRedirectHandler):
+    """Do not forward an evaluation bearer token to a redirect target."""
+
+    def redirect_request(self, request, fp, code, msg, headers, newurl):
+        return None
+
+
+EVALUATION_OPENER = build_opener(NoRedirectHandler())
 
 
 def load_suite(path: Path) -> dict:
@@ -176,7 +186,7 @@ def request_case(
     status = 0
     body = b""
     try:
-        with urlopen(request, timeout=timeout) as response:
+        with EVALUATION_OPENER.open(request, timeout=timeout) as response:
             status = response.status
             body = response.read()
     except HTTPError as error:

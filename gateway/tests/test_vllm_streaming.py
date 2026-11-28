@@ -71,6 +71,52 @@ def test_vllm_stream_requests_and_parses_final_usage(monkeypatch):
     assert events[-1].usage == Usage(prompt_tokens=3, completion_tokens=2, total_tokens=5)
 
 
+def test_vllm_non_streaming_completion_sends_alias_and_parses_usage(monkeypatch):
+    seen = {}
+
+    async def handle(request: httpx.Request) -> httpx.Response:
+        seen["url"] = str(request.url)
+        seen["payload"] = json.loads(request.content)
+        return httpx.Response(
+            200,
+            json={
+                "id": "chatcmpl-test",
+                "object": "chat.completion",
+                "model": "gpu-default",
+                "choices": [
+                    {
+                        "index": 0,
+                        "message": {"role": "assistant", "content": "hello from L4"},
+                        "finish_reason": "stop",
+                    }
+                ],
+                "usage": {
+                    "prompt_tokens": 3,
+                    "completion_tokens": 3,
+                    "total_tokens": 6,
+                },
+            },
+        )
+
+    real_async_client = httpx.AsyncClient
+
+    def client_with_mock(*args, **kwargs):
+        kwargs["transport"] = httpx.MockTransport(handle)
+        return real_async_client(*args, **kwargs)
+
+    monkeypatch.setattr(vllm.httpx, "AsyncClient", client_with_mock)
+    backend = vllm.VllmBackend("http://model.test", "gpu-default")
+
+    content, usage, duration_ms = asyncio.run(backend.complete(chat_request(stream=False)))
+
+    assert seen["url"].endswith("/v1/chat/completions")
+    assert seen["payload"]["model"] == "gpu-default"
+    assert seen["payload"]["stream"] is False
+    assert content == "hello from L4"
+    assert usage == Usage(prompt_tokens=3, completion_tokens=3, total_tokens=6)
+    assert duration_ms >= 0
+
+
 def test_vllm_stream_rejects_malformed_server_event(monkeypatch):
     async def handle(_request: httpx.Request) -> httpx.Response:
         return httpx.Response(

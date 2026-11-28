@@ -81,9 +81,11 @@ class GatewayService:
             raise HTTPException(422, "weights must be non-negative")
         if any(not targets[name].healthy and weight > 0 for name, weight in update.weights.items()):
             raise HTTPException(409, "cannot route traffic to an unhealthy target")
+        # Persist shared intent first. A Redis outage must not leave this process
+        # routing with weights that its peer replicas cannot see.
+        self.rollouts.put(alias, update.weights)
         for name, weight in update.weights.items():
             targets[name].weight = weight
-        self.rollouts.put(alias, update.weights)
         self.admin_audit.append(
             AdminAuditEvent(
                 actor=actor,

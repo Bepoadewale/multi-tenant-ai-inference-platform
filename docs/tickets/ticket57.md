@@ -90,8 +90,9 @@ host.
 
 Final review added a conditional `pciutils` install for a stock AMI that lacks
 `lspci`, and set read-only hardware/runtime inspection commands to run during Ansible
-check mode. The playbook syntax check passed again; the updated source needs its own
-CI run because these are execution-safety changes.
+check mode. The updated playbook syntax check passed. The final PR head `4795f12`
+passed all six required CI jobs, including one fresh-runner local end-to-end cycle,
+in run `46045068200`.
 
 ## Review follow-up — defer unavailable hardware checks safely
 
@@ -136,5 +137,5 @@ full verification is rerun.
 
 Research details are in `docs/gpu-lab/RESEARCH_NOTES.md`; manual order and runtime
 verification are in `docs/gpu-lab/GPU_BATCH_RUNBOOK.md`; role behavior is in
-`infrastructure/ansible/README.md`. The next step is to complete static CI and human
-review while continuing non-billable GPU preparation.
+`infrastructure/ansible/README.md`. PR #57 is
+[open and ready for review](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/57).

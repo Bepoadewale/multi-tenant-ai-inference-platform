@@ -1,20 +1,32 @@
 # GPU Lab Implementation Status
 
-**Overall:** ACTIVE — Phase 2 infrastructure is prepared but blocked on quota. The deployment stack is statically prepared through PR #53 and includes PRs #33–#36. PR #53's code head `e623b75` passed all five checks in `46023306230`; its documentation follow-up `2153942` passed all five checks in `46025160292`. PR #54's five required CI checks passed in run `46028053505`. PR #55 documentation head `de4c6e7` passed all five required checks in run `46034523863`. PR #56 head `852c873` passed all five checks, including its one required clean-room local end-to-end cycle, in run `46040861818`; PR #56 is ready for review and remains open. PR #57 prepares pinned, locally executed Ansible configuration; static checks remain in progress. No GPU cloud execution has occurred in this goal.
+**Updated:** 2026-11-28. The quota is approved at 4.0 On-Demand G/VT vCPUs; project remote state and Budget controls are absent, and no apply is authorized.
+
+**Overall:** ACTIVE — Phase 2 infrastructure remains static-only; GPU quota is approved, but budget, remote-state, exact-plan, expiry, and separate apply gates remain open. The deployment stack is statically prepared through PR #53 and includes PRs #33–#36. PR #53's code head `e623b75` passed all five checks in `46023306230`; its documentation follow-up `2153942` passed all five checks in `46025160292`. PR #54 passed all five required jobs in `46028053505`; PR #55 passed all five in `46034523863`; PR #56 updated head passed all five in `46040861818`. PR #57 head `4795f12` passed all six jobs, including one fresh-runner clean-room cycle, in `46045068200`; PR #57 is ready for review and remains open. PR #58 adds the manual reproduction guide and GPU tenant identities; its restacked head is locally verified and awaits fresh CI. Run `46052092657` passed the checksum-verified Trivy scan but smoke found the edge-device inventory empty because edge agents could not read the owner-only token file. Commit `d759b8e` matches the two local agents to the bootstrap UID/GID; all six jobs, including the fresh-runner clean-room cycle, passed in `46054114999`. Commit `a1616ec` addresses three automated operator-guide findings; all review threads were resolved on those historical heads and CI runs `46055428111`, `46056755505`, `46057657498`, and runbook follow-up `46058891531` each passed all six jobs, including local E2E. The batch and manual vLLM procedures now share the model-cache volume and served alias; a direct non-streaming adapter contract test is added. No GPU cloud execution has occurred in this goal.
+
+**Latest Phase 6 evidence:** PR #58 head `56a0493` passed all six checks in run
+`46065078837`, including its automatic local E2E job. The signed-tenant API test
+denies a customer-support request for engineering-only `embeddings`, even when the
+request supplies `X-Tenant: internal-engineering`. Follow-up head `6f73e42` passed
+the cancellation drill across both local gateways, but its outage check caught an
+HTTP 500 instead of 503; five jobs passed and local E2E failed in run `46066808334`.
+The fix maps shared rollout read/write failures to 503 and persists weights before
+local mutation. Ten focused API/rollout tests and Ruff pass locally; this fix awaits
+the next PR run.
 
 | Phase | Status | Evidence / next gate |
 | --- | --- | --- |
 | 1. Audit, research, architecture | Complete | Baseline, direct request/admission audit, proposed diagrams, official-source research notes, risk register, cost estimate, backlog, evidence manifest, and passing PR checks are recorded. PR human review/merge remains open; exact package versions and cost inputs are rechecked before implementation/apply. |
-| 2. Single-L4 EC2 Terraform | In progress — static only; quota blocked | Dedicated Terraform root, one-instance/account/region/AMI guards, encrypted gp3, IMDSv2, SSM, one-time expiry, plan digest checks, destroy safeguards, and read-only cleanup verification are prepared. The pinned-AMI local-state preview proposes 14 creates for one `g6.xlarge`; it is not a remote-state or apply-ready plan. Real state locking, SSM registration, expiry, provisioning, and teardown remain untested. AWS denied the initial quota request by email; the owner reports manually appealing through the existing case. Applied quota remains zero. |
-| 3. Ubuntu/NVIDIA/CUDA/Ansible | In progress — static host automation | PR #50 provides an ordered host-install manifest and 29-package hashed PyTorch lock. PR #57 prepares a hash-locked Ansible 2.21.6 controller and host role for pinned Ubuntu/NVIDIA/CUDA/Docker packages, signed repositories, runtime configuration, and post-reboot verification. Syntax checks pass locally; CI is pending. No package has been installed on an EC2 host. The manual learning pass and second-run idempotency check remain open. |
+| 2. Single-L4 EC2 Terraform | In progress — static only; launch controls pending | Dedicated Terraform root, one-instance/account/region/AMI guards, encrypted gp3, IMDSv2, SSM, one-time expiry, plan digest checks, destroy safeguards, and read-only cleanup verification are prepared. The pinned-AMI local-state preview proposes 14 creates for one `g6.xlarge`; it is not a remote-state or apply-ready plan. Real state locking, SSM registration, expiry, provisioning, and teardown remain untested. On 2026-11-28, read-only AWS CLI checks confirmed `CASE_CLOSED` and 4.0 applied On-Demand G/VT vCPUs; this is enough by quota for one `g6.xlarge`, but does not reserve AZ capacity or authorize an apply. |
+| 3. Ubuntu/NVIDIA/CUDA/Ansible | Prepared — static host automation | PR #50 provides an ordered host-install manifest and 29-package hashed PyTorch lock. PR #57 adds the hash-locked Ansible 2.21.6 controller and host role for pinned Ubuntu/NVIDIA/CUDA/Docker packages, signed repositories, runtime configuration, PyTorch, and post-reboot verification. All six refreshed CI jobs passed on head `fcc5651` in run `46161064613`; no package has been installed on an EC2 host. No package has been installed on an EC2 host. The manual learning pass and second-run idempotency check remain open. |
 | 4. CUDA performance lab | Prepared — static PR #49 | Bounded CUDA vector-add, synchronized PyTorch experiments, and no-GPU planning are prepared. All five required jobs pass on the current restacked head. The `.cu` source is not compiled and there are no L4 measurements or profiler results. |
 | 5. vLLM and Qwen serving | Prepared — static only | The isolated Compose profile and immutable image/model candidates are prepared. The profile is now stacked after the gateway stream, admission, tokenizer, and cleanup work in PRs #33–#36. No image layer or model weights were downloaded; no L4 load, inference, or streaming result exists. |
-| 6. Multi-tenant GPU gateway | Prepared — static integration | PRs #33–#36 add stream usage/cancellation handling, request-scoped Redis admission leases, model-aware token reservations, and cleanup tests; PR #45 integrates the GPU profile on top of that chain. Required CI passes on the current restacked heads through PR #50. No real GPU request, quota reconciliation, or client cancellation has been verified on vLLM. |
+| 6. Multi-tenant GPU gateway | Local integration fix verified; fresh stacked CI pending; L4 unverified | PR #58's signed customer-support API denial test passed in run `46065078837`. Run `46066808334` proved ten cancellations release active gauges and shared Redis leases, then found rollout-state lookup returned HTTP 500 during Redis outage. The local fix maps Redis rollout read/write errors to 503 and avoids partial local writes; 10 focused tests pass. The corrected outage/recovery drill has passed on the prior PR #58 head; the current restacked head requires fresh CI. No real GPU request, token reconciliation against vLLM, or live GPU cancellation has been verified. |
 | 7. GPU/AI observability | Prepared — static only | PR #46 configures pinned exporters, Prometheus, Grafana, Alertmanager, OpenTelemetry, Tempo, rules, and dashboards. All five required jobs pass on the current restacked head. No live device metrics, alert, dashboard, or trace has been observed. |
 | 8. Benchmarks and FinOps | Prepared — static only | PR #47 includes a bounded direct vLLM serving matrix and metadata collection. All five required jobs pass on the current restacked head. No L4 benchmark or measured inference cost exists. |
 | 9. Evaluation and releases | In progress — static implementation | PR #48 has seven synthetic evaluation cases and a privacy-safe dry-run. PR #51 designs sequential LLM release. PR #52 adds private MLflow tracking and report publication. PR #54 adds local manifest/plan controls. PR #55 adds authenticated plan/read/approval routes, checks candidate metadata against a finished MLflow run and sanitized report, and stores manifests in shared single-host SQLite. Latest five-check run `46034523863` passed. PR #56 head `852c873` passed all five checks in `46040861818`, including the required clean-room cycle. Live host/inference/recovery checks remain open. No real LLM evaluation or release has occurred. |
-| 10. Incidents and recovery | Not started | Safe real fault injection, diagnosis and verified recovery reports. |
-| 11. Automation and CI | In progress — static only | PR #53 adds a hash-locked container build and a lock coverage check; its Linux image build and all five required CI jobs pass. PR #57 adds Ansible hash-lock and syntax validation to CI. Terraform apply, Ansible host execution, and cloud execution remain unrun. |
+| 10. Incidents and recovery | First local incident recorded; GPU drills pending | `INCIDENT-LOCAL-REDIS-001.md` records the real CI 500, root cause, and incomplete recovery verification. The cancellation drill passed; the outage drill fix awaits CI. No controlled L4 failure/recovery report exists yet. |
+| 11. Automation and CI | In progress — local integration | PR #53 adds a hash-locked container build and lock coverage check; its Linux image build passed. PR #57's Ansible hash-lock and syntax job passed. The `6f73e42` workflow's five static jobs passed; local E2E exposed the rollout-store error, and the focused fix is waiting for the next PR run. Terraform apply, Ansible host execution, and cloud execution remain unrun. |
 | 12. Clean-room and teardown | Not started | Independent recreation, export and provider-side absence checks. |
 
 ## Baseline verified directly
@@ -37,7 +49,7 @@
   7-resource bootstrap preview; no bootstrap apply has occurred.
 - Read-only `us-east-1` resource-group tag and EC2 instance lookups for the exact project tag: **no matches**. Untagged or differently tagged leftovers are not excluded.
 - EC2 instance type offerings list G6 in multiple `us-east-1` AZs; this is not a capacity reservation.
-- On-Demand G and VT applied quota: **0 vCPUs** (`L-DB2E81BA`); the latest read-only `us-east-1` check on 2026-11-27 confirmed the expected account, quota `0.0`, and the existing 4-vCPU request still `CASE_OPENED`. AWS email reports denial; the owner reports manually appealing through the existing Support Center case. No API-confirmed appeal result or quota change is available. Do not submit a duplicate request.
+- On-Demand G and VT applied quota (`L-DB2E81BA`): **4.0 vCPUs** in `us-east-1`; read-only history reports `CASE_CLOSED`. No new request is needed. This quota does not reserve instance capacity or permit an apply.
 - Price List API on 2026-11-26: Linux shared On-Demand `g6.xlarge` **$0.8048/hour**. An 8–12 hour instance window costs **$6.44–$9.66** before all other charges. A provisional 12-hour envelope including IPv4, gp3, repository S3/DynamoDB state requests, expiry, egress, tax contingency, and reserve is about **$18.35**; see `COST_REPORT.md` for assumptions and exclusions. This is not a final quote or authorization.
 - Credentials are never recorded here.
 
@@ -45,18 +57,18 @@
 manual driver/CUDA/container/PyTorch setup, vLLM, tenant validation, telemetry,
 benchmark/evaluation, evidence export, and teardown. It is a static procedure only;
 all package candidates must be rechecked and no L4 command has run. A fresh
-read-only AWS check on 2026-11-27 verified the configured key profile is in the
-expected project account, applied G/VT quota is still zero, and exact project-tag
-EC2/resource-group queries returned no resources in `us-east-1`. A separate EC2
+read-only AWS check on 2026-11-28 confirmed the applied G/VT quota is 4.0 vCPUs;
+exact-name state bucket, lock table, and project Budget checks returned absent, and
+project-tag EC2/resource-group queries returned no resources in `us-east-1`. A separate EC2
 Compose profile now statically configures one vLLM GPU service, two loopback-only
 gateway replicas, and shared Redis. Catalog routing and health checks are opt-in and
 unit-tested; the profile has not run on an L4.
 
 ## Current Next Actions
 
-1. Finish PR #57 Ansible lock, role, documentation, and syntax CI checks; retain the passed PR #56 clean-room evidence rather than running another clean room for unrelated changes.
-2. Keep AWS work read-only until the manually submitted appeal is decided and applied G/VT quota is nonzero; do not send another appeal or request.
-3. Continue non-billable research and deployment preparation without claiming host execution; manual NVIDIA setup still precedes running Ansible.
+1. Keep PRs #56–#58 open for review, finish their updated CI, and resolve review threads. Do not merge without owner authorization.
+2. Keep AWS work read-only until the exact project state/lock and Budget alert recipient are established, the exact saved plan and cost fit under $25, expiry safeguards are checked, and separate apply authorization is recorded.
+3. Continue non-billable research and deployment preparation without claiming host execution; the 2026-11-27 CLI check found all currently pinned NVIDIA and Docker package candidates in official vendor package indexes, and the documented signing-key/keyring hashes matched downloaded vendor artifacts. Recheck versions before any paid batch; manual NVIDIA setup still precedes running Ansible.
 4. Recheck signed package indexes, image digest, model revision/license/hash, capacity, current prices, and exact bounded plan immediately before any authorized GPU batch.
 5. Obtain human review for the open PR chain. Nothing has been merged; no direct changes to `main` were made.
 

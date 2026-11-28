@@ -17,6 +17,17 @@
   remaining non-billable work and do not merge without authorization.
 
 
+## 2026-11-28 — Restack and validate PR #58 local tenant and operator preparation
+
+- **Phase:** Phase 2 remains quota-blocked; Phase 3–6 code and instructions are being prepared without a GPU.
+- **Branch / PR:** `codex/gpu-manual-reproduction-guide`, PR #58, rebased from former base `4795f12` onto PR #57 head `d5e4570`.
+- **Rebase choice:** kept the updated upstream goal/status text where old PR #58 commits carried stale snapshots. PR #58-specific failures remain in ticket #58 and this journal; source and test changes remain in the branch diff.
+- **First test attempt:** focused gateway tests failed during collection because the new worktree did not contain the ignored, locally generated `models/tiny-intent-classifier.onnx` CPU fixture. Ran `make install` in the new PR #58 worktree; it created the local Python environment and both local ONNX fixtures. No clean-room cleanup was run.
+- **Validation:** `make verify` passed Ruff, **153 tests** (2 skipped), dependency audit, Compose/monitoring checks, and benchmark/evaluation/CUDA dry-run plans. One existing Starlette/httpx warning remains. The suite made zero GPU operations and zero model-network requests.
+- **Historical troubleshooting retained:** earlier PR #58 workflows failed because the Trivy installer could not locate the requested versions and the smoke script hid a failing assertion. The package switched to a checksum-verified release archive and named, secret-safe smoke assertions. The initial Redis outage drill exposed HTTP 500 from a rollout-state read; the fix returns fail-closed 503 and persists rollout state before changing local weights. Earlier CI validated recovery and cross-gateway cancellation using local CPU Compose.
+- **Cost and limits:** no AWS, GPU, model download, or cloud spend. No local clean-room run was performed; keep the single integrated clean-room run for after the stack stabilizes.
+- **Next:** publish the rebased branch with an exact force-with-lease, run its required checks once, then continue restacking PRs #59–#71.
+
 ## 2026-11-28 — Rebase and validate Ansible host configuration
 
 - **Phase:** Phase 3 static host-configuration preparation; no GPU host access.
@@ -2120,3 +2131,15 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   GPU access, or spend.
 - **Next:** include the exact changed-head syntax-check result in the ticket, publish
   the fixes, and use one PR CI run to validate the updated package.
+
+## 2026-11-28 — Reconcile quota approval and restack PR #58
+
+- **Phase:** Phase 2 preflight; paid GPU work remains gated. PR #58 carries Phase 6 tenant safety, local failure drills, and the manual GPU guide.
+- **Branch / PR:** `codex/gpu-manual-reproduction-guide`, PR #58. Parent PR #57 moved from old head `d5e4570` to `fcc5651` after PR #56 moved to `aa80c49`.
+- **Restack troubleshooting:** an initial rebase using the common historical base `2d2d417` would replay 78 commits, including 61 ancestor changes already represented by the new parent. It was aborted before publication. Using the actual former PR #57 head `d5e4570` as the cut point replayed only PR #58's 17 package commits. The evaluator redirect-security commit conflicted with a newer parent response-schema regression; both tests were retained and the schema mock was updated for the redirect-blocking opener. The goal conflict was resolved in favor of current quota and launch-gate facts.
+- **Validation:** `make verify` completed with Ruff clean, 160 tests passed (2 skipped), no known dependency vulnerabilities, Compose and observability configuration validation, and benchmark/evaluation/CUDA dry-run plans. No GPU operations or model network requests were part of those dry runs. `git diff --check` passed.
+- **Docker storage:** observability validation pulled four digest-pinned images. After confirming there were no containers based on them, those four exact images were removed. No project containers were present; unrelated containers and images were left alone.
+- **AWS status:** read-only CLI confirmed request `CASE_CLOSED` and applied On-Demand G/VT quota 4.0 vCPUs. Exact planned state bucket, lock table, and project Budget returned absent. This creates no instance capacity and is not apply authorization. No AWS write, project resource, GPU hour, or spend occurred.
+- **Remaining launch gates:** remote-state bootstrap, valid private Budget alert recipient and project Budget, current exact price and AZ-capacity check, remote saved-plan review, expiry safeguards, and separate apply authorization. Keep the $25 ceiling and one bounded GPU batch.
+- **CI results:** PR #56 run `46160784399` passed all five required checks, including local E2E. PR #57 run `46161064613` passed all six required checks, including Ansible and local E2E. PR #58 fresh CI has not yet been published at this journal entry.
+- **Next:** review the final PR #58 diff, push with exact lease against `59925fd`, update the PR description, and watch the single triggered run. Then carry descendants from their respective old parent heads, preserving only each PR's own commit range.

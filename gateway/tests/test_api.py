@@ -1,3 +1,8 @@
+import json
+import subprocess
+import sys
+from pathlib import Path
+
 from fastapi.testclient import TestClient
 from inference_gateway.api.main import app
 
@@ -28,6 +33,49 @@ def test_models_require_authenticated_identity():
     }
 
 
+def test_tenant_header_cannot_spoof_or_bypass_signed_identity(tmp_path, monkeypatch):
+    repository = Path(__file__).resolve().parents[2]
+    generator = repository / "scripts" / "generate_local_identity.py"
+    subprocess.run([sys.executable, str(generator)], cwd=tmp_path, check=True)
+
+    identity_dir = tmp_path / ".local" / "identity"
+    tokens = json.loads((identity_dir / "tokens.json").read_text(encoding="utf-8"))
+    monkeypatch.setenv("INFERENCE_AUTH_MODE", "jwt")
+    monkeypatch.setenv("JWT_PUBLIC_KEY_PATH", str(identity_dir / "public.pem"))
+    monkeypatch.setenv("JWT_ISSUER", "https://local.inference.platform")
+    monkeypatch.setenv("JWT_AUDIENCE", "inference-gateway")
+
+    authorized = client.get(
+        "/v1/models",
+        headers={
+            "Authorization": f"Bearer {tokens['customer_support']}",
+            "X-Tenant": "research",
+        },
+    )
+    assert authorized.status_code == 200
+    assert {model["id"] for model in authorized.json()["data"]} == {"chat-default"}
+
+    unauthorized_model = client.post(
+        "/v1/chat/completions",
+        headers={
+            "Authorization": f"Bearer {tokens['customer_support']}",
+            "X-Tenant": "internal-engineering",
+        },
+        json={
+            "model": "embeddings",
+            "messages": [{"role": "user", "content": "must not reach a backend"}],
+        },
+    )
+    assert unauthorized_model.status_code == 403
+    assert unauthorized_model.json()["detail"] == "tenant is not authorized for this model"
+
+    forged = client.get(
+        "/v1/models",
+        headers={"Authorization": "Bearer invalid-token", "X-Tenant": "research"},
+    )
+    assert forged.status_code == 401
+
+
 def test_platform_endpoints_require_stronger_role():
     assert (
         client.get(
@@ -40,6 +88,9 @@ def test_platform_endpoints_require_stronger_role():
     )
     assert response.status_code == 200
     assert {tenant["id"] for tenant in response.json()} == {
+        "customer-support",
+        "internal-engineering",
+        "research",
         "team-analytics",
         "team-payments",
         "team-reporting",

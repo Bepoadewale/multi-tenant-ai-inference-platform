@@ -5,6 +5,14 @@ claim that any cloud or GPU phase has run. Every package uses its own focused br
 and pull request. Review and required CI checks must pass before merge; implementation
 pull requests must include the repository's clean-room evidence.
 
+**Current readiness update (2026-11-28):** the existing request is `CASE_CLOSED` and
+4.0 On-Demand G/VT vCPUs are applied in `us-east-1`. This clears the quota threshold
+for one `g6.xlarge`; it does not authorize provisioning. The project state bucket,
+lock table, and Budget are absent, and the alert recipient is not verified. Exact
+remote-state plan, updated price/AZ-capacity review, independent expiry check, and
+separate apply authorization remain required. The user-set $25 total ceiling remains.
+Old quota-denial statements below are dated historical snapshots, not current state.
+
 ## Current state
 
 - Phase 1 design gate is complete. The repository audit and candidate architecture are recorded in
@@ -44,30 +52,34 @@ pull requests must include the repository's clean-room evidence.
   It is not remote-state locked and must not be applied. Ticket42 records its digest
   and security review; the remote-state plan remains outstanding.
 - No AWS resources or GPU instance hours have been used by this goal.
-- The applied On-Demand G and VT quota is zero in `us-east-1`, `us-east-2`, and
-  `us-west-2`. AWS email reports that the 4-vCPU `us-east-1` request was denied, while
-  Service Quotas history still returns `CASE_OPENED`. The owner reports appealing
-  through the existing case; see `QUOTA_APPEAL_DRAFT.md`. Do not duplicate the request
-  or launch while quota is zero.
-- The existing repository budget and Terraform state guardrails use a repository-
-  scoped bucket and lock table. GPU state must use a unique key namespace, not create
-  duplicate guardrails. The budget uses email notifications. A recipient must be
-  provided outside version control and verified before that alert is active; it is
-  not an enforcement control.
+- Historical quota snapshots below this note preceded the appeal decision. On
+  2026-11-28, read-only `us-east-1` checks show `CASE_CLOSED` and 4.0 applied On-Demand
+  G/VT vCPUs. That is sufficient by quota for one `g6.xlarge`; no AZ reservation is
+  implied and no duplicate request should be sent.
+- Terraform bootstrap code defines a repository-scoped budget and state/lock resources,
+  but the exact project Budget, state bucket, and lock table are currently absent. GPU
+  state should use a unique key namespace once the backend is authorized. The budget
+  alert recipient must be provided outside version control and verified; the alert is
+  not a spending limit.
 - The initial USD $25 limit is a hard ceiling. A provisional planning scenario now
   includes compute, public IPv4, gp3, temporary state and lock storage, one expiry
   invocation, data-transfer allowance, tax contingency, and a reserve. It still
   requires exact AMI, price, egress, tax-profile, and state-retention confirmation;
   it is not permission to apply.
-- PRs #32–#53 are open and unmerged. PR #52 follow-up head `1f02955` passed run
-  `46021471851`. PR #53 tested code head `e623b75` passed all five required checks in
-  run `46023306230`, including a Linux amd64 Docker image build and CPU end-to-end.
-  A documentation-only PR #53 follow-up awaits checks. No AWS resources or GPU
-  execution.
-- PR #56 controller head `852c873` passed all five required checks in run
-  `46040861818`, including its one clean-room local end-to-end cycle. PR #56 is ready
-  for review and remains open. PR #57 prepares the Ansible host role; its CI and host
-  execution are pending. No AWS or GPU work is eligible.
+- PRs #30–#58 remain open and unmerged; merge authorization is outstanding. PR #53
+  code head `e623b75` passed all five checks in `46023306230`, including a Linux AMD64
+  gateway image build and CPU end-to-end. PR #56 head `852c873` passed all five checks
+  in `46040861818`; PR #57 Ansible head `4795f12` passed all six checks, including a
+  clean-room local end-to-end cycle, in `46045068200`. Neither host configuration nor
+  AWS deployment has run.
+- PR #58 adds named tenant identities and the manual guide. Run `46052092657` passed
+  the checksum-verified Trivy scan and identified that owner-only token permissions
+  prevented the local edge agents from registering. Commit `d759b8e` fixed the local
+  container UID/GID and passed all six checks in run `46054114999`, including a fresh
+  local end-to-end cycle. Commit `a1616ec` resolves three automated guide findings
+  about exact Terraform variables, the manual vLLM handoff, and workstation teardown.
+  Its final-head run `46055428111` passed all six jobs. No AWS resource, model, or GPU
+  execution occurred.
 
 ## Ordered implementation packages
 
@@ -97,7 +109,8 @@ image build, dependency audit, and existing CPU local end-to-end flow passed.
 and independent-approver state in SQLite. PR #55 adds the authenticated plan and
 approval API, MLflow evaluation checks, and shared single-host manifest storage; all
 five checks passed on latest head `de4c6e7` in run `46034523863`. PR #56 prepares a
-host-only deployment controller and currently has 16 focused local tests passing.
+host-only deployment controller and has 16 focused local tests passing; updated head
+`852c873` passed all five checks in `46040861818`.
 PR #55 remains open and unmerged. [PR #56](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/56)
 is open as a draft, stacked on PR #55. Initial head `ad10699` passed all five required
 checks in run `46039778508`, including one clean-room local end-to-end cycle. The
@@ -221,9 +234,9 @@ cost and quota gate passes.
 - [x] Refresh and inspect a pinned-AMI local-state preview. Its plan contains 14
   creates for one `g6.xlarge`; it is ignored locally and is not suitable for apply.
 - [ ] Create and inspect the final remote-state saved plan and confirm the full current
-  cost and budget recipient. The existing quota request was denied by email, remains
-  `CASE_OPENED` in the API, and applied quota is zero. Do not apply until the quota and
-  $25 project gates are cleared.
+  cost and budget recipient. The quota is now approved at 4.0 vCPUs, but do not apply
+  until the remote state, recipient/Budget, $25 total cost, exact plan, expiry, and
+  separate authorization gates are cleared.
 
 **Exit gate:** exact plan creates one authorized L4 and only enumerated project
 resources, estimated total remains below $25 with safety margin, expiry is tested,
@@ -231,7 +244,7 @@ and teardown/absence commands are ready.
 
 ### Package 3 — Manual Linux, NVIDIA, CUDA, Docker, and Ansible
 
-**Status:** PR #50 contains a non-billable ordered install manifest and hashed PyTorch lock. PR #57 adds a universal hash-locked Ansible 2.21.6 controller and local-host role for the dated Ubuntu/NVIDIA/CUDA/Docker candidate set. Local syntax checking passes; CI is pending. No GPU host has been configured; candidates are not runtime-verified.
+**Status:** PR #50 contains a non-billable ordered install manifest and hashed PyTorch lock. PR #57 adds a universal hash-locked Ansible 2.21.6 controller and local-host role for the dated Ubuntu/NVIDIA/CUDA/Docker candidate set. Its six checks, including one clean-room local run, passed on head `4795f12` in `46045068200`; PR #57 is ready for review. No GPU host has been configured; candidates are not runtime-verified.
 
 - [ ] Select and pin a standard Ubuntu 24.04 x86_64 AMI, kernel, NVIDIA driver,
   CUDA Toolkit, Docker Engine, NVIDIA Container Toolkit, Python, and PyTorch after
@@ -281,16 +294,21 @@ numbers are fabricated or inferred from CPU fixtures.
 
 ### Package 5 — Manual and containerized vLLM/Qwen serving
 
-**Status:** not started. Exact model license/revision/digest and version tuple remain
-open.
+**Status:** statically prepared in PR #45 and research/runbook updates through PRs
+#47/#50/#57. The current candidate is vLLM 0.34.0 at its reviewed image digest,
+Qwen2.5-1.5B-Instruct at a pinned revision, Ubuntu 24.04 amd64, an R580 host-driver
+candidate, and CUDA 13.0/13.0.3 candidates. The manual guide now uses one named model
+cache volume for the first vLLM launch and later Compose service. This matrix still
+requires live package/license/artifact/runtime verification before use.
 
-- [ ] Pin a dated vLLM release/image digest, compatible CUDA variant, Python ABI, and
-  Qwen 1.5B model revision. Confirm artifact hash, license, memory, context, and
-  tokenizer/template before downloading.
-- [ ] Prepare the exact download, cache, launch, health/readiness, inference, streaming,
-  telemetry, export, and teardown commands before the GPU batch.
-- [ ] Before that batch, use the local verifier from ticket #38 to check the pinned
-  Qwen `model.safetensors` after download; fixture tests are not artifact evidence.
+- [x] Research the dated vLLM image, model revision/license, candidate CUDA/driver
+  versions, model/cache workflow, and host/runtime health checks.
+- [x] Prepare manual and Compose commands for download, cache, launch,
+  health/readiness, inference, streaming, and teardown in the manual guide and GPU
+  batch runbook. Commands are prospective, not executed.
+- [ ] Before the GPU batch, refresh the image digest and model license/revision,
+  confirm architecture and API compatibility, verify actual downloaded snapshot
+  digest, and check memory/context requirements against the L4.
 - [ ] Start manually, verify real L4 inference and streaming, then reproduce with
   Docker Compose without publishing the endpoint or internal services.
 
@@ -313,12 +331,26 @@ tokenizer preflight. None has live GPU inference evidence.
   lease during slow tokenizer preflight and release it on rejection.
 - [x] Add local failure-path coverage for preflight cancellation, unavailable Redis
   admission, and bounded tokenizer HTTP timeout.
-- [ ] Test Redis failure and cancellation across separate gateway processes.
+- [x] Run `make demo-gateway-cancellation` through the local flagship flow. CI run
+  `46066808334` cancelled ten streams across both CPU gateway processes and verified
+  each active gauge and the shared Redis lease hash returned to zero.
+- [ ] Rerun `make demo-redis-outage` after the shared rollout-store fix. In CI run
+  `46066808334`, the first replica returned HTTP 500 instead of the expected 503;
+  `INCIDENT-LOCAL-REDIS-001.md` records the failure. The exit trap restarted Redis,
+  but gateway readiness after recovery was not tested because the assertion failed.
+  The local fix and focused tests are ready for the next PR workflow.
 - [ ] Verify the stream/admission contract against the pinned live vLLM runtime and
   route real GPU-backed requests.
-- [ ] Preserve ONNX defaults and add vLLM as a separately configured runtime target.
-- [ ] Demonstrate support, engineering, and research tenants with shared quotas,
-  model grants, bounded queueing, and noisy-neighbor controls.
+- [x] Preserve ONNX defaults and add vLLM as a separately configured single-target
+  runtime in the isolated Compose profile; GPU catalog and CPU-default regression
+  tests exist in PR #45.
+- [x] Prepare customer-support, internal-engineering, and research catalog profiles
+  with different model grants, request/token limits, and concurrency, plus signed
+  identity fixtures. Ticket #58 tests application authentication; no physical GPU
+  isolation is claimed.
+- [ ] Demonstrate the named tenants against real vLLM through both gateway replicas,
+  verify shared Redis accounting, model denials, overload, and failure cleanup on the
+  approved L4 host.
 
 **Exit gate:** real gateway-routed GPU calls, policy denials, shared state, failure
 cleanup, and CPU ONNX regression all have evidence.
@@ -410,10 +442,10 @@ cost status, educational artifacts, and goal closure are complete.
 - If the complete mandatory work cannot be done under $25, stop paid work, document
   remaining requirements, finish non-billable work, and ask before increasing the
   ceiling or changing the design.
-- The applied G/VT On-Demand quota is zero in three checked regions. The first
-  4-vCPU request was denied by email, though the API history remains `CASE_OPENED`.
-  The owner reports an appeal through the existing Support Center case. Wait for
-  AWS's response; do not send a duplicate appeal or launch with zero applied quota.
+- Historical snapshot: the applied quota was zero in the checked regions before the
+  appeal was resolved. The current `us-east-1` result is 4.0 applied vCPUs and
+  `CASE_CLOSED`; no duplicate request is needed. The quota does not bypass the
+  remaining budget, backend, exact-plan, expiry, capacity, and apply gates.
 - Provisional 12-hour estimate: about `$10.68` before tax for one g6.xlarge, one public
   IPv4, 100 GiB gp3, short-lived S3 state and lock objects, one scheduler invocation,
   and 1 GiB of internet egress. A 25% tax allowance plus `$5` general reserve gives

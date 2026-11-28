@@ -1,7 +1,9 @@
 import json
 import sys
 import types
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from threading import Thread
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -85,13 +87,79 @@ def test_invalid_success_response_types_become_a_failed_case(payload):
         "check": {"type": "exact_number", "value": "4"},
     }
 
-    with patch("evaluations.gpu_llm.run_evaluation.urlopen", return_value=response):
+    with patch(
+        "evaluations.gpu_llm.run_evaluation.EVALUATION_OPENER.open",
+        return_value=response,
+    ):
         result = request_case(
             "http://127.0.0.1:8081/v1", "chat-default", case, "", 1, False
         )
 
     assert result["passed"] is False
     assert result["error_class"] == "InvalidCompletionSchema"
+
+
+def test_evaluator_does_not_forward_bearer_token_across_redirect():
+    forwarded_requests = []
+
+    class DestinationHandler(BaseHTTPRequestHandler):
+        def do_POST(self):
+            forwarded_requests.append(self.headers.get("Authorization"))
+            self.send_response(200)
+            self.send_header("Content-Length", "2")
+            self.end_headers()
+            self.wfile.write(b"{}")
+
+        def log_message(self, *_args):
+            pass
+
+    destination = ThreadingHTTPServer(("127.0.0.1", 0), DestinationHandler)
+    destination_thread = Thread(target=destination.serve_forever, daemon=True)
+    destination_thread.start()
+
+    destination_url = f"http://127.0.0.1:{destination.server_port}/collect"
+
+    class RedirectHandler(BaseHTTPRequestHandler):
+        def do_POST(self):
+            self.send_response(307)
+            self.send_header("Location", destination_url)
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+
+        def log_message(self, *_args):
+            pass
+
+    redirector = ThreadingHTTPServer(("127.0.0.1", 0), RedirectHandler)
+    redirector_thread = Thread(target=redirector.serve_forever, daemon=True)
+    redirector_thread.start()
+    case = {
+        "id": "redirect-check",
+        "category": "security",
+        "messages": [{"role": "user", "content": "synthetic"}],
+        "check": {"type": "exact_number", "value": "1"},
+    }
+
+    try:
+        result = request_case(
+            f"http://127.0.0.1:{redirector.server_port}/v1",
+            "gpu-default",
+            case,
+            "synthetic-test-token",
+            timeout=3,
+            show_subjective_response=False,
+        )
+    finally:
+        redirector.shutdown()
+        destination.shutdown()
+        redirector.server_close()
+        destination.server_close()
+        redirector_thread.join(timeout=3)
+        destination_thread.join(timeout=3)
+
+    assert result["http_status"] == 307
+    assert result["error_class"] == "HTTPError"
+    assert forwarded_requests == []
+
 
 def test_mlflow_publication_logs_only_sanitized_evaluation_metadata(tmp_path, monkeypatch):
     calls = []

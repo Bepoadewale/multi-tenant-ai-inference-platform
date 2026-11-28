@@ -56,3 +56,30 @@ def test_gpu_profile_readiness_requires_the_vllm_backend(monkeypatch):
     assert result["runtime"] == "vllm"
     assert result["backend_ready"] is False
     assert result["admission_ready"] is True
+
+
+def test_gpu_lab_tenants_have_distinct_permissions_and_limits(monkeypatch):
+    monkeypatch.setenv("INFERENCE_VLLM_URL", "http://vllm:8000")
+    catalog = Catalog()
+
+    support = catalog.tenant("customer-support")
+    engineering = catalog.tenant("internal-engineering")
+    research = catalog.tenant("research")
+
+    assert support.allowed_models == {"chat-default"}
+    assert "chat-default" in engineering.allowed_models
+    assert "embeddings" in engineering.allowed_models
+    assert "chat-timeout-demo" in research.allowed_models
+    assert support.quotas.concurrent_requests == 2
+    assert engineering.quotas.concurrent_requests == 4
+    assert research.quotas.concurrent_requests == 1
+    assert len({
+        support.quotas.requests_per_minute,
+        engineering.quotas.requests_per_minute,
+        research.quotas.requests_per_minute,
+    }) == 3
+    assert all("chat-default" in tenant.allowed_models for tenant in (support, engineering, research))
+
+    # Existing tenant identities and their CPU fallback remain present.
+    assert "chat-default" in catalog.tenant("team-search").allowed_models
+    assert "chat-cpu-fallback-demo" in catalog.tenant("team-analytics").allowed_models

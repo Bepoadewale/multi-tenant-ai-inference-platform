@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 
 import redis
+from fastapi import HTTPException
 
 
 class RolloutStore:
@@ -27,7 +28,10 @@ class RolloutStore:
     def get_context(self, alias: str) -> dict[str, object] | None:
         if not self.client:
             return None
-        value = self.client.get(self._key(alias))
+        try:
+            value = self.client.get(self._key(alias))
+        except redis.RedisError as error:
+            raise HTTPException(503, "shared rollout state unavailable") from error
         if value is None:
             return None
         decoded = json.loads(value)
@@ -54,4 +58,7 @@ class RolloutStore:
                 "release_plan_id": release_plan_id,
                 "release_phase": release_phase,
             }
-            self.client.set(self._key(alias), json.dumps(payload, sort_keys=True))
+            try:
+                self.client.set(self._key(alias), json.dumps(payload, sort_keys=True))
+            except redis.RedisError as error:
+                raise HTTPException(503, "shared rollout state unavailable") from error

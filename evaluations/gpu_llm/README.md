@@ -94,9 +94,35 @@ docker compose --env-file deployments/single-gpu/.env \
   --profile gpu-evaluation run --build --rm evaluator
 ```
 
-It prints the MLflow run ID. Access the UI only through an approved Systems Manager
-port-forward to `127.0.0.1:15011`; the host port is not exposed publicly. Export the
-report and needed artifacts before authorized teardown.
+The command prints the MLflow run ID. Review the run in the UI only through an
+approved Systems Manager port-forward to `127.0.0.1:15011`; the host port is not
+exposed publicly. Export the report and needed artifacts before authorized teardown.
+
+For a separate trusted host that already has direct network access to an inference
+endpoint, the standalone runner can also write a report outside the repository:
+
+```bash
+export GPU_EVAL_BASE_URL=http://127.0.0.1:8000/v1
+export GPU_EVAL_MODEL=gpu-default
+export GPU_EVAL_MODEL_REVISION=989aa7980e4cf806f80c7fef2b1adb7bc71aa306
+python3.12 evaluations/gpu_llm/run_evaluation.py \
+  --output /var/tmp/gpu-lab/evaluation/qwen-1.5b-results.json
+```
+
+To publish from that standalone invocation, set `MLFLOW_TRACKING_URI` to an
+authorized MLflow server. The run fails if publication is configured but unavailable;
+it does not silently discard the evidence.
+
+The bearer token is optional for the direct local lab endpoint. The runner refuses
+HTTP redirects instead of following them because a redirected request can forward its
+`Authorization` header to another host. Configure the final trusted API URL directly.
+If the protected gateway is used, provide its signed tenant bearer token through
+`GPU_EVAL_BEARER_TOKEN`; the program does not print or store that value. The runner
+records case IDs, pass/fail, elapsed time, token
+counts when the server returns them, the suite digest, and a digest of each generated
+answer. It never saves prompts or generated text. The report file is restricted to
+the current user on Unix-like systems.
+
 
 By default, subjective response text is not printed or saved. For a controlled
 interactive review, add `--show-subjective-response` and inspect it directly in the
