@@ -66,16 +66,18 @@ Old quota-denial statements below are dated historical snapshots, not current st
   invocation, data-transfer allowance, tax contingency, and a reserve. It still
   requires exact AMI, price, egress, tax-profile, and state-retention confirmation;
   it is not permission to apply.
-- PRs #30–#70 remain open and unmerged; merge authorization is outstanding. PR #59
+- PRs #30–#84 except #54 were open and unmerged in the latest live inventory (54 open,
+  no drafts); merge authorization is outstanding. PR #59
   head `0cfbedb` passed six checks in `46162611345`; #60 head `9fc23f2` passed six
   checks in `46162969703`; #61 head `1474752` passed six checks in `46163194154`.
   PR #62 run `46163327188`, #63 run `46163484312`, and #64 run `46163910205` passed
   all six refreshed jobs. PR #65 head `37b3b30` passed `46164362977`; its earlier
   head `49076a5` passed six checks in `46114955314` and includes the designated local
   CPU clean-room record. PRs #66 and #67 passed `46164644804` and `46164896175`. PR
-  #68 head `ff88165` run `46165126075` and #69 head `f5915e8` run `46165420078` are
-  active. PR #70 is restacked locally onto #69 and needs fresh CI. The catalog-based
-  cost estimate is `$18.51932705`, not authorization. PR #53
+  #68 head `ff88165` run `46165126075`, #69 head `f5915e8` run `46165420078`, and
+  #70 head `1679aa7` run `46165597103` are active. PR #71 is restacked locally onto #70
+  and needs fresh CI. The catalog-based cost estimate is `$18.51932705`, not
+  authorization. PR #53
   code head `e623b75` passed all five checks in `46023306230`, including a Linux AMD64
   gateway image build and CPU end-to-end. PR #56 head `852c873` passed all five checks
   in `46040861818`; PR #57 Ansible head `4795f12` passed all six checks, including a
@@ -164,8 +166,12 @@ on head `b94fc27` in run `46033196309`. No AWS or GPU operation is involved.
 - [x] Persist the plan and both manifests in a shared SQLite volume for the two gateway
   containers on one host; enable WAL and a bounded busy wait.
 - [x] Keep the API unable to access Docker or restart vLLM.
-- [ ] Add host-side verification of current live champion and model file digests.
-- [ ] Implement sequential deployment, readiness checks, and rollback.
+- [x] Add host-side verification of current live champion and model file digests in
+  the dependent host controller (PR #56). Its 16 fake-based tests and CI pass prove
+  local control flow only; checking actual host state and model files remains open.
+- [x] Implement sequential deployment, readiness checks, transaction recovery, and
+  rollback in the dependent host controller (PR #56). Real vLLM rollout, gateway
+  inference, rollback, and interrupted-host recovery remain pending L4 execution.
 
 **Limit:** the champion and model artifact digest are still caller-supplied. This API
 records and checks them against evaluation metadata; it does not prove running state or
