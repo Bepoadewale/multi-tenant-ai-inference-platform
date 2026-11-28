@@ -1,6 +1,6 @@
 # Ticket 84 — Verify the single-L4 network topology in the saved plan
 
-**Status:** Implementation is prepared on `codex/gpu-network-plan-review`, stacked on PR #83. The focused plan and wrapper suites pass 43 tests locally; CI and owner review remain pending. No AWS operation.
+**Status:** [PR #84](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/84) is open on PR #83. Implementation head `724c45a` passed all six required CI jobs in run `46147292091`; owner review remains pending. No AWS operation.
 
 ## Objective
 
@@ -37,6 +37,8 @@ egress; this ticket closes the separate topology-binding gap.
   subnet, route table, or gateway.
 - [x] The focused plan and shell-wrapper suites pass (**43 tests**); Ruff and
   `git diff --check` pass.
+- [x] All six required CI jobs pass on implementation head `724c45a` in run
+  `46147292091`.
 - [ ] A real AWS-provider plan confirms the configuration-expression shape when the
   authorized backend and cost gates permit it.
 - [ ] Publish PR, pass all required CI, and receive owner review. No merge or apply

@@ -17,6 +17,24 @@
   remaining non-billable work and do not merge without authorization.
 
 
+## 2026-11-28 — PR #84 implementation checks passed
+
+- **Phase:** Phase 2 static Terraform preparation; no AWS/GPU operation.
+- **Branch/PR:** `codex/gpu-network-plan-review`, PR #84, implementation head
+  `724c45a`, stacked on PR #83.
+- **CI evidence:** run `46147292091` passed all six required jobs: Python, manifests,
+  supply chain, Ansible, GPU observability, and local end-to-end. The end-to-end job
+  completed successfully after 6m14s.
+- **Local evidence:** 43 focused plan/wrapper tests passed; Ruff, docs-link validation
+  across 35 files, and `git diff --check` passed.
+- **Change:** the saved-plan validator now checks the project VPC/subnet values and
+  network resource bindings. See ticket84 for scope and limits.
+- **Limits/cost:** CI and fixtures do not prove a live AWS provider plan, network
+  routing, Session Manager access, or a GPU host. No AWS resource, GPU hour, model
+  download, local clean-room run, or project spend occurred.
+- **Next:** keep PR #84 open for owner review; continue remaining non-billable
+  readiness work. No merge or cloud apply is authorized by this entry.
+
 ## 2026-11-28 — Verify saved-plan network topology
 
 - **Phase:** Phase 2 static Terraform preparation; no AWS or GPU operation.
