@@ -30,6 +30,19 @@ def _safe_plan_json(ami: str, az: str, expiry: str) -> str:
         "data_class": "synthetic-only",
     }
     after_by_address = {
+        "aws_vpc.gpu": {
+            "cidr_block": "10.74.0.0/16",
+            "enable_dns_support": True,
+            "enable_dns_hostnames": True,
+        },
+        "aws_internet_gateway.gpu": {},
+        "aws_subnet.gpu": {
+            "cidr_block": "10.74.1.0/24",
+            "availability_zone": az,
+            "map_public_ip_on_launch": True,
+        },
+        "aws_route_table.gpu": {"route": [{"cidr_block": "0.0.0.0/0"}]},
+        "aws_route_table_association.gpu": {},
         "aws_security_group.gpu": {
             "ingress": [],
             "egress": [
@@ -68,6 +81,8 @@ def _safe_plan_json(ami: str, az: str, expiry: str) -> str:
             ],
             "tags": tags,
             "volume_tags": tags,
+            "subnet_id": None,
+            "vpc_security_group_ids": [],
             "user_data": "SENTINEL_PRIVATE_USER_DATA",
         },
         "aws_scheduler_schedule.expiry": {
@@ -105,6 +120,75 @@ def _safe_plan_json(ami: str, az: str, expiry: str) -> str:
             "configuration": {
                 "root_module": {
                     "resources": [
+                        {
+                            "address": "aws_internet_gateway.gpu",
+                            "mode": "managed",
+                            "expressions": {
+                                "vpc_id": {"references": ["aws_vpc.gpu.id", "aws_vpc.gpu"]}
+                            },
+                        },
+                        {
+                            "address": "aws_subnet.gpu",
+                            "mode": "managed",
+                            "expressions": {
+                                "vpc_id": {"references": ["aws_vpc.gpu.id", "aws_vpc.gpu"]}
+                            },
+                        },
+                        {
+                            "address": "aws_route_table.gpu",
+                            "mode": "managed",
+                            "expressions": {
+                                "vpc_id": {"references": ["aws_vpc.gpu.id", "aws_vpc.gpu"]},
+                                "route": [
+                                    {
+                                        "cidr_block": {"constant_value": "0.0.0.0/0"},
+                                        "gateway_id": {
+                                            "references": [
+                                                "aws_internet_gateway.gpu.id",
+                                                "aws_internet_gateway.gpu",
+                                            ]
+                                        },
+                                    }
+                                ],
+                            },
+                        },
+                        {
+                            "address": "aws_route_table_association.gpu",
+                            "mode": "managed",
+                            "expressions": {
+                                "subnet_id": {
+                                    "references": ["aws_subnet.gpu.id", "aws_subnet.gpu"]
+                                },
+                                "route_table_id": {
+                                    "references": [
+                                        "aws_route_table.gpu.id",
+                                        "aws_route_table.gpu",
+                                    ]
+                                },
+                            },
+                        },
+                        {
+                            "address": "aws_security_group.gpu",
+                            "mode": "managed",
+                            "expressions": {
+                                "vpc_id": {"references": ["aws_vpc.gpu.id", "aws_vpc.gpu"]}
+                            },
+                        },
+                        {
+                            "address": "aws_instance.gpu",
+                            "mode": "managed",
+                            "expressions": {
+                                "subnet_id": {
+                                    "references": ["aws_subnet.gpu.id", "aws_subnet.gpu"]
+                                },
+                                "vpc_security_group_ids": {
+                                    "references": [
+                                        "aws_security_group.gpu.id",
+                                        "aws_security_group.gpu",
+                                    ]
+                                },
+                            },
+                        },
                         {
                             "address": "aws_scheduler_schedule.expiry",
                             "mode": "managed",

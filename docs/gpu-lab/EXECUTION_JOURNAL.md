@@ -17,6 +17,37 @@
   remaining non-billable work and do not merge without authorization.
 
 
+## 2026-11-28 — Verify saved-plan network topology
+
+- **Phase:** Phase 2 static Terraform preparation; no AWS or GPU operation.
+- **Starting state:** PR #83 head `4c75115` passed 39 focused plan/wrapper tests and
+  all six required CI jobs in run `46146275508`. Its earlier failure on
+  `d3c2264` was caused by an outdated shell-wrapper plan fixture and is recorded
+  below.
+- **Branch/worktree:** `codex/gpu-network-plan-review`, based on the final PR #83
+  head in `/private/tmp/multi-tenant-ai-inference-platform-pr84`.
+- **Objective:** the saved-plan review checked SG ingress/egress rules, but did not
+  check whether the instance, subnet, VPC, route, gateway, and association were wired
+  into one project topology.
+- **Research:** reviewed HashiCorp's official Terraform plan JSON documentation.
+  Known CIDR/DNS values can be checked under resource changes; generated IDs are
+  unknown until apply, so configuration references are checked to bind those values.
+- **Changes:** require the exact project VPC and subnet ranges and DNS/public-IP
+  settings; require one default route; verify gateway, subnet, route table, route
+  association, security group, and instance resource references. Added negative
+  fixture cases for wrong VPC/subnet/route-table bindings and a changed subnet range.
+  Added ticket84 and wired it into the documentation link checker.
+- **Validation:** combined saved-plan and fake-wrapper suites passed **43 tests**;
+  Ruff passed. Terraform provider tests were not repeated locally; CI covers the full
+  test suite.
+- **Evidence limits:** this is fixture/static evidence. A real AWS-provider plan is
+  required to verify the exact JSON expression shape; the tests do not prove
+  connectivity, public routing, SSM, or host behavior.
+- **Cost/resources:** no AWS API call, Terraform plan/apply, GPU instance, model
+  download, Docker build, clean-room run, or spend.
+- **Next:** finish the ticket, goal, backlog, evidence, and docs-link updates; publish
+  PR #84 on top of #83; then let required CI validate the new head.
+
 ## 2026-11-28 — Bind the saved GPU expiry target to project resources
 
 - **Phase:** Phase 2 static-only Terraform safety preparation; no GPU or AWS mutation.
