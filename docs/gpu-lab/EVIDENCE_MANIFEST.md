@@ -187,6 +187,8 @@ evidence.
 
 | PR #71 release-backlog rebase and current snapshot | 2026-11-28 | Release readiness / PR #71 | Local rebase, GitHub CLI inventory, documentation review | Backlog now distinguishes controller source from live host acceptance and records 41 open PRs, three drafts, and the corrected cost estimate at capture time. | Snapshot can become stale; new PR #71 head is not published or CI-validated. No L4 release, GPU rollback, AWS operation, or manual clean-room run occurred. |
 
+| PR #71 rebase on current architecture branch | 2026-11-28 | Release-readiness backlog / PR #71 | Local rebase and documentation validation | Release source remains distinct from real host acceptance; PR #71 is locally rebased on PR #70 head `5f70852`. | Current head `7e2824d` is unpublished and has no current CI; prior run `46116269039` validates an older head only. |
+
 ## Entry format for future evidence
 
 For every new item, record:

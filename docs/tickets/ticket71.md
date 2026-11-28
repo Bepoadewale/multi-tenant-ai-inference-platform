@@ -8,8 +8,7 @@ unchecked even though the dependent controller PR implements it.
 
 ## Current state
 
-- PR #71 is being rebased onto the latest PR #70 head. Prior PR #71 checks belong to
-  older commits and will not validate the new base.
+- PR #70 previous head `e5af488` passed all six jobs in run `46116077981`; current head `5f70852` is published and needs fresh CI. PR #71 has been locally rebased onto #70 head `5f70852`; current head `7e2824d` is not yet published and needs fresh checks. Prior PR #71 head `ee8d1ef` passed six jobs in `46116269039`, but that run does not validate this rebase.
 - The release controller from PR #56 is source-tested and CI-validated on its recorded
   commit, but it has not been run against the GPU host, a live vLLM container, or real
   model weights. Live champion verification, inference, rollback, and interruption
@@ -22,9 +21,10 @@ unchecked even though the dependent controller PR implements it.
 - Applied On-Demand G/VT quota remains zero in the latest recorded AWS check. The
   owner reports manually appealing the denied request; AWS has not confirmed the
   result. No project GPU or AWS resource has been created.
-- Complete feasible non-GPU work before quota approval. The one integrated local
-  clean-room run is still to be done after the PR stack settles; no additional manual
-  clean-room run should be started.
+- Complete feasible non-GPU work before quota approval. The one designated integrated
+  local CPU clean-room run is recorded in `docs/governance/VALIDATION.md`: source
+  `49076a5`, run `46114955314`. The final cloud/GPU clean-room remains Phase 12 work;
+  no additional manual local clean-room run should be started.
 
 ## Changes
 
@@ -41,6 +41,7 @@ unchecked even though the dependent controller PR implements it.
 - [x] Runtime acceptance remains explicitly unverified.
 - [x] Markdown link and whitespace checks pass.
 - [x] Prior PR #71 checks passed on their historical heads.
+- [x] Rebase PR #71 on current PR #70 head `5f70852`.
 - [ ] Publish the rebased PR #71 and pass current CI.
 
 ## Security and cost
@@ -50,8 +51,7 @@ AWS output are added. No AWS calls, GPU work, or spending.
 
 ## Validation
 
-`git diff --check` and relative links in the five changed Markdown files passed. The prior PR #71 head passed all six required jobs in run `46102374147`, including local E2E. This is historical evidence and does not validate the rebased head. This verifies repository/static behavior,
-not model release on a real host.
+`git diff --check` and relative links in the five changed Markdown files passed. The prior PR #71 head `ee8d1ef` passed all six required jobs, including local E2E, in run `46116269039`. This is historical after the rebase and does not validate head `7e2824d`. The designated local CPU clean-room record remains run `46114955314`; neither run proves model release on a real host.
 
 ## Limitations
 
