@@ -55,6 +55,29 @@
   AWS budget-recipient and remote-state gates. Do not apply until exact-plan, cost,
   expiry, cleanup, and separate authorization checks are satisfied.
 
+## 2026-11-28 — Reconcile current quota state across learning documents
+
+- **Date and time:** 2026-11-28 17:58 UTC.
+- **Phase:** Phase 2 documentation consistency; non-billable.
+- **Finding:** several current-facing guides and portfolio drafts still described the
+  quota request as `CASE_OPENED`, despite the later read-only status record showing
+  `CASE_CLOSED` and 4.0 applied vCPUs. Older ticket, evidence, and journal entries
+  correctly describe the earlier state and remain historical.
+- **Change:** updated current-facing report, benchmark, interview, risk, research,
+  incident, workstation-readiness, and repository-audit text; added the read-only
+  quota reconciliation to the evidence manifest. No historical incident or earlier
+  failure was rewritten.
+- **Validation:** `make gpu-docs-validate` checked 35 Markdown files and passed;
+  `git diff --check` passed. The consistency search leaves `CASE_OPENED` only in
+  records explicitly labelled historical.
+- **CI:** published head `4a4f542` passed all six jobs in run `46172702249`. These
+  current-doc edits are local and need publication and current-head CI.
+- **AWS / GPU / cost:** no AWS query or mutation, GPU, model download, or spend during
+  this documentation pass.
+- **Next:** publish this documentation consistency package on PR #84 and verify its
+  required checks; then keep the missing Budget recipient and remote-state setup as
+  explicit pre-launch gates.
+
 ## 2026-11-28 — Refresh static package candidates and quota/backend status
 
 - **Phase:** Phase 2 static infrastructure readiness; no AWS or GPU mutation.

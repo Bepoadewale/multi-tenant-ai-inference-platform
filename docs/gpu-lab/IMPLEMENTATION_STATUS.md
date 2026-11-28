@@ -1,12 +1,13 @@
 # GPU Lab Implementation Status
 
-## Latest PR and validation status — 2026-11-28 17:32 UTC
+## Latest PR and validation status — 2026-11-28 17:58 UTC
 
 PRs #77–#83 passed all six required jobs on refreshed heads in runs `46169578415`,
 `46170127067`, `46170178018`, `46170356996`, `46170595453`, `46170895199`, and
-`46171131696`. Restacked PR #84 head `798b2e8` passed all six jobs in run
-`46171879043`. Its local validation passed 67 focused tests, 12 mocked Terraform
-cases, Ruff, and the 35-file docs checker. No AWS resources, GPU execution, or spend.
+`46171131696`. PR #84 head `4a4f542` passed all six jobs in run `46172702249` after
+the current-quota documentation update. Its local validation passed 67 focused tests,
+12 mocked Terraform cases, Ruff, and the 35-file docs checker. No AWS resources, GPU
+execution, or spend.
 
 ## Historical read-only AWS gate snapshot — 2026-11-28 15:06 UTC
 

@@ -3,7 +3,7 @@
 > **Status: PRE-GPU DRAFT — NOT THE FINAL PROJECT REPORT.** The repository has
 > substantial local implementation, static AWS preparation, and CI evidence. The
 > owner reports quota approval and the latest CLI read confirms 4.0 applied G/VT
-> vCPUs, while request history still says `CASE_OPENED`; no L4 host, CUDA computation, vLLM inference, GPU
+> vCPUs, and the request-history API now reports `CASE_CLOSED`; no L4 host, CUDA computation, vLLM inference, GPU
 > benchmark, live GPU incident, AWS bill, or cloud teardown has been recorded. The
 > empirical sections below must be completed from real evidence after an authorized
 > GPU batch; do not remove this banner before the final acceptance review.
@@ -37,7 +37,7 @@ inference path.
 
 **Final outcome:** pending. The owner reports that AWS approved the On-Demand G/VT
 quota appeal, and the latest read-only CLI query confirms an applied 4.0-vCPU quota.
-The request-history API still says `CASE_OPENED`. The host has not been provisioned,
+The request-history API reports `CASE_CLOSED` with desired quota 4.0 vCPUs. The host has not been provisioned,
 and no real L4 inference result exists.
 
 Complete this summary only after recording the final GPU batch, remaining acceptance

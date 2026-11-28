@@ -13,7 +13,8 @@ preparation for an isolated single-L4 environment. Terraform, Ansible, the GPU
 Compose profile, vLLM model serving, GPU benchmarks, live GPU metrics, and rollback
 are prepared or statically validated. They have not run on an AWS L4. The owner
 reports quota approval and the latest CLI query confirms 4.0 applied On-Demand G/VT
-vCPUs, while the older request record remains `CASE_OPENED`; no GPU launch or execution evidence exists. Do not claim
+vCPUs with request history `CASE_CLOSED`; no GPU launch or execution evidence exists.
+Do not claim
 a GPU result, AWS deployment, production incident, or measured cloud cost.
 
 When answering a question about the L4, say what the prepared design intends to do,

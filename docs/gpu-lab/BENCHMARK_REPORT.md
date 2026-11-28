@@ -26,8 +26,8 @@ The benchmark code and workloads are in:
 
 ## Evidence boundary
 
-The latest read-only AWS check reports 4.0 applied G/VT vCPUs; no GPU instance has run
-and the quota request record still says `CASE_OPENED`. Static dry-runs
+The latest read-only AWS check reports 4.0 applied G/VT vCPUs and the request history
+is `CASE_CLOSED`; no GPU instance has run. Static dry-runs
 validate command generation and bounds. Mock-transport tests
 validate privacy and client behavior. CI validates repository behavior, including
 the local CPU path. None of those results are L4 measurements.

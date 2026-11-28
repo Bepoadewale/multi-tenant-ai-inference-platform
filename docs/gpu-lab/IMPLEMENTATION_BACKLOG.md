@@ -5,13 +5,13 @@ claim that any cloud or GPU phase has run. Every package uses its own focused br
 and pull request. Review and required CI checks must pass before merge; implementation
 pull requests must include the repository's clean-room evidence.
 
-## Latest PR and engineering status — 2026-11-28 17:32 UTC
+## Latest PR and engineering status — 2026-11-28 17:58 UTC
 
 PRs #77–#83 passed all six required checks on their refreshed heads, including the
-local CPU end-to-end job. Restacked PR #84 head `798b2e8` passed all six required jobs,
-including local-e2e, in run `46171879043`. Its local validation passed 67 focused
-tests, 12 mocked Terraform cases, Ruff, the 35-file docs checker, and
-`git diff --check`. The single designated local clean-room run remains the one recorded
+local CPU end-to-end job. PR #84 head `4a4f542` passed all six jobs, including
+local-e2e, in run `46172702249` after the current-quota documentation update. Its local
+validation passed 67 focused tests, 12 mocked Terraform cases, Ruff, the 35-file docs
+checker, and `git diff --check`. The single designated local clean-room run remains the one recorded
 in `docs/governance/VALIDATION.md`; no repeat is planned. PR #43 and #53 are now
 reported mergeable in the current open-PR inventory, but still require owner review.
 The project Budget/verified recipient, remote state and lock, final plan/cost,

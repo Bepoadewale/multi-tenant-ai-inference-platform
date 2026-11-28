@@ -3,17 +3,17 @@
 Research was started on 2026-11-26 and updated on 2026-11-28. This remains a Phase 1 design record, not a final compatibility matrix. Recheck sources immediately before implementation because prices, quota, software releases, and model artifacts change.
 
 **Latest quota observation (2026-11-28):** the owner reports AWS approved the request,
-and the applied On-Demand G/VT quota reads `4.0` vCPUs. The request-history API still
-reports `CASE_OPENED`; preserve this as stale/inconsistent history. Earlier zero-quota
-results below are historical. EC2 lists `g6.xlarge` in five us-east-1 AZs; this does
-not reserve launch capacity. The state bucket, lock table, and budget are absent; see
-the cost and readiness records before planning any apply.
+and the applied On-Demand G/VT quota reads `4.0` vCPUs. The read-only request-history
+query now reports `CASE_CLOSED` with desired value `4.0`; earlier `CASE_OPENED` and
+zero-quota records below are historical. EC2 lists `g6.xlarge` in five us-east-1 AZs;
+this does not reserve launch capacity. The state bucket, lock table, and project Budget
+are absent; see the cost and readiness records before planning any apply.
 
 ## AWS hardware, region and quota
 
 - AWS's [G6 product page](https://aws.amazon.com/ec2/instance-types/g6/) and [accelerated instance specification table](https://docs.aws.amazon.com/ec2/latest/instancetypes/ac.html) describe G6 as NVIDIA L4 based. The single-GPU `g6.xlarge` is listed with 4 vCPUs, 16 GiB host memory, one L4, and 22 GiB of listed GPU memory; `g6.2xlarge` has 8 vCPUs, 32 GiB, and one L4 with the same listed GPU memory. The GPU is commonly described as a 24 GB L4; AWS's table expresses the per-instance memory as 22 GiB. Capacity and runtime compatibility still need live validation.
 - Read-only `describe-instance-type-offerings` in `us-east-1` listed `g6.xlarge` in `us-east-1a`, `1b`, `1c`, `1d`, and `1f`; it listed `g6.2xlarge` in `1a`, `1b`, `1c`, `1d`, and `1f`. Offering means the type is supported in that AZ, not that capacity can be launched.
-- A historical read-only Service Quotas lookup returned `Running On-Demand G and VT instances = 0.0 vCPUs`, quota code `L-DB2E81BA`. A later 2026-11-28 check returns applied quota `4.0`; the owner reports approval, though the request history still says `CASE_OPENED`. AWS [EC2 instance quota documentation](https://docs.aws.amazon.com/ec2/latest/instancetypes/ec2-instance-quotas.html) describes this quota; the applied value is sufficient on paper for one `g6.xlarge`, but it does not reserve capacity or authorize provisioning. Do not submit a duplicate request.
+- A historical read-only Service Quotas lookup returned `Running On-Demand G and VT instances = 0.0 vCPUs`, quota code `L-DB2E81BA`. The latest 2026-11-28 read-only check returns applied quota `4.0` and request history `CASE_CLOSED` with desired value 4.0. AWS [EC2 instance quota documentation](https://docs.aws.amazon.com/ec2/latest/instancetypes/ec2-instance-quotas.html) describes this quota; the applied value is sufficient on paper for one `g6.xlarge`, but it does not reserve capacity or authorize provisioning. Do not submit a duplicate request.
 - Read-only AWS Price List API queries on 2026-11-28 returned the `g6.xlarge`
   `BoxUsage` On-Demand rate at **$0.8048 per instance-hour** for Linux, no
   preinstalled software, shared tenancy, and `US East (N. Virginia)`, effective
@@ -69,7 +69,7 @@ Continue with current primary documentation before each phase: [AWS G6](https://
 ## Decisions still open
 
 - Whether the `$25` cap can cover the requested GPU-dependent validation with enough runtime to install the driver, download the model, integrate/observe/benchmark it, run safe incident drills, and export evidence. The instance-only estimate leaves room but time-consuming manual setup could use it quickly.
-- Why the request-history API remains `CASE_OPENED` after the owner-reported approval and applied quota of 4.0 vCPUs. The numeric quota is confirmed by CLI; no duplicate request is needed. Capacity, Budget, remote-state, exact-plan, cost, and apply gates remain.
+- The prior disagreement between request-history and applied-quota records has been reconciled by a later read-only query showing `CASE_CLOSED` and 4.0 applied vCPUs. Capacity, Budget, remote-state, exact-plan, cost, and apply gates remain.
 - Exact Ubuntu LTS point release/AMI, kernel, driver branch, CUDA compatibility, Docker Toolkit release, PyTorch build, vLLM release, and container image digest.
 - Exact encrypted Terraform state/locking arrangement that follows repository governance without creating long-lived costs above the project cap.
 - Which monitoring components can coexist on 16 GiB host memory without invalidating the inference experiment; measure before selecting `g6.2xlarge`.

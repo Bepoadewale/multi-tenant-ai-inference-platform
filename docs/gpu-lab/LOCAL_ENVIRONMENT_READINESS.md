@@ -47,9 +47,9 @@ installed there only after an authorized GPU launch.
 
 - No AWS mutation was performed during this readiness check.
 - The 2026-11-27 workstation inventory below is historical. A fresh read-only AWS CLI
-  check on 2026-11-28 confirmed the expected account and `4.0` applied On-Demand G/VT
-  vCPUs; the owner reports AWS approved the request. The request-history API still
-  says `CASE_OPENED`. The numeric quota is sufficient on paper for one `g6.xlarge`,
+  check on 2026-11-28 confirmed the expected account, `4.0` applied On-Demand G/VT
+  vCPUs, and `CASE_CLOSED` request history with desired value `4.0`; the owner reports
+  AWS approved the request. This quota is sufficient on paper for one `g6.xlarge`,
   but does not reserve capacity. No L4 launch has occurred; the Budget recipient,
   remote-state, exact-plan/cost, expiry, and apply-authorization gates remain.
 - The project ceiling remains USD $25. Quota approval alone does not authorize an
@@ -75,10 +75,10 @@ the launched Ubuntu AMI and kernel. No packages were installed.
 2. Before any AWS mutation, verify the expected account using the key-based profile as
    instructed by the project credential map, then recheck region, applied quota, G6
    availability, exact resources, current prices, and the reviewed saved plan. Do not
-   print credentials. The 2026-11-28 check found applied quota `4.0` vCPUs, while the
-   request record remains `CASE_OPENED`. G6 offerings exist in several us-east-1 AZs,
-   but do not guarantee capacity. The project state bucket, lock table, and budget are
-   absent.
+   print credentials. The 2026-11-28 check found applied quota `4.0` vCPUs and request
+   history `CASE_CLOSED` with desired value `4.0`. G6 offerings exist in several
+   us-east-1 AZs, but do not guarantee capacity. The project state bucket, lock table,
+   and Budget are absent.
 3. The hash-locked Ansible requirements and host role are prepared for the future EC2
    host. Do not run its local-connection playbook on this workstation.
 4. After authorized provisioning and the manual learning pass, run Ansible on the Ubuntu
