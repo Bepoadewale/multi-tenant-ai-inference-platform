@@ -70,16 +70,24 @@ AWS_PROFILE=ai-platform-pilot-key aws service-quotas get-service-quota \
 ```
 
 The value must be at least 4 vCPUs for one `g6.xlarge`. A request or appeal being
-open is not an approved applied quota. Do not submit another request if the existing
-appeal is pending. The current recorded value is `0.0` vCPUs, so cloud provisioning
-is blocked.
+open is not the same as a confirmed approval, and quota alone does not authorize a
+paid launch. The latest read-only check recorded on 2026-11-28 returned `4.0` applied
+vCPUs, while the request-history entry still says `CASE_OPENED`; the owner reported
+that the original request was denied and an appeal was submitted. No approval notice
+was confirmed. Recheck the live value and case outcome before any plan or apply. Do
+not submit another quota request while the existing appeal is pending.
+
+Even with sufficient numeric quota, this project remains blocked from cloud
+provisioning until the exact project state backend is available, a private valid
+Budget recipient is confirmed, a saved plan and complete cost are reviewed, expiry
+and teardown are ready, and the owner authorizes the exact apply.
 
 **Why:** this prevents work from reaching the wrong AWS account and checks the
 specific capacity quota before planning a paid machine.
 
-**Expected:** account check succeeds, region is `us-east-1`, quota is at least 4, and
-AWS credentials remain in the local AWS profile. Never paste credentials into a
-shell command, PR, screenshot, or repository file.
+**Expected:** account check succeeds, region is `us-east-1`, the live applied quota is
+at least 4, and AWS credentials remain in the local AWS profile. Never paste
+credentials into a shell command, PR, screenshot, or repository file.
 
 **If the SSO profile expired:** use `aws sso login --profile ai-platform-pilot`, then
 repeat the identity check. The key profile is used for the required mutation preflight:
