@@ -9,11 +9,12 @@ engineering is predominantly real L4 execution and validation.
 
 ## Current state
 
-- PR #66 is based on open PR #65 head `d72bc28`; PR #65 remains open, non-draft, and
-  its six required checks passed in run `46091506580`.
-- PR #50 remains open and non-draft; its five required checks passed in run
+- PR #65 is open as a draft; rebased head `49076a5` has fresh required checks in
+  progress (run `46114955314`). PR #66 has been locally rebased onto #65 head `49076a5`;
+  it must be pushed and checked before review.
+- PR #50 remains open; its historical checks passed on the recorded head in run
   `46016503614`.
-- A read-only AWS CLI check on 2026-11-28 found applied On-Demand G/VT quota `0.0`.
+- The latest recorded read-only AWS CLI check found applied On-Demand G/VT quota `0.0`.
   The existing four-vCPU request still reports `CASE_OPENED`. The owner reported an
   AWS denial email and manually submitted an appeal through the existing case; AWS
   has not confirmed its outcome. No duplicate request or AWS mutation was made.
@@ -40,11 +41,12 @@ engineering is predominantly real L4 execution and validation.
 - [x] Update the current state in the cost report and PR #50 ticket from live CLI
   verification.
 - [x] Remove the AWS account number and request reference from public documentation.
-- [x] Record the pre-quota readiness target in the persistent goal.
-- [x] Record commands and evidence in the execution journal and manifest.
-- [x] Update the implementation status and documentation index.
-- [x] Pass all six required CI jobs on implementation commit `637eb7d` in run
-  `46092847166`, including one workflow local E2E cycle.
+- [x] Record the pre-quota readiness target in the persistent goal and status.
+- [x] Correct model metadata and quota facts while keeping historical events intact.
+- [x] Record commands and evidence in the journal and manifest.
+- [x] Update the documentation index, cost report, audit, research notes, and ticket #50.
+- [x] Rebase PR #66 onto updated PR #65 head `49076a5`.
+- [ ] Push rebased PR #66 and pass its current required CI.
 - [ ] Obtain human review; do not merge without owner authorization.
 
 ## Validation
@@ -80,6 +82,6 @@ remain in force.
 ## Evidence and outstanding work
 
 The execution journal records the checks made on 2026-11-28; the evidence manifest
-records their limits. PR CI must validate this final document head. The GPU-dependent
+records their limits. The current rebased PR head must pass CI before review. The GPU-dependent
 acceptance criteria remain incomplete until performed on a real L4. The quota appeal
 outcome remains an external dependency.
