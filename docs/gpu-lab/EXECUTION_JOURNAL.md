@@ -47,11 +47,13 @@
 - **Previous-head CI:** while reviewing the diff, `gh pr checks 84` showed all six
   required jobs passing on the already-published head `3aeef02` in run
   `46151077506`. This does not validate the uncommitted edits recorded here.
+- **Published follow-up CI:** commit `9520b6e` was pushed to PR #84. Its six required
+  jobs passed in run `46152355082`; local end-to-end completed in 5m29s. Owner review
+  is still pending.
 - **Cost/resources:** no package downloads or installations, Docker build/container,
   AWS API call, Terraform plan/apply, model download, GPU operation, or spend.
-- **Next:** finish the final diff review, publish the reviewable PR #84 follow-up and
-  let its CI finish. Do not merge without owner review; do not apply AWS
-  infrastructure.
+- **Next:** keep PR #84 open for owner review; proceed with independent non-billable
+  readiness tasks. Do not merge without owner review; do not apply AWS infrastructure.
 
 ## 2026-11-28 — PR #84 implementation checks passed
 
