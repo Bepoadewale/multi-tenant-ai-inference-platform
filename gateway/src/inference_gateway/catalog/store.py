@@ -13,6 +13,50 @@ class Catalog:
     """Static local catalog; production uses a versioned control-plane store."""
 
     def __init__(self) -> None:
+        vllm_url = os.getenv("INFERENCE_VLLM_URL")
+        if vllm_url:
+            model_id = os.getenv("INFERENCE_GPU_MODEL_ID", "gpu-default")
+            chat_default = ModelDefinition(
+                name="chat-default",
+                model_id=model_id,
+                runtime="vllm",
+                gpu_count=1,
+                gpu_type=os.getenv("INFERENCE_GPU_POOL", "single-l4-logical"),
+                capacity_policy=CapacityPolicy.REQUIRE_SIMULATED_GPU,
+                max_replicas=1,
+                targets=[
+                    ModelTarget(
+                        name="vllm-single-l4",
+                        version="v1",
+                        weight=100,
+                        backend_url=vllm_url,
+                    )
+                ],
+            )
+        else:
+            chat_default = ModelDefinition(
+                name="chat-default",
+                model_id="local/tiny-intent-classifier",
+                runtime="onnx",
+                gpu_count=1,
+                gpu_type="simulated-l40s",
+                capacity_policy=CapacityPolicy.REQUIRE_SIMULATED_GPU,
+                max_replicas=4,
+                targets=[
+                    ModelTarget(
+                        name="onnx-stable-v1",
+                        version="v1",
+                        weight=90,
+                        backend_url=os.getenv("INFERENCE_TARGET_V1_URL"),
+                    ),
+                    ModelTarget(
+                        name="onnx-candidate-v2",
+                        version="v2",
+                        weight=10,
+                        backend_url=os.getenv("INFERENCE_TARGET_V2_URL"),
+                    ),
+                ],
+            )
         self.tenants = {
             "team-search": Tenant(
                 id="team-search",
@@ -72,29 +116,7 @@ class Catalog:
             ),
         }
         self.models = {
-            "chat-default": ModelDefinition(
-                name="chat-default",
-                model_id="local/tiny-intent-classifier",
-                runtime="onnx",
-                gpu_count=1,
-                gpu_type="simulated-l40s",
-                capacity_policy=CapacityPolicy.REQUIRE_SIMULATED_GPU,
-                max_replicas=4,
-                targets=[
-                    ModelTarget(
-                        name="onnx-stable-v1",
-                        version="v1",
-                        weight=90,
-                        backend_url=os.getenv("INFERENCE_TARGET_V1_URL"),
-                    ),
-                    ModelTarget(
-                        name="onnx-candidate-v2",
-                        version="v2",
-                        weight=10,
-                        backend_url=os.getenv("INFERENCE_TARGET_V2_URL"),
-                    ),
-                ],
-            ),
+            "chat-default": chat_default,
             "embeddings": ModelDefinition(
                 name="embeddings",
                 model_id="sentence-transformers/all-MiniLM-L6-v2",

@@ -36,7 +36,7 @@ curl -fsS --connect-timeout 2 --max-time 5 "http://localhost:15010/api/2.0/mlflo
 
 for port in 8081 8082; do
   wait_for "gateway ${port} health" curl -fsS --connect-timeout 2 --max-time 5 "http://localhost:${port}/healthz"
-  curl -fsS --connect-timeout 2 --max-time 5 "http://localhost:${port}/healthz" | jq -e '.status == "ok" and .mode == "local-cpu-onnx"' >/dev/null
+  curl -fsS --connect-timeout 2 --max-time 5 "http://localhost:${port}/healthz" | jq -e '.status == "ok" and .runtime == "onnx" and .backend_ready == true and .admission_ready == true' >/dev/null
   wait_for "gateway ${port} signed identity" curl -fsS --connect-timeout 2 --max-time 5 "http://localhost:${port}/v1/models" -H "Authorization: Bearer ${search_token}"
 done
 curl -fsS --connect-timeout 2 --max-time 5 http://localhost:3002/api/health | jq -e '.database == "ok"' >/dev/null

@@ -4,6 +4,19 @@ from inference_gateway.api.main import app
 client = TestClient(app)
 
 
+def test_healthz_reports_runtime_and_readiness_dependencies():
+    response = client.get("/healthz")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "status": "ok",
+        "runtime": "onnx",
+        "model": "local/tiny-intent-classifier",
+        "backend_ready": True,
+        "admission_ready": True,
+    }
+
+
 def test_models_require_authenticated_identity():
     assert client.get("/v1/models").status_code == 401
     response = client.get("/v1/models", headers={"Authorization": "Bearer local-search-token"})

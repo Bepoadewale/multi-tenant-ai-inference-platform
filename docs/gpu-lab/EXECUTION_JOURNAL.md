@@ -960,3 +960,99 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Cost:** no infrastructure, GPU hour, or spend.
 - **Next:** validate and publish PR #44; continue preparing scripts and datasets
   locally while quota and the Support Center response remain pending.
+
+## 2026-11-27 — PR #44 published
+
+- **Branch / PR / commit:** `codex/gpu-batch-readiness`, PR #44 against PR #43,
+  initial head `868e11d`.
+- **Checks:** CI is pending; no AWS changes or GPU hours.
+- **Next:** finish recording this publication and wait for the existing PR #43 and
+  #44 CI runs, then continue non-billable code readiness work.
+
+## 2026-11-27 — PR #43 and #44 checks passed
+
+- PR #43 head `4e62876`: run `45979618437` passed Python, manifests, supply-chain, and
+  local end-to-end checks.
+- PR #44 head `02247c8`: run `45980633787` passed the same four required checks.
+- Both PRs remain open for human review. No AWS or GPU execution occurred.
+- Continue static deployment integration in PR #45.
+
+## 2026-11-27 — Build the opt-in single-L4 Compose runtime path
+
+- **Phase:** static preparation for Phases 5, 6, and 11; no GPU execution.
+- **Branch:** `codex/single-l4-compose-deployment`, based on PR #44 head `02247c8`.
+- **Objective:** connect the existing gateway vLLM adapter to a standalone EC2 Compose
+  profile while keeping the CPU ONNX path as the default.
+- **Changes:** added an opt-in catalog target/model ID, single-GPU Compose profile,
+  candidate image/model env file, and readiness checks for the selected backend and
+  shared capacity state. The Compose file exposes only loopback gateway ports; vLLM
+  and Redis are private to the Compose network. Added `make gpu-compose-config` to
+  the standard verification target.
+- **Validation:** `make VENV=<existing-project-virtualenv-path> verify` passed Ruff,
+  76 tests (one existing Starlette deprecation warning), pip-audit with no known
+  vulnerabilities, and both base/GPU Compose config checks. Nine focused tests also
+  passed for catalog defaults/profile, unhealthy vLLM readiness, and the API health
+  endpoint. `git diff --check` passed.
+- **Cloud/cost:** no image pull, GPU allocation, AWS write, instance hour, or spend.
+- **Limitations:** simulated Redis capacity remains a logical accounting mechanism.
+  This profile has no DCGM exporter yet and has not run against actual GPU hardware.
+- **Next:** finish full verification, publish PR #45, and continue GPU observability
+  and benchmark preparation in separate packages.
+
+## 2026-11-27 — Add safe capacity-demo CI diagnostics
+
+- **Phase:** Phase 2 static deployment prep; no cloud or GPU execution.
+- **Branch / PR / commit:** PR #45 branch `codex/single-l4-compose-deployment`,
+  commit `2688d48`, pushed to PR #45.
+- **Starting state:** PR #45's fixed smoke check passes. The cumulative local CPU
+  `demo-capacity` demo failed in runs `45983777135` and `140460013629`; the PR #46
+  workflow also failed in the same script. The scripts used bare `test` / `jq` checks,
+  so CI did not identify which request or expected status failed.
+- **Change:** the capacity demo now tracks its current stage and, on error, prints each
+  captured HTTP status plus a restricted JSON summary of error, capacity decision, and
+  usage fields. It does not print bearer tokens, prompts, generated text, or full
+  response bodies.
+- **Validation:** `bash -n scripts/demo-capacity.sh` passed. The script itself was
+  not run locally because it calls `FLUSHDB` on the project Redis service. CI must
+  establish the actual failure cause and verify that diagnostics are sufficient.
+- **Cloud and cost:** none. This only changes local CPU demo diagnostics.
+- **Next:** push to PR #45, run its existing CI once, inspect the new failure detail,
+  and fix the underlying issue if confirmed. CI has not yet been checked for this
+  head at the time of this entry; the observability branch must rebase onto this head.
+
+
+## 2026-11-27 — Fix stale capacity snapshot assertion
+
+- **Phase:** Phase 2 static deployment preparation; local E2E is CPU-only.
+- **Branch / PR:** `codex/single-l4-compose-deployment`, PR #45.
+- **Starting state:** CI run `45988603667` on head `65e5cba` passed smoke, then failed
+  at the capacity demo's administrative snapshot check. The diagnostic reported that
+  the preceding search quota request returned 429 as expected, search and payments
+  requests returned 200, and the analytics CPU fallback returned 200.
+- **Root cause:** the capacity API returns `mode: SIMULATED_HARDWARE_QUOTA_ACCOUNTING`
+  and the pools list; the demo checked an obsolete `hardware: SIMULATED` property.
+  This was a stale assertion, not a GPU failure.
+- **Change:** updated the demo to compare the returned `mode` and pool slot count. The
+  snapshot body/status are now stored in the temporary diagnostic directory, so a
+  future failure can report the relevant fields.
+- **Validation:** `bash -n scripts/demo-capacity.sh` and `git diff --check` passed. The
+  demo was not run locally because it executes Redis `FLUSHDB`; a fresh GitHub Actions
+  run is needed to verify the assertion and reveal any later queue-path failure.
+- **Cloud and cost:** no AWS operation, GPU, model, or spend.
+- **Next:** push this correction and watch its one PR #45 run. After it passes, rebase
+  PR #46 and the benchmark preparation branch onto the updated PR #45 head.
+
+## 2026-11-27 — Confirm PR #45 capacity fix in CI
+
+- **Phase:** Phase 2 static deployment preparation; CI exercised the existing local
+  CPU-only stack, not a GPU.
+- **Branch / PR / commit:** `codex/single-l4-compose-deployment`, PR #45, `31348c3`.
+- **Starting state:** the stale capacity mode assertion was fixed and pushed. CI run
+  `45990929878` was watched once using `gh pr checks 45 --watch --interval 120`.
+- **Result:** all four required checks passed: local E2E (5m11s), manifests, Python,
+  and supply-chain. The capacity demo including its queue path passed in local E2E.
+- **Evidence:** run `45990929878`; sanitized cause and result are recorded in
+  `docs/tickets/ticket45.md`.
+- **Cloud and cost:** no AWS resources, GPU runtime, model download, or spend.
+- **Next:** rebase the observability branch onto `31348c3`, validate it and its CI,
+  then rebase the benchmark branch onto the updated observability head.

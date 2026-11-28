@@ -1,0 +1,76 @@
+# Ticket 45 — Add the isolated single-L4 Compose deployment profile
+
+## Objective
+
+Make the existing gateway and vLLM adapter usable from a standalone single-GPU EC2
+Compose stack without changing the local CPU ONNX default or the future EKS contract.
+
+## Current state
+
+The repository had a working local Compose stack for CPU ONNX, a vLLM HTTP adapter,
+and a Kubernetes values file, but no standalone EC2 Compose deployment. The gateway
+catalog always routed `chat-default` to ONNX model IDs, so setting a vLLM URL alone
+could not select the matching served model name. Its `/healthz` response always said
+local CPU ONNX and did not check the upstream model server.
+
+## Changes
+
+- Added an opt-in `INFERENCE_VLLM_URL` catalog path that creates exactly one
+  `chat-default` target, uses the configured vLLM model alias, and leaves the
+  environment-unset ONNX model and weighted targets intact.
+- Added a standalone Compose file for one vLLM service with a reservation for one GPU,
+  two gateway replicas, and shared Redis. vLLM and Redis have no host-published ports;
+  the gateways bind to loopback only.
+- Added a sample environment file with the previously researched immutable image
+  digest and Qwen model revision, both marked provisional pending date-of-run checks.
+- Added dynamic readiness checks for the selected model backend and shared capacity
+  store. The response states the selected runtime; health failure returns HTTP 503.
+- Added `make gpu-compose-config` to `make verify` and documented the new profile,
+  volume behavior, auth setup, and limitations.
+- Updated the existing end-to-end smoke check to assert the gateway's readiness
+  response fields (`runtime`, backend readiness, and admission readiness). The prior
+  assertion expected the removed `mode=local-cpu-onnx` field.
+
+## Validation
+
+- GPU Compose file parses using the sample environment file.
+- Ruff passes for changed Python files.
+- Unit tests cover the unchanged ONNX default, opt-in vLLM target/model alias, and
+  not-ready behavior when the vLLM backend is unhealthy.
+- API readiness test covers the existing ONNX mode.
+- `make VENV=<existing-project-virtualenv-path> verify` passed on this head: Ruff,
+  76 tests (one existing Starlette deprecation warning), pip-audit found no known
+  vulnerabilities, and both base and GPU Compose configuration checks passed.
+- `git diff --check` passed.
+- No GPU image was pulled and no vLLM container or AWS resource was started.
+- PR #45 CI run `45982878898` exposed the stale smoke assertion after the readiness
+  response became runtime-aware. The failure was in the existing smoke script, not a
+  GPU test. That assertion was corrected and the smoke check passed on a later run.
+- CI run `45990929878` passed all four required jobs on head `31348c3`: local E2E,
+  manifests, Python, and supply-chain. The capacity demo now checks the API's actual
+  simulated-accounting mode and pool fields. This is CPU/local CI evidence only; it
+  does not demonstrate GPU inference.
+
+## Security and financial considerations
+
+The app ports bind to `127.0.0.1`; they should be reached through Session Manager port
+forwarding. vLLM and Redis stay on the private Compose network. The Docker Compose
+profile allows outbound model retrieval through the host network and AWS security
+group; no public inbound rule is added. The Compose project is designed for one
+accelerator. Redis counters remain logical admission controls, not physical GPU
+partitioning, scheduling, or tenant isolation. The $25 AWS budget and exact-plan
+approval gates remain unchanged.
+
+## Outstanding work
+
+- PR #45 is open against PR #44. Head `31348c3` fixes the stale capacity snapshot
+  assertion identified by diagnostics on run `45988603667`: the API returns
+  `.mode == "SIMULATED_HARDWARE_QUOTA_ACCOUNTING"`, not `.hardware == "SIMULATED"`.
+  The corrected demo and queued-request path passed in `45990929878`. The script was
+  not run locally because it starts with Redis `FLUSHDB`.
+- Recheck the pinned container digest, NVIDIA driver/runtime compatibility, and model
+  revision, license, and artifact hash before any paid run.
+- Review the separate GPU observability package in PR #46; its static checks passed
+  but live GPU behavior remains unverified.
+- Validate manual inference and stream accounting on a real L4 before claiming the
+  gateway integration acceptance criteria.

@@ -542,6 +542,33 @@ class GatewayService:
         result = self.capacity.snapshot()
         return await result if inspect.isawaitable(result) else result
 
+    async def readiness(self) -> dict[str, object]:
+        """Check the routed inference backend and shared admission state."""
+        model = self.catalog.model("chat-default")
+        target = next((item for item in model.targets if item.healthy and item.weight > 0), None)
+        backend_ready = False
+        if target is not None:
+            backend = self.backend_for(model, target)
+            health = getattr(backend, "health", None)
+            if health is not None:
+                result = health()
+                backend_ready = await result if inspect.isawaitable(result) else bool(result)
+            else:
+                backend_ready = True
+        try:
+            await self.capacity_snapshot()
+            admission_ready = True
+        except HTTPException:
+            admission_ready = False
+        ready = backend_ready and admission_ready
+        return {
+            "status": "ok" if ready else "not_ready",
+            "runtime": model.runtime,
+            "model": model.model_id,
+            "backend_ready": backend_ready,
+            "admission_ready": admission_ready,
+        }
+
     async def request_analysis(self, request_id: str) -> dict | None:
         result = self.meter.get_request(request_id)
         record = await result if inspect.isawaitable(result) else result

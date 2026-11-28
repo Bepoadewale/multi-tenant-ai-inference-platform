@@ -211,10 +211,14 @@ content from public evidence. A healthy HTTP process without a successful CUDA m
 load is not a passing inference check.
 
 Only after the manual request and stream work should the **single-GPU Docker Compose**
-deployment be started. Keep Prometheus, Grafana, Tempo, Redis, gateway, and model
-server on private Compose networks. Access operator views only through Session
-Manager port forwarding. Test readiness, shutdown, and restart once, then continue to
-multi-tenant work without leaving duplicate model servers active.
+deployment in `deployments/single-gpu/` be started. It runs one vLLM server, Redis, and
+the existing two gateway replicas. Its `.env.example` contains provisional pins and
+must be reviewed before use. Keep Redis and vLLM on the private Compose network; the
+gateway ports bind to loopback and should be reached only through Session Manager
+port forwarding. The profile reuses Redis quota accounting and is not physical GPU
+isolation. Test readiness, shutdown, and restart once, then continue to multi-tenant
+work without leaving duplicate model servers active. GPU Compose parsing is checked
+locally with `make gpu-compose-config`.
 
 ## Gateway, telemetry, measurements, and recovery
 
