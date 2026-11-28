@@ -103,8 +103,7 @@ terraform-validate:
 	terraform -chdir=infrastructure/terraform/bootstrap validate
 	terraform -chdir=infrastructure/terraform/environments/aws init -backend=false
 	terraform -chdir=infrastructure/terraform/environments/aws validate
-	terraform -chdir=infrastructure/terraform/environments/gpu-ec2 init -backend=false
-	terraform -chdir=infrastructure/terraform/environments/gpu-ec2 validate
+	$(MAKE) gpu-ec2-validate
 cloud-delivery-validate:
 	./scripts/validate-cloud-delivery-contracts.sh
 pilot-cloud-plan:
@@ -133,6 +132,7 @@ gpu-ec2-validate:
 	terraform -chdir=infrastructure/terraform/environments/gpu-ec2 init -backend=false
 	terraform -chdir=infrastructure/terraform/environments/gpu-ec2 fmt -check -recursive
 	terraform -chdir=infrastructure/terraform/environments/gpu-ec2 validate
+	terraform -chdir=infrastructure/terraform/environments/gpu-ec2 test -no-color
 gpu-compose-config:
 	docker compose --env-file deployments/single-gpu/.env.example -f deployments/single-gpu/compose.yaml config --quiet
 gpu-observability-validate:
@@ -170,7 +170,7 @@ gpu-ec2-triton:
 gpu-release-controller-help:
 	$(PY) scripts/gpu_release_controller.py --help
 gpu-docs-validate:
-	$(PYTHON) scripts/check_gpu_docs_links.py README.md docs/README.md docs/goals/SINGLE_L4_GPU_INFRASTRUCTURE_GOAL.md docs/gpu-lab/*.md docs/tickets/ticket74.md docs/tickets/ticket75.md docs/tickets/ticket76.md
+	$(PYTHON) scripts/check_gpu_docs_links.py README.md docs/README.md docs/goals/SINGLE_L4_GPU_INFRASTRUCTURE_GOAL.md docs/gpu-lab/*.md docs/tickets/ticket74.md docs/tickets/ticket75.md docs/tickets/ticket76.md docs/tickets/ticket77.md
 gpu-ec2-bootstrap-preview-plan:
 	./scripts/gpu-ec2-bootstrap-preview-plan.sh
 gpu-ec2-bootstrap-plan:
