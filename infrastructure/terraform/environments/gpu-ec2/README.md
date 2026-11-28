@@ -47,11 +47,13 @@ its Snap or Debian systemd service and fails visibly if neither service exists. 
 documents this as common for Ubuntu Server AMIs; verify the instance is online before
 relying on Session Manager.
 
-The root reuses the repository's private, versioned state bucket and DynamoDB lock
-table created by `infrastructure/terraform/bootstrap/`. It must use a separate
-backend key such as `gpu-ec2/us-east-1/terraform.tfstate`. The S3 backend enables the
-native lock file and the repository's DynamoDB locking contract together. Never put
-state or saved plans in Git.
+The planned backend uses the repository's private, versioned state bucket and
+DynamoDB lock table managed by `infrastructure/terraform/bootstrap/`, with a separate
+key such as `gpu-ec2/us-east-1/terraform.tfstate`. The bootstrap design has not been
+applied: the latest exact-name AWS reads found no bucket, lock table, or budget. Apply
+the separately reviewed bootstrap plan before initializing this root with remote
+state. The S3 backend is configured to use both its native lock file and the
+repository's DynamoDB locking contract. Never put state or saved plans in Git.
 
 The Scheduler one-time schedule remains in the Terraform state after firing with the
 repository's currently pinned AWS provider. The normal Terraform destroy removes it;
@@ -101,10 +103,10 @@ and `docs/gpu-lab/`. Before a paid operation, the owner must complete the reposi
 cloud-pilot authorization sequence, refresh the estimate, verify the account and
 quota, select an offered AZ, record a future expiry, review the exact saved plan, and
 confirm teardown. A read-only check on 2026-11-28 returned an applied G/VT quota of
-4 vCPUs, enough on paper for one `g6.xlarge`; the existing quota-request history
-earlier read `CASE_OPENED`; a later read-only check reports `CASE_CLOSED`. Five
-us-east-1 AZ offerings appeared in the CLI query, but an offering is not a capacity
-reservation. No GPU resource or Terraform apply exists.
+4 vCPUs, enough on paper for one `g6.xlarge`; the owner reports approval, while the
+quota-request history still reads `CASE_OPENED`. Five us-east-1 AZ offerings appeared
+in the CLI query, but an offering is not a capacity reservation. No GPU resource or
+Terraform apply exists.
 The exact remote-state plan, verified budget-alert recipient, full cost, expiry, and
 apply-authorization gates still prevent launch.
 

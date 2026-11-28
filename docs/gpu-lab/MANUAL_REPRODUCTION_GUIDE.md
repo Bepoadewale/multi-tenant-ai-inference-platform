@@ -69,12 +69,12 @@ AWS_PROFILE=ai-platform-pilot-key aws service-quotas get-service-quota \
   --region us-east-1 --query Quota.Value --output text
 ```
 
-The value must be at least 4 vCPUs for one `g6.xlarge`. The owner confirmed quota
-approval; the latest recorded read-only checks returned `4.0` applied vCPUs and
-`CASE_CLOSED` in request history. An earlier same-day result showed `CASE_OPENED`;
-that is a historical snapshot. Quota alone does not reserve capacity or authorize a
-paid launch. Recheck the live quota and instance capacity before any plan or apply.
-Do not submit another quota request.
+The value must be at least 4 vCPUs for one `g6.xlarge`. The owner now reports that
+AWS approved the request, and the latest read-only CLI check confirms `4.0` applied
+vCPUs. The request-history view still says `CASE_OPENED`; treat that as stale history,
+not as an applied quota of zero. Quota alone does not authorize a paid launch. Recheck
+the live quota and actual AZ capacity immediately before planning/applying; do not
+submit a duplicate request.
 
 Even with sufficient numeric quota, this project remains blocked from cloud
 provisioning until the exact project state backend is available, a private valid
@@ -438,7 +438,7 @@ apt-get install -y \
   docker-ce-cli=5:29.9.3-1~ubuntu.24.04~noble \
   containerd.io=2.4.2-4~ubuntu.24.04~noble \
   docker-buildx-plugin=0.39.1-1~ubuntu.24.04~noble \
-  docker-compose-plugin=5.8.0-1~ubuntu.24.04~noble \
+  docker-compose-plugin=5.8.1-1~ubuntu.24.04~noble \
   nvidia-container-toolkit=1.20.2-1 \
   nvidia-container-toolkit-base=1.20.2-1 \
   libnvidia-container-tools=1.20.2-1 \

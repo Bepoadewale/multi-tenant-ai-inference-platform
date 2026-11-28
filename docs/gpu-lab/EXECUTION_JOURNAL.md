@@ -17,6 +17,42 @@
   remaining non-billable work and do not merge without authorization.
 
 
+## 2026-11-28 — Refresh static package candidates and quota/backend status
+
+- **Phase:** Phase 2 static infrastructure readiness; no AWS or GPU mutation.
+- **Branch/PR:** `codex/gpu-network-plan-review`, PR #84, starting head
+  `3aeef0278f67d525f16a700c3c20275e0677c8c5`; GitHub reports OPEN/CLEAN with no
+  review decision.
+- **Objective:** reconcile current quota approval reporting, avoid implying the
+  remote backend or Budget exists, and refresh pinned software package metadata
+  before any eventual GPU batch.
+- **Research:** checked NVIDIA Ubuntu 24.04, NVIDIA Container Toolkit, and Docker
+  Ubuntu Noble package indexes through Python's standard HTTP client; inspected the
+  vLLM latest-release metadata through `gh`. Selected package versions and Compose
+  checksum are recorded in `RESEARCH_NOTES.md`.
+- **Changes:** corrected docs to say the owner reports quota approval and the CLI
+  confirms a 4.0-vCPU applied quota while request history remains `CASE_OPENED`;
+  clarified that the S3/DynamoDB backend and Budget are planned, not deployed; pinned
+  the current Compose candidate to 5.8.1; and corrected a claim that metadata checks
+  proved a tested vLLM stack.
+- **Failed approaches:** the first broad documentation patch did not apply because
+  the implementation-status paragraph did not match the expected text; no partial
+  edit occurred. The edits were split into smaller patches.
+- **Validation:** `make gpu-docs-validate` validated local links/headings in 35
+  files; `make gpu-compose-config` passed; `make gpu-ec2-validate` passed Terraform
+  formatting, validation, and all 12 mocked cases. `make gpu-ansible-validate`
+  initially failed because Ansible was not on the default `PATH`; rerunning with
+  `PATH=/tmp/gpu-ansible-venv/bin:$PATH` passed playbook syntax validation.
+  `git diff --check` passed before these journal updates.
+- **Previous-head CI:** while reviewing the diff, `gh pr checks 84` showed all six
+  required jobs passing on the already-published head `3aeef02` in run
+  `46151077506`. This does not validate the uncommitted edits recorded here.
+- **Cost/resources:** no package downloads or installations, Docker build/container,
+  AWS API call, Terraform plan/apply, model download, GPU operation, or spend.
+- **Next:** finish the final diff review, publish the reviewable PR #84 follow-up and
+  let its CI finish. Do not merge without owner review; do not apply AWS
+  infrastructure.
+
 ## 2026-11-28 — PR #84 implementation checks passed
 
 - **Phase:** Phase 2 static Terraform preparation; no AWS/GPU operation.

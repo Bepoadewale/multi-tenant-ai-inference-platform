@@ -1,6 +1,6 @@
 # Ticket 84 — Verify the single-L4 network topology in the saved plan
 
-**Status:** [PR #84](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/84) is open on PR #83. Implementation head `724c45a` and documentation head `c50b591` passed all six required CI jobs in runs `46147292091` and `46148089116`. The instance-level public-IP follow-up at `8349510` passed all six checks in run `46148953601`; documentation head `355deba` passed all six in run `46149649470`. Owner review remains pending. No AWS operation.
+**Status:** [PR #84](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/84) is open on PR #83. Implementation head `724c45a` and documentation head `c50b591` passed all six required CI jobs in runs `46147292091` and `46148089116`. The instance-level public-IP follow-up at `8349510` passed all six checks in run `46148953601`; documentation head `355deba` passed all six in run `46149649470`. Head `3aeef02` passed all six jobs in run `46151077506`. The current package-index and status-documentation edits still need publication and fresh CI. Owner review remains pending. No AWS operation.
 
 ## Objective
 
@@ -46,6 +46,8 @@ egress; this ticket closes the separate topology-binding gap.
   authorized backend and cost gates permit it.
 - [x] Publish the public-IP follow-up and pass all required CI on `8349510` in run
   `46148953601`.
+- [ ] Validate and publish the 2026-11-28 package-index and status-documentation
+  follow-up; checks for its new head are pending.
 - [ ] Receive owner review. No merge or apply is authorized by this ticket.
 
 ## Validation

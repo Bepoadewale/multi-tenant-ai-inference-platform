@@ -1,7 +1,8 @@
 # Single-L4 Inference Benchmark Report
 
-**Status:** report framework prepared; no L4 measurements exist. This document must
-be completed from real results after quota approval and an authorized GPU batch. The
+**Status:** report framework prepared; no L4 measurements exist. The owner reports
+quota approval and AWS CLI confirms 4 applied vCPUs; complete this document from real
+results only after the remaining gates and an authorized GPU batch. The
 empty result cells below are intentional; do not fill them with estimates, mock
 responses, or results from CPU ONNX tests.
 
@@ -25,8 +26,8 @@ The benchmark code and workloads are in:
 
 ## Evidence boundary
 
-The latest read-only AWS check reports 4.0 applied G/VT vCPUs, but no GPU instance
-has run and the quota request record still says `CASE_OPENED`. Static dry-runs
+The latest read-only AWS check reports 4.0 applied G/VT vCPUs; no GPU instance has run
+and the quota request record still says `CASE_OPENED`. Static dry-runs
 validate command generation and bounds. Mock-transport tests
 validate privacy and client behavior. CI validates repository behavior, including
 the local CPU path. None of those results are L4 measurements.

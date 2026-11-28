@@ -1,12 +1,11 @@
 # Single-L4 AI Inference Infrastructure Project Report
 
 > **Status: PRE-GPU DRAFT — NOT THE FINAL PROJECT REPORT.** The repository has
-> substantial local implementation, static AWS preparation, and CI evidence, but
-> Read-only AWS checks now show 4.0 applied On-Demand G/VT vCPUs; this clears the
-> quota threshold for one `g6.xlarge`, but the project remote state, lock table, and
-> Budget are absent and no apply is authorized. No L4 host, CUDA computation, vLLM
-> inference, GPU benchmark, live GPU incident, AWS bill, or cloud teardown has been
-> recorded. Complete the empirical sections from real evidence after an authorized
+> substantial local implementation, static AWS preparation, and CI evidence. The
+> owner reports quota approval and the latest CLI read confirms 4.0 applied G/VT
+> vCPUs, while request history still says `CASE_OPENED`; no L4 host, CUDA computation, vLLM inference, GPU
+> benchmark, live GPU incident, AWS bill, or cloud teardown has been recorded. The
+> empirical sections below must be completed from real evidence after an authorized
 > GPU batch; do not remove this banner before the final acceptance review.
 
 ## Report status and evidence labels
@@ -36,11 +35,10 @@ bounded benchmark/evaluation tools, governed sequential release controls, operat
 runbooks, and learning documents. The existing CPU ONNX service remains the executed
 inference path.
 
-**Final outcome:** pending. The initial On-Demand G/VT request was denied, then the
-existing case was closed with 4.0 vCPUs applied according to the 2026-11-28 read-only
-check. This is sufficient by quota only. The project state/lock and Budget are absent,
-a private alert recipient and exact saved-plan review are outstanding, and no apply is
-authorized. The host has not been provisioned; no real L4 inference result exists.
+**Final outcome:** pending. The owner reports that AWS approved the On-Demand G/VT
+quota appeal, and the latest read-only CLI query confirms an applied 4.0-vCPU quota.
+The request-history API still says `CASE_OPENED`. The host has not been provisioned,
+and no real L4 inference result exists.
 
 Complete this summary only after recording the final GPU batch, remaining acceptance
 gates, all-in cost estimate and billing status, teardown verification, and unresolved

@@ -1,6 +1,6 @@
 # Local environment readiness
 
-**Checked:** 2026-11-27 for workstation tooling; AWS quota/status refreshed 2026-11-28. This records workstation tooling, not an AWS or GPU host.
+**Checked:** 2026-11-27. This records workstation tooling, not an AWS or GPU host.
 
 ## Workstation tools verified
 
@@ -29,7 +29,8 @@ hash-locked Ansible controller and a syntax-checked host role. It is designed to
 locally on the EC2 host through Session Manager after the manual installation lesson;
 do not run the local-connection playbook on this Mac.
 
-The GPU host must be prepared separately after quota and spending gates pass. The
+The GPU host must be prepared separately after the Budget, remote-state, exact-plan,
+cost, and apply-authorization gates pass. The
 current runbook covers the standard Ubuntu image, headless NVIDIA driver, CUDA
 toolkit/compiler, Docker Engine, NVIDIA Container Toolkit, PyTorch GPU validation,
 manual vLLM start, and only then the automation. Do not install a CUDA stack on the
@@ -37,7 +38,7 @@ workstation as a substitute for L4 validation.
 
 ## AWS and spending state
 
-The local command-line tools were rechecked on 2026-11-27 at 19:20 UTC; AWS state was refreshed read-only on 2026-11-28: Python
+The local command-line tools were rechecked on 2026-11-27 at 19:20 UTC: Python
 3.12.12, AWS CLI 2.32.6, Terraform 1.14.0, Docker client/server 29.0.1, and Compose
 2.40.3 are available. `ansible-playbook`, `nvcc`, `nvidia-smi`, and
 `nvidia-container-cli` remain absent on this Apple Silicon workstation, as expected;
@@ -45,13 +46,12 @@ the hash-locked Ansible controller runs on the future EC2 host, and NVIDIA tools
 installed there only after an authorized GPU launch.
 
 - No AWS mutation was performed during this readiness check.
-- Historical 2026-11-27 AWS check: the applied quota was zero and the request showed
-  `CASE_OPENED`; that snapshot is superseded. The 2026-11-28 read-only AWS CLI check
-  confirms `CASE_CLOSED` and 4.0 applied On-Demand G/VT vCPUs in `us-east-1`. This is
-  enough by quota for one `g6.xlarge`, not an AZ reservation or apply authorization.
-  The exact state bucket, lock table, and Budget are absent; a valid private Budget
-  recipient is not verified. Earlier G6 offerings in five AZs are not a live capacity
-  reservation. No project resource or GPU hour exists.
+- The 2026-11-27 workstation inventory below is historical. A fresh read-only AWS CLI
+  check on 2026-11-28 confirmed the expected account and `4.0` applied On-Demand G/VT
+  vCPUs; the owner reports AWS approved the request. The request-history API still
+  says `CASE_OPENED`. The numeric quota is sufficient on paper for one `g6.xlarge`,
+  but does not reserve capacity. No L4 launch has occurred; the Budget recipient,
+  remote-state, exact-plan/cost, expiry, and apply-authorization gates remain.
 - The project ceiling remains USD $25. Quota approval alone does not authorize an
   apply; the exact plan, current complete cost estimate, runtime, expiry, and teardown
   gates remain required.
@@ -77,7 +77,8 @@ the launched Ubuntu AMI and kernel. No packages were installed.
    availability, exact resources, current prices, and the reviewed saved plan. Do not
    print credentials. The 2026-11-28 check found applied quota `4.0` vCPUs, while the
    request record remains `CASE_OPENED`. G6 offerings exist in several us-east-1 AZs,
-   but do not guarantee capacity. The project state bucket and budget are absent.
+   but do not guarantee capacity. The project state bucket, lock table, and budget are
+   absent.
 3. The hash-locked Ansible requirements and host role are prepared for the future EC2
    host. Do not run its local-connection playbook on this workstation.
 4. After authorized provisioning and the manual learning pass, run Ansible on the Ubuntu

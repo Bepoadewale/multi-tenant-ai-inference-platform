@@ -13,7 +13,7 @@ gpu_host_nvidia_toolkit_version: "1.20.2-1"
 gpu_host_docker_engine_version: "5:29.9.3-1~ubuntu.24.04~noble"
 gpu_host_containerd_version: "2.4.2-4~ubuntu.24.04~noble"
 gpu_host_buildx_version: "0.39.1-1~ubuntu.24.04~noble"
-gpu_host_compose_version: "5.8.0-1~ubuntu.24.04~noble"
+gpu_host_compose_version: "5.8.1-1~ubuntu.24.04~noble"
 gpu_host_torch_venv: /opt/gpu-lab/torch-venv
 gpu_host_torch_lock: /opt/gpu-lab/requirements-torch.lock
 

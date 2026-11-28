@@ -513,9 +513,9 @@ reviewed batch. A confirmation variable does not grant spending approval.
 
 ## Current research set and compatibility decision
 
-The 2026-11-27 research record contains provisional candidates: Ubuntu 24.04 amd64;
+The 2026-11-28 research record contains provisional candidates: Ubuntu 24.04 amd64;
 NVIDIA driver R580.196.11; CUDA Toolkit 13.0.3; NVIDIA Container Toolkit `1.20.2-1`;
-Docker Engine 29.9.3 and Compose plugin 5.8.0; PyTorch `2.14.0+cu130` for CPython
+Docker Engine 29.9.3 and Compose plugin 5.8.1; PyTorch `2.14.0+cu130` for CPython
 3.12; and the vLLM OpenAI image `v0.34.0` with an AMD64 digest. These are **not final
 pins** and no compatibility has been proven on the L4. vLLM's current official Docker guide says CUDA 13 images need
 an R580-or-newer host driver normally and describe an explicit compatibility mode
@@ -548,6 +548,7 @@ mutations until current state is known.
 
 ## Evidence status
 
-This document is static preparation. It does not demonstrate quota approval,
+This document is static preparation. The owner reports quota approval and the CLI
+confirms the applied vCPU value, but this document does not demonstrate live
 availability/capacity, infrastructure, installed software, model download, GPU
 execution, inference, benchmark measurements, alert behavior, incidents, or teardown.
