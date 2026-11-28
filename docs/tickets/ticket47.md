@@ -40,6 +40,13 @@ GPU benchmark harness.
 - Added a 120-minute batch runtime cap and 10-minute per-command timeout by default.
 - Centralized the benchmark container name so timeout and interruption cleanup target
   the exact named container for that workload repetition.
+- Separated the served API alias (`gpu-default`) from the tokenizer model ID. The
+  official vLLM benchmark defaults the tokenizer ID to the API model name, which would
+  try to load `gpu-default` as a tokenizer and fail before generating measurements.
+- Carried each run's exact container name next to its command so timeout and
+  interruption cleanup stop the active benchmark container, including the first run.
+- Added regression coverage for both timeout and keyboard-interruption cleanup on the
+  first run of a multi-case matrix.
 - Added a regression test that verifies the runner command and cleanup name agree for
   a non-first repetition.
 - Corrected the Trivy GitHub Actions input so `HIGH,CRITICAL` is passed as one quoted
@@ -64,6 +71,15 @@ GPU benchmark harness.
   workstation's Python 3.12 environment does not include pytest, so the test used
   `uvx` without changing the repository environment.
 - No Docker profile service, model, benchmark request, AWS resource, or GPU was used.
+- On 2026-11-28, `.venv/bin/ruff` and the focused tests passed using the existing
+  hash-locked Python environment from the adjacent PR #57 worktree: Ruff passed and
+  `gateway/tests/test_gpu_benchmark_runner.py` reported 3 passed. `make
+  gpu-benchmark-plan` still produced 11 cases and 33 commands; inspection confirms
+  the generated command contains `--model gpu-default --tokenizer
+  Qwen/Qwen2.5-1.5B-Instruct`. `git diff --check` passed. No Docker client, model,
+  AWS resource, or GPU was started. The benchmark source was checked against the
+  official vLLM v0.34.0 implementation, which defaults tokenizer ID to model ID:
+  <https://github.com/vllm-project/vllm/blob/v0.34.0/vllm/benchmarks/serve.py>.
 - After rebasing the candidate onto PR #46 head `6df97e7`, `make gpu-benchmark-plan`
   again produced 11 cases and 33 commands with the 120-minute batch and 600-second
   per-command bounds. One regression test passed; Ruff, `make gpu-compose-config`, and
@@ -83,8 +99,8 @@ batch and stop early if required evidence, time, or the $25 total budget is at r
 
 ## Outstanding work
 
-- PR #47 is open stacked on PR #46; pass its CI checks and review. PR #46's rebased
-  CI was still running when PR #47 was opened.
+- PR #47 is open stacked on PR #46. The current review fixes are local and require
+  updated PR CI and review confirmation.
 - Recheck the pinned vLLM image and CLI flags against the exact runtime inside the
   benchmark container immediately before execution.
 - Add a separate authenticated gateway benchmark for end-to-end overhead and

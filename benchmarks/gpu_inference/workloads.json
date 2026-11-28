@@ -2,6 +2,7 @@
   "schema_version": 1,
   "description": "Synthetic random-token serving matrix for the single-L4 lab; direct vLLM endpoint, not gateway or multi-tenant evidence.",
   "model_alias": "gpu-default",
+  "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
   "context_length": 8192,
   "context_safety_margin_tokens": 128,
   "num_prompts": 100,

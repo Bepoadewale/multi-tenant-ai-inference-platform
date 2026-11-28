@@ -48,6 +48,9 @@ def load_matrix(path: Path, allow_16: bool) -> tuple[dict, list[dict]]:
     matrix = json.loads(path.read_text(encoding="utf-8"))
     if matrix.get("schema_version") != 1:
         raise ValueError("workload matrix schema_version must be 1")
+    for field in ("model_alias", "model_id"):
+        if not isinstance(matrix.get(field), str) or not matrix[field].strip():
+            raise ValueError(f"workload matrix {field} must be a non-empty string")
     context = matrix["context_length"]
     margin = matrix.get("context_safety_margin_tokens", 0)
     if context < 1 or margin < 0:
@@ -133,6 +136,8 @@ def benchmark_command(
         "/v1/chat/completions",
         "--model",
         matrix["model_alias"],
+        "--tokenizer",
+        matrix["model_id"],
         "--dataset-name",
         "random",
         "--random-input-len",
@@ -312,7 +317,8 @@ def main() -> int:
     for case in cases:
         for repetition in range(1, repetitions + 1):
             command = benchmark_command(case, matrix, repetition, metadata, output_dir)
-            commands.append(command)
+            container_name = benchmark_container_name(case, repetition)
+            commands.append((command, container_name))
 
     run_record = {
         "created_at": datetime.now(UTC).isoformat(),
@@ -326,7 +332,7 @@ def main() -> int:
         "per_run_timeout_seconds": args.per_run_timeout_seconds,
         "expected_runs": len(commands),
         "metadata": metadata,
-        "commands": [shlex.join(command) for command in commands],
+        "commands": [shlex.join(command) for command, _ in commands],
     }
     if args.dry_run:
         print(json.dumps(run_record, indent=2))
@@ -337,7 +343,7 @@ def main() -> int:
         json.dumps(run_record, indent=2) + "\n", encoding="utf-8"
     )
     deadline = monotonic() + args.max_runtime_minutes * 60
-    for index, command in enumerate(commands, start=1):
+    for index, (command, container_name) in enumerate(commands, start=1):
         remaining = deadline - monotonic()
         if remaining <= 0:
             print(f"Runtime limit reached; preserve partial results in {output_dir}", file=sys.stderr)
@@ -354,7 +360,7 @@ def main() -> int:
             except subprocess.TimeoutExpired:
                 os.killpg(process.pid, signal.SIGKILL)
                 process.wait()
-            stop_benchmark_container(benchmark_container_name(case, repetition))
+            stop_benchmark_container(container_name)
             print(
                 f"Benchmark timed out at run {index}; preserve partial results in {output_dir}",
                 file=sys.stderr,
@@ -367,7 +373,7 @@ def main() -> int:
             except subprocess.TimeoutExpired:
                 os.killpg(process.pid, signal.SIGKILL)
                 process.wait()
-            stop_benchmark_container(benchmark_container_name(case, repetition))
+            stop_benchmark_container(container_name)
             print(f"Benchmark interrupted at run {index}; partial results are preserved", file=sys.stderr)
             return 130
         if return_code:

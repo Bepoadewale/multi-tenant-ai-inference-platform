@@ -1252,3 +1252,35 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** continue static preparation for evaluation and incident exercises, then
   refresh shared status docs and PR descriptions. The single-L4 experiment still
   requires quota approval and the complete $25 cost/plan authorization gate.
+
+## 2026-11-28 — Fix vLLM benchmark tokenizer selection and failure cleanup
+
+- **Phase:** Phase 8 static benchmark preparation; PR #47.
+- **Branch:** `codex/gpu-benchmark-preparation`, worktree based on remote head
+  `5374f5c` before this change is committed.
+- **Starting state:** PR review identified that vLLM's benchmark client would treat
+  the API alias `gpu-default` as the tokenizer model, and that timeout/interruption
+  cleanup used the final matrix item instead of the item currently running.
+- **Research:** inspected the official vLLM v0.34.0 `bench serve` implementation at
+  `https://github.com/vllm-project/vllm/blob/v0.34.0/vllm/benchmarks/serve.py`; when
+  `--tokenizer` is omitted, it uses `--model` as the tokenizer ID. The checked-in API
+  alias is not the model repository ID.
+- **Changes:** added `model_id` to the workload matrix and pass it via `--tokenizer`
+  while retaining the served alias for `--model`. The runner now stores each command
+  with its exact container name and uses that name for timeout/interruption cleanup.
+  Tests cover the generated flags and both failure paths on the first run of a
+  multi-case matrix.
+- **Validation:** Ruff passed using the existing Python environment in the adjacent
+  PR #57 worktree; `gateway/tests/test_gpu_benchmark_runner.py` passed all 3 tests.
+  `make gpu-benchmark-plan` generated 11 cases and 33 commands; `git diff --check`
+  passed. The first attempt to use a PR-local `.venv` failed because this detached
+  worktree has no such environment; using the already installed hash-locked
+  environment avoided changing project dependencies. No Docker service, model
+  download, benchmark request, AWS resource, or GPU was used.
+- **Evidence:** local tests and dry-run are static/local evidence only. Updated CI
+  evidence is pending publication of this fix; the earlier PR #47 CI run does not
+  validate these edits.
+- **Cloud/cost:** no AWS use, GPU hours, or spend.
+- **Next:** commit and push these benchmark-specific changes with an exact
+  `--force-with-lease` against the observed PR #47 head; then watch one CI run and
+  address both review threads only after the updated checks pass.
