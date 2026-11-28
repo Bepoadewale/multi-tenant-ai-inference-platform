@@ -35,11 +35,12 @@ All checks below must pass before the GPU root is applied.
    fit under $25. A budget alert is not a hard limit.
 5. **Exact plan and expiry:** run the account/region/quota/AMI/availability preflight,
    save and review the exact remote-state plan, record its SHA-256, and independently
-   count resources. Confirm the six-hour instance expiry is present in the reviewed
-   plan, the guest shutdown timer is rendered, and the separate one-time AWS
-   scheduled-termination path is configured. Record the run-monitor ID, root, PID,
-   and log path for Terraform mutation. Do not run concurrent Terraform operations
-   against this state.
+   count resources. The work-block table totals a ten-hour planned batch; set the
+   exact approved expiry to match that session plan, subject to the Terraform guard
+   that rejects expiries more than 12 hours after planning. Verify the guest shutdown
+   timer is rendered and the separate one-time AWS scheduled-termination path is
+   configured. Record the run-monitor ID, root, PID, and log path for Terraform
+   mutation. Do not run concurrent Terraform operations against this state.
 6. **Approval:** obtain explicit owner approval for that exact plan, total estimated
    cost, maximum session runtime, resource list, and teardown procedure. Quota
    approval alone does not authorize apply. If any prerequisite fails, do static

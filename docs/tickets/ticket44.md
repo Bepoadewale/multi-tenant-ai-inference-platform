@@ -69,3 +69,16 @@ raw plan, or account identifier is added to the public repository.
 - Establish the reviewed shared backend and budget through their separate guarded
   bootstrap path.
 - Keep all instance and model execution commands unclaimed until a real L4 run.
+
+## Review follow-up — align expiry with the planned batch
+
+Review found that the launch checklist required a six-hour expiry even though the
+planned work blocks total ten hours. The checklist now says to set the exact expiry to
+the approved session plan, which is ten hours for the current schedule, and records the
+Terraform guard's separate 12-hour maximum. It also keeps both guest shutdown and the
+independent AWS scheduled-termination checks.
+
+This is a documentation correction only. The runbook's table still labels ten hours as
+a planning ceiling, not a measured duration or authorization; the whole experiment
+must remain within the $25 cap and receive exact-plan approval. No AWS or GPU action
+was taken.
