@@ -9,12 +9,12 @@ the stack works on an NVIDIA L4.
 
 ## Current state
 
-PR #69 prior head `81c09df` passed all six jobs in run `46115952390`; the current
-restacked head `f21d61a` needs fresh CI. PR #70 previous head `e5af488` passed all six
-required jobs in run `46116077981`, including local E2E; the current local head
-`56bd866` is rebased onto PR #69 head `f21d61a` and is not yet published. No review
-decision is recorded. The latest recorded applied G/VT quota is zero, and no GPU or
-AWS resource has been created for this lab.
+PR #69 current rebased head `f5915e8` has active CI run `46165420078`. PR #70 previous
+head `e5af488` passed all six required jobs in run `46116077981`, including local E2E;
+the current local head is rebased onto PR #69 head `f5915e8` and is not yet published.
+No review decision is recorded. Applied G/VT quota is approved at 4.0 vCPUs, but the
+remaining AWS launch gates are open; no GPU or AWS resource has been created for this
+lab.
 
 ## Research and architecture
 
@@ -34,13 +34,15 @@ candidate pending a fresh review and real host validation.
 - [x] The L4 remains labeled as the required validation boundary.
 - [x] Local documentation links and whitespace validation pass.
 - [x] The prior PR #70 head passed its required workflow.
-- [x] Rebase PR #70 on current PR #69 head `f21d61a`.
+- [x] Rebase PR #70 on current PR #69 head `f5915e8`.
 - [ ] Publish the rebased PR #70 and pass current required CI.
 
 ## Commands and validation
 
-`git diff --check` passed. A relative-link scan over the seven changed Markdown files
-found no missing targets. Prior PR #70 head `e5af488` passed six required jobs in run `46116077981`, including local E2E. That result does not validate the rebased head `56bd866`, which needs fresh CI. No separate clean-room rerun was performed; the documentation change
+`git diff --check` passed. A current relative-link scan over four changed Markdown
+files found 68 valid targets. Prior PR #70 head `e5af488` passed six required jobs in
+run `46116077981`, including local E2E. That result does not validate the current
+rebased head, which needs fresh CI. No separate clean-room rerun was performed; the documentation change
 does not modify implementation, and the PR workflow owns its one local cycle.
 
 ## Issues, alternatives, and limitations
