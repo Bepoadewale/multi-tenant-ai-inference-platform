@@ -46,14 +46,19 @@ clear.
 
 ## Validation and evidence
 
-The three API lookups were read-only and used the configured AWS CLI profile. A local
-decimal calculation caught the existing EBS arithmetic error; the line now converts
-100 GiB to 107.3742 GB before applying the GB-Mo rate. `git diff --check` passed, a
-repository scan found no missing relative Markdown targets in 114 files and 205
-links, and the full-precision estimate calculation passed: `$18.5172`, with `$6.4828`
-headroom. No account identity, credential, or private value is stored in this ticket.
-Required GitHub Actions remain pending. Pricing must be refreshed again before any
-billable plan.
+Read-only AWS Price List API queries returned the compute, public IPv4, gp3, S3,
+DynamoDB, and Scheduler inputs recorded above. A local decimal calculation corrected
+the EBS unit conversion by converting 100 GiB to 107.3742 GB before applying the
+GB-Mo rate. The full-precision estimate is `$18.51932705`, leaving `$6.48067295`
+below the $25 ceiling under the stated assumptions. These rates and the estimate must
+be refreshed against the exact plan before any billable operation. The ticket stores
+no account identity, credential, or private value.
+
+The original PR #69 checks do not validate the current rebased head. PR #66 refreshed
+run `46164644804` passed all six jobs; PR #67 run `46164896175` and PR #68 run
+`46165126075` were still running at this snapshot. PR #69 needs its own fresh CI after
+publication. On the current rebase, 64 relative links across five changed Markdown
+files resolve and `git diff --check` passes.
 
 ## Security and financial considerations
 

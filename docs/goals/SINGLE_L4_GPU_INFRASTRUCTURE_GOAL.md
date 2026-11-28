@@ -3,13 +3,13 @@
 **Status: ACTIVE — Phase 2, isolated EC2 infrastructure (static preparation only)**
 **Source of truth:** this document, the linked execution journal, pull requests, and evidence records.  
 **Last updated:** 2026-11-28
-**Current branch:** PR #64 head `2e2e4dd` passed all six checks in `46163910205`; PR #65 head `37b3b30` passed all six in `46164362977`. PR #66 head `846b5cf` run `46164644804` and PR #67 head `5dc225f` run `46164896175` are active. PR #68 automation-readiness documentation is rebased locally onto #67 and needs fresh CI after publication. No AWS resource or GPU activity.
+**Current branch:** PR #64 and #65 passed six checks in runs `46163910205` and `46164362977`; PR #66 head `846b5cf` passed all six in `46164644804`. PR #67 head `5dc225f` run `46164896175` and PR #68 head `ff88165` run `46165126075` are active. PR #69 cost research is rebased locally onto #68 and requires fresh CI. No AWS resource or GPU activity.
 **Registration PR:** [#30 — docs: register single-L4 GPU infrastructure goal](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/30) (open; current head `04cb564`, required checks passed). **Phase 2 PR:** [#32 — guarded single-L4 EC2 foundation](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/32) (open and ready for review; current head `da2567e`).
 **Baseline repair PR:** [#31 — fix: apply audited dependency constraints](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/31) (open; head `9710932`, required checks passed).
 **GPU quota:** the latest read-only CLI check confirms the existing request is `CASE_CLOSED` with desired value 4.0 and applied On-Demand G/VT quota is 4.0 vCPUs in `us-east-1`, sufficient numerically for one `g6.xlarge`. This does not reserve AZ capacity or authorize provisioning. Do not submit another quota request.
 **Launch gates still open:** exact project remote state and locking, a valid private Budget-alert recipient and project Budget, exact saved-plan/cost review, fresh regional capacity validation, independent expiry verification, and a separate explicit apply authorization. No GPU instance or other project AWS resources exist.
 
-**Latest progress (2026-11-28):** PRs #59–#65 passed refreshed CI. PR #66 run `46164644804` and PR #67 run `46164896175` remain active. PR #68 is rebased locally to #67 and updates the CI/automation readiness narrative. The designated local CPU clean-room run remains recorded as historical evidence; no L4 or AWS execution has occurred.
+**Latest progress (2026-11-28):** PRs #59–#66 passed refreshed CI. PR #67 run `46164896175` and PR #68 run `46165126075` are active. PR #69 refreshes the cost envelope to `$18.51932705`, leaving `$6.48067295` under the project cap under documented assumptions; this remains an estimate, not authorization. No L4 or AWS execution has occurred.
 
 ## Project objective
 
