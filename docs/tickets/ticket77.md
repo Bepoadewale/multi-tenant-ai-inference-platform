@@ -73,8 +73,9 @@ GPU hour, model download, or project spend is involved.
 
 ## Acceptance status
 
-Local mocked-provider coverage and full local verification pass. PR CI is pending. No
-cloud or GPU result is claimed.
+Local mocked-provider coverage and full local verification pass. PR #77 implementation
+head `75f91e3` passed all six required jobs in run `46133957636`. No cloud or GPU
+result is claimed.
 
 ## References
 
