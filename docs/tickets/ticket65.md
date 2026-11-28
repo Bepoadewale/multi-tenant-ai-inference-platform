@@ -54,8 +54,10 @@ unverified.
 - [x] Publish the final kernel declaration fix; all six checks passed on code commit
   `39ecace` in run `46087597029`, including the workflow local E2E job.
 - [ ] Obtain human review; do not merge without owner authorization.
-- [ ] Complete the single integrated clean-room reproduction after the stack settles;
-  keep this PR draft until that project review gate is satisfied.
+- [x] Complete and record the one designated integrated local CPU clean-room run
+  after the non-GPU stack settled (PR #65 head `49076a5`, run `46114955314`).
+- [ ] Pass fresh CI on this governance-record follow-up and recheck the P1 review gate;
+  do not merge without owner authorization.
 
 ## Acceptance criteria
 
@@ -84,8 +86,12 @@ passes 187 tests (2 skipped), the dependency audit, Compose checks, GPU observab
 configuration validation, and existing benchmark/evaluation/CUDA planning targets.
 `bash -n`, the Triton dry-run, the host-wrapper Make preview, Python compilation,
 relative-link checks, and `git diff --check` pass. The final code commit `39ecace` passed all six required jobs in run `46087597029`. A documentation-only follow-up records release-backlog status; its check results are
-tracked on the current PR head. All these checks validate local preparation, not a CUDA kernel or profiler
-on an L4.
+tracked on the current PR head. The single integrated local clean-room cycle passed on the final PR #65 source head
+`49076a5` in run `46114955314`; `docs/governance/VALIDATION.md` records the exact
+commands, outputs, cleanup, and limits. This fresh-runner workflow used the local CPU
+path. It does not validate a CUDA kernel or profiler on an L4. The documentation-only
+record follow-up needs its own current PR CI; do not count that as a second manual
+clean-room run.
 
 ## Security and financial considerations
 
