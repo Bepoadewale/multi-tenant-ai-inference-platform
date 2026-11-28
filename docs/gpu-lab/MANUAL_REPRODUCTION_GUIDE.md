@@ -69,13 +69,12 @@ AWS_PROFILE=ai-platform-pilot-key aws service-quotas get-service-quota \
   --region us-east-1 --query Quota.Value --output text
 ```
 
-The value must be at least 4 vCPUs for one `g6.xlarge`. A request or appeal being
-open is not the same as a confirmed approval, and quota alone does not authorize a
-paid launch. The latest read-only check recorded on 2026-11-28 returned `4.0` applied
-vCPUs, while the request-history entry still says `CASE_OPENED`; the owner reported
-that the original request was denied and an appeal was submitted. No approval notice
-was confirmed. Recheck the live value and case outcome before any plan or apply. Do
-not submit another quota request while the existing appeal is pending.
+The value must be at least 4 vCPUs for one `g6.xlarge`. The owner confirmed quota
+approval; the latest recorded read-only checks returned `4.0` applied vCPUs and
+`CASE_CLOSED` in request history. An earlier same-day result showed `CASE_OPENED`;
+that is a historical snapshot. Quota alone does not reserve capacity or authorize a
+paid launch. Recheck the live quota and instance capacity before any plan or apply.
+Do not submit another quota request.
 
 Even with sufficient numeric quota, this project remains blocked from cloud
 provisioning until the exact project state backend is available, a private valid

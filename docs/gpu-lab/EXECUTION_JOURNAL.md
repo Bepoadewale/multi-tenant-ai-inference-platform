@@ -2325,3 +2325,15 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **GitHub/CI:** PR #71 run `46166173924` and PR #72 run `46166571475` passed. PR #73 run `46167001745` is in progress. PR #74 current rebased head is not yet published and needs fresh CI.
 - **AWS / GPU / cost:** no AWS calls or mutations, instance, GPU, model download, or spend. Budget recipient, remote state, exact plan/cost, capacity, expiry, and separate apply authorization remain open.
 - **Next:** review docs and scripts, complete changed-file link checks and `git diff --check`, publish PR #74 with an exact lease against old head `944b4573dd95450d27ab977be7caf2cedf9ad5ab`, update its PR body, and monitor one CI run.
+
+## 2026-11-28 — Restack AI infrastructure handbook in PR #75
+
+- **Date and time:** 2026-11-28 16:55 UTC.
+- **Phase:** continuous non-billable learning documentation.
+- **Starting state:** PR #75 `codex/gpu-infrastructure-handbook` was based on old PR #74 head `944b457`; current PR #74 head is `3cf1eec`.
+- **Objective:** carry the handbook and its supporting documentation onto the latest bootstrap and quota-control stack.
+- **Changes:** replayed five documentation commits onto #74. Kept refreshed goal, status, backlog, and journal snapshots during conflicts; preserved handbook, documentation-index, and evidence changes. Corrected the manual guide and ticket to record the owner's quota approval and the later `CASE_CLOSED` read-only result, while retaining the remaining cost and apply gates.
+- **Validation:** the previous head `5284057` passed its historical six CI jobs in run `46129296996`; current rebased head needs fresh CI. 119 relative links across ten changed Markdown files resolve and `git diff --check` passes. No clean-room rerun or GPU operation was performed.
+- **GitHub status:** PRs #71 and #72 refreshed runs `46166173924` and `46166571475` passed. PR #73 run `46167001745` and #74 run `46167348257` are active. Current PR #75 is local and not yet published.
+- **AWS / GPU / cost:** no AWS query or mutation, no instance, GPU operation, model download, or spend. Quota is approved; budget, recipient, remote state, final plan/cost, live capacity, expiry, and separate apply authorization remain open.
+- **Next:** finish link and documentation checks, publish #75 with exact lease against old remote head `a7c6ccd64181d89fb794ffa3bdb02eb1f1d720eb`, update the PR description, and follow one current-head CI run.

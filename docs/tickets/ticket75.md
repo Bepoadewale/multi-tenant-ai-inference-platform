@@ -26,9 +26,9 @@ handbook labels the architecture as proposed and points readers to current evide
   scheduling as background only; clearly state they are not implemented here.
 - Link the handbook from both the main README and documentation index.
 - Add a truthful entry to the evidence manifest and keep its table structure valid.
-- Correct the manual reproduction guide's stale quota note: the latest recorded
-  applied quota is 4.0 vCPUs, but request history and approval evidence remain
-  unresolved, and other cloud gates still block a paid launch.
+- Correct the manual reproduction guide's stale quota note: the owner confirmed
+  approval; the latest recorded applied quota is 4.0 vCPUs and request history is
+  `CASE_CLOSED`. Other cloud launch gates remain open.
 - Refresh the implementation backlog's open-PR inventory using live GitHub metadata,
   including the successful #74 CI result and the pending #75 run.
 
@@ -41,21 +41,22 @@ GPU, model-serving, benchmark, or production reliability evidence.
 
 ## Validation
 
-Markdown link/heading validation passed across eight touched documents, and `git diff
---check` passed. Upstream PR #74 head `944b457` passed all six required checks in run
-`46128237140`. PR #75 head `5284057` passed all six required checks in run `46129296996`, including routine PR local end-to-end CI. This does not represent a second designated project clean-room run.
-No software behavior changed; no local clean-room run, AWS operation, image/model
-download, or GPU execution is part of this documentation package.
+The historical PR #75 head `5284057` passed all six required checks in run
+`46129296996`, including routine local end-to-end CI; this was not a second designated
+project clean-room run. After restacking on current PR #74 head `3cf1eec`, 119 relative
+links across ten changed Markdown files resolve and `git diff --check` passes. The
+current restacked head is `ad05843` before the validation-record commit and requires
+fresh CI. No software behavior changed; no local
+clean-room run, AWS operation, image/model download, or GPU execution occurred.
 
 ## Outstanding
 
-- Run the documentation checks and full repository verification.
-- Review the rendered Markdown and links.
-- Publish this focused PR stacked on the bootstrap guardrail PR and verify final-head
-  CI.
+- Publish this restacked PR with an exact lease and verify fresh CI.
 - Continue expanding the final report and manual reproduction guide with measured
   results only after the GPU execution phase.
 
 ## Acceptance status
 
-**Documentation acceptance passed on head `5284057`; all six PR CI checks passed in run `46129296996`. The document remains an educational draft about a system whose real-L4 acceptance criteria are pending.
+**Documentation checks pass on the rebased local head, but fresh PR CI is pending.**
+The handbook remains educational documentation for a system whose real-L4 acceptance
+criteria are pending.
