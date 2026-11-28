@@ -62,6 +62,8 @@ message, new support case, quota request, resource, GPU hour, or spend was creat
   returned applied quota `0.0`.
 - `aws service-quotas create-support-case help` — says it creates a case only for
   requests in `PENDING`; the command was not executed.
+- PR #41 GitHub Actions run `45976696129` passed `python`, `manifests`,
+  `supply-chain`, and `local-e2e`.
 
 ## Security and financial impact
 
