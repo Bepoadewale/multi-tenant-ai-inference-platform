@@ -2184,3 +2184,14 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **AWS / GPU / cost:** no account call, cloud mutation, GPU, model download, or spend.
 - **Next:** leave PR #59 open for owner review; the documentation covers concepts and
   plans but cannot establish real L4 behavior.
+
+
+## 2026-11-28 — Restack and validate the AI infrastructure handbook
+
+- **Phase:** non-billable documentation preparation; Phase 2 paid launch gates remain open.
+- **Branch / PR:** `codex/ai-infrastructure-handbook`, PR #59, parent PR #58 current head `fa4d819`; local head before this journal update `e17865e`.
+- **Rebase:** replayed PR #59's five own commits from former PR #58 head `59925fd` onto `fa4d819`. Conflicting shared goal, status, and journal text was resolved in favor of the latest quota approval and current launch gates. The handbook's GPU, distributed-systems, observability, FinOps, security, and reliability topics were retained.
+- **Validation:** checked relative Markdown links across eight changed Markdown files; no missing targets. `git diff --check` passed. The handbook is documentation only and makes no L4 execution claim.
+- **AWS / cost:** no AWS query or mutation, GPU, model/image pull, or spend in this handbook task. The current read-only result remains 4.0 applied G/VT vCPUs, with project backend and Budget absent; the $25 cap still applies.
+- **CI:** PR #58 run `46162221680` was still in progress at this check. PR #59 fresh CI has not been triggered yet.
+- **Next:** commit the status/journal follow-up, publish PR #59 using an exact lease against `151e1b6`, update the PR description, and watch its single CI run.

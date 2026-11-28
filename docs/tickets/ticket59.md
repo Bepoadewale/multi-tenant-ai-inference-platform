@@ -80,3 +80,17 @@ Redis incident. These are concept and repository explanations; no runtime behavi
 new GPU evidence is claimed. `git diff --check` passed. Updated head `5d812ae` passed
 all six jobs in run `46122060966`, including routine local E2E. No additional manual
 clean-room run occurred.
+
+
+## 2026-11-28 restack update
+
+Rebased PR #59 from its former PR #58 head `59925fd` onto updated PR #58 head
+`fa4d819`. The worktree replayed five handbook-specific commits. Shared goal/status
+conflicts were kept current with the approved 4.0-vCPU quota and open remote-state,
+Budget, exact-plan, expiry, and apply-authorization gates. The shared execution journal
+was reconciled without dropping the current PR #58 quota and cost evidence.
+
+A relative-link check covered eight changed Markdown files and found no missing
+relative targets; `git diff --check` passed. No AWS operation or GPU execution occurred.
+Fresh PR #59 checks await publication; PR #58 run `46162221680` was still running at
+this status snapshot.
