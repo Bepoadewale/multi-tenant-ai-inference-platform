@@ -76,7 +76,8 @@ async def cancel_stream(client: httpx.AsyncClient, base_url: str, token: str) ->
     ) as response:
         if response.status_code != 200:
             raise AssertionError(
-                f"gateway returned HTTP {response.status_code} before cancellation"
+                "gateway returned HTTP "
+                f"{response.status_code} before cancellation: {response.text[:500]}"
             )
         async for line in response.aiter_lines():
             if line.startswith("data: ") and line != "data: [DONE]":
@@ -88,6 +89,27 @@ async def main() -> None:
     tokens_path = REPO_ROOT / ".local" / "identity" / "tokens.json"
     token = json.loads(tokens_path.read_text(encoding="utf-8"))["search"]
     gateways = ["http://localhost:8081", "http://localhost:8082"]
+
+    # This drill measures cancellation cleanup, not quota state left by a preceding
+    # demo. Each flagship demo uses the same disposable local Redis fixture and
+    # resets it before starting its own independent assertions.
+    subprocess.run(
+        [
+            "docker",
+            "compose",
+            "-f",
+            str(REPO_ROOT / "docker-compose.yml"),
+            "exec",
+            "-T",
+            "redis",
+            "redis-cli",
+            "FLUSHDB",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=5,
+    )
 
     async with httpx.AsyncClient(timeout=5) as client:
         starting_leases = await asyncio.to_thread(redis_active_lease_count)

@@ -58,6 +58,15 @@ The mocked apply creates no AWS resources. The official HashiCorp documentation 
 provider mocking requires Terraform 1.7 or later; this root already requires
 Terraform 1.10 or later. PR CI results will be recorded before acceptance.
 
+The current-head CI run `46168512412` failed in the local flagship end-to-end job
+after `demo-local` and `demo-overload` passed. The cancellation drill received HTTP
+429 before it could cancel a stream. The log did not include the response body, so it
+did not identify the rejecting quota. The drill now starts from the same clean,
+disposable Redis fixture used by the other independent demos and includes the
+response body in future failure output. This isolates cancellation cleanup from state
+left by earlier demo steps; it does not change production gateway behavior. Fresh CI
+must confirm the correction.
+
 ## Security and financial boundary
 
 The test uses fake account, instance, and role identifiers. Provider calls are mocked.
@@ -76,8 +85,9 @@ GPU hour, model download, or project spend is involved.
 ## Acceptance status
 
 Local mocked-provider coverage and `make gpu-ec2-validate` pass on the refreshed
-source. Fresh current-head CI is pending after publication. No cloud or GPU result is
-claimed.
+source. One current-head CI run failed in the local cancellation demo as described
+above; the demo isolation and diagnostics are corrected locally and require a fresh CI
+run. No cloud or GPU result is claimed.
 
 ## References
 
