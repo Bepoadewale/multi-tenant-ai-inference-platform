@@ -8,13 +8,14 @@ unchecked even though the dependent controller PR implements it.
 
 ## Current state
 
-- PR #70 previous head `e5af488` passed all six jobs in run `46116077981`; current head `5f70852` is published and needs fresh CI. PR #71 has been locally rebased onto #70 head `5f70852`; current head `7e2824d` is not yet published and needs fresh checks. Prior PR #71 head `ee8d1ef` passed six jobs in `46116269039`, but that run does not validate this rebase.
+- PR #70 current head `5f70852` passed all six required jobs in run `46117637674`. PR #71 head `2aece0f` passed all six in `46117785097`; documentation follow-up `de588c3` is published and its fresh CI is being tracked. Both PRs remain open and unmerged; this records CI/local validation, not live AWS or GPU results.
 - The release controller from PR #56 is source-tested and CI-validated on its recorded
   commit, but it has not been run against the GPU host, a live vLLM container, or real
   model weights. Live champion verification, inference, rollback, and interruption
   recovery remain L4 acceptance work.
 - The latest GitHub snapshot on 2026-11-28 found 41 open PRs (#30–#71, excluding
-  #54), with #46, #55, and #65 in draft. PR heads, checks, and reviews can change;
+  #54), with #46 and #55 in draft; #65 is ready for owner review. PR heads, checks,
+  and reviews can change;
   query GitHub before using this snapshot as current state.
 - The recorded corrected 12-hour planning envelope is `$18.5193`, under the initial
   `$25` ceiling on paper. It is not billed spend, a quote, or apply authorization.
