@@ -59,6 +59,6 @@ were involved.
 ## Evidence and acceptance
 
 Local evidence is static and mocked; it does not establish AWS tag propagation or
-absence of untagged resources. Review the passing local validation and final PR checks
-at [PR #79](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/79)
-when available.
+absence of untagged resources. [PR #79](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/79)
+is open; implementation head `2e92165` passed all six required checks in run
+`46137645356`. This status/evidence follow-up is awaiting CI.
