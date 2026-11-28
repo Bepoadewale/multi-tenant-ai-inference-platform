@@ -30,7 +30,9 @@ benchmark report and operator decision paths have not been collected in one plac
 - [x] Link from documentation index and persistent status records.
 - [x] Check 119 Markdown links across ten changed documentation files; every local
   target exists. `git diff --check` passed.
-- [ ] Complete PR CI and human review.
+- [x] All six required PR checks passed in workflow `46077217832`, including the
+  workflow's local end-to-end job.
+- [ ] Human review.
 
 ## Validation
 
