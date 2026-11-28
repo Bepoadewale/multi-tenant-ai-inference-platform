@@ -71,10 +71,15 @@ def _safe_plan_json(ami: str, az: str, expiry: str) -> str:
             "user_data": "SENTINEL_PRIVATE_USER_DATA",
         },
         "aws_scheduler_schedule.expiry": {
+            "name": f"{PROJECT}-gpu-ec2",
+            "group_name": f"{PROJECT}-gpu-ec2",
             "schedule_expression": f"at({expiry[:19]})",
             "schedule_expression_timezone": "UTC",
             "state": "ENABLED",
             "flexible_time_window": [{"mode": "OFF"}],
+            "target": [
+                {"arn": "arn:aws:scheduler:::aws-sdk:ec2:terminateInstances"}
+            ],
         },
         "aws_iam_role_policy_attachment.ssm_core": {
             "policy_arn": "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"

@@ -25,6 +25,7 @@ has run locally, and what the AWS plan reviewed.
 | verify project, owner, expiry, and cost tags on GPU-lab resources | [mocked Terraform tag test](tickets/ticket79.md) |
 | prove GPU-root inputs reject unapproved hardware, regions, and storage sizes | [mocked Terraform input-constraint tests](tickets/ticket80.md) |
 | review the exact GPU saved plan without printing sensitive plan values | [saved-plan review ticket](tickets/ticket81.md) |
+| verify the GPU expiry plan invokes the project-scoped EC2 termination action | [expiry target validation ticket](tickets/ticket82.md) |
 | guarded EC2 host configuration, deployment, smoke checks, incident drill, and evidence capture | [manual reproduction guide](gpu-lab/MANUAL_REPRODUCTION_GUIDE.md#use-the-guarded-host-operation-wrappers-after-the-manual-lesson) · [ticket 64](tickets/ticket64.md) |
 | bounded Triton kernel and Nsight profiler preparation | [CUDA performance lab](../benchmarks/cuda_performance/README.md) · [ticket 65](tickets/ticket65.md) |
 | reconciliation of model, quota, CI, and public-evidence facts | [ticket 66](tickets/ticket66.md) |

@@ -147,13 +147,20 @@ def validate(
 
     schedule = after["aws_scheduler_schedule.expiry"]
     expected_schedule = f"at({expected_expiry[:19]})"
+    target = _nested(schedule, "target")
     if (
-        schedule.get("schedule_expression") != expected_schedule
+        schedule.get("name") != f"{PROJECT}-gpu-ec2"
+        or schedule.get("group_name") != f"{PROJECT}-gpu-ec2"
+        or schedule.get("schedule_expression") != expected_schedule
         or schedule.get("schedule_expression_timezone") != "UTC"
         or schedule.get("state") != "ENABLED"
         or _nested(schedule, "flexible_time_window").get("mode") != "OFF"
+        or target.get("arn") != "arn:aws:scheduler:::aws-sdk:ec2:terminateInstances"
     ):
-        raise ValueError("saved plan expiry schedule does not match the exact reviewed UTC deadline")
+        raise ValueError(
+            "saved plan expiry must use the project schedule group and exact UTC deadline "
+            "to invoke EC2 TerminateInstances"
+        )
 
     return changes
 
@@ -186,7 +193,7 @@ def main() -> int:
     print(f"Instance: one g6.xlarge in {expected_az}; Ubuntu AMI matches reviewed input")
     print("Root disk: encrypted gp3, 100-120 GiB, deleted with the instance")
     print("Network: no inbound rules; outbound TCP 80 and 443 only")
-    print("Metadata: IMDSv2 required; expiry: exact reviewed UTC deadline")
+    print("Metadata: IMDSv2 required; expiry: exact UTC deadline invokes EC2 TerminateInstances")
     for address in sorted(EXPECTED_ADDRESSES):
         print(f"- create {address}")
     return 0

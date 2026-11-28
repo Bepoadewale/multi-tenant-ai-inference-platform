@@ -73,10 +73,15 @@ def _plan() -> dict:
             "user_data": "SENTINEL_PRIVATE_USER_DATA",
         },
         "aws_scheduler_schedule.expiry": {
+            "name": "multi-tenant-ai-inference-platform-gpu-ec2",
+            "group_name": "multi-tenant-ai-inference-platform-gpu-ec2",
             "schedule_expression": "at(2026-11-28T18:00:00)",
             "schedule_expression_timezone": "UTC",
             "state": "ENABLED",
             "flexible_time_window": [{"mode": "OFF"}],
+            "target": [
+                {"arn": "arn:aws:scheduler:::aws-sdk:ec2:terminateInstances"}
+            ],
         },
         "aws_iam_role_policy_attachment.ssm_core": {
             "policy_arn": "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
@@ -148,12 +153,12 @@ def test_accepts_exact_safe_single_l4_plan() -> None:
             lambda plan: _change(plan, "aws_instance.gpu").update(instance_type="g6.2xlarge"),
             "instance settings",
         ),
-            (
-                lambda plan: _change(plan, "aws_instance.gpu")["metadata_options"][0].update(
-                    http_put_response_hop_limit=2
-                ),
-                "one-hop metadata",
+        (
+            lambda plan: _change(plan, "aws_instance.gpu")["metadata_options"][0].update(
+                http_put_response_hop_limit=2
             ),
+            "one-hop metadata",
+        ),
         (
             lambda plan: _change(plan, "aws_security_group.gpu").update(
                 ingress=[{"protocol": "-1", "from_port": 0, "to_port": 0, "cidr_blocks": ["0.0.0.0/0"]}]
@@ -177,17 +182,29 @@ def test_accepts_exact_safe_single_l4_plan() -> None:
             ),
             "required project tags",
         ),
-            (
-                lambda plan: _change(plan, "aws_route_table.gpu").update(
-                    tags={**TAGS, "cost_scope": "other-project"}
-                ),
-                "required project tags",
+        (
+            lambda plan: _change(plan, "aws_route_table.gpu").update(
+                tags={**TAGS, "cost_scope": "other-project"}
             ),
+            "required project tags",
+        ),
         (
             lambda plan: _change(plan, "aws_scheduler_schedule.expiry").update(
                 schedule_expression="at(2026-11-28T20:00:00)"
             ),
-            "exact reviewed UTC deadline",
+            "exact UTC deadline",
+        ),
+        (
+            lambda plan: _change(plan, "aws_scheduler_schedule.expiry")["target"][0].update(
+                arn="arn:aws:scheduler:::aws-sdk:lambda:invoke"
+            ),
+            "TerminateInstances",
+        ),
+        (
+            lambda plan: _change(plan, "aws_scheduler_schedule.expiry").update(
+                group_name="unrelated"
+            ),
+            "project schedule group",
         ),
     ],
 )

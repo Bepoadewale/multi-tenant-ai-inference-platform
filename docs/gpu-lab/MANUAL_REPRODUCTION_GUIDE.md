@@ -195,9 +195,10 @@ Plans and Terraform state may contain sensitive data. Keep them outside public G
 The wrapper requires the exported `EXPECTED_AWS_ACCOUNT_ID`, `GPU_EC2_AZ`,
 `GPU_EC2_UBUNTU_AMI_ID`, and `GPU_EC2_EXPIRES_AT` values above. It checks the saved
 plan's exact resources and key GPU, storage, metadata, tag, network, and expiry
-settings, then prints a bounded summary rather than Terraform's raw JSON plan. The
-plan prints a SHA-256 digest; record it privately as `GPU_EC2_PLAN_SHA256` after
-reviewing the exact saved plan.
+settings. It also shows that the one-time schedule uses the project group and invokes
+EC2 instance termination. It then prints a bounded summary rather than Terraform's
+raw JSON plan. The plan prints a SHA-256 digest; record it privately as
+`GPU_EC2_PLAN_SHA256` after reviewing the exact saved plan.
 
 Before proceeding, inspect the exact saved plan and record:
 
