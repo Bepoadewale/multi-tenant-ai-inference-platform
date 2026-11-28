@@ -1,4 +1,4 @@
-.PHONY: install test lint audit run demo load-test bootstrap-local smoke status public-demo demo-local demo-overload demo-gateway-cancellation demo-redis-outage demo-routing demo-failure demo-timeout demo-metering demo-observability demo-recovery demo-model-registry demo-release-control demo-capacity demo-operational-evidence demo-remediation demo-agent-tools demo-self-service demo-edge-adapter demo-sandboxed-agent demo-operator-console demo-flagship verify clean-local destroy-local helm-lint terraform-validate cloud-delivery-validate pilot-guardrails-plan pilot-cloud-plan pilot-cloud-apply pilot-cloud-push-image pilot-cloud-bootstrap-runtime pilot-cloud-smoke pilot-cloud-validate pilot-cloud-destroy container-dependencies-validate container-dependencies-audit gpu-ec2-preflight gpu-ec2-validate gpu-compose-config gpu-observability-validate gpu-benchmark-plan gpu-benchmark gpu-gateway-benchmark-plan gpu-gateway-benchmark gpu-evaluation-plan gpu-cuda-plan gpu-cuda-matmul gpu-cuda-vector-add gpu-triton-plan gpu-ec2-triton gpu-release-controller-help gpu-ansible-validate gpu-ec2-bootstrap-preview-plan gpu-ec2-preview-plan gpu-ec2-plan gpu-ec2-apply gpu-ec2-configure gpu-ec2-deploy gpu-ec2-smoke gpu-ec2-benchmark gpu-ec2-evaluate gpu-ec2-incident-drills gpu-ec2-evidence gpu-ec2-destroy-plan gpu-ec2-destroy gpu-ec2-destroy-apply gpu-ec2-verify-clean
+.PHONY: install test lint audit run demo load-test bootstrap-local smoke status public-demo demo-local demo-overload demo-gateway-cancellation demo-redis-outage demo-routing demo-failure demo-timeout demo-metering demo-observability demo-recovery demo-model-registry demo-release-control demo-capacity demo-operational-evidence demo-remediation demo-agent-tools demo-self-service demo-edge-adapter demo-sandboxed-agent demo-operator-console demo-flagship verify clean-local destroy-local helm-lint terraform-validate cloud-delivery-validate pilot-guardrails-plan pilot-cloud-plan pilot-cloud-apply pilot-cloud-push-image pilot-cloud-bootstrap-runtime pilot-cloud-smoke pilot-cloud-validate pilot-cloud-destroy container-dependencies-validate container-dependencies-audit gpu-ec2-preflight gpu-ec2-validate gpu-compose-config gpu-observability-validate gpu-benchmark-plan gpu-benchmark gpu-gateway-benchmark-plan gpu-gateway-benchmark gpu-evaluation-plan gpu-cuda-plan gpu-cuda-matmul gpu-cuda-vector-add gpu-triton-plan gpu-ec2-triton gpu-release-controller-help gpu-ansible-validate gpu-ec2-bootstrap-preview-plan gpu-ec2-bootstrap-plan gpu-ec2-bootstrap-apply gpu-ec2-bootstrap-migrate gpu-ec2-preview-plan gpu-ec2-plan gpu-ec2-apply gpu-ec2-configure gpu-ec2-deploy gpu-ec2-smoke gpu-ec2-benchmark gpu-ec2-evaluate gpu-ec2-incident-drills gpu-ec2-evidence gpu-ec2-destroy-plan gpu-ec2-destroy gpu-ec2-destroy-apply gpu-ec2-verify-clean
 PYTHON ?= python3.12
 VENV := .venv
 PY := $(VENV)/bin/python
@@ -170,6 +170,12 @@ gpu-release-controller-help:
 	$(PY) scripts/gpu_release_controller.py --help
 gpu-ec2-bootstrap-preview-plan:
 	./scripts/gpu-ec2-bootstrap-preview-plan.sh
+gpu-ec2-bootstrap-plan:
+	./scripts/gpu-ec2-bootstrap-plan.sh
+gpu-ec2-bootstrap-apply:
+	./scripts/gpu-ec2-bootstrap-apply.sh
+gpu-ec2-bootstrap-migrate:
+	./scripts/gpu-ec2-bootstrap-migrate.sh
 gpu-ec2-preview-plan:
 	./scripts/gpu-ec2-preview-plan.sh
 gpu-ec2-plan:

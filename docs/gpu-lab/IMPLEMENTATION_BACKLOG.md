@@ -76,9 +76,9 @@ Old quota-denial statements below are dated historical snapshots, not current st
   CPU clean-room record. PRs #66 and #67 passed `46164644804` and `46164896175`. PR
   #68 head `ff88165` run `46165126075`, #69 head `f5915e8` run `46165420078`, and
   #70 head `1679aa7` run `46165597103`, and #71 head `127d0a8` run `46166173924` are
-  #68–#70 runs passed; #71 run `46166173924` and PR #72 head `81cb61f` run
-  `46166571475` are being watched. PR #73 quota reconciliation is locally rebased on
-  #72 and needs fresh CI. The catalog-based
+  PRs #68–#72 passed, including #71 `46166173924` and #72 `46166571475`. PR #73 head
+  `4bdf624` run `46167001745` is in progress. PR #74 bootstrap guardrails are locally
+  rebased on #73 and need fresh CI after publication. The catalog-based
   cost estimate is `$18.51932705`, not
   authorization. PR #53
   code head `e623b75` passed all five checks in `46023306230`, including a Linux AMD64

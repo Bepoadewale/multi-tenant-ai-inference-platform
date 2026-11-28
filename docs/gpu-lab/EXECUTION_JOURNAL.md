@@ -2314,3 +2314,14 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **GitHub/CI:** PR #72 refreshed run `46166571475` and PR #71 run `46166173924` were still being watched. PR #73 must be published with an exact lease against old head `b50c5a96`, then its current CI must be observed.
 - **AWS / GPU / cost:** no AWS calls or mutations in this work session; no GPU, model download, instance-hour, or spend. The $25 ceiling remains. Quota approval does not clear remote-state, Budget/recipient, exact plan/cost, capacity, expiry, or separate apply gates.
 - **Next:** complete links/diff validation, correct the ticket and PR body for the current state, push the refreshed PR, and watch one CI run.
+
+## 2026-11-28 — Restack and validate guarded bootstrap package in PR #74
+
+- **Date and time:** 2026-11-28 16:50 UTC.
+- **Phase:** Phase 2 static infrastructure safety gates; no cloud operation.
+- **Starting state:** PR #74 `codex/gpu-bootstrap-guardrails` was based on old PR #73 head `b50c5a9`; current PR #73 head is `4bdf624`.
+- **Changes:** rebased the bootstrap scripts and Terraform-native S3 lockfile minimum (Terraform `>=1.10.0`) onto refreshed PR #73. Kept current parent goal, status, and journal during conflicts and retained both bootstrap implementation commits. Updated ticket #74 to separate prior full validation from current focused checks.
+- **Validation:** six focused bootstrap fake-tool tests pass; `bash -n` passes for plan/apply/migrate/common scripts; `make terraform-validate` passes for bootstrap, existing EKS, and GPU roots. The first test command `pytest` was unavailable; reran using `.venv/bin/python -m pytest`. No AWS-backed plan was run.
+- **GitHub/CI:** PR #71 run `46166173924` and PR #72 run `46166571475` passed. PR #73 run `46167001745` is in progress. PR #74 current rebased head is not yet published and needs fresh CI.
+- **AWS / GPU / cost:** no AWS calls or mutations, instance, GPU, model download, or spend. Budget recipient, remote state, exact plan/cost, capacity, expiry, and separate apply authorization remain open.
+- **Next:** review docs and scripts, complete changed-file link checks and `git diff --check`, publish PR #74 with an exact lease against old head `944b4573dd95450d27ab977be7caf2cedf9ad5ab`, update its PR body, and monitor one CI run.

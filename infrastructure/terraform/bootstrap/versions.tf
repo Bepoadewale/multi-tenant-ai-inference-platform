@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.8.0"
+  required_version = ">= 1.10.0, < 2.0.0"
 
   # Bootstrap initially runs with `-backend=false`. After this bucket and lock table
   # exist, operators explicitly migrate local bootstrap state to this backend.
