@@ -45,7 +45,7 @@ cost is incurred.
 
 ## Outstanding work
 
-- Publish this focused PR stacked on PR #75 and verify its final-head CI.
+- Verify the final-head CI for PR #76, which is stacked on PR #75.
 
 ## Acceptance status
 
