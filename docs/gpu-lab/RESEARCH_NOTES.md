@@ -227,12 +227,13 @@ resource/runtime estimate and assumptions are recorded in [`COST_REPORT.md`](COS
 - Docker's [Compose GPU guide](https://docs.docker.com/compose/how-tos/gpu-support/)
   requires `capabilities: [gpu]` for a service device reservation and supports a
   `count: 1` assignment. `count` and `device_ids` cannot be set together. This is
-  device visibility to a container, not physical GPU isolation between tenants. A
-  single L4 should be allocated only to the vLLM workload container; other services
-  should not receive GPU access.
+  device visibility to a container, not physical GPU isolation between tenants. The
+  single L4 is visible to vLLM for inference and DCGM Exporter for telemetry; other
+  services do not receive GPU access. This shared visibility does not provide an
+  exclusive allocation or hardware isolation.
 - NVIDIA's [DCGM Exporter releases](https://github.com/NVIDIA/dcgm-exporter/releases)
-  list 4.8.4 as the current release at research time and report tested DCGM 4.6.1
-  components. The [exporter release strategy](https://github.com/NVIDIA/dcgm-exporter/blob/main/RELEASE.md)
+  listed 4.8.4 on 2026-11-26, with tested DCGM 4.6.1 components at that time. The
+  [exporter release strategy](https://github.com/NVIDIA/dcgm-exporter/blob/main/RELEASE.md)
   distinguishes a versioned full image tag from mutable `latest`. The project should
   pin the complete exporter/image version and digest, inspect the metric field set,
   and run a live scrape before using any metric name or alert in a dashboard. The
@@ -249,6 +250,78 @@ resource/runtime estimate and assumptions are recorded in [`COST_REPORT.md`](COS
 These are source-informed design inputs, not a tested container, exporter, metric,
 trace, or alert configuration. All package versions and image digests must be checked
 again before implementation and the paid run.
+
+## 2026-11-27 — Single-host GPU observability configuration research
+
+- NVIDIA's [DCGM Exporter installation guide](https://docs.nvidia.com/datacenter/dcgm/latest/installation/install-dcgm-exporter.html)
+  requires an NVIDIA driver and GPU-visible container runtime and recommends matching
+  the exporter with the DCGM version listed in that release's notes. It documents
+  custom collector CSVs and warns that `SYS_ADMIN` is needed for profiling fields.
+  The profile therefore requests only ordinary device telemetry and does not add
+  `SYS_ADMIN`; that least-privilege assumption still needs a live L4 check.
+- NVIDIA's [4.9.0 release notes](https://github.com/NVIDIA/dcgm-exporter/releases/tag/4.9.0)
+  list DCGM 4.7.0 as the image's bundled/tested version. The release changes several
+  metric names and units, including GPU utilization from percent to a 0-to-1 ratio,
+  framebuffer memory from MiB to bytes, and driver labels. The dashboard uses
+  `DCGM_FI_DEV_GPU_UTIL_RATIO`, `DCGM_FI_DEV_FB_USED_BYTES`, and
+  `DCGM_FI_DEV_FB_CAPACITY_BYTES`; runtime output must still be checked on the L4.
+- The [official vLLM metrics reference](https://docs.vllm.ai/en/latest/design/metrics/)
+  documents `vllm:` metric names for its V1 engine, including request-state gauges,
+  KV-cache use, and TTFT histograms. This replaces the older unprefixed expression in
+  the previous GPU dashboard. The selected image's actual engine version must be
+  checked before trusting those series.
+- Official release pages reviewed for the observability candidates: Prometheus
+  [3.16.0](https://github.com/prometheus/prometheus/releases/tag/v3.16.0), Node Exporter
+  [1.12.1](https://github.com/prometheus/node_exporter/releases/tag/v1.12.1), Grafana
+  [13.3.2](https://github.com/grafana/grafana/releases/tag/v13.3.2), Alertmanager
+  [0.35.0](https://github.com/prometheus/alertmanager/releases/tag/v0.35.0), Tempo
+  [3.1.1](https://github.com/grafana/tempo/releases/tag/v3.1.1), and OpenTelemetry
+  Collector Contrib [0.166.0](https://github.com/open-telemetry/opentelemetry-collector-contrib/releases/tag/v0.166.0).
+  Registry manifest digests were read with `docker buildx imagetools inspect`; this
+  fetched image metadata only, not image layers. Compose pins the multi-architecture
+  manifest digests. Recheck them before the execution batch.
+- Grafana's [Tempo 2.x to 3.0 migration guide](https://grafana.com/docs/tempo/latest/set-up-for-tracing/setup-tempo/migrate-to-3/)
+  says Tempo 3 removes the `ingester` and `compactor` blocks and uses a `live_store`
+  path in monolithic mode. The local CPU stack remains on Tempo 2.7.1, so the GPU
+  profile has a separate Tempo 3.1 configuration rather than reusing its older file.
+  A pinned-image config check is still required before launch.
+- The [Prometheus node_exporter guide](https://prometheus.io/docs/guides/node-exporter/)
+  describes host filesystem and namespace access for host metrics. Node Exporter in
+  this single-host profile uses host PID/network namespaces and a read-only host-root
+  mount with all Linux capabilities dropped. It has no published port, but host
+  network mode means it listens on the EC2 host; the no-inbound security-group rule
+  must be independently verified and Prometheus is configured to scrape through
+  Docker's `host-gateway` alias.
+- Redis does not expose Prometheus metrics itself, so the current Redis target uses
+  the externally maintained [Redis Exporter](https://github.com/oliver006/redis_exporter).
+  Its official release page lists v1.99.0 on 2026-11-24; its registry manifest digest
+  is `sha256:2c0cdc2452096b5af460d870e72fa6ee2ebb971780f443a616885685d2c0ebad`. The
+  image is configured to
+  connect only to the private Compose Redis service. No key scanning or per-key data
+  export flags are enabled. Check the live `redis_up` series and exporter version
+  before relying on it.
+- The [Prometheus configuration reference](https://prometheus.io/docs/prometheus/latest/configuration/configuration/)
+  supports explicit static scrape targets and rule files. The profile sets short
+  retention and bounded in-memory TSDB storage because this is a disposable lab.
+  Alert thresholds are diagnostic laboratory values, not production SLOs; Alertmanager
+  is configured for its local UI only and sends no external notifications.
+
+These findings informed the static Compose and dashboard candidate being prepared for PR #46. A
+profile-specific OpenTelemetry Collector configuration removes common authorization,
+cookie, prompt/completion, request/response body, URL, and database statement
+attributes before exporting and omits the debug-to-stdout exporter. This is defense
+in-depth rather than proof that every future instrumentation path is content-free.
+`make gpu-observability-validate` checks the configuration using pinned native
+validators and is wired into static CI. Compose parsing and dashboard JSON syntax
+passed locally. The pinned Prometheus validator
+accepted the scrape config and five alert rules; the pinned Alertmanager validator
+accepted its route; and pinned Tempo 3.1 and OTel Collector configuration checks
+passed. Tempo's first validation attempt found a real compaction-nesting error; it was
+fixed and the check passed. Prometheus, Alertmanager, Tempo, and OTel Collector layers
+were pulled to the local Docker cache only for config validation. No GPU image was
+pulled, no profile exporter/service was started, and no real metrics, alerts, or traces
+were produced. Live DCGM fields, vLLM series, host-network access, and request/trace
+correlation remain unverified until the approved single-L4 batch.
 
 ## 2026-11-27 — Monitoring, quota-state, model evaluation, and automation research
 
@@ -288,8 +361,8 @@ again before implementation and the paid run.
   This research does not authorize redistribution of model weights.
 - Docker's [Compose GPU support guide](https://docs.docker.com/compose/how-tos/gpu-support/)
   requires GPU capability reservation and allows a count of one. Device visibility
-  does not give tenant isolation or partition the L4; only vLLM should receive the
-  device in the lab profile.
+  does not give tenant isolation or partition the L4; vLLM and the hardware telemetry
+  exporter share visibility in the lab profile.
 - Ansible's [playbook guide](https://docs.ansible.com/projects/ansible/latest/playbook_guide/playbooks_intro.html)
   describes desired-state modules as commonly idempotent but warns that not every
   playbook/module is. Run the configuration twice and inspect the second run for
