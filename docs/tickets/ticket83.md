@@ -1,6 +1,6 @@
 # Ticket 83 — Bind the GPU expiry schedule to this project
 
-**Status:** Implementation is prepared on `codex/gpu-expiry-binding-review`, stacked on PR #82. Focused tests pass locally; pull request and required CI are pending. No AWS operation.
+**Status:** Implementation is prepared on `codex/gpu-expiry-binding-review`, restacked on PR #82 head `0164511`. The combined suite passes 39 tests after restacking, Ruff passes, and the docs checker validates 34 files. PR publication and current-head CI are pending. No AWS operation.
 
 ## Objective
 
@@ -47,7 +47,7 @@ termination.
   configuration section (39 tests across both files).
 - [ ] Validate the expression shape against a real AWS-provider plan when the
   authorized remote backend and GPU quota gates permit a plan.
-- [ ] Publish the PR, pass all required CI, and receive owner review. No merge or
+- [ ] Publish the PR, pass all required CI on the restacked head, and receive owner review. No merge or
   AWS apply is authorized by this ticket.
 
 ## Validation commands and results
@@ -73,6 +73,10 @@ shell-wrapper suite. The production guard failed closed because the fixture had 
 instance expressions as Terraform's documented plan JSON. The combined saved-plan
 and wrapper suites then passed **39 tests**; PR CI must rerun on the corrected commit
 before acceptance.
+
+After restacking on PR #82 head `0164511`, the combined suite again passed 39 tests,
+Ruff passed, and `make gpu-docs-validate` checked 34 Markdown files. Current-head CI
+and live-provider plan JSON verification remain outstanding.
 
 ## Security, cost, and evidence limits
 

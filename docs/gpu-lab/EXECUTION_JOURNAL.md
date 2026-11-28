@@ -2512,3 +2512,23 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **AWS / GPU / cost:** no AWS calls, resources, GPU actions, or spend.
 - **Next:** publish PR #82 with an exact force-with-lease, monitor its CI, then restack
   PR #83 onto the verified new head.
+
+## 2026-11-28 — Bind expiry plan to the project instance and role
+
+- **Date and time:** 2026-11-28 17:31 UTC.
+- **Phase:** Phase 2 saved-plan validation; static and local only.
+- **CI:** PR #77 follow-up run `46169578415`, PR #78 run `46170127067`, and PR #79
+  run `46170178018` passed all six jobs. PR #80 run `46170356996` had five jobs
+  passed and local-e2e pending; PR #81 run `46170595453` had three jobs passed and
+  three pending. PR #82 run `46170895199` had Ansible, GPU observability, and
+  manifests passed, with Python, local-e2e, and supply-chain pending.
+- **Changes:** restacked PR #83 on PR #82 head `0164511`. Its plan validator verifies
+  Terraform configuration references bind the schedule role and termination target
+  to this project's expiry role and single EC2 instance. Preserved current parent
+  status records and recorded PR #83 detail in ticket83.
+- **Validation:** the focused tests passed 39 cases; Ruff passed; docs validation
+  checked 34 files; `git diff --check` passed. Current-head CI and live-provider plan
+  shape verification remain outstanding. No clean-room run.
+- **AWS / GPU / cost:** no AWS calls or mutations, GPU, model download, or spend.
+- **Next:** publish PR #83 with an exact force-with-lease and monitor CI; only then
+  restack the current final queued PR #84.

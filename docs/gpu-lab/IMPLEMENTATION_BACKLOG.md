@@ -17,9 +17,11 @@ Old quota-denial statements below are dated historical snapshots, not current st
 `46169578415` after its earlier local cancellation-demo failure. PR #78 and #79 passed
 all six jobs on their refreshed heads in `46170127067` and `46170178018`. PR #80 run
 `46170356996` has five jobs passed and local-e2e pending. PR #81 run `46170595453` has
-three jobs passed, with Python, local-e2e, and supply-chain pending. PR #82 local head
-`5ff9d3e` passes 35 focused tests, Ruff, and the 33-file docs check; fresh CI is
-pending publication. These static checks do not demonstrate AWS or GPU behavior.
+three jobs passed, with Python, local-e2e, and supply-chain pending. PR #82 run
+`46170895199` has three jobs passed, with Python, local-e2e, and supply-chain pending.
+PR #83 local head `c0cd127` passes 39 focused tests, Ruff, and the 34-file docs check;
+publication and fresh CI are pending. These static checks do not demonstrate AWS or
+GPU behavior.
 
 ## Current state
 
