@@ -9,8 +9,8 @@ engineering is predominantly real L4 execution and validation.
 
 ## Current state
 
-- The worktree is based on open PR #65 head `d72bc28`; PR #65 remains open, non-draft,
-  and its six required checks passed in run `46091506580`.
+- PR #66 is based on open PR #65 head `d72bc28`; PR #65 remains open, non-draft, and
+  its six required checks passed in run `46091506580`.
 - PR #50 remains open and non-draft; its five required checks passed in run
   `46016503614`.
 - A read-only AWS CLI check on 2026-11-28 found applied On-Demand G/VT quota `0.0`.
@@ -43,8 +43,9 @@ engineering is predominantly real L4 execution and validation.
 - [x] Record the pre-quota readiness target in the persistent goal.
 - [x] Record commands and evidence in the execution journal and manifest.
 - [x] Update the implementation status and documentation index.
-- [ ] Pass required CI and obtain human review; do not merge without owner
-  authorization.
+- [x] Pass all six required CI jobs on implementation commit `637eb7d` in run
+  `46092847166`, including one workflow local E2E cycle.
+- [ ] Obtain human review; do not merge without owner authorization.
 
 ## Validation
 
@@ -61,11 +62,12 @@ AWS_PROFILE=ai-platform-pilot-key aws service-quotas \
 ```
 
 The CLI returned zero applied quota and `CASE_OPENED` for the existing four-vCPU
-request. PR #50 and #65 had successful required checks on the recorded heads.
-`git diff --check` passed. A local scan excluding the virtual environment checked 111
-Markdown files and 200 relative file targets; none was missing. GitHub Actions provides
-the normal repository validation. No additional clean-room cycle is planned for this
-documentation-only correction.
+request. PR #50 and #65 had successful required checks on the recorded heads. On
+implementation commit `637eb7d`, all six PR #66 checks passed in run `46092847166`,
+including the workflow's local E2E cycle. `git diff --check` passed. A local scan
+excluding the virtual environment checked 111 Markdown files and 200 relative file
+targets; none was missing. Check the current PR head's required checks in GitHub before
+review. No separate manual clean-room cycle is planned.
 
 ## Security and financial considerations
 
