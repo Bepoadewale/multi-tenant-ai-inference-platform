@@ -49,7 +49,8 @@ verified role tokens before these controls can be used to deploy anything.
 
 ## Validation
 
-- Focused local tests: 7 passed.
+- Focused local tests before the review follow-up: 7 passed; 8 passed after adding
+  the review regression cases.
 - Ruff on the new implementation and tests: passed.
 - Python bytecode compilation and `git diff --check`: passed.
 - Full `make verify`: Ruff and 123 tests passed, 2 skipped; dependency audit reported
@@ -80,3 +81,12 @@ additional code and later authorized L4 execution within the $25 ceiling.
 
 **Local manifest and approval primitives implemented and unit-tested. Authenticated
 release integration and all live deployment criteria remain outstanding.**
+
+## Review follow-up
+
+Static review exposed two state-integrity gaps. New SQLite records now require a
+pending status and a null approver, leaving approval state changes to `approve()`.
+The manifest reads evaluation report bytes once and uses that exact snapshot for both
+gate checks and the recorded digest. New regression tests cover mutated approval
+fields and an evaluation file overwritten after its read. Ruff and all 8 focused tests
+passed locally. PR CI on the updated, restacked head is still required.

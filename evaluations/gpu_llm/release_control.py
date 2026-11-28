@@ -112,7 +112,8 @@ def create_manifest(
     deployment_alias: str = "candidate",
 ) -> ReleaseManifest:
     """Bind a sanitized passing evaluation to a pinned model and serving runtime."""
-    report = json.loads(Path(report_path).read_text(encoding="utf-8"))
+    report_bytes = Path(report_path).read_bytes()
+    report = json.loads(report_bytes)
     if report.get("schema_version") != 1:
         raise ReleaseValidationError("evaluation report schema_version must be 1")
     if report.get("model_revision") != model_revision:
@@ -151,7 +152,7 @@ def create_manifest(
         runtime_config_sha256=config_digest,
         suite_id=str(report.get("suite_id", "")),
         suite_sha256=str(report["suite_sha256"]),
-        evaluation_report_sha256=digest_file(report_path),
+        evaluation_report_sha256=hashlib.sha256(report_bytes).hexdigest(),
         automatic_gate="pass",
         human_review_required=bool(report.get("human_review_required", True)),
         source_commit=source_commit,
@@ -260,6 +261,10 @@ class ReleaseApprovalStore:
 
     def save(self, plan: ReleasePlan) -> ReleasePlan:
         verify_plan(plan)
+        if plan.status != "PENDING_APPROVAL" or plan.approved_by is not None:
+            raise ReleaseValidationError(
+                "new release plans must be pending approval with no approver"
+            )
         with self._connect() as db:
             db.execute(
                 "INSERT INTO llm_release_plans VALUES (?, ?, ?, ?, ?, NULL)",

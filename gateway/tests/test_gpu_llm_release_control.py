@@ -1,5 +1,7 @@
+import hashlib
 import json
 from dataclasses import replace
+from pathlib import Path
 
 import pytest
 
@@ -66,6 +68,30 @@ def test_manifest_binds_exact_model_runtime_and_sanitized_evaluation(tmp_path):
     assert manifest.vllm_image == IMAGE
 
 
+def test_manifest_hashes_the_same_report_bytes_used_for_gate_validation(
+    tmp_path, monkeypatch
+):
+    report = _report(tmp_path / "report.json")
+    passing_bytes = report.read_bytes()
+    original_read_bytes = Path.read_bytes
+    reads = 0
+
+    def read_then_simulate_concurrent_overwrite(path):
+        nonlocal reads
+        content = original_read_bytes(path)
+        if path == report:
+            reads += 1
+            _report(report, gate="fail", failed=1)
+        return content
+
+    monkeypatch.setattr(Path, "read_bytes", read_then_simulate_concurrent_overwrite)
+    manifest = _manifest(report)
+
+    assert reads == 1
+    assert manifest.evaluation_report_sha256 == hashlib.sha256(passing_bytes).hexdigest()
+    assert json.loads(report.read_text(encoding="utf-8"))["automatic_gate"] == "fail"
+
+
 @pytest.mark.parametrize(
     ("gate", "failed"), [("fail", 1), ("pass", 1)]
 )
@@ -109,14 +135,19 @@ def test_plan_requires_independent_approval_and_stores_audit_identity(tmp_path):
     )
     candidate = _manifest(_report(tmp_path / "candidate.json"))
     store = ReleaseApprovalStore(tmp_path / "release" / "approvals.sqlite")
-    plan = store.save(
-        create_plan(
-            environment="single-l4-lab",
-            requester="release-requester",
-            champion=champion,
-            candidate=candidate,
-        )
+    pending = create_plan(
+        environment="single-l4-lab",
+        requester="release-requester",
+        champion=champion,
+        candidate=candidate,
     )
+
+    with pytest.raises(ReleaseValidationError, match="pending approval with no approver"):
+        store.save(replace(pending, status="APPROVED", approved_by=pending.requester))
+    with pytest.raises(ReleaseValidationError, match="pending approval with no approver"):
+        store.save(replace(pending, status="PENDING_APPROVAL", approved_by="other-reviewer"))
+
+    plan = store.save(pending)
 
     with pytest.raises(ReleaseValidationError, match="different approver"):
         store.approve(plan.plan_id, "release-requester")

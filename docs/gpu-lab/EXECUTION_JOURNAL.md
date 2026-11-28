@@ -1869,3 +1869,22 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Cost:** local-only code and tests; no AWS call, model download, GPU, or spend.
 - **Next:** finish ticket/status records, run the complete local validation suite, then open PR #54 stacked on PR #53. Follow with authenticated approval and a safe host-side sequential deployment/rollback package.
 - **Validation completion:** full `make verify` passed Ruff, 123 tests (2 skipped), and the dependency audit; GPU Compose and observability validation passed, and benchmark/evaluation/CUDA targets remained dry runs with zero model requests or GPU operations. The single-L4 CPU/GPU Compose configuration parsed successfully. No local model-serving containers were started.
+
+## 2026-11-28 — Protect release approval state and report snapshot integrity
+
+- **Phase:** Phase 9 static model-release preparation; PR #54.
+- **Branch / starting head:** `codex/gpu-sequential-llm-release`, remote head
+  `69f0b39`; its upstream evaluation/CUDA stack still needs updated heads.
+- **Starting state:** review found that `save()` accepted caller-edited approval fields
+  because status and approver are excluded from the immutable plan digest, and that
+  manifest creation validated one report read but hashed a second read of the same path.
+- **Changes:** `save()` now only accepts new plans in `PENDING_APPROVAL` with no
+  approver. Manifest creation reads the report once, parses the snapshot, and computes
+  its SHA-256 from those same bytes. Tests cover self-approved/mutated inserts and a
+  simulated concurrent report overwrite after the snapshot read.
+- **Validation:** Ruff passed; the focused release-control suite passed 8 tests;
+  `git diff --check` passed. No model, MLflow service, AWS resource, or GPU was used.
+- **Evidence limits:** tests prove local state and byte-snapshot checks only. They do not
+  establish authenticated identity, live artifact trust, deployment, or rollback.
+- **Next:** publish after restacking on the current predecessor, run PR CI, then reply
+  to and resolve the two review threads with the passing evidence.
