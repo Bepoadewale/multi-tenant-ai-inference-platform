@@ -50,6 +50,10 @@
 - **Published follow-up CI:** commit `9520b6e` was pushed to PR #84. Its six required
   jobs passed in run `46152355082`; local end-to-end completed in 5m29s. Owner review
   is still pending.
+- **Evidence closeout CI:** commit `e8675be` records the package/status work and prior
+  CI result. Its six required jobs passed in run `46152999772`; local end-to-end
+  completed in 6m00s. A separate AWS OIDC-labelled run had no jobs and no logs; the
+  checked workflow only defines `workflow_dispatch`, and no cloud action was run.
 - **Cost/resources:** no package downloads or installations, Docker build/container,
   AWS API call, Terraform plan/apply, model download, GPU operation, or spend.
 - **Next:** keep PR #84 open for owner review; proceed with independent non-billable
