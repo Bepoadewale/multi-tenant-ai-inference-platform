@@ -78,11 +78,15 @@ From the repository root:
 terraform -chdir=infrastructure/terraform/environments/gpu-ec2 init -backend=false
 terraform -chdir=infrastructure/terraform/environments/gpu-ec2 fmt -check -recursive
 terraform -chdir=infrastructure/terraform/environments/gpu-ec2 validate
+make gpu-ec2-validate
 ```
 
 `-backend=false` validates configuration without connecting to the remote state
 bucket. It does not prove an AWS account has quota, capacity, permissions, or working
-SSM/GPU access. Do not use a normal apply during static validation.
+SSM/GPU access. `make gpu-ec2-validate` also runs the mocked-provider Terraform tests
+in `tests/expiry.tftest.hcl`; these assert configuration relationships without AWS
+API calls. They do not prove Scheduler delivery or the guest timer on a real host.
+Do not use a normal apply during static validation.
 
 ## Eventual operator sequence
 
