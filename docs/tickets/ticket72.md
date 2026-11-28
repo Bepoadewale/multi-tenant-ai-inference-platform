@@ -11,9 +11,14 @@ keeping all claims dependent on live NVIDIA L4 execution clearly pending.
 
 The report already had all 28 requested chapter headings and an explicit PRE-GPU
 DRAFT warning. Its first draft was about 2,700 words and deferred several core
-concepts to other documents. The AWS On-Demand G/VT quota remains zero; no lab
-instance or GPU execution has occurred. See the persistent goal, execution journal,
-and evidence manifest for the latest operational state.
+concepts to other documents. AWS has now approved 4.0 On-Demand G/VT vCPUs; this does
+not reserve capacity or authorize an apply. No lab instance or GPU execution has
+occurred. See the persistent goal, execution journal, and evidence manifest for the
+latest operational state.
+
+PR #72 is now rebased onto refreshed PR #71 head `127d0a8`; its current local head
+is `0b1f4df` and requires fresh CI after publication. Earlier PR #72 CI on head
+`c01fbca` is historical and does not validate this restacked head.
 
 ## Research and design
 
@@ -38,7 +43,7 @@ authorized GPU batch.
 - [x] Clearly distinguish logical tenant controls from hardware isolation.
 - [x] Keep measured L4, AWS, benchmark, release, incident, and teardown outcomes pending.
 - [x] Link the work from the documentation index and journal.
-- [ ] Review the report against actual L4 evidence after quota is approved.
+- [ ] Review and replace data-dependent report drafts after actual L4 evidence exists.
 
 ## Commands and validation
 
@@ -61,5 +66,6 @@ was fabricated.
 
 Complete the data-dependent chapters only after a bounded, explicitly authorized
 L4 batch. The user-selected $25 ceiling, one-instance rule, cleanup requirements,
-and quota gate remain in force. This documentation package does not clear any cloud
-authorization gate.
+and launch gates remain in force. Remote state, Budget and verified recipient, exact
+plan/cost, expiry, capacity, and separate apply authorization are still open. This
+documentation package does not clear a cloud authorization gate.

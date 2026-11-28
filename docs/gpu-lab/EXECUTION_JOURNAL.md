@@ -2289,3 +2289,15 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Validation:** 66 relative links across four changed Markdown files resolve and `git diff --check` passes; no runtime test is needed for this documentation-only change.
 - **AWS / GPU / cost:** no mutation, no GPU/model operation, no spend. The catalog estimate remains `$18.51932705` under assumptions and below the $25 ceiling; final exact plan/cost and separate apply authorization remain open.
 - **Next:** publish #71 using an exact lease against old head `a35c6a4`, update its PR body, and watch one CI run.
+
+## 2026-11-28 — Restack report-learning package in PR #72
+
+- **Date and time:** 2026-11-28 16:41 UTC.
+- **Phase:** continuous educational documentation preparation; GPU evidence remains pending.
+- **Starting repository state:** PR #72 branch `codex/gpu-report-learning` was behind refreshed PR #71 head `127d0a8`; old PR #72 remote head was `ef1f5e3`.
+- **Objective:** rebase the report-learning changes onto the current stack and reconcile quota, launch-gate, and CI status.
+- **Changes:** rebased PR #72 to local head `0b1f4df`; kept the refreshed parent journal during conflict resolution; updated ticket, goal, implementation status, and backlog to say quota is approved at 4.0 vCPUs while remaining launch gates stay open.
+- **Validation:** the first link-check attempt used `python`, which is not installed on this workstation; reran with `python3`, and all 7 relative links across the six changed Markdown files resolve. `git diff --check` passes. No code test applies to this documentation-only change.
+- **GitHub/CI:** PR #71 head `127d0a8` has run `46166173924` active. PR #72 remote still points to old head `ef1f5e3`; fresh CI must run after the updated branch is published. Historical CI on `c01fbca` does not validate the restacked code.
+- **AWS / GPU / cost:** read-only status carried forward from the recorded 2026-11-28 check: quota 4.0 is sufficient numerically for one `g6.xlarge`, but AZ capacity, project remote state and locking, Budget and verified recipient, exact plan/cost, independent expiry, and separate apply authorization are not ready. No AWS mutation, GPU operation, model download, or spend occurred.
+- **Next:** finish link/diff review, push with an exact lease against `ef1f5e3`, update PR #72 details, then monitor one fresh CI run and continue the PR stack.
