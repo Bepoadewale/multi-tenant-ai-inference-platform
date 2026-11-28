@@ -164,8 +164,12 @@ on head `b94fc27` in run `46033196309`. No AWS or GPU operation is involved.
 - [x] Persist the plan and both manifests in a shared SQLite volume for the two gateway
   containers on one host; enable WAL and a bounded busy wait.
 - [x] Keep the API unable to access Docker or restart vLLM.
-- [ ] Add host-side verification of current live champion and model file digests.
-- [ ] Implement sequential deployment, readiness checks, and rollback.
+- [x] Add host-side verification of current live champion and model file digests in
+  the dependent host controller (PR #56). Its 16 fake-based tests and CI pass prove
+  local control flow only; checking actual host state and model files remains open.
+- [x] Implement sequential deployment, readiness checks, transaction recovery, and
+  rollback in the dependent host controller (PR #56). Real vLLM rollout, gateway
+  inference, rollback, and interrupted-host recovery remain pending L4 execution.
 
 **Limit:** the champion and model artifact digest are still caller-supplied. This API
 records and checks them against evaluation metadata; it does not prove running state or
