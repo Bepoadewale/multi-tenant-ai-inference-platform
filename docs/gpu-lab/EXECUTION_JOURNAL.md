@@ -1,21 +1,21 @@
-## 2026-11-28 — PR #56 release-manifest review fix passed CI
+# GPU Lab Execution Journal
 
-## 2026-11-28 — PR #56 release-manifest review fix passed CI
+## 2026-11-28 — Remove private quota request references from public records
 
-- **Phase:** Phase 9 static release tooling; Phase 2 remains quota-blocked.
-- **Branch / PR:** `codex/gpu-release-host-controller`, PR #56, tested head
-  `473db1cee7fa0aacb826d7a6e94fbf020c7c9c74`.
-- **Validation:** GitHub Actions run `46105533251` passed all five required jobs,
-  including the fresh-runner local CPU end-to-end sequence. Local Ruff and the focused
-  release-controller suite passed **17 tests**. Governance validation records the
-  original successful clean-room sequence and this updated-head run.
-- **Result:** the `manifest-from-report` review finding is fixed; no host-state files
-  are required to generate a metadata manifest. The CLI regression fails if a host
-  controller is constructed during manifest generation.
-- **AWS / GPU / cost:** none; no AWS operation, EC2 host, model artifact, GPU, or spend.
-- **Next:** reply to and resolve the release-controller review finding; continue
-  remaining non-billable work and do not merge without authorization.
-
+- **Phase:** Phase 2 evidence hygiene; no AWS or GPU operation.
+- **Branch/PR:** `codex/gpu-network-plan-review`, PR #84, starting at clean head
+  `b27423f`.
+- **Finding:** an inherited historical evidence row and journal entries included a
+  private AWS quota-request reference. The identifier was not required to explain the
+  decision or validate the current applied quota.
+- **Change:** replaced the identifier in six documentation locations with a clear
+  redaction marker; preserved the historical request status and evidence claims.
+- **Validation:** `git diff --check` passed before adding this entry; documentation
+  link validation and PR CI remain to run on the resulting commit.
+- **Cost/resources:** no AWS query or mutation, plan/apply, GPU operation, model
+  download, package installation, or spend.
+- **Next:** validate and publish this sanitization on PR #84; then continue with
+  independent PR conflict repair. Do not merge without owner review.
 
 ## 2026-11-28 — Refresh static package candidates and quota/backend status
 
@@ -196,16 +196,6 @@
 - **Limitations and cost:** this proves local control flow only. No AWS, GPU, model download, host rollout, or spend occurred.
 - **Next:** finish the current branch rebase, rerun focused tests, publish with an exact force-with-lease, and validate in CI.
 
-
-## 2026-11-28 — Quota approval and launch-gate reconciliation
-
-- **Phase:** Phase 2 preflight; quota is approved, but no GPU provisioning is authorized yet.
-- **Verification:** read-only Service Quotas history reports `CASE_CLOSED` and the applied On-Demand G/VT quota is 4.0 vCPUs. The exact project Terraform state bucket, lock table, and Budget are absent. Billing alternate contact is not configured; a valid private Budget alert recipient has not been verified. No project-tagged AWS resources exist.
-- **Decision:** quota approval clears the capacity gate only. Complete remote-state setup, budget recipient and alarm gates, exact saved-plan and fresh price/capacity review, runtime expiry controls, and explicit apply authorization before any paid mutation. Keep GPU work in one prepared batch within the $25 ceiling.
-- **Cost:** zero GPU instance-hours; no project resources or cloud spend.
-
-# GPU Lab Execution Journal
-
 ## 2026-11-28 — Rebase authenticated release planning onto approval-integrity fix
 
 - **Phase:** Phase 9 static model-release preparation; quota-gated GPU validation remains pending.
@@ -217,13 +207,11 @@
 
 ## 2026-11-27 — Quota status rechecked without mutation
 
-
-## 2026-11-27 — Quota status rechecked without mutation
-
 - **Phase:** Phase 2 static-only EC2 preparation; no AWS mutation.
-- **Historical state at that check:** the owner-provided AWS email reported that the initial 4-vCPU request was denied. The owner reported manually sending an appeal through the existing case. At that time, read-only Service Quotas history showed `CASE_OPENED` and applied quota `0.0` vCPUs. This historical snapshot is superseded by the 2026-11-28 read-only check, which shows `CASE_CLOSED` and 4.0 applied vCPUs.
-- **Decision at that time:** do not submit a duplicate request or start billable infrastructure. Continue non-billable code, deployment, and runbook preparation.
+- **Current state:** AWS email supplied by the owner reports that the initial 4-vCPU request was denied. The owner reports manually sending an appeal through the existing case. The latest read-only Service Quotas history still reports `CASE_OPENED`; applied quota is `0.0` vCPUs. These sources have not yet reconciled.
+- **Decision:** do not submit a duplicate request or start billable infrastructure. Continue non-billable code, deployment, and runbook preparation.
 - **Cost:** no resources or GPU instance-hours used by this check.
+
 ## 2026-11-27 — Attempt the authorized quota-case update with AWS CLI
 
 - **Phase:** Phase 2 — static-only EC2 preparation; GPU execution remains blocked.
@@ -260,7 +248,7 @@
 - **Phase:** Phase 2 static-only preflight; no cloud resource creation or spend.
 - **Command:** read-only AWS Service Quotas queries in `us-east-1` checked the existing
   request and applied G/VT quota using `ai-platform-pilot-key`.
-- **Result:** request `[reference redacted]` remains
+- **Result:** request `[request reference redacted]` remains
   `CASE_OPENED`, requested value `4.0`; the applied `Running On-Demand G and VT
   instances` quota is `0.0` vCPUs.
 - **Decision:** do not retry the request or launch infrastructure. This is status
@@ -783,7 +771,7 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   recorded.
 - **Action and result:** submitted an account-level request for 4 On-Demand G/VT vCPUs
   in `us-east-1`, enough for the planned single `g6.xlarge`. Request ID:
-  `[reference redacted]`. AWS accepted the request and reports
+  `[request reference redacted]`. AWS accepted the request and reports
   `PENDING`; an independent `get-requested-service-quota-change` query confirmed the
   status immediately after submission.
 - **Financial/security boundary:** this is a quota control-plane request, not an EC2
@@ -1014,7 +1002,7 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Phase:** Phase 1 official research supporting Phase 3; no cloud or GPU execution.
 - **Branch / PR:** `codex/gpu-software-compatibility`, prepared on the PR #32 foundation
   branch at `da2567e`; PR #37 is not yet open.
-- **Starting state:** worktree clean; quota request (reference redacted)
+- **Starting state:** worktree clean; quota request `[request reference redacted]`
   still `CASE_OPENED`, with applied G/VT quota 0 vCPUs. PR #36's existing CI watcher
   session `5600` was live; run `45938690893` had manifests and supply-chain passed,
   Python passed, while local-e2e remained pending.
@@ -1048,27 +1036,12 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   push its branch, open PR #37 against PR #32, and let its required checks reach a
   terminal state. Continue using the existing PR #36 watcher only.
 
-## 2026-11-28 — Sanitize model-cache filesystem errors
-
-- **Phase:** Phase 5 model-integrity preparation; PR #38 review follow-up.
-- **Branch / starting head:** `codex/model-artifact-integrity`, PR #38 head `2d2d417`.
-- **Finding:** a permission failure from `Path.open()` can include the complete local
-  cache path, and the CLI printed that exception verbatim.
-- **Change:** classify missing-file and permission errors with safe fixed messages;
-  report other operating-system failures by error class only. Added a CLI test whose
-  simulated `PermissionError` contains the secret path and asserts it is absent from
-  stderr.
-- **Validation:** Ruff passed, 9 focused tests passed, bytecode compilation passed,
-  and `git diff --check` passed. No model file was downloaded and no AWS/GPU work was
-  performed.
-- **Next:** publish the fix, watch current-head CI, then resolve the review thread with
-  the exact passing evidence.
 ## 2026-11-27 — Quota denial and support-path investigation
 
 - **Phase:** Phase 2 remains static-only; GPU execution is blocked.
 - **Starting state:** PR #38 head `5256060` is under its one active CI watcher. No GPU
-  resources exist or were created. The request identifier is omitted from this public
-  journal; do not create another request.
+  resources exist or were created. The existing quota request ID is recorded in the
+  project ledger; do not create another request.
 - **New evidence:** the owner provided an AWS email stating that the 4-vCPU On-Demand
   G/VT quota increase was denied and that the case may be reopened with a detailed use
   case. A read-only Service Quotas history query still reports `CASE_OPENED` for the
@@ -1473,51 +1446,6 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   refresh shared status docs and PR descriptions. The single-L4 experiment still
   requires quota approval and the complete $25 cost/plan authorization gate.
 
-## 2026-11-28 — Fix vLLM benchmark tokenizer selection and failure cleanup
-
-- **Phase:** Phase 8 static benchmark preparation; PR #47.
-- **Branch:** `codex/gpu-benchmark-preparation`; fix committed as `ac4184b` and pushed
-  to PR #47.
-- **Starting state:** PR review identified that vLLM's benchmark client would treat
-  the API alias `gpu-default` as the tokenizer model, and that timeout/interruption
-  cleanup used the final matrix item instead of the item currently running.
-- **Research:** inspected the official vLLM v0.34.0 `bench serve` implementation at
-  `https://github.com/vllm-project/vllm/blob/v0.34.0/vllm/benchmarks/serve.py`; when
-  `--tokenizer` is omitted, it uses `--model` as the tokenizer ID. The checked-in API
-  alias is not the model repository ID.
-- **Changes:** added `model_id` to the workload matrix and pass it via `--tokenizer`
-  while retaining the served alias for `--model`. The runner now stores each command
-  with its exact container name and uses that name for timeout/interruption cleanup.
-  Tests cover the generated flags and both failure paths on the first run of a
-  multi-case matrix.
-- **Validation:** Ruff passed using the existing Python environment in the adjacent
-  PR #57 worktree; `gateway/tests/test_gpu_benchmark_runner.py` passed all 3 tests.
-  `make gpu-benchmark-plan` generated 11 cases and 33 commands; `git diff --check`
-  passed. The first attempt to use a PR-local `.venv` failed because this detached
-  worktree has no such environment; using the already installed hash-locked
-  environment avoided changing project dependencies. No Docker service, model
-  download, benchmark request, AWS resource, or GPU was used.
-- **Evidence:** PR #47 head `ac4184b` passed all five required CI jobs in run
-  `46107629939`, including Python tests/dry-run, local E2E, Terraform/manifests,
-  observability validation, and supply-chain checks. This is CI/static/local evidence;
-  it does not demonstrate vLLM execution or GPU measurements.
-- **Cloud/cost:** no AWS use, GPU hours, or spend.
-- **Review follow-up:** after the updated checks passed, the two P1 review threads
-  were addressed with code/test evidence and resolved. PR #47 remains open and
-  stacked on PR #46; no merge or cloud work was performed.
-- **Next:** continue static evaluation and operational-preparation review. The $25
-  cap, zero approved G-series quota, and pending appeal continue to block GPU runs.
-
-## 2026-11-28 — Verify benchmark evidence follow-up CI
-
-- **Phase:** Phase 8 static preparation; PR #47 documentation update.
-- **Head and result:** commit `78b6188` passed all five required jobs in run
-  `46108247828`, including local E2E. The evidence manifest and ticket now distinguish
-  the code-head run `46107629939` from this documentation-head run.
-- **Boundary:** these checks did not start vLLM, contact a model, use AWS, or execute a
-  GPU benchmark. No GPU hours or project spend were incurred.
-- **Next:** rebase the evaluation preparation on the current PR #47 head and continue
-  the static review queue.
 ## 2026-11-27 — Prepare a deterministic LLM evaluation suite
 
 - **Phase:** Phase 9 static preparation; no model evaluation.
@@ -1612,56 +1540,6 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Evidence:** exact tool state and its limits are recorded in
   `LOCAL_ENVIRONMENT_READINESS.md` and the evidence manifest.
 
-
-## 2026-11-28 — Harden LLM evaluation scoring and endpoint instructions
-
-- **Phase:** Phase 9 static evaluation preparation; PR #48.
-- **Branch / starting head:** `codex/gpu-evaluation-preparation`, remote head
-  `79e7f8f`; this branch depends on the earlier PR #47 head and must be rebased
-  after PR #47 CI settles.
-- **Starting state:** review found that an expected positive number could match inside
-  a negative answer, invalid completion/usage types could throw before writing the
-  aggregate report, and the evaluator instructions used an unpublished vLLM host port
-  and backend-only model ID at the gateway.
-- **Changes:** signed number boundaries are excluded from exact-number checks;
-  completion content must be a string and usage/token counts must have valid types or
-  the case is recorded as `InvalidCompletionSchema`. The Compose benchmark service
-  mounts the evaluator read-only. The README now documents direct private-network
-  execution through Compose DNS and a separate authenticated gateway path using its
-  loopback port and client-facing `chat-default` alias.
-- **Validation:** Ruff passed; the focused evaluation suite passed 9 tests. The dry-run
-  reported seven cases and `network_requests: 0`; `docker compose config --quiet` and
-  `git diff --check` passed. No model call, container, AWS resource, or GPU was used.
-- **Full-suite attempt:** `make lint` passed, but `make test` could not collect 10
-  gateway modules because this isolated worktree did not contain the ignored
-  `models/tiny-intent-classifier.onnx` file that `make install` normally generates.
-  I did not run `make install`, so no hidden model files were created in this worktree.
-  The focused tests passed; updated PR CI will run the repository setup and full suite.
-- **Failed attempt:** the first new HTTP-mock test run failed because the mock's
-  context manager yielded a different mock object. Setting `__enter__` to return the
-  configured response fixed the test harness; no production behavior was altered to
-  satisfy the mock.
-- **Evidence limits:** these tests demonstrate local response-shape handling and
-  static invocation configuration only. The exact pinned vLLM runtime response,
-  gateway authentication, and live model evaluation still require the authorized GPU
-  batch.
-- **Cloud/cost:** no AWS use, GPU hours, or spend.
-- **Next:** commit the fix, rebase PR #48 on the updated benchmark PR #47 head, then
-  run one CI cycle and address the three review threads.
-
-## 2026-11-28 — Verify evaluation fixes and resolve review feedback
-
-- **Phase:** Phase 9 static preparation; PR #48.
-- **Head/base:** PR #48 head `a5bb235`, rebased on PR #47 head `260e249`.
-- **CI:** run `46108950555` passed all five required jobs, including the full Python
-  setup/test job and local E2E. This confirms the repository setup path that the
-  isolated local `make test` attempt could not reproduce without generating the
-  ignored ONNX fixtures in that worktree.
-- **Review:** all three findings were answered and resolved with the fixed numeric
-  check, failed-case response validation, and corrected private-vLLM/gateway
-  instructions. No model request was sent.
-- **Cloud/cost:** no AWS operation, GPU hour, or spend.
-- **Next:** update the evidence/status documentation, then rebase and continue PR #49.
 ## 2026-11-27 — Prepare CUDA and PyTorch performance experiments
 
 - **Phase:** Phase 4 static preparation; no CUDA compilation or GPU execution.
@@ -1726,31 +1604,6 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** continue preparation; check the appeal outcome and applied quota before
   any launch preflight, and do not launch with zero applied quota.
 
-
-## 2026-11-28 — Correct CUDA reduced-precision checks and transfer timing
-
-- **Phase:** Phase 4 static CUDA performance preparation; PR #49.
-- **Branch / starting head:** `codex/gpu-cuda-lab-preparation`, remote head
-  `9430af6`; the fix is committed locally and rebased on PR #48 head `33e4d2a`.
-- **Starting state:** review found a BF16 correctness comparison that included input
-  quantization error, and a device-to-host transfer sample that allocated pageable
-  memory inside each timed iteration.
-- **Changes:** compare each GPU result with an FP32 multiplication of those same
-  precision-rounded inputs. Preallocate a pinned CPU destination before the timing loop,
-  enqueue a nonblocking device-to-host copy between CUDA events, then synchronize after
-  recording the end event. Updated the learning notes to explain the distinction.
-- **Validation:** Ruff passed; 3 focused plan/calculation tests passed; Python bytecode
-  compilation and `git diff --check` passed. `make gpu-cuda-plan` reported the bounded
-  sizes, warmups, repetitions, and zero GPU operations. No CUDA code was compiled and
-  no GPU or AWS resource was used.
-- **Limit:** the workstation has no NVIDIA GPU. The timing code and numerical tolerance
-  still require confirmation on the actual L4; these checks are static/local only.
-- **Previous-head CI:** the initial PR #49 update at `5496324`, based on PR #48
-  `a5bb235`, passed all five required jobs in run `46109166340`. The current rebase
-  includes the same code plus the newer PR #48 evidence commit, so its own checks are
-  still required.
-- **Next:** publish the rebased branch using the exact expected remote head, watch one
-  current-head CI cycle, and resolve both review threads after it passes.
 ## 2026-11-27 — Prepare ordered GPU host install manifest
 
 - **Phase:** Phase 3 static preparation; no GPU host or package install.
@@ -2264,18 +2117,6 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** include the exact changed-head syntax-check result in the ticket, publish
   the fixes, and use one PR CI run to validate the updated package.
 
-## 2026-11-28 — Reconcile quota approval and restack PR #58
-
-- **Phase:** Phase 2 preflight; paid GPU work remains gated. PR #58 carries Phase 6 tenant safety, local failure drills, and the manual GPU guide.
-- **Branch / PR:** `codex/gpu-manual-reproduction-guide`, PR #58. Parent PR #57 moved from old head `d5e4570` to `fcc5651` after PR #56 moved to `aa80c49`.
-- **Restack troubleshooting:** an initial rebase using the common historical base `2d2d417` would replay 78 commits, including 61 ancestor changes already represented by the new parent. It was aborted before publication. Using the actual former PR #57 head `d5e4570` as the cut point replayed only PR #58's 17 package commits. The evaluator redirect-security commit conflicted with a newer parent response-schema regression; both tests were retained and the schema mock was updated for the redirect-blocking opener. The goal conflict was resolved in favor of current quota and launch-gate facts.
-- **Validation:** `make verify` completed with Ruff clean, 160 tests passed (2 skipped), no known dependency vulnerabilities, Compose and observability configuration validation, and benchmark/evaluation/CUDA dry-run plans. No GPU operations or model network requests were part of those dry runs. `git diff --check` passed.
-- **Docker storage:** observability validation pulled four digest-pinned images. After confirming there were no containers based on them, those four exact images were removed. No project containers were present; unrelated containers and images were left alone.
-- **AWS status:** read-only CLI confirmed request `CASE_CLOSED` and applied On-Demand G/VT quota 4.0 vCPUs. Exact planned state bucket, lock table, and project Budget returned absent. This creates no instance capacity and is not apply authorization. No AWS write, project resource, GPU hour, or spend occurred.
-- **Remaining launch gates:** remote-state bootstrap, valid private Budget alert recipient and project Budget, current exact price and AZ-capacity check, remote saved-plan review, expiry safeguards, and separate apply authorization. Keep the $25 ceiling and one bounded GPU batch.
-- **CI results:** PR #56 run `46160784399` passed all five required checks, including local E2E. PR #57 run `46161064613` passed all six required checks, including Ansible and local E2E. PR #58 fresh CI has not yet been published at this journal entry.
-- **Next:** review the final PR #58 diff, push with exact lease against `59925fd`, update the PR description, and watch the single triggered run. Then carry descendants from their respective old parent heads, preserving only each PR's own commit range.
-
 ## 2026-11-28 — Revalidate rebased PR #60 gateway benchmark
 
 - **Phase:** Phase 8 benchmark preparation; GPU execution remains pending L4 quota and
@@ -2296,330 +2137,783 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** publish the documentation update on PR #60, watch its single fresh CI run,
   then rebase PR #61 and continue with the remaining pre-GPU stack.
 
+## 2026-11-28 — Restack PR #61 interview guide
 
-## 2026-11-28 — Restack and locally validate PR #60 gateway benchmarking
+- **Phase:** Pre-GPU documentation and implementation preparation; applied GPU quota
+  remains zero.
+- **Branch / PR:** PR #61 (`codex/gpu-interview-preparation`) rebased onto PR #60
+  head `9a8bd28` after PR #60 itself was restacked onto PR #58 head `59925fd`.
+- **Starting state:** PR #61 had one documentation commit based on the old PR #60
+  head `1012414`. Its earlier six-job CI run was valid only for that prior stack.
+- **Changes:** retained the interview guide, added current rebase and acceptance
+  history, and preserved PR #60's newer goal, status, and journal records rather than
+  replacing them with stale snapshots. Refreshed the backlog and evidence manifest.
+- **Validation:** confirmed the guide has 106 numbered questions across 18 topics;
+  checking changed-file relative links and whitespace before publication. Fresh PR CI
+  is required. No clean-room run is applicable to a documentation-only rebase.
+- **Cost / security:** no AWS call, infrastructure, GPU, model download, live request,
+  credentials, or spend.
+- **Next:** finish structural/link checks, publish the rebased PR #61, watch one CI
+  run, and proceed to PR #62.
 
-- **Phase:** Phase 8 benchmark preparation; actual GPU benchmarking remains pending the launch controls and authorized L4 batch.
-- **Branch / PR:** `codex/authenticated-gateway-benchmark`, PR #60. Its parent is PR #58, not sibling PR #59. Rebased from former PR #58 head `59925fd` onto current PR #58 head `fa4d819`; eight PR #60 commits were replayed.
-- **Troubleshooting:** shared implementation-status conflicts were resolved using current parent status, then the benchmark row was re-added. The PR #60 worktree had no `.venv`; the first local test command failed before collection. Reused the already prepared PR #58 Python 3.12 environment without modifying this worktree's dependency state.
-- **Validation:** focused benchmark suite passed 8 tests; Ruff passed; the 18-request, concurrency-6 dry run listed all three tenants and saved no content. The dry run made no network requests. `git diff --check` passed.
-- **Limits and cost:** no real gateway/vLLM requests, GPU, AWS query/write, model downloads, or spend. No benchmark measurements were generated.
-- **Current CI:** PR #58 run `46162221680` passed all six required checks. Sibling PR #59 run `46162611345` was still in progress at this journal snapshot. PR #60 new CI has not yet been published.
-- **Next:** finish current-status docs and ticket, push with an exact lease against old PR #60 head `9a8bd28`, update its PR body, and watch the triggered checks.
+## 2026-11-28 — Restack PR #62 benchmark and incident handbooks
+
+- **Phase:** Phases 8 and 10 documentation preparation; GPU measurements and fault
+  drills remain dependent on approved L4 capacity and the $25 spending controls.
+- **Branch / PR:** PR #62 (`codex/gpu-operations-evidence-handbooks`) restacked onto
+  PR #61 head `bfd3449` after PR #61 moved onto PR #60 head `9a8bd28`.
+- **Starting state:** PR #62 contained one documentation commit based on PR #61's
+  former head `fda6433`; inherited goal, status, backlog, journal, and #61 ticket
+  updates were stale and conflicted during rebase.
+- **Changes:** retained the new benchmark report and incident response handbook,
+  preserved updated parent records, and refreshed the goal, backlog, evidence, status,
+  and #62 ticket for this stack.
+- **Validation:** the documents contain blank result slots and no invented GPU data.
+  A current check passed for 75 relative Markdown links across nine changed Markdown
+  files and `git diff --check`. PR #62's earlier 119-link check and CI run apply to
+  the previous base; fresh CI is required.
+- **Cost / security:** no AWS call, GPU, model request, credentials, or spend.
+- **Next:** rerun the relative-link check, publish PR #62, and watch its fresh CI.
+
+## 2026-11-28 — Restack PR #63 final project report draft
+
+- **Phase:** Educational report preparation; GPU execution remains quota and budget
+  gated.
+- **Branch / PR:** PR #63 (`codex/gpu-final-project-report-draft`) restacked onto PR
+  #62 head `90e4aca`.
+- **Starting state:** PR #63 contained a documentation commit based on the former PR
+  #62 head `bb7ff2f`. It adds a report draft and references prior #62 CI.
+- **Changes:** retained the report and ticket, preserved current parent goal/status,
+  backlog, and journal content, and updated the evidence record so old CI is clearly
+  labeled as historical.
+- **Validation:** on the updated files, 83 relative Markdown links resolve across
+  nine files, all 28 numbered report chapters are present, and `git diff --check`
+  passes. Old CI does not verify this head. The report remains a draft and must be
+  updated with real measurements, screenshots, and incident evidence after approved
+  GPU runs.
+- **Cost / security:** no AWS operation, GPU, model download, live request, or spend.
+- **Next:** validate the report links and chapter structure, publish PR #63, and
+  watch the current-head CI before continuing.
+
+## 2026-11-28 — Restack and repair PR #64 host-operation bootstrap
+
+- **Phase:** Phase 11 non-billable host command readiness; Phase 2 remains blocked by
+  zero applied L4 quota.
+- **Branch / PR:** PR #64 (`codex/gpu-host-operator-automation`) restacked onto PR #63
+  head `d25413f`.
+- **Review finding:** the `configure` wrapper used the same `nvidia-smi` guard as
+  inference. A standard Ubuntu instance has no working `nvidia-smi` before Ansible
+  installs the NVIDIA driver, so this would prevent the first configuration pass.
+- **Fix:** configure now validates only IMDSv2 account, instance ID, region, and
+  instance type before Ansible; deployment and GPU workload operations still require
+  exactly one visible L4. Added a regression test and clarified the manual guide and
+  batch runbook.
+- **Validation:** 20 focused host-operator tests pass; Ruff, Bash syntax, Make target
+  previews, `make gpu-ansible-validate`, `make gpu-ec2-validate`, Compose validation,
+  observability validation, and `git diff --check` pass. Full `make verify` first
+  failed during test collection because generated ONNX fixtures were absent in this
+  worktree. Created the two local ignored fixtures with `scripts/create_model.py`;
+  rerun passed Ruff, 181 tests (2 skipped), dependency audit with no known
+  vulnerabilities, Compose and monitoring validation, and all GPU benchmark,
+  evaluation, and CUDA dry-run plans. One existing Starlette/httpx deprecation
+  warning remains.
+- **Parent CI:** PRs #59–#63 passed all six checks on current heads; PR #64 head
+  `06f1a11` passed all six jobs in run `46114151883`. PR #65 needs fresh CI on the
+  updated stack.
+- **AWS / GPU / cost:** none; no AWS call, instance, model, GPU, live request, or spend.
+  No separate local clean-room run was performed.
+- **Next:** publish the updated PR #64 source and review docs, watch its single fresh
+  CI run, and then continue with PR #65.
+
+## 2026-11-28 — Restack and harden PR #65 Triton evidence output
+
+- **Phase:** Phase 4 non-billable GPU performance preparation; all L4 measurements
+  and profiling remain pending.
+- **Branch / PR:** PR #65 (`codex/gpu-profiling-preparation`) rebased locally onto
+  PR #64 head `06f1a11`.
+- **Rebase history:** older PR #65 snapshots repeatedly conflicted with the latest
+  goal/status/evidence records. Kept the newer parent records; package-specific detail
+  remains in ticket #65 and this journal. Source and tests were carried forward.
+- **Review finding:** Triton wrote every default run to one fixed JSON path using
+  truncating file creation, which could overwrite prior evidence.
+- **Fix:** the default path now includes a UTC microsecond timestamp. Explicit output
+  paths use exclusive creation and fail safely when the file exists. Added a test that
+  proves prior result contents remain unchanged; updated the manual guide.
+- **Validation:** 12 focused Triton tests, Ruff, Python CLI dry-run, shell syntax, and
+  whitespace checks pass. Full `make verify` passed Ruff, 193 tests (2 skipped), the
+  dependency audit with no known vulnerabilities, Compose/monitoring validation, and
+  all benchmark, evaluation, CUDA, and Triton dry-run plans. The first collection
+  attempt lacked ignored ONNX fixtures in this worktree; created them locally and
+  reran successfully. One existing Starlette/httpx deprecation warning remains.
+- **Parent state:** PRs #59–#64 passed their six-job runs, including PR #64 run
+  `46114151883`. PR #65 requires fresh CI after its updated base is published.
+- **Cost/security:** no AWS, GPU, model download, live request, or spend. No manual
+  clean-room run or project cleanup was performed.
+- **Next:** wait for PR #64's current-head CI, publish PR #65 with a fresh run, and
+  retain draft state until the required integrated clean-room review gate is met.
+
+- **Documentation recheck:** 114 relative Markdown links resolve across 13 changed
+  Markdown files; no unresolved rebase markers remain; `git diff --check` passes.
+- **Parent CI update:** PR #64 head `06f1a11` passed all six required jobs in run
+  `46114151883`, including the local CPU E2E job.
 
 
-## 2026-11-28 — Restack and validate the GPU interview guide
+## 2026-11-28 — Record the one integrated local clean-room cycle
 
-- **Phase:** non-billable learning documentation; paid GPU gates remain open.
-- **Branch / PR:** `codex/gpu-interview-preparation`, PR #61, parent PR #60 current head `9fc23f2`; rebased from old parent `9a8bd28`. The one handbook-specific commit is now based on the current benchmark PR.
-- **Content check:** the interview guide contains 106 numbered questions across Linux, AWS, GPU, CUDA, Docker, Python, distributed systems, vLLM, language models, LLMOps/MLOps, evaluation, observability, reliability, security, performance, FinOps, incidents, and system design; it includes follow-ups and evidence-grounded STAR examples.
-- **Validation:** relative Markdown links in six changed files had no missing targets; `git diff --check` passed. No test or clean-room run was needed for this documentation-only change.
-- **AWS / GPU / cost:** none; no AWS query/write, model download, GPU activity, or spend.
-- **CI:** PR #58 run `46162221680` passed. PR #59 run `46162611345` and PR #60 run `46162969703` were still in progress. PR #61 fresh CI has not yet been published.
-- **Next:** commit the current goal/status/journal updates, push using an exact lease against old PR head `bfd3449`, update its PR body, and track one CI run.
+- **Phase:** non-GPU readiness / validation gate for the single-L4 project.
+- **Evidence:** PR #65 source head `49076a5bf2c24a8122b787f2c119480d705be2a8`,
+  GitHub Actions run `46114955314`, fresh Ubuntu 24.04 runner and Python 3.12.
+  The `local-e2e` job and all six required workflow jobs passed.
+- **Commands:** `make install`, `make bootstrap-local`, `make smoke`,
+  `make demo-flagship`, `make verify`, `make clean-local`, executed in that order.
+  The verification reported 193 passed, 2 skipped, one warning; the dependency audit
+  reported no known vulnerabilities. The final cleanup log confirmed that only
+  project Compose resources, local images, volumes, and generated artifacts were
+  removed.
+- **Decision:** record this as the single integrated local CPU clean-room acceptance
+  run for this GPU goal. It confirms the existing local CPU path and project cleanup;
+  it does not establish AWS or GPU behavior. Routine PR CI continues to exercise its
+  local-e2e job, but no second manual project clean-room run was started.
+- **Documentation:** exact commands, result, and limitations are now recorded in
+  `docs/governance/VALIDATION.md`, ticket #65, and the evidence manifest. Fresh CI is
+  required for this documentation follow-up before rechecking PR #65's P1 review gate.
+- **AWS/GPU/cost:** no AWS resource, GPU, model artifact download, or project spend.
 
 
-## 2026-11-28 — Restack benchmark and incident handbooks
+## 2026-11-28 — Restack PR #66 on the recorded clean-room evidence
 
-- **Phase:** non-billable documentation preparation; no GPU experiments or incidents are claimed.
-- **Branch / PR:** `codex/gpu-operations-evidence-handbooks`, PR #62, parent PR #61 head `1474752`; rebased from old parent `bfd3449`. One PR-specific documentation commit was replayed.
-- **Validation:** relative links in seven changed Markdown files passed. Reviewed the benchmark report and incident handbook for evidence labels; benchmark values remain explicitly unmeasured and incidents are procedures, not fabricated events. `git diff --check` passed.
-- **AWS / GPU / cost:** no AWS calls or mutations, GPU use, model download, benchmark measurement, or spend.
-- **CI:** PR #61 fresh checks are pending; PR #62 fresh CI has not been triggered yet.
-- **Next:** publish this restack with exact lease against old head `90e4aca`, then watch the one PR-triggered workflow.
+- **Phase:** evidence/research reconciliation; no GPU or AWS operation.
+- **PR #65:** source head `49076a5` passed six checks in `46114955314`. The
+  designated local CPU clean-room cycle is now in `docs/governance/VALIDATION.md`.
+  Documentation follow-up head `24ea5e8` was published and needs its own current CI.
+- **PR #66:** rebased locally onto PR #65 head `24ea5e8`; current local head is
+  `039619e`. Historical #66 checks do not validate the new base; it is not yet
+  published. Rebase conflicts were resolved in favor of the newer parent facts and
+  PR #66-specific ticket details were preserved.
+- **Next:** publish #66, update its PR description, and check current CI; then restack
+  PRs #67–#71 sequentially on their new immediate parents.
+- **Cost/security:** no AWS query or mutation, model download, GPU operation, or spend.
 
 
-## 2026-11-28 — Restack the evidence-based final-report draft
+## 2026-11-28 — Restack PR #67 on the clean-room evidence branch
 
-- **Phase:** continuous documentation preparation; the report remains a pre-GPU draft, not a final deliverable.
-- **Branch / PR:** `codex/gpu-final-project-report-draft`, PR #63, parent PR #62 head `8927734`; rebased from old PR #62 head `90e4aca`.
-- **Change review:** retained the report's 28-chapter structure and draft banner. Corrected its current quota statement to the approved 4.0-vCPU result and named the remaining remote-state, Budget, exact-plan, and apply gates. All GPU-specific evidence sections remain pending real execution.
-- **Validation:** relative Markdown links across seven changed files passed; `git diff --check` passed.
-- **AWS / GPU / cost:** no AWS operation, GPU, model download, measured result, or spend.
-- **CI:** PR #63 fresh CI has not been triggered yet; parent PR #62 run is pending.
-- **Next:** publish with exact lease against old PR #63 head `d25413f`, update the PR description, and track its required checks.
+- **Phase:** current-state documentation; no AWS/GPU execution.
+- **Parent state:** PR #65 source `49076a5` has the designated local clean-room run
+  recorded in governance, and PR #65 follow-up head `24ea5e8` requires fresh CI. PR
+  #66 current head `2c5766e` is based on that follow-up and also requires fresh CI.
+- **PR #67:** rebased on current #66 head `2c5766e`; new local head `5f1b911` is not
+  yet published. Conflict resolution retained the newer parent goal/status and preserved
+  the package-specific PR #67 ticket and evidence.
+- **Next:** publish #67, start its normal required checks, and continue restacking #68–#71.
+- **Cost/security:** no AWS query/mutation, model download, GPU operation, manual
+  clean-room run, or spend.
 
-## 2026-11-28 — Restack PR #64 host-operator automation
 
-- **Phase:** Phase 11 non-billable automation preparation; GPU deployment remains gated.
-- **Branch / PR:** PR #64 (`codex/gpu-host-operator-automation`) is being restacked from old PR #63 head `d25413f` onto refreshed PR #63 head `e178ff7`.
-- **Review finding:** the original host `configure` action required `nvidia-smi` before Ansible could install the NVIDIA driver, making first-time setup impossible on standard Ubuntu.
-- **Change:** configure now validates IMDSv2 instance identity, account, region, and allowed instance type; deployment/workload commands continue to require a visible single L4. Added regression coverage and updated the operator documentation.
-- **Validation:** prior-base check recorded in ticket64: 20 focused tests; full `make verify` passed (181 passed, 2 skipped); Ansible, Terraform, Compose, observability, Ruff, and dry-run preparation checks passed. On the refreshed stack, PR #59 and #60 CI runs `46162611345` and `46162969703` passed all six jobs; PRs #61–#63 runs are active. PR #64 needs CI on its refreshed head.
-- **AWS / GPU / cost:** no AWS query or mutation, no instance, no model download, no GPU execution, and no spend. Applied quota is 4.0 vCPUs, but project state/locking, Budget recipient and Budget, exact plan/cost, independent expiry, fresh capacity, and separate apply authorization remain launch gates.
-- **Next:** finish conflict review and link/status checks, publish PR #64 with exact lease against old head `06f1a11`, then monitor its single CI run.
+## 2026-11-28 — Restack PR #68 after clean-room record update
 
-## 2026-11-28 — Restack bounded Triton profiling preparation
+- **Phase:** automation readiness documentation; no AWS/GPU execution.
+- **Parents:** PR #65 governance record is published at `24ea5e8` after source head
+  `49076a5` passed its designated local CPU clean-room CI in `46114955314`. PR #66
+  head `2c5766e` and PR #67 head `7b9fb9f` are now published on the updated stack.
+- **PR #68:** rebased on current #67 head `7b9fb9f`; local rebased head is `224b035`.
+  It is not yet published or CI-validated. Ticket #68 distinguishes manual AWS
+  workflow gating from paid operations and live host execution.
+- **Next:** publish #68 and run current required CI, then restack #69–#71 sequentially.
+- **Cost/security:** no AWS query or mutation, model download, GPU use, manual
+  clean-room run, or spend.
 
-- **Phase:** Phase 4 and non-billable preparation; no CUDA kernel or profiler has run on an L4.
-- **Branch / PR:** PR #65 (`codex/gpu-profiling-preparation`) restacked onto refreshed PR #64 head `2e2e4dd`, replacing old parent `06f1a11`.
-- **Changes retained:** bounded Triton vector-add benchmark and host guard, evidence preservation across runs, Nsight sampling guidance, tests, ticket, and manual steps. Shared current status records were retained from the refreshed parent during conflicts.
-- **Earlier evidence:** original PR #65 head `49076a5` passed six CI jobs in run `46114955314`, including the designated integrated local CPU clean-room run. The command sequence and limits are recorded in `docs/governance/VALIDATION.md`; this does not test GPU execution.
-- **Validation:** 12 focused Triton tests pass on the rebased source; Ruff passes for the Triton module and tests; `bash -n scripts/gpu-ec2-triton.sh`, `make gpu-triton-plan`, and `git diff --check` pass. The dry run reports zero network requests and zero GPU operations. A link scan found 107 valid relative links across nine changed Markdown files. The previous base passed 12 focused tests and `make verify` (193 passed, 2 skipped); those are not fresh-head checks.
-- **AWS / GPU / cost:** no AWS query or mutation, no GPU or model activity, and no spend. Quota is approved at 4.0 vCPUs; state/locking, Budget, exact plan/cost, expiry, capacity, and separate apply gates remain open.
-- **Next:** publish using an exact lease against old PR #65 head `24ea5e8`, update the PR description, and watch one refreshed CI run.
 
-## 2026-11-28 — Reconcile current quota and research facts in PR #66
+## 2026-11-28 — Restack PR #69 on current automation-readiness parent
 
-- **Phase:** Phase 1 evidence/status upkeep and non-billable readiness work.
-- **Branch / PR:** PR #66 (`codex/gpu-research-fact-reconciliation`) rebased from old PR #65 parent `24ea5e8` onto current PR #65 head `37b3b30`.
-- **Changes:** reconciled current quota/request status in research notes, repository audit, cost report, ticket #50, ticket #66, backlog, and goal-facing status while preserving dated historical quota-zero records. Current read-only AWS result is 4.0 vCPUs applied and `CASE_CLOSED`; quota is not capacity or apply authority. Qwen revision/digest notes remain metadata checks, not model downloads.
-- **Validation:** 62 relative Markdown links across seven changed Markdown files resolve; `git diff --check` passes. No GPU, runtime, or model tests apply to this documentation update.
-- **CI:** refreshed runs for PRs #59–#64 passed, including #64 run `46163910205`; PR #65 run `46164362977` is active. PR #66 requires a new run after publication.
-- **AWS / cost:** no AWS query in this session beyond the documented prior result, no AWS mutation, no spend, no GPU or model download. The $25 ceiling and open launch gates remain.
-- **Next:** run final status/link review, publish #66 with an exact lease against old head `2c5766e`, update its PR description, and monitor its one required CI run.
+- **Phase:** cost estimate documentation; no new AWS Price List or infrastructure
+  operation was performed in this restack.
+- **PR #69:** prior head `81c09df` passed all six jobs in `46115952390`. The branch
+  is now locally rebased on PR #68 head `6afa0ef`, with local head `bc0ea0e`; new CI
+  is needed after publication.
+- **Cost:** the corrected `$18.5193` 12-hour estimate and its limitations remain in
+  the cost report. It is planning arithmetic only, not an invoice or spending approval.
+- **Readiness:** the designated local CPU clean-room run is recorded at PR #65 source
+  `49076a5`, run `46114955314`. Real GPU and cloud acceptance remain outstanding.
+- **Next:** publish #69, update its PR body, verify its current CI, then restack #70 and
+  #71 sequentially.
+- **Cost/security:** no AWS mutation, GPU action, model download, manual clean-room
+  run, or spend.
 
-## 2026-11-28 — Reconcile backlog snapshots in PR #67
 
-- **Phase:** non-billable documentation and PR-state hygiene.
-- **Branch / PR:** PR #67 (`codex/gpu-backlog-current-status`) rebased from old #66 parent `2c5766e` onto refreshed PR #66 head `846b5cf`.
-- **Changes:** updated stale quota-zero and pre-quota text to reflect applied 4.0-vCPU quota and `CASE_CLOSED`, while preserving dated historical snapshots; the remote-state and Budget gaps still block planning. Updated current CI references for #59–#66 and clarified that human review/merge state is separate from CI.
-- **Conflict handling:** the rebase conflicted in the shared journal. Kept the latest parent journal and will record this restack as a new entry, rather than replacing current history with an older snapshot.
-- **Current CI:** #64 run `46163910205` passed all six jobs; #65 run `46164362977` and #66 run `46164644804` remain active. PR #67 needs fresh CI after publication.
-- **Validation:** relative Markdown link scan and `git diff --check` are run before publication. No runtime or GPU test applies.
-- **AWS / GPU / cost:** no AWS query or mutation, GPU, model download, or spend. The $25 limit and separate apply authorization still govern any future paid work.
-- **Next:** publish PR #67 with exact lease against old head `7b9fb9f`, update its PR description, and watch one CI run; continue sequential restacks.
+## 2026-11-28 — Restack PR #70 after cost refresh
 
-## 2026-11-28 — Restack GPU automation-readiness notes in PR #68
+- **Phase:** pinned software architecture documentation; no L4 compatibility is claimed.
+- **PR #69:** prior head `81c09df` passed all six checks in run `46115952390`; current
+  head `f21d61a` is published and needs fresh CI.
+- **PR #70:** previous head `e5af488` passed all six checks in run `46116077981`.
+  Rebased onto current #69 head `f21d61a`; local head `56bd866` is not published and
+  needs its own checks.
+- **Readiness:** the designated local CPU clean-room run is documented at source
+  `49076a5`, run `46114955314`. Pinned candidate versions still need real L4
+  verification; no model/runtime success is inferred from metadata.
+- **Next:** publish #70, start current required CI, then rebase #71 on the new head.
+- **Cost/security:** no AWS action, model download, GPU work, manual clean-room run,
+  or spend.
 
-- **Phase:** Phase 11 static automation and CI readiness; no host/cloud execution.
-- **Branch / PR:** PR #68 (`codex/gpu-ci-automation-readiness`) rebased from old #67 parent `7b9fb9f` onto refreshed PR #67 head `5dc225f`.
-- **Change:** reconciled ticket #68 with current PR #64–#67 evidence, corrected the reason the remote plan remains gated (remote state and Budget controls are absent; quota is approved), and recorded the one designated local CPU clean-room run as complete historical evidence.
-- **Validation:** source audit references existing Makefile and workflow files; 60 relative links across three changed Markdown files resolved and `git diff --check` passed. No code test, AWS call, or GPU operation is required for this docs-only package.
-- **Current CI:** PR #65 run `46164362977` passed all six jobs; PR #66 run `46164644804` and PR #67 run `46164896175` are active. PR #68 needs fresh checks after publication.
-- **Cost/security:** no credentials, cloud mutation, GPU, model download, or spend. $25 ceiling and separate apply authorization remain.
-- **Next:** publish PR #68 with exact lease against old head `6afa0ef`, update its description, and monitor one CI run.
 
-## 2026-11-28 — Restack and reconcile single-L4 cost research in PR #69
+## 2026-11-28 — Restack PR #71 on current architecture parent
 
-- **Phase:** Phase 2 cost-readiness research; all commands were non-mutating.
-- **Branch / PR:** PR #69 (`codex/gpu-price-refresh`) replayed four cost-focused commits onto refreshed PR #68 head `ff88165`, replacing the old parent `6afa0ef`.
-- **Research and correction:** retained the read-only AWS Price List results for EC2 `g6.xlarge`, public IPv4, gp3, S3, DynamoDB, and Scheduler. Corrected 100 GiB to 107.3742 decimal GB for the gp3 GB-month price. The plan estimate is `$18.51932705` including the stated assumptions, leaving `$6.48067295` under the $25 ceiling. This is not an invoice, exact-plan result, or spend authorization.
-- **Conflict handling:** refreshed research notes were reconciled with the newly approved quota and `CASE_CLOSED`; earlier zero-quota text remains dated historical context. Ticket #69 retains the detailed rate assumptions and validation limits.
-- **CI:** PR #66 run `46164644804` passed all six jobs. PR #67 run `46164896175` and #68 run `46165126075` were active at this snapshot. PR #69 needs fresh CI on the rebased head.
-- **AWS / GPU / cost:** Price List reads are catalog queries only; no infrastructure, GPU, model download, or spend. State, Budget recipient, exact saved plan, capacity, expiry, and separate apply authorization remain open.
-- **Next:** publish #69 with exact lease against old head `f21d61a`, update the PR body, and watch one CI run.
+- **Phase:** release-backlog documentation; no live host release or GPU behavior.
+- **Parent:** PR #70 prior head `e5af488` passed run `46116077981`; current head
+  `5f70852` is published on PR #69 head `f21d61a` and needs fresh CI.
+- **PR #71:** locally rebased on #70 head `5f70852`; current local head `7e2824d` is
+  not yet published. Prior #71 head `ee8d1ef` passed six checks in `46116269039`, but
+  does not validate this rebase.
+- **Clean-room record:** the single designated local CPU run remains PR #65 source
+  `49076a5`, run `46114955314`, documented in governance. It does not prove AWS/GPU
+  operation. No further manual local clean-room run occurred.
+- **Next:** publish #71 and check current CI, then review the full non-GPU checklist.
+- **Cost/security:** no AWS query/mutation, model download, GPU action, or spend.
 
-## 2026-11-28 — Restack architecture candidate summary in PR #70
+## 2026-11-28 — Complete the restack checks and reconcile readiness handoff
 
-- **Phase:** Phase 1 architecture and Phase 3/5 software research; no host compatibility was executed.
-- **Branch / PR:** PR #70 (`codex/gpu-readiness-architecture-facts`) rebased four commits onto refreshed PR #69 head `f5915e8`, replacing old parent `f21d61a`.
-- **Change:** keeps the proposed software stack aligned with the dated pinned candidates while clearly distinguishing candidate pins from proven driver/CUDA/container/PyTorch/vLLM compatibility on L4.
-- **Current AWS facts:** quota is approved at 4.0 vCPUs; missing project state/locking, Budget/recipient, exact plan/cost, expiry, fresh capacity, and separate apply authorization remain. The current cost report uses `$18.51932705` as a planning estimate only.
-- **CI:** PR #67 run `46164896175` passed. PR #68 run `46165126075` and #69 run `46165420078` are active. PR #70 needs fresh CI after publication.
-- **Validation:** 68 relative links across four changed Markdown files resolve and `git diff --check` passes. No GPU compatibility, software install, AWS operation, or spend is claimed.
-- **Next:** complete links and diff review, publish using exact lease against old PR #70 head `5f70852`, update PR details, and monitor one current-head CI run.
+- **Phase:** non-billable source/documentation preparation; no cloud or GPU operation.
+- **PR #65:** added the one designated local CPU clean-room run to
+  `docs/governance/VALIDATION.md`, answered and resolved the P1 review thread, and
+  marked the PR ready for owner review. Follow-up head `24ea5e8` passed all six jobs
+  in run `46117285643`.
+- **Restacked PRs:** current heads #66 `2c5766e`, #67 `7b9fb9f`, #68 `6afa0ef`, #69
+  `f21d61a`, #70 `5f70852`, and #71 `2aece0f` all passed their six required jobs in
+  runs `46117369933`, `46117439007`, `46117499822`, `46117561667`, `46117637674`,
+  and `46117785097`.
+- **Readiness decision:** maintain the owner's target to complete feasible code,
+  configuration, docs, local/static validation, and CI before quota approval. Quota
+  approval still leaves immediate live account/quota/capacity/pricing/plan/cost/expiry
+  and apply authorization gates, followed by actual L4-only work. The $25 ceiling
+  remains binding; no apply is authorized by quota approval alone.
+- **Backlog audit:** corrected the local Redis outage/recovery item to complete using
+  the already-recorded run `46068015904`; clarified that incident drills and
+  automation source are prepared while real L4 failures, host execution, expiry, and
+  teardown verification remain open.
+- **Review gates:** replied to and resolved the clean-room evidence findings on PRs
+  #46 and #55 using the same recorded descendant-stack run; both are now ready for
+  owner review. A read-only inventory found 41 open PRs and none in draft. PR #71
+  head `2edf036` passed all six required checks in run `46118688165` before this
+  handoff update.
+- **Clean-room:** this was no additional run. The designated run remains CI run
+  `46114955314`, CPU/local only, as recorded in `docs/governance/VALIDATION.md`.
+- **AWS/cost/security:** no AWS call or mutation, model download, GPU hour, or spend.
+- **Next:** continue resolving remaining non-GPU review/readiness gaps without merging
+  PRs; reassess exact live preflight only after the quota appeal receives a decision.
 
-## 2026-11-28 — Restack model-release backlog in PR #71
+## 2026-11-28 — Finish the final readiness handoff checks
 
-- **Phase:** Phase 9 source/readiness documentation and PR-stack maintenance.
-- **Branch / PR:** PR #71 (`codex/gpu-release-backlog-truth`) replayed its documentation commits onto refreshed PR #70 head `1679aa7`, replacing old parent `5f70852`.
-- **Change retained:** backlog checkboxes distinguish implemented host-controller source from real L4 release, champion verification, inference, rollback, and interruption recovery, which remain untested.
-- **Quota evidence reconciliation:** an earlier 2026-11-28 read-only snapshot recorded 0 applied vCPUs and `CASE_OPENED`; a later check recorded 4.0 applied vCPUs and `CASE_CLOSED`. These are time-ordered snapshots, not conflicting current claims. Exact project state, lock table, and Budget remain absent; quota does not authorize provisioning.
-- **Live GitHub inventory:** 54 open PRs from #30–#84 excluding #54; no drafts were returned at the snapshot. This is not a review/merge approval.
-- **CI:** PR #67 run `46164896175` passed. PR #68 run `46165126075`, #69 run `46165420078`, and #70 run `46165597103` were active at the check. PR #71 requires fresh CI after publication.
-- **Validation:** 66 relative links across four changed Markdown files resolve and `git diff --check` passes; no runtime test is needed for this documentation-only change.
-- **AWS / GPU / cost:** no mutation, no GPU/model operation, no spend. The catalog estimate remains `$18.51932705` under assumptions and below the $25 ceiling; final exact plan/cost and separate apply authorization remain open.
-- **Next:** publish #71 using an exact lease against old head `a35c6a4`, update its PR body, and watch one CI run.
+- **Phase:** pre-quota non-billable documentation and review readiness.
+- **PR #71:** updated the final status to show PR #46 and #55 ready after their
+  evidence threads were resolved. Current PR #71 head `63df036` passed all six
+  required jobs in run `46119306265`.
+- **Review inventory:** the read-only open-PR inventory found 41 open PRs, no drafts,
+  and no unresolved inline review threads. All PRs remain unmerged for owner review.
+- **Validation boundary:** the single designated CPU clean-room run remains
+  `46114955314`; routine PR local-E2E jobs are normal CI checks, not another requested
+  manual project clean-room cycle. No GPU result is claimed.
+- **AWS/cost:** no AWS operation, model download, GPU hour, or spend occurred. Applied
+  L4 quota and the owner's existing appeal outcome remain external blockers.
+- **Next:** continue any remaining source/review work that can be done without AWS;
+  after quota decision, perform only the live safety preflight and authorized L4 batch.
 
-## 2026-11-28 — Restack report-learning package in PR #72
+## 2026-11-28 — Refresh the quota and project-resource preflight
 
-- **Date and time:** 2026-11-28 16:41 UTC.
-- **Phase:** continuous educational documentation preparation; GPU evidence remains pending.
-- **Starting repository state:** PR #72 branch `codex/gpu-report-learning` was behind refreshed PR #71 head `127d0a8`; old PR #72 remote head was `ef1f5e3`.
-- **Objective:** rebase the report-learning changes onto the current stack and reconcile quota, launch-gate, and CI status.
-- **Changes:** rebased PR #72 to local head `0b1f4df`; kept the refreshed parent journal during conflict resolution; updated ticket, goal, implementation status, and backlog to say quota is approved at 4.0 vCPUs while remaining launch gates stay open.
-- **Validation:** the first link-check attempt used `python`, which is not installed on this workstation; reran with `python3`, and all 7 relative links across the six changed Markdown files resolve. `git diff --check` passes. No code test applies to this documentation-only change.
-- **GitHub/CI:** PR #71 head `127d0a8` has run `46166173924` active. PR #72 remote still points to old head `ef1f5e3`; fresh CI must run after the updated branch is published. Historical CI on `c01fbca` does not validate the restacked code.
-- **AWS / GPU / cost:** read-only status carried forward from the recorded 2026-11-28 check: quota 4.0 is sufficient numerically for one `g6.xlarge`, but AZ capacity, project remote state and locking, Budget and verified recipient, exact plan/cost, independent expiry, and separate apply authorization are not ready. No AWS mutation, GPU operation, model download, or spend occurred.
-- **Next:** finish link/diff review, push with an exact lease against `ef1f5e3`, update PR #72 details, then monitor one fresh CI run and continue the PR stack.
+- **Phase:** Phase 2 read-only account/quota gate; no mutation.
+- **Identity:** `AWS_PROFILE=ai-platform-pilot-key aws sts get-caller-identity`
+  matched the expected account. The account number is not repeated in this journal.
+- **Quota:** `us-east-1` applied On-Demand G/VT quota is `0.0` vCPUs. The existing
+  four-vCPU request remains `CASE_OPENED`; no new request or case was created.
+- **Resources:** the exact `project=multi-tenant-ai-inference-platform` and
+  `environment=gpu-ec2` tag inventory returned zero resources; the similarly scoped
+  EC2 instance query returned no rows.
+- **Result:** the owner-reported appeal has no approval reflected in Service Quotas.
+  No launch is eligible. No AWS resource, GPU instance-hour, model download, or spend.
+- **Next:** wait for the existing case outcome while continuing only non-billable
+  source and review work; rerun current account/quota/price checks before any plan or
+  apply after a decision.
 
-## 2026-11-28 — Reconcile quota and launch readiness in PR #73
+## 2026-11-28 — Expand the educational report before GPU execution
 
-- **Date and time:** 2026-11-28 16:46 UTC.
-- **Phase:** Phase 2 read-only readiness and non-billable documentation.
-- **Starting repository state:** PR #73 branch `codex/gpu-applied-quota-reconcile` was based on old PR #72 head `ef1f5e3`; PR #72 was refreshed to `81cb61f`.
-- **Objective:** rebase quota-readiness notes onto the current stack and preserve the reported read-only preflight evidence without widening the launch authorization.
-- **Conflict handling:** kept refreshed parent versions of the goal, status, backlog, journal, evidence manifest, and expanded final report; retained PR #73's cost, research, Terraform guide, risk, and ticket updates. Two follow-up documentation commits were redundant with refreshed parent status and were not retained. Updated stale `CASE_OPENED` wording to preserve it as an earlier snapshot and record the later `CASE_CLOSED` result.
-- **Observed evidence (from ticket73's recorded commands):** applied quota was 4.0 vCPUs; five AZ offerings were listed; exact project resources, backend bucket, lock table, and Budget were absent; no usable Budget recipient was available; guarded preflight stopped at missing-bucket `HeadBucket: 404` before plan or mutation. User subsequently confirmed quota approval. AZ offerings are not capacity reservation.
-- **Validation:** 130 relative Markdown links across 17 changed Markdown files resolve; `git diff --check` passes. No GPU-dependent test applies.
-- **GitHub/CI:** PR #72 refreshed run `46166571475` and PR #71 run `46166173924` were still being watched. PR #73 must be published with an exact lease against old head `b50c5a96`, then its current CI must be observed.
-- **AWS / GPU / cost:** no AWS calls or mutations in this work session; no GPU, model download, instance-hour, or spend. The $25 ceiling remains. Quota approval does not clear remote-state, Budget/recipient, exact plan/cost, capacity, expiry, or separate apply gates.
-- **Next:** complete links/diff validation, correct the ticket and PR body for the current state, push the refreshed PR, and watch one CI run.
+- **Phase:** non-billable documentation readiness across project phases; L4 execution remains blocked by the quota gate.
+- **Branch:** `codex/gpu-report-learning`, stacked on PR #71.
+- **Pull request:** PR #72 is open for owner review. Its six CI jobs passed in run `46123579368` at head `c01fbca`, including routine PR local end-to-end CI. This is not another project-designated clean-room run.
+- **Starting state:** PR #71 branch was clean at `a35c6a4`; report had all 28 chapter headings but about 2,700 words, and several foundations deferred to other docs.
+- **Objective and changes:** expanded the report explanations of model/token/transformer concepts, GPU software layers, request and quota flow, vLLM KV cache, logical multi-tenancy, telemetry, and service objectives; added a concise chapter glossary; created ticket72 and linked it in `docs/README.md`.
+- **Validation:** `git diff --check` passed; report is about 4,500 words. No software tests, AWS commands, GPU commands, model downloads, or instance-hour were used.
+- **Evidence limits:** this records documentation only. The report remains marked PRE-GPU DRAFT. No runtime behavior, benchmark, screenshot, cost, or incident was invented.
+- **Cost and resources:** no AWS mutation or spending; no project resources exist per the latest scoped read-only inventory.
+- **Outstanding:** publish focused PR and review its CI; future L4-dependent chapters still need real evidence after quota approval, current cost checks, exact-plan review, and authorized batch execution.
 
-## 2026-11-28 — Restack and validate guarded bootstrap package in PR #74
+## 2026-11-28 — Reconcile applied quota and current AWS launch gates
 
-- **Date and time:** 2026-11-28 16:50 UTC.
-- **Phase:** Phase 2 static infrastructure safety gates; no cloud operation.
-- **Starting state:** PR #74 `codex/gpu-bootstrap-guardrails` was based on old PR #73 head `b50c5a9`; current PR #73 head is `4bdf624`.
-- **Changes:** rebased the bootstrap scripts and Terraform-native S3 lockfile minimum (Terraform `>=1.10.0`) onto refreshed PR #73. Kept current parent goal, status, and journal during conflicts and retained both bootstrap implementation commits. Updated ticket #74 to separate prior full validation from current focused checks.
-- **Validation:** six focused bootstrap fake-tool tests pass; `bash -n` passes for plan/apply/migrate/common scripts; `make terraform-validate` passes for bootstrap, existing EKS, and GPU roots. The first test command `pytest` was unavailable; reran using `.venv/bin/python -m pytest`. No AWS-backed plan was run.
-- **GitHub/CI:** PR #71 run `46166173924` and PR #72 run `46166571475` passed. PR #73 run `46167001745` is in progress. PR #74 current rebased head is not yet published and needs fresh CI.
-- **AWS / GPU / cost:** no AWS calls or mutations, instance, GPU, model download, or spend. Budget recipient, remote state, exact plan/cost, capacity, expiry, and separate apply authorization remain open.
-- **Next:** review docs and scripts, complete changed-file link checks and `git diff --check`, publish PR #74 with an exact lease against old head `944b4573dd95450d27ab977be7caf2cedf9ad5ab`, update its PR body, and monitor one CI run.
+- **Phase:** Phase 2; read-only AWS refresh and guarded preflight. No cloud mutation.
+- **Branch/PR:** `codex/gpu-applied-quota-reconcile`, PR #73 stacked on PR #72.
+- **Starting state:** PR #72 was open at `ef1f5e3`; all six checks passed in run `46124118809`. Its worktree was clean. The prior project record said applied G/VT quota was zero.
+- **Identity/quota:** `AWS_PROFILE=ai-platform-pilot-key aws sts get-caller-identity` matched the expected account. `get-service-quota` now returns `4.0` applied G/VT vCPUs; request history still reports `CASE_OPENED`. No approval notice was confirmed, and no duplicate request was made.
+- **Capacity/price:** `describe-instance-type-offerings` lists `g6.xlarge` in us-east-1a, 1b, 1c, 1d, and 1f. This is not a capacity reservation. AWS Price List API returned `$0.8048/hour` for Linux shared On-Demand `g6.xlarge`, matching the current estimate.
+- **Resource inventory:** exact project-tag resource count and project EC2 instance count were both zero. Exact expected state bucket and DynamoDB lock table were not found; the expected project Budget was absent. A read-only billing-alternate-contact query returned `ResourceNotFoundException`; a private primary-contact query produced no usable email. No address was recorded.
+- **Guarded preflight:** `make gpu-ec2-preflight`, with the expected account, pinned Canonical AMI, offered `us-east-1c`, and a future expiry, accepted account, AMI, quota, and AZ checks, then stopped at `HeadBucket: 404 Not Found` because the project backend bucket does not exist. It did not reach plan or apply.
+- **Failure/solution:** the stale zero-quota status was contradicted by current `get-service-quota`. Current docs now distinguish the applied quota value from the still-open request record and from launch authorization. Bootstrap remains gated by an invalid placeholder Budget email and the owner-authorization/exact-plan process.
+- **Cost/evidence:** `$18.5193` remains a planning estimate under the `$25` cap. No AWS resource, model download, GPU hour, Terraform plan/apply, or spend occurred. No account ID, email, or credential is in the public record.
+- **Next:** finish the status reconciliation PR; obtain a privately supplied, verified Budget notification address; review the exact bootstrap plan and required cloud-pilot authorization before any bootstrap apply. Then create and review the locked GPU plan before the single bounded GPU batch.
 
-## 2026-11-28 — Restack AI infrastructure handbook in PR #75
+## 2026-11-28 — Build guarded backend bootstrap wrappers
 
-- **Date and time:** 2026-11-28 17:03 UTC.
-- **Phase:** continuous non-billable learning documentation.
-- **Starting state:** PR #75 `codex/gpu-infrastructure-handbook` was based on old PR #74 head `944b457`; current PR #74 head is `3cf1eec`.
-- **Objective:** carry the handbook and its supporting documentation onto the latest bootstrap and quota-control stack.
-- **Changes:** replayed five documentation commits onto #74. Kept refreshed goal, status, backlog, and journal snapshots during conflicts; preserved handbook, documentation-index, and evidence changes. Corrected the manual guide and ticket to record the owner's quota approval and the later `CASE_CLOSED` read-only result, while retaining the remaining cost and apply gates.
-- **Validation:** the previous head `5284057` passed its historical six CI jobs in run `46129296996`; current rebased head needs fresh CI. 119 relative links across ten changed Markdown files resolve and `git diff --check` passes. No clean-room rerun or GPU operation was performed.
-- **GitHub status:** PRs #71 and #72 refreshed runs `46166173924` and `46166571475` passed. PR #73 run `46167001745` and #74 run `46167348257` are active. Current PR #75 is local and not yet published.
-- **AWS / GPU / cost:** no AWS query or mutation, no instance, GPU operation, model download, or spend. Quota is approved; budget, recipient, remote state, final plan/cost, live capacity, expiry, and separate apply authorization remain open.
-- **Next:** finish link and documentation checks, publish #75 with exact lease against old remote head `a7c6ccd64181d89fb794ffa3bdb02eb1f1d720eb`, update the PR description, and follow one current-head CI run.
+- **Phase:** Phase 2 non-billable Terraform readiness; no cloud operation.
+- **Branch/PR:** `codex/gpu-bootstrap-guardrails`, PR #74 based on PR #73 head
+  `b50c5a9`; initial commit `1c495d1` was pushed and PR #74 opened for owner review.
+- **Starting state:** the bootstrap root had seven resources and a static preview
+  script, but no private saved-plan/apply/migration workflow. No matching AWS backend
+  resources were recorded in the latest live inventory.
+- **Objective and changes:** added private plan/apply/migrate wrappers, exact seven-
+  resource plan validation, account and absence checks, digest-bound apply, Make
+  targets, operator instructions, tests, and ticket74. The local state is retained
+  after migration; no automatic cleanup is provided.
+- **Troubleshooting:** the first focused test invocation called system `pytest`, which
+  is absent. Installed the repository's documented Python 3.12 environment with
+  `make install`; the existing model fixture generation completed. The first
+  bootstrap preview Make target stopped immediately because the expected account
+  variable was not supplied; it performed no AWS call. No preview was retried because
+  the static Terraform validation is the relevant gate for this package.
+- **Compatibility review:** comparison with the [HashiCorp S3 backend guide](https://developer.hashicorp.com/terraform/language/backend/s3)
+  showed native S3 lockfiles require Terraform 1.10 or later. Tightened the bootstrap
+  minimum from 1.8 to `>=1.10,<2.0`; bootstrap `terraform validate` passed after that
+  correction. PR CI is being rerun on the corrected head.
+- **Validation:** six fake-tool bootstrap tests passed. `bash -n` passed for all four
+  new shell scripts. `make terraform-validate` passed for the bootstrap, existing EKS,
+  and GPU roots. `make verify` passed: Ruff; 199 passed, 2 skipped; dependency audit
+  found no known vulnerabilities; Compose and observability validation passed; GPU
+  benchmark/evaluation/CUDA targets were dry runs. Initial `make verify` found an
+  unsorted import; Ruff fixed it and verification was rerun successfully. `git diff
+  --check` passed. No real AWS/Terraform plan, apply, or migration ran.
+- **Security/financial boundary:** the email is represented only by a synthetic test
+  address; no real recipient is stored. Fake AWS/Terraform binaries are used in tests.
+  No AWS resource, model download, GPU hour, or project spend occurred.
+- **Outstanding:** review the PR diff and verify final-head GitHub CI. The owner must
+  provide a private valid Budget email and authorize a concrete saved plan before a future
+  bootstrap apply. A separate owner-approved teardown plan is needed for versioned
+  remote state resources.
+- **Next:** confirm the corrected PR #74 CI result. Keep AWS read-only and do not
+  repeat the designated project clean-room cycle.
 
-## 2026-11-28 — Restack documentation link checks in PR #76
+## 2026-11-28 — Draft the AI infrastructure learning handbook
 
-- **Date and time:** 2026-11-28 16:55 UTC.
-- **Phase:** Phase 11 local and CI documentation validation; non-billable.
-- **Starting state:** PR #76 was based on old PR #75 head `a7c6ccd`; current PR #75 head is `76325be`.
-- **Objective:** carry the standard-library Markdown link checker onto the current learning handbook and bootstrap stack.
-- **Conflict handling:** rebased four PR #76 commits. Kept the latest parent goal, status, backlog, and journal during conflicts, then reconciled current PR/CI and quota status. The checker and ticket remain intact.
-- **Validation:** `make gpu-docs-validate` passed on the current stack, checking 27 Markdown files; 3 focused checker tests passed; Ruff passed for the checker and tests; `git diff --check` passed. Prior PR #76 head `777335c` passed all six CI jobs in `46131623135`. The earlier full `make verify` result is documented in ticket76; a new full run is not needed for these status-only changes.
-- **GitHub:** PR #73 run `46167001745` passed. PR #74 run `46167348257` and PR #75 run `46167762231` are active. PR #76 old remote head `dba21f141b36e52f18e8897735b5981fcf74415b`; local rebased head `99fe443` is unpublished.
-- **AWS / GPU / cost:** no AWS call, mutation, GPU, model download, instance-hour, or spend. Quota approval does not clear the remaining cost/state/expiry/apply gates.
-- **Next:** run the current documentation checks and targeted tests, record results, push PR #76 with exact lease against its old remote head, and watch one fresh CI run.
+- **Phase:** non-billable documentation preparation across Phases 3–11; GPU execution
+  remains blocked by launch authorization and unresolved budget-recipient setup.
+- **Branch:** `codex/gpu-infrastructure-handbook`, stacked on PR #74 head `944b457`.
+- **Starting state:** the repository had a 4,500-word pre-GPU report, 6,000-word
+  manual reproduction guide, benchmark and incident reports, and interview guide, but
+  did not have the separately requested AI infrastructure handbook.
+- **Objective and changes:** drafted a 4,283-word handbook covering GPU/CUDA layers,
+  parallel execution, transformer inference and KV cache, vLLM, performance metrics,
+  tenant admission, model evaluation/release, observability, reliability, security,
+  FinOps, troubleshooting, and distributed GPU concepts that are explicitly outside
+  this single-L4 lab. Linked it from the main README and docs index, added ticket75 and an evidence-manifest
+  entry, and restored the manifest entries to the table under their header. Corrected the
+  manual guide to report the latest recorded 4.0-vCPU quota without treating it as
+  confirmed appeal approval or paid-launch authorization. A live GitHub inventory
+  found 45 open PRs (#30–#75 except #54); updated the backlog with successful #74
+  CI and pending #75 status. The text distinguishes
+  general explanations, proposed configuration, local evidence, and unexecuted L4
+  requirements.
+- **Validation:** a local standard-library link/heading checker found no broken
+  relative targets across eight touched documentation/index files; `git diff
+  --check` passed. No runtime code or software tests changed in this documentation
+  package. PR #74 final head `944b457` passed all six required jobs in run
+  `46128237140`; PR #75 head `a7c6ccd` passed all six required checks in run `46129784597`, including routine PR local end-to-end CI. This was not another designated project clean-room run.
+- **Failure and correction:** the standard shell variable name `path` is special in
+  zsh and overwrote the command search path in one temporary inventory command; the
+  command failed before repository inspection. Re-ran with `file_path`; no files or
+  system settings were changed.
+- **Evidence boundary:** explanations are educational text, not GPU output. The
+  handbook does not claim an L4 boot, GPU computation, real vLLM inference, live
+  observability, benchmark, or incident result.
+- **Cloud/cost/security:** no AWS calls or mutation, model/image download, GPU hour,
+  or spend. No credentials or account-specific identifiers were added.
+- **Next:** review the handbook for clarity, run documentation/CI checks, and publish
+  the focused package as a PR stacked on #74. Continue only non-billable work until
+  the private Budget recipient and exact-plan authorization gates are satisfied.
 
-## 2026-11-28 — Restack and locally validate expiry guardrails in PR #77
+## 2026-11-28 — Add automated checks for project documentation links
 
-- **Date and time:** 2026-11-28 17:00 UTC.
-- **Phase:** Phase 2 expiry safety and Phase 11 static testing; no cloud access.
-- **Starting state:** PR #77 was based on old PR #76 head `dba21f1`; current PR #76 head is `2f2456d`.
-- **Changes:** rebased the mocked Terraform expiry tests and documentation onto current PR #76. Kept refreshed parent goal/status/backlog/journal on conflicts; the expiry Terraform tests and ticket remain.
-- **Validation:** `make gpu-ec2-validate` passed formatting, validation, and three mocked-provider tests. `make gpu-docs-validate` checked 28 Markdown files, and `git diff --check` passed. These Terraform tests render/evaluate configuration only and do not contact AWS.
-- **CI:** PRs #74 and #75 runs `46167348257` and `46167762231` passed. PR #76 run `46168201575` is in progress. PR #77 old remote head `387b91c4056aef0ecb6c4c5330e24204496c884e`; current local head `7dc4992` needs publication and fresh CI.
-- **AWS / GPU / cost:** no AWS API call, mutation, instance, GPU operation, model download, or spend. Quota is approved, but remote state, Budget/recipient, exact plan/cost, capacity, expiry execution, and separate apply authorization remain open.
-- **Next:** complete documentation checks, push with exact lease against old PR #77 head `387b91c4056aef0ecb6c4c5330e24204496c884e`, update its description, and monitor one fresh CI run.
+- **Phase:** non-billable CI and documentation readiness.
+- **Branch:** `codex/gpu-documentation-link-checks`, stacked on PR #75 head `a7c6ccd`.
+- **Starting state:** PR #75 head `a7c6ccd` passed all six required checks in run
+  `46129784597`. The handbook and updated guides had been checked locally, but no
+  reusable repository check covered relative Markdown links and heading fragments.
+- **Objective and changes:** add a Python standard-library checker, tests, a Make
+  target in `make verify`, a GitHub Actions manifest check, and ticket76. Scope is
+  limited to project goal/readme/GPU docs and active tickets; remote links are not
+  fetched.
+- **Validation:** three focused tests and Ruff passed. `make gpu-docs-validate` checked
+  all 27 selected documents. `make verify` passed Ruff, 202 tests (2 skipped), dependency
+  audit, Compose/observability validation, GPU dry-run plans, and the link checker.
+  `make terraform-validate` passed all three roots; `git diff --check` passed. PR CI
+  was pending at this intermediate point. No manual clean-room cycle or cloud/GPU action
+  is part of this package.
+- **Security/cost:** reads only checked-in Markdown, uses no network, and records no
+  credentials or private values. No AWS resource, GPU hour, model/image download, or
+  project spend occurred.
+- **Final local verification:** `make verify` passed Ruff, 202 tests (2 skipped),
+  dependency audit, Compose configuration, monitoring config validation, GPU
+  benchmark/evaluation/CUDA dry-runs, and project documentation link checks. The
+  monitoring validator pulled four digest-pinned images after the user's Docker
+  cleanup; after validation, all resulting images were pruned. `make
+  terraform-validate` passed for bootstrap, EKS, and GPU EC2 roots. `git diff --check`
+  passed. No container was started by the validator and no cloud action occurred.
+- **Pull request:** opened PR #76 stacked on #75. Final head `dba21f1` passed all six
+  required CI jobs in run `46132280041`. No merge was performed.
 
-## 2026-11-28 — Restack and validate network guardrails in PR #78
+## 2026-11-28 — Add mocked Terraform expiry safety tests
 
-- **Date and time:** 2026-11-28 17:07 UTC.
-- **Phase:** Phase 2 network safety validation; static and non-billable.
-- **Starting state:** PR #78 was based on old PR #77 head `387b91c`; current PR #77 head is `7ee48eb`.
-- **Changes:** rebased the mocked network test and ticket onto current PR #77. Kept refreshed parent status documentation; the security-group risk-register entry and Terraform test remain.
-- **Validation:** `make gpu-ec2-validate` passed format, validation, and all four mocked Terraform tests (three expiry and one network test). `make gpu-docs-validate` checked 29 Markdown files, and `git diff --check` passed. The Terraform tests assert zero ingress, only TCP 80/443 egress, and the single instance's network references. No AWS network rule or instance was created.
-- **CI:** PR #76 run `46168201575` and #77 run `46168512412` are in progress. PR #78 old remote head `6aeb638b3cfe63ba9832e72d0ce3f3786dd7bfdd`; current local head `c8c8eb3` is unpublished and needs fresh CI.
-- **AWS / GPU / cost:** no AWS call, mutation, instance, GPU operation, model download, or spend. Quota approval does not complete the remaining launch gates.
-- **Next:** run the docs validator and diff check after status edits, publish with exact lease against old PR #78 head, update its PR body, and watch one fresh CI run.
+- **Phase:** Phase 2 non-billable infrastructure readiness.
+- **Branch:** `codex/gpu-expiry-safeguard-tests`, based on PR #76 head `dba21f1`.
+- **Starting state:** PR #76 is open; final head `dba21f1` passed all six required jobs
+  in run `46132280041`. The Terraform root configures a Scheduler expiry plus a guest
+  `systemd` timer, but the expiry wiring had no executable Terraform test.
+- **Objective and changes:** add a Terraform `terraform test` file using the mocked
+  AWS provider; test one-time UTC scheduling, exact target instance, scoped trust and
+  terminate permission, guest timer rendering, root volume/IMDS settings, and invalid
+  expiry input. Include the test in `make gpu-ec2-validate`, which is called by
+  `make terraform-validate` and CI. Update the risk register and ticket 77 to separate
+  mock configuration evidence from real runtime evidence.
+- **Research:** official HashiCorp Terraform test documentation says mocking is
+  supported from Terraform 1.7.0, while the repository GPU root requires Terraform
+  1.10.0 or later. References are linked in ticket77:
+  <https://developer.hashicorp.com/terraform/language/tests/mocking> and
+  <https://developer.hashicorp.com/terraform/language/tests>.
+- **Commands and outcomes:** Terraform 1.14.0 initialized the GPU root with
+  `-backend=false`. The first mocked run failed because an automatically generated
+  mock IAM role ARN did not satisfy AWS provider ARN validation; supplied a valid fake
+  role ARN. The test then passed. After adding invalid-deadline cases and tighter
+  assertions, `terraform fmt -recursive` and `terraform test -no-color` passed all
+  three cases. Tests use mocked data and resources, not AWS API calls. The first
+  `make verify` attempt failed before test collection because the new worktree had
+  neither a `.venv` nor the ignored local ONNX fixtures. Reused the already installed
+  Python 3.12 environment and generated both tiny fixtures with the documented model
+  script; this was setup recovery, not another clean-room run. Then `make verify`
+  passed Ruff, 202 tests (2 skipped), the dependency audit, Compose and observability
+  validation, GPU dry-run plans, and Markdown link validation. `make terraform-validate`
+  passed bootstrap, EKS, and GPU roots; GPU formatting, validation, and all three
+  Terraform tests passed. `git diff --check` passed. The observability validator pulled
+  four digest-pinned images; all local images were pruned afterward, leaving no local
+  containers or images. Docker volumes and build cache were not removed.
+- **Security/cost:** no cloud credentials were used, no network requests are part of
+  the test, and there was no AWS resource, GPU-hour, or project spend.
+- **Limitations:** static mocked configuration does not demonstrate Scheduler
+  delivery, cloud-init success on the selected AMI, timer behavior after reboot, or
+  EC2 termination. Those real checks remain required before paid inference work.
+- **Pull request:** opened PR #77 stacked on #76 at implementation head `75f91e3`;
+  all six required CI jobs passed in run `46133957636`. No merge was performed.
 
-## 2026-11-28 — Restack and validate resource tags in PR #79
+## 2026-11-28 — Add mocked GPU network-boundary tests
 
-- **Date and time:** 2026-11-28 17:08 UTC.
-- **Phase:** Phase 2 ownership, cost-attribution, and expiry metadata; non-billable tests.
-- **Starting state:** PR #79 was based on old PR #78 head `6aeb638`; current PR #78 head is `179240c`.
-- **Changes:** rebased the explicit tag map and mocked tag test onto current PR #78; retained the schedule-group tagging limitation because the locked provider schema does not expose schedule tags. Kept refreshed parent status records during conflict resolution.
-- **Validation:** `make gpu-ec2-validate` passes Terraform formatting, validation, and five mocked tests (expiry, network, and resource tags). `make gpu-docs-validate` checked 30 files. No AWS API call was made.
-- **CI:** PR #76 run `46168201575` passed. PR #77 run `46168512412` and #78 run `46168796270` are in progress. PR #79 old remote head `efe7eed486a0683cbc48d684137c8c5cd11d35a6`; local rebased implementation head `f369b9e` needs current-head CI.
-- **AWS / GPU / cost:** no mutation, resource, instance, GPU operation, model download, or spend. Quota approval does not clear the remote-state, Budget, exact-plan, live capacity, expiry, or separate apply gates.
-- **Next:** publish #79 with an exact lease against its old remote head, update the PR description, and monitor one CI run.
+- **Phase:** Phase 2 non-billable infrastructure readiness.
+- **Branch:** `codex/gpu-network-guardrail-tests`, based on PR #77 final head
+  `387b91c`, which passed all six required CI jobs in run `46134599825`.
+- **Objective:** add executable configuration checks for the custom security group
+  and ensure the single L4 instance references only that group and its selected
+  subnet.
+- **Research:** current AWS EC2/VPC documentation states that security groups begin
+  without inbound rules and are stateful, so response traffic for outbound requests
+  is allowed without adding inbound rules. Sources are linked in ticket78.
+- **Changes:** new Terraform mock test requires no ingress; exactly TCP 80 and 443
+  egress to the documented IPv4 destination, with no IPv6, prefix-list, security-group,
+  or self-referencing rule; one security-group attachment; and the selected subnet and
+  `g6.xlarge` type. The docs state that allowed outbound ports still reach any public
+  IPv4 destination and live rules remain unverified.
+- **Troubleshooting:** the first test run failed because the mock generated an invalid
+  Scheduler role ARN; added valid fake instance and IAM ARNs. The first egress check
+  compared a provider set to a list and failed despite the printed CIDR matching; used
+  a count plus membership check instead. The AWS mock also does not merge provider
+  default tags into resource tags, so removed a tag assertion outside this network
+  test's scope. All four Terraform tests then passed.
+- **Security/cost:** mocked AWS provider only. No credentials, API calls, resource,
+  GPU hour, or project spend. No live AWS validation is claimed.
+- **Pull request:** opened PR #78 stacked on #77 at implementation head `5c3bd12`;
+  all six required CI jobs passed in run `46135887060`. No merge was performed.
 
-## 2026-11-28 — Resolve local cancellation demo CI failure and refresh GPU input tests
+- **Validation update:** generated the standard ignored CPU ONNX fixtures in this
+  worktree, then `make verify` passed Ruff, 202 tests (2 skipped), dependency audit,
+  Compose/observability checks, GPU dry-run plans, and the documentation link check.
+  `make terraform-validate` passed all three roots, including all four GPU mock tests;
+  `git diff --check` passed. The observability validator downloaded four digest-pinned
+  Docker images and all image tags were pruned afterward. The local Docker container
+  and image listings are empty. This was not the designated clean-room cycle. No AWS
+  resource, GPU hour, or project spend occurred.
 
-- **Date and time:** 2026-11-28 17:24 UTC.
-- **Phase:** Phase 2 non-billable CI and Terraform guardrail readiness.
-- **Starting state:** PR #77 run `46168512412` failed in `local-e2e` after the local
-  and overload demos passed. The cancellation demo then received HTTP 429 before it
-  could cancel a stream. PR #78 run `46168796270` completed with all six jobs passed.
-  PR #79 run `46169103723` had five jobs passed and `local-e2e` still running.
-- **Investigation:** the failing log omitted the response body and did not identify
-  which quota rejected the request. The cancellation drill asserted a clean active
-  lease hash but inherited other Redis-backed quota state from the prior demo.
-- **Change:** PR #77 commit `58165d1` resets only the disposable local Redis fixture
-  before its independent cancellation assertions and includes the HTTP response body
-  when setup is rejected. This does not modify gateway runtime behavior and does not
-  establish the precise prior rejection cause.
-- **Validation:** Python byte-compilation and `git diff --check` passed locally for
-  the script and ticket. Fresh PR #77 CI is pending; the fix is not yet accepted.
-  PR #80's local head `565913e` passes Terraform format/validate and all 12 mocked
-  cases; `make gpu-docs-validate` checked 31 Markdown files and `git diff --check`
-  passed. No local clean-room run was repeated.
-- **AWS / GPU / cost:** no AWS call or mutation, GPU instance, model download, or
-  spend. No cloud action is authorized yet; the state bucket, lock table, Budget and
-  recipient, exact remote plan/cost, live capacity, independent expiry, and separate
-  apply authorization gates remain outstanding.
-- **Next:** verify PR #77's single CI watcher result, then refresh dependent PR branches
-  and publish PR #80 using an exact lease. Keep the existing one-run clean-room policy.
+## 2026-11-28 — Make GPU resource tags explicit and testable
 
-## 2026-11-28 — Restack network, tag, and input guardrails on the cancellation fix
+- **Phase:** Phase 2 static infrastructure readiness; no AWS resource was changed.
+- **Branch:** `codex/gpu-project-tag-guardrails`, based on PR #78 head `6aeb638`.
+- **Objective:** make ownership, expiry, data classification, and cost scope explicit
+  on taggable infrastructure, and check those values without AWS credentials.
+- **Changes:** introduced one complete shared tag map and assigned it directly to each
+  taggable resource in the GPU Terraform root, including the network, instance, root
+  volume, IAM role/profile, and Scheduler schedule group. Added a Terraform mock test
+  covering 11 resource tag maps and their required values. Added ticket79 to the
+  documentation link checker and updated the goal, status, risk, backlog, environment
+  README, and evidence manifest.
+- **Troubleshooting:** first validation correctly rejected `tags` on
+  `aws_scheduler_schedule`; the pinned AWS provider 5.100.0 schema has no such argument.
+  Removed it and documented that the schedule group is tagged while the individual
+  schedule remains managed by the dedicated root under its exact project name. The
+  first test compared a typed provider object with a `map(string)`; Terraform reported
+  the types differ. The test now compares normalized JSON values. Formatting, GPU-root
+  validation, and all five mocked tests pass.
+- **Documentation check:** `make gpu-docs-validate` passed for 30 files; `git diff
+  --check` passed.
+- **Security/cost:** test uses only AWS provider mocks. No AWS credentials/API calls,
+  resources, GPU time, model download, or project spend. No live tag propagation or
+  cleanup claim is made.
+- **PR state:** branch is prepared on top of PR #78; PR #79 is not yet published.
 
-- **Date and time:** 2026-11-28 17:24 UTC.
-- **Phase:** Phase 2 non-billable readiness; no cloud actions.
-- **Changes:** restacked PR #78 on PR #77 commit `58165d1`, PR #79 on refreshed PR
-  #78 commit `cbf07ef`, and PR #80 on refreshed PR #79 commit `fca2715`. Updated the
-  goal, implementation status, backlog, tickets, journal, and evidence manifest with
-  the failed-run context and current CI state.
-- **Validation:** PR #78 local Terraform validation passed all four mocked cases and
-  the docs checker covered 29 files. PR #79 passed all five mock cases and checked 30
-  Markdown files. PR #80 head `a81c4ca` passed all 12 mock cases and checked 31
-  Markdown files. `git diff --check` passed. These are non-cloud checks; no repeated
-  clean-room cycle was run.
-- **CI:** PR #79's previous head `faf024a` passed all six jobs in run `46169103723`.
-  PR #77 follow-up run `46169578415` showed five jobs passed and local-e2e pending at
-  the last watcher update. Fresh CI for restacked PRs #78 and #79 is pending; PR #80
-  is prepared locally but not yet published.
-- **AWS / GPU / cost:** no AWS call, instance, GPU operation, model download, or
-  spend. Remote state, Budget and recipient, final exact plan/cost, capacity, expiry
-  verification, and separate apply authorization remain open.
-- **Next:** publish PR #80 against its exact current remote head, then monitor its
-  checks and continue with saved-plan PR #81 after the refreshed base checks pass.
+## 2026-11-28 — PR #78 documentation-head end-to-end retry
 
-## 2026-11-28 — Restack and revalidate saved-plan guardrails
+- **Phase:** routine PR validation for Phase 2 static network guardrails.
+- **Branch / PR:** PR #78, head `6aeb638`, stacked on #77.
+- **Observed failure:** GitHub Actions run `46136477854` failed in `make demo-flagship`
+  when the sandboxed-agent task POST returned HTTP 500. The response body and service
+  traceback were not retained, so the root cause is unknown. The previous code head
+  `5c3bd12` passed the full workflow; `6aeb638` changed documentation only.
+- **Recovery evidence:** reran only the failed job for the same workflow. The sandboxed
+  agent flow and all six required jobs passed in run `46136477854`. This shows the
+  failure was not reproduced by the retry; it does not identify the cause.
+- **Cost/scope:** GitHub-hosted CI only; no local Docker run, AWS call, GPU, or project
+  spend occurred.
 
-- **Date and time:** 2026-11-28 17:27 UTC.
-- **Phase:** Phase 2 exact-plan safeguards; non-billable static and local tests.
-- **Starting state:** PR #81 was based on the previous PR #80 head `6145e25`; the
-  refreshed PR #80 head is `7e898b2`.
-- **Changes:** restacked the saved-plan summary and plan/apply wrapper checks on #80.
-  Conflict resolution retained the updated parent status records; PR #81-specific
-  implementation and validation history remains in `ticket81.md` and the evidence
-  manifest.
-- **Validation:** the focused test suite passed 33 tests; Ruff passed; plan/apply
-  shell scripts passed `bash -n`; documentation validation checked 32 files; and
-  `git diff --check` passed. No clean-room run was repeated.
-- **CI:** implementation head `8ff6f5f` passed run `46141493735`, but current-head
-  CI after this restack remains pending. PR #80 head `7e898b2` has a fresh run in
-  progress; PRs #77–#79 refreshed results are still being watched.
-- **AWS / GPU / cost:** no AWS request, plan, apply, instance, model download, GPU
-  operation, or spend.
-- **Next:** publish PR #81 with a force-with-lease against its verified old head, then
-  monitor its checks before restacking PR #82.
+## 2026-11-28 — Publish explicit GPU resource tag guardrails
 
-## 2026-11-28 — Confirm cancellation fix and restack expiry-target validation
+- **Branch / PR:** `codex/gpu-project-tag-guardrails`, PR #79, stacked on PR #78.
+- **Publication:** pushed implementation commit `2e92165` and opened PR #79. GitHub
+  Actions run `46137645356` passed all six required jobs, including local end-to-end.
+- **Follow-up:** updated the goal, backlog, ticket, evidence manifest, and status to
+  record the published PR and its passing implementation-head checks. The source code
+  is unchanged; the follow-up documentation commit requires its own CI run.
+- **Limits:** CI and mocked Terraform verify configuration only. No AWS resources, GPU
+  execution, or spend occurred.
 
-- **Date and time:** 2026-11-28 17:29 UTC.
-- **Phase:** Phase 2 non-billable infrastructure checks.
-- **CI results:** PR #77 follow-up run `46169578415` passed all six jobs, including
-  local-e2e. Restacked PR #78 run `46170127067` and PR #79 run `46170178018` also
-  passed all six jobs each. PR #80 run `46170356996` had five jobs passed and
-  local-e2e pending at the latest check. PR #81 run `46170595453` had three passed
-  and Python, local-e2e, and supply-chain pending at the latest check.
-- **Changes:** restacked PR #82 expiry target checks onto PR #81 head `3355407`.
-  Kept the current PR #81 goal/status/journal records during conflict resolution and
-  recorded PR #82-specific work in its own ticket.
-- **Validation:** the focused plan-summary/wrapper suite passed 35 tests; Ruff passed;
-  the docs checker validated 33 files; `git diff --check` passed. No clean-room run.
-- **AWS / GPU / cost:** no AWS calls, resources, GPU actions, or spend.
-- **Next:** publish PR #82 with an exact force-with-lease, monitor its CI, then restack
-  PR #83 onto the verified new head.
+## 2026-11-28 — Add negative tests for GPU-root input bounds
 
-## 2026-11-28 — Bind expiry plan to the project instance and role
+- **Phase:** Phase 2 static infrastructure preparation; no AWS operation.
+- **Branch:** `codex/gpu-input-constraint-tests`, based on PR #79 documentation head
+  `efe7eed`.
+- **Objective:** prove that Terraform planning rejects accelerator families, regions,
+  project identifiers, disk sizes, and AMI inputs outside the authorized initial lab.
+- **Changes:** added seven mocked `plan` cases for `g6.2xlarge`, `g5.xlarge`, root
+  volume sizes below 100 or above 120 GiB, non-`us-east-1` region, unrelated project,
+  and malformed AMI. The full GPU-root Terraform test suite now has 12 cases. Added
+  ticket80 to the docs link checker, docs index, status, backlog, and evidence list.
+- **Troubleshooting:** the first region case also supplied `us-west-2a`; the zone
+  validation correctly failed first, causing the test to fail because it expected only
+  the region validation. Kept a valid `us-east-1a` zone and changed only the region.
+  The isolated region test and all other cases pass.
+- **Validation:** Terraform 1.14.0 format check, validation, and all 12 mock tests pass.
+  `make gpu-docs-validate` passed on 31 Markdown files, and `git diff --check` passed.
+  No Docker, AWS, GPU, or spend.
+- **PR state:** no PR opened yet.
 
-- **Date and time:** 2026-11-28 17:31 UTC.
-- **Phase:** Phase 2 saved-plan validation; static and local only.
-- **CI:** PR #77 follow-up run `46169578415`, PR #78 run `46170127067`, and PR #79
-  run `46170178018` passed all six jobs. PR #80 run `46170356996` had five jobs
-  passed and local-e2e pending; PR #81 run `46170595453` had three jobs passed and
-  three pending. PR #82 run `46170895199` had Ansible, GPU observability, and
-  manifests passed, with Python, local-e2e, and supply-chain pending.
-- **Changes:** restacked PR #83 on PR #82 head `0164511`. Its plan validator verifies
-  Terraform configuration references bind the schedule role and termination target
-  to this project's expiry role and single EC2 instance. Preserved current parent
-  status records and recorded PR #83 detail in ticket83.
-- **Validation:** the focused tests passed 39 cases; Ruff passed; docs validation
-  checked 34 files; `git diff --check` passed. Current-head CI and live-provider plan
-  shape verification remain outstanding. No clean-room run.
-- **AWS / GPU / cost:** no AWS calls or mutations, GPU, model download, or spend.
-- **Next:** publish PR #83 with an exact force-with-lease and monitor CI; only then
-  restack the current final queued PR #84.
+## 2026-11-28 — Publish GPU Terraform input-boundary tests
+
+- **Branch / PR:** `codex/gpu-input-constraint-tests`, PR #80, stacked on PR #79.
+- **Publication:** pushed implementation and current-state records; PR #80 head
+  `cf25f6d` passed all six required jobs in GitHub Actions run `46139054282`, including
+  Terraform validation and local CPU end-to-end.
+- **Follow-up:** the goal, status, ticket80, backlog, and evidence manifest now record
+  this result. The source tests do not access AWS or assert live capacity; this
+  documentation follow-up needs its own CI result.
+- **Cost/scope:** GitHub-hosted CI only. No local Docker images, AWS resources, GPU
+  execution, or project spend.
+
+## 2026-11-28 — PR #79 final documentation checks passed
+
+- **Branch / PR:** PR #79 final documentation head `efe7eed`, stacked on #78.
+- **Result:** all six required GitHub Actions jobs passed in run `46138350722`,
+  including local end-to-end. The goal, status, backlog, ticket79, and evidence record
+  now identify this final head and its CI result.
+- **Limit:** this is CI/local evidence only; no AWS, GPU, or spend occurred.
+
+## 2026-11-28 — Prepare exact saved-plan review guard (PR #81)
+
+- **Phase:** Phase 2 static infrastructure preparation; no AWS operation.
+- **Starting state:** PR #80 was open on #79 at head `6145e25`. A live check showed
+  all six required jobs passed in run `46139713692`. PR #81 did not yet exist.
+- **Branch/worktree:** `codex/gpu-saved-plan-review`, based on PR #80 head `6145e25`
+  in `/private/tmp/multi-tenant-ai-inference-platform-pr81`.
+- **Objective:** ensure the saved plan's digest is paired with a structural review of
+  its resource scope before the operator applies it, while keeping Terraform's raw
+  JSON output and user data out of terminal output.
+- **Changes:** added `scripts/gpu_ec2_plan_summary.py`; the plan wrapper now validates
+  the plan JSON before printing its digest, and apply validates the same
+  checksum-matched plan again before `terraform apply`. It checks exactly 14 expected
+  managed resources with create-only actions; reviewed AMI/AZ/expiry; one `g6.xlarge`;
+  encrypted bounded gp3 disk; IMDSv2 and one-hop metadata; SSM managed policy; all
+  taggable resource maps; no ingress and only TCP 80/443 IPv4 egress; and exact
+  one-time UTC expiry. Added fixture and fake-CLI regression tests, ticket81, docs
+  index, docs-link validation, status, risk, backlog, evidence, and goal updates.
+- **Errors and troubleshooting:** first wrapper integration failed because the fake
+  Terraform command expected `show` at argv position zero, but the actual wrapper
+  supplies `-chdir` before `show`; the fake command was changed to detect `show -json`
+  anywhere in the args. A test then failed because a broadened tag check used a
+  different but accurate error string; the expected assertion was corrected. One
+  temporary edit put a privacy assertion in a test without a subprocess result, which
+  produced `NameError`; it was moved to the relevant test. These failures and fixes
+  are retained here rather than hidden.
+- **Validation:** the initial implementation run passed 31 focused tests. Schema
+  review then added two malformed-plan cases; the final focused run passed 33 tests.
+  `make gpu-ec2-validate` passed format and configuration checks plus all 12 mocked
+  Terraform tests. Ruff passed for all three changed Python files. `bash -n` passed
+  for plan/apply wrappers, `make gpu-docs-validate` checked 32 Markdown files, and
+  `git diff --check` passed. The tests use fixture JSON and fake AWS/Terraform
+  executables.
+- **Evidence limits:** tests prove the validator rejects specified fixture changes,
+  that the sanitized summary omits sentinel user data, and that an unsafe instance
+  type never reaches fake Terraform apply. They do not confirm live AWS provider JSON,
+  remote state, quota/capacity, a real apply, or GPU behavior.
+- **Resources/cost:** no Docker builds or containers, AWS calls, Terraform mutation, model/image
+  downloads, GPU time, or project spend. PR #80 final CI was checked read-only; no
+  duplicate watcher or status process was launched.
+- **Next:** inspect the final diff, commit and publish PR #81 stacked on #80, then use
+  one GitHub Actions watcher for its checks. Keep all cloud access read-only until the
+  Budget recipient, exact plans, cost/expiry safeguards, and separate apply approval
+  are resolved.
+
+## 2026-11-28 — Publish saved-plan review guard
+
+- **PR:** [#81 — validate saved GPU Terraform plans](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/81), stacked on PR #80.
+- **Implementation head:** `8ff6f5fa5c648409d7ce50502b4879fe7102d896`.
+- **CI:** all six required jobs passed in run `46141493735`, including the routine
+  GitHub-hosted local CPU end-to-end workflow. No extra manual local clean-room run
+  was started.
+- **Follow-up:** updated this goal, status, backlog, evidence manifest, ticket, and
+  journal to record the PR and implementation-head result. The documentation follow-up
+  needs a new final-head CI run.
+- **Limits and cost:** PR checks and fixture tests do not verify the actual AWS plan
+  JSON or authorize infrastructure changes. No AWS call, Terraform mutation, GPU
+  instance, model download, local Docker build/container, or project spend occurred.
+
+## 2026-11-28 — Validate the scheduled expiry action (PR #82 preparation)
+
+- **Phase:** Phase 2 static infrastructure preparation; no AWS operation.
+- **Starting state:** PR #81 final head `3cb8139` passed all six required jobs in run
+  `46142107889`, including the routine local CPU end-to-end workflow. PR #81 remains
+  open and unmerged.
+- **Branch/worktree:** `codex/gpu-plan-expiry-target-review`, based on PR #81 head
+  `3cb8139` in `/private/tmp/multi-tenant-ai-inference-platform-pr82`.
+- **Objective:** make the saved-plan summary verify not only when the expiry schedule
+  runs, but also which action it invokes and which project schedule group owns it.
+- **Changes:** require the exact project schedule name/group and EventBridge Scheduler
+  AWS SDK target `ec2:TerminateInstances`; retain the one-time UTC expression, enabled
+  state, and disabled flexible window. The sanitized summary now states that the
+  expiry action invokes EC2 termination. Added negative fixture cases for a different
+  target action and an unrelated schedule group. Added ticket82, docs index and link
+  checker entry.
+- **Troubleshooting:** the first edit of the validation condition omitted a boolean
+  `or`; source inspection caught it before tests ran, and it was corrected.
+- **Validation:** 35 focused plan-validator and fake-wrapper tests passed; Ruff passed
+  for the changed Python files; `git diff --check` passed. These tests use fixture JSON
+  and do not contact AWS.
+- **Evidence limits:** a fixture validates expected plan fields, while the earlier
+  Terraform mock test covers the configured schedule and role. Neither proves the
+  live AWS provider emits these exact fields, the Scheduler fires, or an EC2 host
+  terminates. Those remain real-L4 lifecycle checks.
+- **Resources/cost:** no AWS calls, Terraform mutation, local Docker build/container,
+  model download, GPU runtime, or project spend.
+- **Next:** finish documentation/link checks, commit and publish PR #82 on top of #81,
+  and watch its required CI. Keep AWS read-only until the private Budget recipient,
+  exact plans, cost/expiry safeguards, and separate apply approval are resolved.
+
+## 2026-11-28 — Publish expiry-target validation
+
+- **PR:** [#82 — verify GPU expiry schedule target](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/82), stacked on PR #81.
+- **Implementation head:** `3c50b00bb99d9badd63df0a18792f5b8a6d9dcf0`.
+- **CI:** all six required jobs passed in run `46143239396`, including the routine
+  GitHub-hosted local CPU end-to-end workflow. No separate manual clean-room run was
+  started.
+- **Follow-up:** the goal, status, backlog, ticket82, and evidence manifest now record
+  the PR and implementation checks. This documentation follow-up requires its own
+  final-head CI run.
+- **Limits and cost:** this is static validation only; no actual Terraform plan JSON,
+  EventBridge invocation, EC2 termination, AWS resource, GPU, model download, local
+  Docker build/container, or project spend occurred.
+
+## 2026-11-28 13:15 UTC — Tighten PR #84 instance public-address review
+
+- **Phase and scope:** Phase 2 static infrastructure preparation; no cloud mutation.
+- **Starting state:** PR #84 documentation head `c50b591` had passed all six required
+  checks in run `46148089116`; the PR remained open. The validator checked the subnet's
+  public-IP-on-launch setting but did not check the EC2 instance's own public-address
+  plan value.
+- **Objective and changes:** require `associate_public_ip_address=true` in the instance
+  plan, add an unsafe-plan regression case, and align the fake Terraform-wrapper plan
+  fixture. Update ticket84 and the persistent goal/status/evidence records.
+- **Troubleshooting:** the first focused run failed one wrapper test because its
+  independent fake plan fixture omitted the new field. Added the field to that
+  fixture; no product defect or AWS operation was involved.
+- **Validation:** final focused test run passed 44 tests; Ruff passed; the GPU docs
+  link checker validated 35 files; `git diff --check` passed. The first test run's
+  failure was retained in this entry.
+- **Evidence limits:** these are local static and fixture tests; they do not establish
+  real AWS plan JSON shape, route behavior, Systems Manager connectivity, or GPU
+  execution. No CI has run on this follow-up yet.
+- **Resources and cost:** no AWS API call, Terraform plan/apply, local Docker build or
+  container, model download, GPU runtime, or project spend.
+- **Next:** review the diff, publish the PR #84 follow-up, and watch one final-head CI
+  run. Then resume the broader open-PR and non-billable readiness review.
+
+## 2026-11-28 13:20 UTC — Reconcile the reported GPU quota approval
+
+- **Phase and scope:** Phase 2 read-only quota verification; no AWS mutation.
+- **Trigger:** the owner reported that AWS had approved the On-Demand G-series quota
+  appeal and asked whether GPU work should begin before remaining non-GPU work.
+- **Commands:** used `AWS_PROFILE=ai-platform-pilot-key` with `aws sts
+  get-caller-identity` and `aws service-quotas list-service-quotas --service-code
+  ec2 --region us-east-1`; the latter selected the quota named “Running On-Demand G
+  and VT instances.”
+- **Result:** expected account identity matched and applied quota `L-DB2E81BA` is
+  `4.0` vCPUs. This is enough on paper for one `g6.xlarge`. Service Quotas request
+  history elsewhere still reads `CASE_OPENED`; preserve that stale status alongside
+  the owner report and applied value. The quota does not reserve AZ capacity.
+- **Decision:** finish the non-GPU safety gates before any paid GPU run. The private
+  Budget notification recipient, remote-state bootstrap, exact locked GPU plan,
+  refreshed full-cost/expiry/teardown review, and separate apply authorization remain.
+  Prepare GPU-dependent operations as one bounded batch after those gates.
+- **Evidence limits and cost:** the CLI proves only the account context and applied
+  quota value. It does not prove live capacity, a remote-state plan, an instance, or
+  GPU access. Queries were read-only; no AWS resources or spend.
+
+## 2026-11-28 13:26 UTC — Verify PR #84 follow-up CI and update readiness state
+
+- **Phase and scope:** Phase 2 static plan validation and non-billable readiness.
+- **PR/CI:** PR #84 commit `8349510` passed all six required jobs in GitHub Actions
+  run `46148953601`, including local E2E. The run also validates the updated plan
+  fixtures and instance-level public-IP assertion.
+- **Documentation:** updated the goal, implementation status, cost report, ticket84,
+  and evidence manifest to record the CLI-confirmed 4.0-vCPU applied quota and the
+  owner's report of approval. The case-history API's `CASE_OPENED` value is retained
+  as stale/inconsistent history, not treated as proof that the applied quota is zero.
+- **Readiness decision:** quota capacity is now sufficient on paper for a single
+  `g6.xlarge`, but finish non-GPU safety gates before GPU execution: obtain a private
+  Budget notification recipient, create/review the remote-state backend plan, refresh
+  exact costs/capacity/expiry/teardown, and require separate apply authorization.
+- **Validation and cost:** six PR checks passed on code head `8349510`; documentation
+  links, Ruff, the focused 44 tests, and diff checks passed before that run. The new
+  documentation update then passed all six required checks on head `355deba` in run
+  `46149649470`. No Terraform plan/apply, AWS mutation, GPU time, or spend occurred.
+
+## 2026-11-28 13:42 UTC — Reconcile the open PR review and mergeability queue
+
+- **Phase and scope:** PR-only workflow review; no branch or AWS mutation.
+- **GitHub snapshot:** 54 PRs are open (#30–#84 except #54); none has an approving
+  review decision. The live GraphQL mergeability result shows PR #39 and PR #50 as
+  conflicting, while the other 52 are clean/mergeable. PR #84 head `2bad950` passed
+  all six required checks in run `46150315317`.
+- **Impact:** passing checks do not replace human review. The two conflicts and lack
+  of approvals mean the open PR stack is not ready to close; do not claim all PR/CI
+  review is complete. Resolve each branch against its intended base and revalidate
+  affected descendants before any merge.
+- **Decision:** keep the AWS account read-only. Continue the non-GPU review and safety
+  gates; do not let quota approval alone trigger GPU launch.
+- **Evidence limits and cost:** mergeability and review-decision data are a point-in-
+  time GitHub snapshot. No AWS mutation, Terraform operation, GPU hour, or spend.
