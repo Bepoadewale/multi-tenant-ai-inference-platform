@@ -47,7 +47,9 @@ unverified.
 - [x] Record current official NVIDIA and Triton references and the version decision.
 - [x] Pass focused local tests, lint, the repository validation suite, shell parsing,
   dry-run/Make previews, and diff checks.
-- [ ] Pass the final PR checks and resolve findings.
+- [x] Pass PR checks on the preceding candidate (all six jobs in runs
+  `46085794180` and `46086647676`).
+- [ ] Publish the final kernel declaration fix and pass checks on the final PR head.
 - [ ] Obtain human review; do not merge without owner authorization.
 
 ## Acceptance criteria
@@ -65,14 +67,19 @@ unverified.
 ## Validation
 
 The initial candidate's focused Triton suite passed 10 tests and its required PR
-workflow passed all six jobs in run `46085794180`, including local E2E. The latest
-local follow-up has 11 focused tests and `make lint` passes. `make verify` passes 187
-tests (2 skipped), the dependency audit, Compose checks, GPU observability configuration
-validation, and existing benchmark/evaluation/CUDA planning targets. `bash -n`, the
-Triton dry-run, the host-wrapper Make preview, and `git diff --check` pass. Seventy-six
-relative Markdown targets across eight changed documentation files resolve. The plan
-reports zero GPU and network operations. CI for this ticket's pull request has not run
-yet. All these checks validate only local preparation, not a CUDA kernel or profiler
+workflow passed all six jobs in run `46085794180`, including local E2E. Follow-up
+commit `deaafd3` passed all six jobs, including local E2E, in run `46086647676`.
+During review of the executable path, the JIT kernel was moved from a nested closure
+to a top-level Triton module. Triton compiles JIT functions by inspecting their
+function source, so keeping the function at module scope avoids relying on a nested
+closure being understood by that source parser. The module is imported only after
+the host has verified a single L4; workstation dry-runs still do not import Torch or
+Triton. This source-layout correction has 11 focused local tests, and `make verify`
+passes 187 tests (2 skipped), the dependency audit, Compose checks, GPU observability
+configuration validation, and existing benchmark/evaluation/CUDA planning targets.
+`bash -n`, the Triton dry-run, the host-wrapper Make preview, Python compilation,
+relative-link checks, and `git diff --check` pass. The final-head CI run remains
+required. All these checks validate local preparation, not a CUDA kernel or profiler
 on an L4.
 
 ## Security and financial considerations
@@ -86,6 +93,6 @@ not grant approval for the later GPU batch.
 
 ## Evidence and outstanding work
 
-Local evidence will prove only parameter validation and dry-run safety. The L4 kernel,
+Local evidence proves only parameter validation and dry-run safety. The L4 kernel,
 Nsight capture, compatibility, performance counters, and measured performance remain
 unproven until the quota, exact-plan, and batch-authorization gates pass.

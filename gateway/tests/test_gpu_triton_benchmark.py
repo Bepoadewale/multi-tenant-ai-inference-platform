@@ -78,13 +78,9 @@ def test_triton_host_wrapper_rejects_oversized_runtime_before_host_metadata():
 def test_triton_result_is_created_with_owner_only_permissions(tmp_path, monkeypatch):
     torch = ModuleType("torch")
     triton = ModuleType("triton")
-    triton.__path__ = []
     triton.__version__ = "3.8.0-test"
-    triton_language = ModuleType("triton.language")
-    triton.language = triton_language
     monkeypatch.setitem(sys.modules, "torch", torch)
     monkeypatch.setitem(sys.modules, "triton", triton)
-    monkeypatch.setitem(sys.modules, "triton.language", triton_language)
     monkeypatch.setattr(
         triton_vector_add,
         "execute",

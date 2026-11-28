@@ -60,22 +60,9 @@ def _driver_version() -> str | None:
         return None
 
 
-def _make_kernel(triton, tl):
-    @triton.jit
-    def vector_add(x_ptr, y_ptr, output_ptr, count, BLOCK_SIZE: tl.constexpr):
-        offsets = tl.program_id(0) * BLOCK_SIZE + tl.arange(0, BLOCK_SIZE)
-        mask = offsets < count
-        x = tl.load(x_ptr + offsets, mask=mask, other=0.0)
-        y = tl.load(y_ptr + offsets, mask=mask, other=0.0)
-        tl.store(output_ptr + offsets, x + y, mask=mask)
-
-    return vector_add
-
-
 def execute(
     torch,
     triton,
-    tl,
     elements: int,
     block_size: int,
     warmups: int,
@@ -97,7 +84,10 @@ def execute(
     y = torch.randn((elements,), device="cuda", dtype=torch.float32)
     output = torch.empty_like(x)
     reference = x + y
-    kernel = _make_kernel(triton, tl)
+    # Import the JIT kernel only after this non-dry-run path reaches the GPU checks.
+    from triton_vector_add_kernel import vector_add
+
+    kernel = vector_add
     grid = (triton.cdiv(elements, block_size),)
 
     for _ in range(warmups):
@@ -198,12 +188,11 @@ def main() -> int:
     try:
         import torch
         import triton
-        import triton.language as tl
     except ImportError as error:
         parser.error(f"the pinned CUDA/PyTorch environment is unavailable: {error}")
     try:
         report = execute(
-            torch, triton, tl, args.elements, args.block_size, args.warmups,
+            torch, triton, args.elements, args.block_size, args.warmups,
             args.repeats, args.max_runtime_seconds,
         )
     except (AssertionError, RuntimeError, subprocess.SubprocessError) as error:
