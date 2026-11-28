@@ -32,6 +32,8 @@ termination.
   matching project role and instance.
 - Fail closed when Terraform configuration expressions are absent or ambiguous.
 - Add fixture tests for a target bound to another role or instance.
+- Update the fake saved-plan fixture used by the shell-wrapper tests to include the
+  Terraform configuration expressions required by the new guard.
 
 ## Acceptance criteria
 
@@ -41,6 +43,8 @@ termination.
 - [x] A schedule input bound to another instance is rejected.
 - [x] An expiry policy expression bound to another instance is rejected.
 - [x] Focused plan tests pass (24 tests), Ruff passes, and `git diff --check` passes.
+- [x] The saved-plan and wrapper suites pass together after refreshing the fake plan's
+  configuration section (39 tests across both files).
 - [ ] Validate the expression shape against a real AWS-provider plan when the
   authorized remote backend and GPU quota gates permit a plan.
 - [ ] Publish the PR, pass all required CI, and receive owner review. No merge or
@@ -49,8 +53,12 @@ termination.
 ## Validation commands and results
 
 ```bash
-PYTHONPATH=.:gateway/src python -m pytest gateway/tests/test_gpu_ec2_plan_summary.py -q
-ruff check scripts/gpu_ec2_plan_summary.py gateway/tests/test_gpu_ec2_plan_summary.py
+PYTHONPATH=.:gateway/src python -m pytest \
+  gateway/tests/test_gpu_ec2_plan_summary.py \
+  gateway/tests/test_gpu_ec2_scripts.py -q
+ruff check scripts/gpu_ec2_plan_summary.py \
+  gateway/tests/test_gpu_ec2_plan_summary.py \
+  gateway/tests/test_gpu_ec2_scripts.py
 git diff --check
 ```
 
@@ -58,6 +66,13 @@ The first local attempt used `python`, which is not installed as a command on th
 workstation. `python3` is Python 3.14 but does not have pytest installed. The focused
 suite then ran with a pre-existing local validation environment: **24 passed**;
 Ruff and the diff check passed. No project-local virtual environment was created.
+
+The first PR CI run (`46145456879`) found one stale fake saved-plan fixture in the
+shell-wrapper suite. The production guard failed closed because the fixture had no
+`configuration` object. Updated that fixture to use the same action, role, and
+instance expressions as Terraform's documented plan JSON. The combined saved-plan
+and wrapper suites then passed **39 tests**; PR CI must rerun on the corrected commit
+before acceptance.
 
 ## Security, cost, and evidence limits
 

@@ -39,8 +39,15 @@
   workstation; `python3` was Python 3.14 without pytest. The first test run then
   exposed an incorrect expectation that the IAM policy's ARN reference also included
   the `.id` path; the code and fixture were corrected to the actual `.arn` reference.
-- **Validation:** focused suite passed **24 tests**; Ruff passed, the local docs-link
-  checker validated 34 Markdown files, and `git diff --check` passed.
+- **CI failure and fix:** PR #83 run `46145456879` showed that the shared wrapper
+  test fixture also needed Terraform's configuration expressions. The saved-plan
+  validator correctly refused its older resource-changes-only fixture. Added the
+  same role/instance/action bindings to that fake plan; the combined validator and
+  wrapper suites then passed **39 tests**. A new PR CI run is still required.
+- **Validation:** the focused validator suite passed **24 tests**;
+  Ruff passed, the local docs-link checker validated 34 Markdown files, and
+  `git diff --check` passed. The first local focused run did not include the wrapper
+  suite, which is why CI caught the incomplete fixture update.
   Terraform fixture checks do not prove the live AWS provider's JSON shape. The next
   permitted remote plan should confirm it before any apply.
 - **Security/evidence limits:** this checks resource references, not the runtime
@@ -48,9 +55,8 @@
   action and scope; a real scheduled termination remains unverified. No AWS query or
   mutation, Terraform plan, GPU operation, model download, Docker build/container,
   local clean-room run, or project spend occurred.
-- **Next:** finish documentation validation, publish the focused PR on top of #82,
-  and let its standard CI validate the final head. Do not merge without owner
-  authorization.
+- **Next:** update the PR record, push the wrapper fixture fix to PR #83, and watch
+  its new CI run. Do not merge without owner authorization.
 
 ## 2026-11-28 — Restack and validate PR #58 local tenant and operator preparation
 
