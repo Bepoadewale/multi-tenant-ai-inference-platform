@@ -77,6 +77,8 @@ services:
       HF_HOME: /root/.cache/huggingface
     volumes:
       - model-cache:/root/.cache/huggingface
+    ports:
+      - 127.0.0.1:8000:8000
     shm_size: 8gb
     deploy:
       resources:

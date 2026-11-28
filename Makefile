@@ -1,4 +1,4 @@
-.PHONY: install test lint audit run demo load-test bootstrap-local smoke status public-demo demo-local demo-overload demo-routing demo-failure demo-timeout demo-metering demo-observability demo-recovery demo-model-registry demo-release-control demo-capacity demo-operational-evidence demo-remediation demo-agent-tools demo-self-service demo-edge-adapter demo-sandboxed-agent demo-operator-console demo-flagship verify clean-local destroy-local helm-lint terraform-validate cloud-delivery-validate pilot-guardrails-plan pilot-cloud-plan pilot-cloud-apply pilot-cloud-push-image pilot-cloud-bootstrap-runtime pilot-cloud-smoke pilot-cloud-validate pilot-cloud-destroy container-dependencies-validate container-dependencies-audit gpu-ec2-preflight gpu-ec2-validate gpu-compose-config gpu-observability-validate gpu-benchmark-plan gpu-benchmark gpu-evaluation-plan gpu-cuda-plan gpu-cuda-matmul gpu-cuda-vector-add gpu-ec2-bootstrap-preview-plan gpu-ec2-preview-plan gpu-ec2-plan gpu-ec2-apply gpu-ec2-destroy-plan gpu-ec2-destroy-apply gpu-ec2-verify-clean
+.PHONY: install test lint audit run demo load-test bootstrap-local smoke status public-demo demo-local demo-overload demo-routing demo-failure demo-timeout demo-metering demo-observability demo-recovery demo-model-registry demo-release-control demo-capacity demo-operational-evidence demo-remediation demo-agent-tools demo-self-service demo-edge-adapter demo-sandboxed-agent demo-operator-console demo-flagship verify clean-local destroy-local helm-lint terraform-validate cloud-delivery-validate pilot-guardrails-plan pilot-cloud-plan pilot-cloud-apply pilot-cloud-push-image pilot-cloud-bootstrap-runtime pilot-cloud-smoke pilot-cloud-validate pilot-cloud-destroy container-dependencies-validate container-dependencies-audit gpu-ec2-preflight gpu-ec2-validate gpu-compose-config gpu-observability-validate gpu-benchmark-plan gpu-benchmark gpu-evaluation-plan gpu-cuda-plan gpu-cuda-matmul gpu-cuda-vector-add gpu-release-controller-help gpu-ec2-bootstrap-preview-plan gpu-ec2-preview-plan gpu-ec2-plan gpu-ec2-apply gpu-ec2-destroy-plan gpu-ec2-destroy-apply gpu-ec2-verify-clean
 PYTHON ?= python3.12
 VENV := .venv
 PY := $(VENV)/bin/python
@@ -143,6 +143,8 @@ gpu-cuda-matmul:
 gpu-cuda-vector-add:
 	nvcc -O2 -std=c++17 -lineinfo benchmarks/cuda_performance/vector_add.cu -o /tmp/gpu-lab-vector-add
 	/tmp/gpu-lab-vector-add
+gpu-release-controller-help:
+	$(PY) scripts/gpu_release_controller.py --help
 gpu-ec2-bootstrap-preview-plan:
 	./scripts/gpu-ec2-bootstrap-preview-plan.sh
 gpu-ec2-preview-plan:

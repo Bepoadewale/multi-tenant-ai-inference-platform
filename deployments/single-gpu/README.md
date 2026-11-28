@@ -56,8 +56,28 @@ A different identity with the signed `release.approve` role can approve the plan
 gateway containers read the same plan on this one host. It is not a distributed lock
 or a durable multi-host registry. The API does not have the Docker socket, does not
 verify the live champion against an independent active-deployment record, and does not
-switch vLLM. A separate host-side controller is still required before deployment or
-rollback can be claimed.
+switch vLLM. A separate host-side controller is prepared below; only fake-based local
+tests exist, so live deployment or rollback cannot yet be claimed.
+
+The host-only `scripts/gpu_release_controller.py` verifies the approved plan against
+the active manifest and the running container, computes a SHA-256 digest over every
+file in the selected model snapshot, and updates only the model-serving values in
+`.env`. It recreates only vLLM, checks its health and served alias, then starts both
+gateway replicas. A failed readiness check restores the last active model and records
+the result in a private transaction journal. `restore-active` supports the evaluation
+workflow, where the one GPU must temporarily load a candidate while the gateways are
+stopped. `recover` retries an interrupted restoration. These behaviors have local
+fake-based tests only; they have not run against EC2, Docker Compose, or an L4.
+
+The vLLM API is published on host loopback port `8000` only so the host controller can
+check its model and readiness endpoints. Gateway replicas use loopback ports `8081`
+and `8082`; the controller checks both. These host-only ports are not public listeners,
+and the AWS security group has no inbound rules. The default release API URL is
+`http://127.0.0.1:8081/gpu-release/v1`; change it only to another TLS URL or local
+loopback endpoint.
+
+Use `make gpu-release-controller-help` to inspect the local command surface without
+contacting AWS or starting Docker services.
 
 `SIMULATED_GPU_POOL` and the existing `SIMULATED_GPU_POOL_SLOTS` setting name a
 Redis-backed **logical admission counter** retained from the local capacity feature.
@@ -72,9 +92,9 @@ Redis service.
 `.env.example` contains the researched vLLM image digest and Qwen model revision as
 provisional candidates. Recheck them before a paid run. Do not replace the immutable
 image digest with a mutable tag. The Compose file requests exactly one NVIDIA GPU,
-keeps Redis and vLLM off host-published ports, and publishes the gateway ports only
-on loopback. Prometheus, Grafana, Alertmanager, and the MLflow UI/API also bind only
-to host loopback.
+gives Redis no host-published port, and publishes vLLM plus the gateway ports on host
+loopback only for operator checks. Prometheus, Grafana, Alertmanager, and the MLflow
+UI/API also bind only to host loopback.
 DCGM Exporter and the OpenTelemetry Collector (OTel Collector) have no published host
 ports. Node Exporter shares the host network so it can observe host network counters;
 it uses a read-only host-root mount, drops Linux capabilities, and publishes no Docker

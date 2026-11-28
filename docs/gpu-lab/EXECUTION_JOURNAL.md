@@ -1,3 +1,56 @@
+## 2026-11-28 — PR #56 release-manifest review fix passed CI
+
+## 2026-11-28 — PR #56 release-manifest review fix passed CI
+
+- **Phase:** Phase 9 static release tooling; Phase 2 remains quota-blocked.
+- **Branch / PR:** `codex/gpu-release-host-controller`, PR #56, tested head
+  `473db1cee7fa0aacb826d7a6e94fbf020c7c9c74`.
+- **Validation:** GitHub Actions run `46105533251` passed all five required jobs,
+  including the fresh-runner local CPU end-to-end sequence. Local Ruff and the focused
+  release-controller suite passed **17 tests**. Governance validation records the
+  original successful clean-room sequence and this updated-head run.
+- **Result:** the `manifest-from-report` review finding is fixed; no host-state files
+  are required to generate a metadata manifest. The CLI regression fails if a host
+  controller is constructed during manifest generation.
+- **AWS / GPU / cost:** none; no AWS operation, EC2 host, model artifact, GPU, or spend.
+- **Next:** reply to and resolve the release-controller review finding; continue
+  remaining non-billable work and do not merge without authorization.
+
+
+## 2026-11-28 — PR #56 release-manifest review fix passed CI
+
+- **Phase:** Phase 9 static release tooling; Phase 2 remains quota-blocked.
+- **Branch / PR:** `codex/gpu-release-host-controller`, PR #56, tested head
+  `473db1cee7fa0aacb826d7a6e94fbf020c7c9c74`.
+- **Validation:** GitHub Actions run `46105533251` passed all five required jobs,
+  including the fresh-runner local CPU end-to-end sequence. Local Ruff and the focused
+  release-controller suite passed **17 tests**. Governance validation records the
+  original successful clean-room sequence and this updated-head run.
+- **Result:** the `manifest-from-report` review finding is fixed; no host-state files
+  are required to generate a metadata manifest. The CLI regression fails if a host
+  controller is constructed during manifest generation.
+- **AWS / GPU / cost:** none; no AWS operation, EC2 host, model artifact, GPU, or spend.
+- **Next:** reply to and resolve the release-controller review finding; continue
+  remaining non-billable work and do not merge without authorization.
+
+## 2026-11-28 — Fix PR #56 manifest command initialization
+
+- **Phase:** Phase 9 static model-release preparation; Phase 2 remains blocked by zero applied G/VT quota.
+- **Branch / PR:** `codex/gpu-release-host-controller`, PR #56, rebased onto the updated PR #55 branch.
+- **Review finding:** the metadata-only `manifest-from-report` command must not construct the host controller because its parser has no host state arguments and does not need Docker or EC2 access.
+- **Fix:** host controller creation now occurs only for commands that use host state or host controls. A CLI regression test makes construction fail if the report-only command tries to initialize the controller.
+- **Validation:** the focused release-controller suite passed 17 tests; Ruff and `git diff --check` passed. Previous CI for the pre-rebase head passed; a fresh run is required for this rebased stack.
+- **Limitations and cost:** this proves local control flow only. No AWS, GPU, model download, host rollout, or spend occurred.
+- **Next:** finish the current branch rebase, rerun focused tests, publish with an exact force-with-lease, and validate in CI.
+
+
+## 2026-11-28 — Quota approval and launch-gate reconciliation
+
+- **Phase:** Phase 2 preflight; quota is approved, but no GPU provisioning is authorized yet.
+- **Verification:** read-only Service Quotas history reports `CASE_CLOSED` and the applied On-Demand G/VT quota is 4.0 vCPUs. The exact project Terraform state bucket, lock table, and Budget are absent. Billing alternate contact is not configured; a valid private Budget alert recipient has not been verified. No project-tagged AWS resources exist.
+- **Decision:** quota approval clears the capacity gate only. Complete remote-state setup, budget recipient and alarm gates, exact saved-plan and fresh price/capacity review, runtime expiry controls, and explicit apply authorization before any paid mutation. Keep GPU work in one prepared batch within the $25 ceiling.
+- **Cost:** zero GPU instance-hours; no project resources or cloud spend.
+
 # GPU Lab Execution Journal
 
 ## 2026-11-28 — Rebase authenticated release planning onto approval-integrity fix

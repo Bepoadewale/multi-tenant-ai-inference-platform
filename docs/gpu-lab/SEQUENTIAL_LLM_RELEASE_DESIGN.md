@@ -3,10 +3,11 @@
 **Status:** PR #54 implements and tests local immutable manifest, plan digest,
 stale-input, and independent-approval record primitives. PR #55 adds an authenticated
 gateway planning/approval API that reads a finished sanitized MLflow run and stores
-the exact manifests in a shared single-host SQLite volume. Independent live champion
-verification, model-file digest recomputation, sequential vLLM restart, deployment
-verification, and rollback remain unimplemented and unexecuted. PR #52 adds the
-private MLflow service and report upload path. **Reviewed:** 2026-11-27.
+the exact manifests in a shared single-host SQLite volume; all five checks passed on
+the latest recorded PR head. PR #56 prepares a host-only sequential deployment
+controller with simulated subprocess and HTTP tests; no live GPU or EC2 deployment,
+recovery, or rollback has run. PR #52 adds the private MLflow service and report
+upload path. **Reviewed:** 2026-11-27.
 
 ## Why the current release flow cannot deploy the GPU model
 
@@ -21,9 +22,14 @@ PR #52 adds a small MLflow tracking server to the GPU Compose profile and lets t
 evaluator upload its sanitized report. The GPU host has its own temporary SQLite and
 artifact volume. PR #54 adds the local data/control layer. PR #55 adds authenticated
 planning and approval endpoints and checks candidate provenance against the MLflow
-run. The caller still supplies the champion manifest and model artifact digest; the
-API does not prove the currently running champion or recompute model-file hashes.
-There is still no vLLM deployment or rollback controller.
+run. The caller still supplies the champion manifest and model artifact digest to the
+planning API; the API does not prove the currently running champion or recompute
+model-file hashes. PR #56 adds a host-only controller that checks the approved
+champion against private active state, verifies the running container's image,
+arguments, model-cache volume and readiness, then hashes every file in the pinned
+snapshot. It performs a sequential restart and attempts verified rollback. These
+paths have only been exercised with local fakes; no live deployment or recovery has
+occurred.
 
 Keep the existing ONNX flow unchanged. Add a separate LLM release path that records
 model artifacts and uses a sequential vLLM restart on the single L4.
@@ -85,8 +91,9 @@ The operator applies the approved plan through the EC2 host's private control pa
    reloads; it is not zero-downtime deployment.
 4. Wait for vLLM readiness, confirm the served model identity, and run a small
    non-sensitive smoke request through the gateway.
-5. If checks pass, record the deployment and move the MLflow `champion` alias to the
-   candidate. Retain the prior manifest so a later rollback can restore it.
+5. If checks pass, the current host controller records the new champion in its private
+   active-state file and retains the previous transaction record. It does not update
+   an MLflow model alias or upload a deployment run; those remain follow-up work.
 6. If load, readiness, or smoke checks fail, restore the prior configuration, restart
    vLLM, and verify the old champion before marking the plan rolled back. Keep the
    candidate failure logs and do not mark it successful.
@@ -124,8 +131,14 @@ replacement across multiple serving replicas.
 - [x] The gateway API derives requester/approver from `platform.admin` and
   `release.approve` dependencies and reads the finished sanitized report from the
   actual MLflow run ID supplied in the candidate request.
-- [ ] The host controller must compare the champion with independently recorded live
-  deployment state and recompute model-file digests before deployment.
+- [x] The host controller compares the approved champion to private host state,
+  verifies live container image/arguments/cache volume/readiness, and hashes every
+  file in each pinned model snapshot before deployment and after startup.
+- [x] A host-only controller sequences vLLM replacement, checks readiness, records a
+  private transaction journal, and attempts to restore the prior champion if candidate
+  deployment fails. Fake-based tests cover success and verified rollback.
+- [ ] Validate deployment, interrupted-transaction recovery, automatic rollback, and
+  recovery from rollback failure on the authorized L4 host.
 - [ ] Plan and candidate records must be linked to a model artifact whose bytes are
   independently checked against the recorded digest.
 - A sanitized evaluation report is linked to a pinned model revision and runtime

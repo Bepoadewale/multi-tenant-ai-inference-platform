@@ -138,6 +138,24 @@ Run on the **EC2 host through Session Manager**. Capture outputs to a sanitized 
 evidence bundle. These are commands to execute during the future session, not results
 already observed:
 
+Session Manager's Ubuntu shell user can use `sudo`, but Docker's socket is a root-level
+control interface. Do not add the login user to the `docker` group just to avoid
+`sudo`; membership would grant root-equivalent control. For Docker, Compose, and the
+private release files, start a root shell from the repository directory and verify
+the identity before continuing:
+
+```bash
+sudo -s
+cd /path/to/multi-tenant-ai-inference-platform
+id -u
+pwd
+```
+
+`id -u` should print `0`. Replace the repository path with the actual checkout path.
+Run the following host-side Docker and release-controller commands in this shell, and
+type `exit` to leave it. Do not copy AWS or model-service credentials into shell
+history.
+
 ```bash
 uname -a
 lscpu
@@ -234,24 +252,129 @@ isolation. Test readiness, shutdown, and restart once, then continue to multi-te
 work without leaving duplicate model servers active. GPU Compose parsing is checked
 locally with `make gpu-compose-config`.
 
-For release preparation, set `GPU_SOURCE_COMMIT` to the exact deployed source SHA and
-`GPU_MODEL_ARTIFACT_SHA256` to the digest produced by the verified model-file
-manifest. `GPU_MODEL_ID` identifies the underlying model; the evaluator records it
-separately from the API's served-model alias. The evaluator captures these values, the pinned vLLM image, and a digest of
-the vLLM runtime settings that Compose passes to both vLLM and the evaluator. The API
-checks these values against the finished sanitized MLflow run before creating a plan.
-The model digest must come from artifact verification; do not fill it from memory or
-copy an unverified value.
+For release preparation, the host controller hashes every file in the exact pinned
+Hugging Face model snapshot. From the repository root on the **EC2 host**, run:
+
+```bash
+python3 scripts/gpu_release_controller.py model-digest \
+  Qwen/Qwen2.5-1.5B-Instruct 989aa7980e4cf806f80c7fef2b1adb7bc71aa306
+```
+
+The command reads the project's model-cache volume and prints a SHA-256 digest over a
+sorted manifest of relative file paths, file sizes, and each file's SHA-256. It uses
+the full snapshot (configuration, tokenizer files, and weight files), resolves Hub
+cache symlinks, and rejects links escaping the model cache. The command does not
+download weights. This is the digest that the evaluator will record; after evaluation,
+compare the resulting MLflow metadata and report with this value. Set
+`GPU_MODEL_ARTIFACT_SHA256` to the output and `GPU_SOURCE_COMMIT` to the exact source
+commit before running the evaluator. `GPU_MODEL_ID` is the underlying
+model repository; the evaluator records it separately from the served API alias.
+The evaluator also records the pinned vLLM image and a digest of the exact runtime
+settings passed to vLLM. The release API checks those values against the finished
+sanitized MLflow run. Never fill a digest by hand or from an unverified source.
+
+The single L4 cannot keep a champion and candidate model loaded together. During a
+candidate evaluation, the gateway replicas must be stopped so tenants cannot receive
+the unapproved candidate. After the evaluation is exported to MLflow, restore the
+recorded champion before creating or approving a plan:
+
+```bash
+docker compose --env-file deployments/single-gpu/.env \
+  -f deployments/single-gpu/compose.yaml stop gateway-1 gateway-2
+# Temporarily set the candidate model, revision, image, and runtime settings in .env.
+docker compose --env-file deployments/single-gpu/.env \
+  -f deployments/single-gpu/compose.yaml up -d --no-deps --force-recreate vllm
+GPU_MODEL_ID="$(sed -n 's/^GPU_MODEL_ID=//p' deployments/single-gpu/.env)"
+GPU_MODEL_REVISION="$(sed -n 's/^GPU_MODEL_REVISION=//p' deployments/single-gpu/.env)"
+MODEL_ARTIFACT_DIGEST="$(python3 scripts/gpu_release_controller.py model-digest \
+  "$GPU_MODEL_ID" "$GPU_MODEL_REVISION")"
+sed -i "s/^GPU_MODEL_ARTIFACT_SHA256=.*/GPU_MODEL_ARTIFACT_SHA256=$MODEL_ARTIFACT_DIGEST/" \
+  deployments/single-gpu/.env
+docker compose --env-file deployments/single-gpu/.env \
+  -f deployments/single-gpu/compose.yaml --profile gpu-evaluation run --rm evaluator
+# Only after an initial champion has been initialized:
+python3 scripts/gpu_release_controller.py restore-active
+```
+
+This block is for later candidate evaluation after a champion has been initialized.
+For the first model, leave vLLM running after evaluation, build and verify the initial
+champion manifest below, then initialize active state. The first run must not call
+`restore-active` because there is no recorded champion yet. Candidate evaluation
+causes service downtime. Evaluation is not deployment approval.
 
 The authenticated gateway exposes `POST /gpu-release/v1/plans` for an operator with
 the `platform.admin` role and `POST /gpu-release/v1/plans/{plan_id}/approve` for a
 different identity with the `release.approve` role. Send no bearer token to shell
 history or logs. The API records the plan, its champion/candidate manifests, and the
-approver in a shared single-host SQLite volume. It does not deploy a model, validate
-the actually running champion against an independently managed active record, or
-restart Docker. Do not mark the candidate as deployed or claim release/rollback
-acceptance until a separate host-side deployment controller verifies current state,
-performs the sequential restart, and proves recovery.
+approver in a shared single-host SQLite volume. The API itself does not inspect the
+running process or restart Docker. The host controller requires the exact target
+environment `single-l4-lab`, an approved plan, and two distinct actors. It compares
+the plan champion with a private active-release record, the live container command and
+image, the model-cache volume, and a fresh digest of the full model snapshot. It
+checks vLLM at host loopback port 8000 and each gateway replica at loopback ports 8081
+and 8082. Compose maps these ports only to `127.0.0.1`; the security group has no
+inbound rules. The controller updates only model-serving values in `.env`, restarts
+only the `vllm` Compose service, starts the gateway replicas, and restores the previous
+model if readiness fails. It checks service readiness, not an authenticated inference
+request; perform the separate tenant smoke test after deployment.
+It does not create a traffic-weighted canary or promise zero downtime. These controls
+are locally fake-tested but have not run on EC2 or an L4.
+
+For the initial model, after vLLM has loaded the pinned snapshot, calculate its digest
+as shown above and set `GPU_MODEL_ARTIFACT_SHA256` in `.env` before evaluation. Run the
+evaluator, then download the sanitized MLflow report to
+`.local/gpu-release/initial-report.json` through the loopback-only MLflow UI. Create a
+runtime configuration file that matches `.env` exactly, for example:
+
+```json
+{
+  "served_model_name": "gpu-default",
+  "dtype": "bfloat16",
+  "max_model_len": 8192,
+  "max_num_seqs": 2,
+  "max_num_batched_tokens": 8192,
+  "gpu_memory_utilization": 0.85,
+  "tensor_parallel_size": 1
+}
+```
+
+Create a champion manifest from that report and the digest just computed:
+
+```bash
+VLLM_IMAGE="$(sed -n 's/^VLLM_IMAGE=//p' deployments/single-gpu/.env)"
+GPU_SOURCE_COMMIT="$(sed -n 's/^GPU_SOURCE_COMMIT=//p' deployments/single-gpu/.env)"
+MODEL_ARTIFACT_DIGEST="$(python3 scripts/gpu_release_controller.py model-digest \
+  Qwen/Qwen2.5-1.5B-Instruct 989aa7980e4cf806f80c7fef2b1adb7bc71aa306)"
+python3 scripts/gpu_release_controller.py manifest-from-report \
+  .local/gpu-release/initial-report.json \
+  --model-id Qwen/Qwen2.5-1.5B-Instruct \
+  --model-revision 989aa7980e4cf806f80c7fef2b1adb7bc71aa306 \
+  --model-license Apache-2.0 \
+  --model-artifact-sha256 "$MODEL_ARTIFACT_DIGEST" \
+  --vllm-image "$VLLM_IMAGE" \
+  --runtime-config .local/gpu-release/runtime-config.json \
+  --source-commit "$GPU_SOURCE_COMMIT" \
+  --alias champion \
+  --output .local/gpu-release/champion.json
+```
+
+For the initial model, start both loopback-only gateway replicas so the controller can
+verify their health endpoints, then initialize the active champion. For later model
+changes, apply only an approved plan:
+
+```bash
+docker compose --env-file deployments/single-gpu/.env \
+  -f deployments/single-gpu/compose.yaml up -d --no-deps gateway-1 gateway-2
+python3 scripts/gpu_release_controller.py initialize /path/to/champion-manifest.json
+python3 scripts/gpu_release_controller.py apply <approved-plan-uuid>
+```
+
+The apply command prompts for a short-lived `platform.admin` token without echoing or
+storing it. If the process or instance stops during replacement, first run
+`python3 scripts/gpu_release_controller.py recover`; it reapplies the last private
+active manifest, verifies the model snapshot, and starts the gateway replicas. These
+commands are prepared and fake-tested only; their first real execution requires the
+authorized L4 batch.
 
 ## Gateway, telemetry, measurements, and recovery
 
