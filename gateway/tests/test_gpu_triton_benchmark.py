@@ -1,10 +1,13 @@
 import os
+import stat
 import subprocess
 import sys
 from pathlib import Path
+from types import ModuleType
 
 import pytest
 
+from benchmarks.cuda_performance import triton_vector_add
 from benchmarks.cuda_performance.triton_vector_add import (
     MAX_ELEMENTS,
     MAX_RUNTIME_SECONDS,
@@ -70,6 +73,32 @@ def test_triton_host_wrapper_rejects_oversized_runtime_before_host_metadata():
 
     assert completed.returncode == 1
     assert "must be an integer from 1 to 120" in completed.stderr
+
+
+def test_triton_result_is_created_with_owner_only_permissions(tmp_path, monkeypatch):
+    torch = ModuleType("torch")
+    triton = ModuleType("triton")
+    triton.__path__ = []
+    triton.__version__ = "3.8.0-test"
+    triton_language = ModuleType("triton.language")
+    triton.language = triton_language
+    monkeypatch.setitem(sys.modules, "torch", torch)
+    monkeypatch.setitem(sys.modules, "triton", triton)
+    monkeypatch.setitem(sys.modules, "triton.language", triton_language)
+    monkeypatch.setattr(
+        triton_vector_add,
+        "execute",
+        lambda *_args: {"platform": {"gpu_name": "NVIDIA L4"}, "result": {}},
+    )
+    output = tmp_path / "private" / "result.json"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["triton_vector_add.py", "--output", str(output)],
+    )
+
+    assert triton_vector_add.main() == 0
+    assert stat.S_IMODE(output.stat().st_mode) == 0o600
 
 
 @pytest.mark.parametrize(

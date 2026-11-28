@@ -90,6 +90,7 @@ verify:
 	$(MAKE) gpu-gateway-benchmark-plan
 	$(MAKE) gpu-evaluation-plan
 	$(MAKE) gpu-cuda-plan
+	$(MAKE) gpu-triton-plan
 clean-local:
 	./scripts/clean-local.sh
 destroy-local:

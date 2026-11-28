@@ -64,7 +64,9 @@ unverified.
 
 ## Validation
 
-The focused Triton suite passes 10 tests. `make lint` passes. `make verify` passes 186
+The initial candidate's focused Triton suite passed 10 tests and its required PR
+workflow passed all six jobs in run `46085794180`, including local E2E. The latest
+local follow-up has 11 focused tests and `make lint` passes. `make verify` passes 187
 tests (2 skipped), the dependency audit, Compose checks, GPU observability configuration
 validation, and existing benchmark/evaluation/CUDA planning targets. `bash -n`, the
 Triton dry-run, the host-wrapper Make preview, and `git diff --check` pass. Seventy-six
