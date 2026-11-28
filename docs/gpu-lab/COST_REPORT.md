@@ -4,7 +4,6 @@
 **Pricing research date:** 2026-11-28 (AWS Price List API refresh; recheck before any plan or apply).
 **Hard initial ceiling:** USD $25 for this project's AWS usage.  
 **Current measured spend:** $0; GPU instance hours: 0.
-**Current quota (read-only, 2026-11-28):** 4.0 applied On-Demand G/VT vCPUs; later history check reports `CASE_CLOSED`. This is not an AZ capacity reservation or apply authorization. Refresh before any saved plan.
 
 ## Read-only plan scope check
 
@@ -179,9 +178,10 @@ not run the lab.
 - Recheck account identity, `us-east-1`, permission boundary, the exact On-Demand G/VT
   quota, G6 offerings, and current capacity. The 2026-11-28 read-only query returned
   an applied quota of `4.0` vCPUs (`L-DB2E81BA`), sufficient on paper for one
-  `g6.xlarge`. The request-history result was initially `CASE_OPENED`; a later
-  read-only check reports `CASE_CLOSED`. Five AZ offerings were returned, but this
-  does not guarantee capacity. Refresh all values immediately before any plan/apply.
+  `g6.xlarge`; the owner reports the quota was approved, while the request-history
+  request history now reports `CASE_CLOSED` with desired value 4.0, matching the
+  applied quota. Five AZ offerings were returned, but this does not guarantee capacity. Refresh all values
+  immediately before any plan/apply.
 - Refresh every Price List input, the current tax profile, state retention, EBS size,
   data-transfer rate/aggregation, and Scheduler charges.
 - Prepare and inspect one saved Terraform plan: exact resource count, tags, account,
@@ -192,18 +192,20 @@ not run the lab.
   more budget through the user's authorization process.
 - On 2026-11-27, after the user explicitly asked to submit the quota request
   immediately, a request for 4 On-Demand G/VT vCPUs was submitted. The owner later
-  supplied an AWS email reporting denial and manually appealed the existing case.
-  Read-only checks on 2026-11-28 found the applied quota at `4.0` vCPUs; an early
-  request-history snapshot returned `CASE_OPENED`, and the later check returned
-  `CASE_CLOSED`. The user confirmed approval. The numeric quota is enough for the
-  selected type but does not reserve instance capacity or authorize provisioning. No
-  Terraform apply or infrastructure mutation has been made.
+  supplied an AWS email reporting denial and reports manually appealing through the
+  existing case. The owner now reports approval; a fresh CLI read on 2026-11-28
+  returns `4.0` applied vCPUs and request history reports `CASE_CLOSED` with desired
+value 4.0.
+  The numeric quota is enough for the selected type but does not reserve instance
+  capacity or authorize provisioning. No Terraform apply or infrastructure mutation
+  has been made.
 
 ## Current outcome
 
-The quota capacity value currently satisfies the one-instance vCPU requirement, but
-the cost/plan gate is not passed: the `$18.5193` estimate is provisional, the exact
-remote-state Terraform plan does not exist, and the budget-alert recipient is still a
-placeholder that has not been verified. The latest recorded request-history check is
-`CASE_CLOSED`; it does not reserve AZ capacity or authorize provisioning. AWS spend
-recorded for this goal remains `$0`.
+The applied quota satisfies the one-instance vCPU requirement, but the cost/plan gate
+is not passed: the `$18.5193` estimate is provisional, the exact remote-state Terraform
+plan does not exist, and the project Budget and its alert recipient are absent. No Billing
+alternate contact exists, so a valid private recipient remains required. Request history
+reports `CASE_CLOSED` with desired value `4.0`, matching the applied quota. This does
+not reserve instance capacity or authorize provisioning. AWS spend recorded for this
+goal remains `$0`.

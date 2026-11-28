@@ -2,12 +2,11 @@
 
 # On-Demand G/VT quota appeal record
 
-**Status:** the owner reports manually submitting this appeal through the existing
-case in AWS Support Center. The AWS CLI `add-communication-to-case` attempt was
-rejected because this account's Support plan does not allow the Support API. The
-quota-history API still shows `CASE_OPENED` and the applied quota is zero; no new AWS
-response has appeared in the connected email search yet. Do not submit this appeal
-again while awaiting AWS.
+**Status:** historical unsent draft; do not send it as written. The owner reports
+manually appealing through the existing case and later reports AWS approved the
+request. A 2026-11-28 AWS CLI read confirms 4.0 applied On-Demand G/VT vCPUs, while
+request history still shows `CASE_OPENED`. This file preserves the earlier draft and
+status; see the current goal and implementation status for the latest evidence.
 
 ## Reference message supplied for the appeal
 

@@ -21,9 +21,11 @@ flowchart LR
 ```
 
 The state bucket, lock table, and expiry are proposed controls, not deployed
-resources. Reuse the repository's private, versioned state bucket and repository-
-scoped DynamoDB lock table from its existing bootstrap contract. Assign the GPU root a
-unique `gpu-ec2/` state-key namespace, and use Terraform's S3 lock file too. HashiCorp
+resources. The Terraform bootstrap root is designed to create the private, versioned
+state bucket, repository-scoped DynamoDB lock table, and budget alert. Read-only AWS
+inventory found those resources absent, so this backend cannot be used until the
+bootstrap plan is separately reviewed and applied. Then assign the GPU root a unique
+`gpu-ec2/` state-key namespace, and use Terraform's S3 lock file too. HashiCorp
 marks DynamoDB locking deprecated but documents support for both locks during
 migration; configure and test this with the selected Terraform release. The guest
 timer is a second independent runtime limit; it must shut down the machine while EC2
@@ -88,7 +90,7 @@ The repository now pins researched candidates so a future run can be reproduced:
 | NVIDIA driver | `580.196.11-1ubuntu1` | Package version and signing inputs were checked in official indexes on 2026-11-27; installation and reboot are untested. |
 | Host CUDA Toolkit | `13.0.3-1` | Candidate package is pinned for CUDA C++ exercises; no host compiler or kernel has run. |
 | NVIDIA Container Toolkit | `1.20.2-1` | Candidate package is pinned; Docker GPU device access is untested. |
-| Docker | Engine `5:29.9.3-1~ubuntu.24.04~noble`; Compose `5.8.0-1~ubuntu.24.04~noble` | Candidate package versions are pinned; host installation is untested. |
+| Docker | Engine `5:29.9.3-1~ubuntu.24.04~noble`; Compose `5.8.1-1~ubuntu.24.04~noble` | Official Docker Ubuntu package index and Compose v5.8.1 release metadata were checked on 2026-11-28; host installation is untested. |
 | Standalone CUDA PyTorch lab | PyTorch `2.14.0+cu130`, CPython 3.12, Linux x86-64 | Hash-locked separately for CUDA experiments; it is not layered into the vLLM image. No GPU tensor operation has run. |
 | Model server | vLLM OpenAI image `v0.34.0`, pinned to AMD64 image digest `sha256:cf5b2fdd087eb4f6d261736967cc5cde974bd22ff4df50365f8fa419b6b4c484` | Registry metadata and release compatibility notes were researched; image load and inference on an L4 are untested. |
 | Initial model | `Qwen/Qwen2.5-1.5B-Instruct` revision `989aa7980e4cf806f80c7fef2b1adb7bc71aa306` | Hub metadata reports Apache-2.0 and a pinned weight digest; weights have not been downloaded or loaded. |

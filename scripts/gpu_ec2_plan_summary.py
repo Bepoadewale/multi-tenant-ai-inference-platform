@@ -110,6 +110,7 @@ def validate(
         instance.get("instance_type") != "g6.xlarge"
         or instance.get("ami") != expected_ami
         or instance.get("availability_zone") != expected_az
+        or instance.get("associate_public_ip_address") is not True
         or instance.get("instance_initiated_shutdown_behavior") != "terminate"
     ):
         raise ValueError("saved plan does not match the reviewed single-L4 instance settings")
@@ -123,6 +124,29 @@ def validate(
     ):
         raise ValueError("saved plan root volume is outside the encrypted 100-120 GiB gp3 limit")
 
+    vpc = after["aws_vpc.gpu"]
+    if (
+        vpc.get("cidr_block") != "10.74.0.0/16"
+        or vpc.get("enable_dns_support") is not True
+        or vpc.get("enable_dns_hostnames") is not True
+    ):
+        raise ValueError("saved plan VPC does not match the isolated GPU network")
+    subnet = after["aws_subnet.gpu"]
+    if (
+        subnet.get("cidr_block") != "10.74.1.0/24"
+        or subnet.get("availability_zone") != expected_az
+        or subnet.get("map_public_ip_on_launch") is not True
+    ):
+        raise ValueError("saved plan subnet does not match the approved public GPU subnet")
+    route_table = after["aws_route_table.gpu"]
+    routes = route_table.get("route")
+    if (
+        not isinstance(routes, list)
+        or len(routes) != 1
+        or not isinstance(routes[0], dict)
+        or routes[0].get("cidr_block") != "0.0.0.0/0"
+    ):
+        raise ValueError("saved plan route table must contain only the project internet route")
     metadata = _nested(instance, "metadata_options")
     if (
         metadata.get("http_endpoint") != "enabled"
@@ -171,6 +195,43 @@ def validate(
     }
     if len(egress) != 2 or ports != {80, 443}:
         raise ValueError("saved plan egress must contain only TCP 80 and 443 to IPv4")
+
+    vpc_id_references = {"aws_vpc.gpu.id", "aws_vpc.gpu"}
+    network_bindings = (
+        ("aws_internet_gateway.gpu", "vpc_id", vpc_id_references),
+        ("aws_subnet.gpu", "vpc_id", vpc_id_references),
+        ("aws_route_table.gpu", "vpc_id", vpc_id_references),
+        ("aws_security_group.gpu", "vpc_id", vpc_id_references),
+        (
+            "aws_route_table_association.gpu",
+            "subnet_id",
+            {"aws_subnet.gpu.id", "aws_subnet.gpu"},
+        ),
+        (
+            "aws_route_table_association.gpu",
+            "route_table_id",
+            {"aws_route_table.gpu.id", "aws_route_table.gpu"},
+        ),
+        ("aws_instance.gpu", "subnet_id", {"aws_subnet.gpu.id", "aws_subnet.gpu"}),
+        (
+            "aws_instance.gpu",
+            "vpc_security_group_ids",
+            {"aws_security_group.gpu.id", "aws_security_group.gpu"},
+        ),
+    )
+    for address, argument, expected_references in network_bindings:
+        expression = _resource_expressions(plan, address).get(argument)
+        if _references(expression) != expected_references:
+            raise ValueError(
+                f"saved plan network {address}.{argument} is not bound to the project topology"
+            )
+
+    route_expressions = _resource_expressions(plan, "aws_route_table.gpu").get("route")
+    if not isinstance(route_expressions, list) or len(route_expressions) != 1:
+        raise ValueError("saved plan must configure exactly one internet route")
+    route_gateway = route_expressions[0].get("gateway_id")
+    if _references(route_gateway) != {"aws_internet_gateway.gpu.id", "aws_internet_gateway.gpu"}:
+        raise ValueError("saved plan internet route must use the project internet gateway")
 
     schedule = after["aws_scheduler_schedule.expiry"]
     expected_schedule = f"at({expected_expiry[:19]})"
@@ -252,7 +313,10 @@ def main() -> int:
     print(f"Actions: {len(changes)} create, 0 update, 0 delete")
     print(f"Instance: one g6.xlarge in {expected_az}; Ubuntu AMI matches reviewed input")
     print("Root disk: encrypted gp3, 100-120 GiB, deleted with the instance")
-    print("Network: no inbound rules; outbound TCP 80 and 443 only")
+    print(
+        "Network: one project subnet and gateway; no inbound rules; "
+        "outbound TCP 80 and 443 only"
+    )
     print("Metadata: IMDSv2 required; expiry: exact UTC deadline invokes EC2 TerminateInstances")
     for address in sorted(EXPECTED_ADDRESSES):
         print(f"- create {address}")

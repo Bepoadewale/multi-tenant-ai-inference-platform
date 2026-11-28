@@ -5,106 +5,134 @@ claim that any cloud or GPU phase has run. Every package uses its own focused br
 and pull request. Review and required CI checks must pass before merge; implementation
 pull requests must include the repository's clean-room evidence.
 
-**Current readiness update (2026-11-28):** the existing request is `CASE_CLOSED` and
-4.0 On-Demand G/VT vCPUs are applied in `us-east-1`. This clears the quota threshold
-for one `g6.xlarge`; it does not authorize provisioning. The project state bucket,
-lock table, and Budget are absent, and the alert recipient is not verified. Exact
-remote-state plan, updated price/AZ-capacity review, independent expiry check, and
-separate apply authorization remain required. The user-set $25 total ceiling remains.
-Old quota-denial statements below are dated historical snapshots, not current state.
+## Latest PR and engineering status — 2026-11-28 18:28 UTC
 
-**Latest PR checks (2026-11-28):** PR #77 follow-up passed all six jobs in
-`46169578415` after its earlier local cancellation-demo failure. PR #78 and #79 passed
-all six jobs on their refreshed heads in `46170127067` and `46170178018`. PR #80 run
-`46170356996` has five jobs passed and local-e2e pending. PR #81 run `46170595453` has
-three jobs passed, with Python, local-e2e, and supply-chain pending. PR #82 run
-`46170895199` has three jobs passed, with Python, local-e2e, and supply-chain pending.
-PR #83 local head `c0cd127` passes 39 focused tests, Ruff, and the 34-file docs check;
-publication and fresh CI are pending. These static checks do not demonstrate AWS or
-GPU behavior.
+PRs #77–#83 passed all six required checks on their refreshed heads, including the
+local CPU end-to-end job. PR #84 head `5ba4470` passed all six jobs, including
+local-e2e, in run `46175433425` after quota and clean-room history corrections.
+Its local validation passed 67 focused tests, 12 mocked Terraform cases, Ruff, the
+35-file docs checker, and `git diff --check`. Historical PR #31 records two local
+clean-room cycles. The single designated integrated clean-room evidence for this GPU
+goal is PR #65 CI run `46114955314`, recorded in `docs/gpu-lab/EVIDENCE_MANIFEST.md`.
+No extra manual clean-room run is planned. PR #43 and #53 are now
+reported mergeable in the current open-PR inventory, but still require owner review.
+The project Budget/verified recipient, remote state and lock, final plan/cost,
+capacity, expiry verification, and separate apply authorization remain open.
 
-## Current state
+## Read-only AWS gate snapshot — 2026-11-28 15:06 UTC
 
-- Phase 1 design gate is complete. The repository audit and candidate architecture are recorded in
-  `REPOSITORY_AUDIT.md`, `ARCHITECTURE.md`, and `RESEARCH_NOTES.md`.
-- PR #30 registers this goal and is ready for review. Its current head is
-  `04cb5645be7c3182958248a62c22b0a9b9d055f6`; all required checks passed.
-- PR #31 repairs the baseline dependency audit, passed two fresh local clean-room
-  cycles and all required GitHub checks, and is ready for review.
-- PR #32 adds the static single-L4 Terraform root and helpers. Head `d3cee0f` passed
-  all four required jobs once on the PR event. Ten create/destroy fail-closed tests are
-  committed locally through `ca3706b`; local verification passes, and CI awaits
-  publication.
-  Two helper review findings have regression tests and are fixed. Human review remains
-  open.
-- PR #37 is open against PR #36 to record the dated Ubuntu/NVIDIA/CUDA, vLLM image,
-  and pinned Qwen model compatibility candidates. PRs #38–#51 are stacked one at a
-  time through PR #50. PR #54 passed all five checks in run `46028053505`. This is
-  research and static CI evidence, not proof of GPU execution; exact target-AMI
-  packages and real L4 validation remain open.
-- PR #38 is open as a focused model-artifact verification helper based on PR #37.
-  Head `5256060` records the verifier, fixture tests, and Terraform validation; its
-  head passed all four required checks in run `45946331836`. Fixture tests do not
-  replace checking the actual downloaded artifact.
-- PR #39 is open against PR #38 to record the quota denial, regional quota checks,
-  and an unsent appeal draft. Its head `7605b0b` passed all four required checks in
-  run `45947503606`. It does not submit an AWS message or quota request.
-- PR #40 is open against PR #39 to pin the reviewed Canonical Ubuntu AMI
-  and fail closed when publisher, image family, architecture, or availability does
-  not match. All four required checks passed in the implementation run
-  `45949421928` and documentation follow-up runs `45950217355` and `45951027403`.
-  No AWS resource or GPU run is part of this package.
-- PR #41 records the owner's authorized CLI appeal attempt. The Support API rejected
-  the communication before sending due to the current account plan; no case update
-  occurred. All four required checks passed in run `45976696129`.
-- A refreshed AWS-backed local-state preview uses the exact pinned AMI. It proposes 14
-  creates, including one `g6.xlarge`, IMDSv2, and an encrypted 100-GiB root volume.
-  It is not remote-state locked and must not be applied. Ticket42 records its digest
-  and security review; the remote-state plan remains outstanding.
-- No AWS resources or GPU instance hours have been used by this goal.
-- Historical quota snapshots below this note preceded the appeal decision. On
-  2026-11-28, read-only `us-east-1` checks show `CASE_CLOSED` and 4.0 applied On-Demand
-  G/VT vCPUs. That is sufficient by quota for one `g6.xlarge`; no AZ reservation is
-  implied and no duplicate request should be sent.
-- Terraform bootstrap code defines a repository-scoped budget and state/lock resources,
-  but the exact project Budget, state bucket, and lock table are currently absent. GPU
-  state should use a unique key namespace once the backend is authorized. The budget
-  alert recipient must be provided outside version control and verified; the alert is
-  not a spending limit.
-- The initial USD $25 limit is a hard ceiling. A provisional planning scenario now
-  includes compute, public IPv4, gp3, temporary state and lock storage, one expiry
-  invocation, data-transfer allowance, tax contingency, and a reserve. It still
-  requires exact AMI, price, egress, tax-profile, and state-retention confirmation;
-  it is not permission to apply.
-- PRs #30–#84 except #54 were open and unmerged in the latest live inventory (54 open,
-  no drafts); merge authorization is outstanding. PR #59
-  head `0cfbedb` passed six checks in `46162611345`; #60 head `9fc23f2` passed six
-  checks in `46162969703`; #61 head `1474752` passed six checks in `46163194154`.
-  PR #62 run `46163327188`, #63 run `46163484312`, and #64 run `46163910205` passed
-  all six refreshed jobs. PR #65 head `37b3b30` passed `46164362977`; its earlier
-  head `49076a5` passed six checks in `46114955314` and includes the designated local
-  CPU clean-room record. PRs #66 and #67 passed `46164644804` and `46164896175`. PR
-  #68 head `ff88165` run `46165126075`, #69 head `f5915e8` run `46165420078`, and
-  #70 head `1679aa7` run `46165597103`, and #71 head `127d0a8` run `46166173924` are
-  PRs #68–#73 passed, including #71 `46166173924`, #72 `46166571475`, and #73
-  `46167001745`. PR #74 head `3cf1eec` run `46167348257` is in progress. PR #75
-  handbook work is rebased locally on #74 and needs fresh CI after publication. The
-  catalog-based
-  cost estimate is `$18.51932705`, not
-  authorization. PR #53
-  code head `e623b75` passed all five checks in `46023306230`, including a Linux AMD64
-  gateway image build and CPU end-to-end. PR #56 head `852c873` passed all five checks
-  in `46040861818`; PR #57 Ansible head `4795f12` passed all six checks, including a
-  clean-room local end-to-end cycle, in `46045068200`. Neither host configuration nor
-  AWS deployment has run.
-- PR #58 adds named tenant identities and the manual guide. Run `46052092657` passed
-  the checksum-verified Trivy scan and identified that owner-only token permissions
-  prevented the local edge agents from registering. Commit `d759b8e` fixed the local
-  container UID/GID and passed all six checks in run `46054114999`, including a fresh
-  local end-to-end cycle. Commit `a1616ec` resolves three automated guide findings
-  about exact Terraform variables, the manual vLLM handoff, and workstation teardown.
-  Its final-head run `46055428111` passed all six jobs. No AWS resource, model, or GPU
-  execution occurred.
+**Read-only refresh:** the expected AWS account matched. Applied On-Demand G/VT quota
+is `4.0` vCPUs, enough numerically for one `g6.xlarge`; request history now
+reports `CASE_CLOSED` with desired value 4.0. Five us-east-1 AZ offerings were listed;
+none reserves live capacity. The exact project state bucket, lock table, project Budget,
+project-tagged resources, and project EC2 instances are absent. A different account
+Budget was listed, but its project coverage is unverified and it is not relied upon.
+The current `$0.8048/hour` price matches the `$18.5193` 12-hour planning envelope. A
+guarded preflight stopped at the absent state bucket. No Billing alternate contact or
+verified private alert recipient is configured. No paid apply is ready or authorized.
+
+At capture time, this section was the handoff. Detailed package notes below are dated historical
+records; use the goal, implementation status, tickets, and live GitHub records for newer
+state. The owner wants every feasible code, automation, local/static validation,
+documentation, and CI task finished before the paid GPU batch. Only real-L4 execution
+and its immediate live safety gates should remain at that point. Historical PR #31
+records two local CPU clean-room cycles. The one designated integrated clean-room run
+for this GPU goal is PR #65 CI run `46114955314`, recorded in
+`docs/gpu-lab/EVIDENCE_MANIFEST.md`; no extra manual local clean-room run is planned.
+The cloud/GPU clean-room remains Phase 12 work.
+
+- The latest GitHub inventory found **54 open PRs** from #30–#84 except #54; none is
+  a draft or has an approving review. PRs #43 and #53 conflict after parent updates;
+  the other 52 are mergeable. PR #42, #52, and #84 current heads pass CI. No PR was
+  merged by this work. PRs #46 and #55 are ready for review after
+  their clean-room evidence threads were answered and resolved using the integrated
+  record in `docs/governance/VALIDATION.md`. PR #65 is ready for owner review after
+  its P1 evidence thread was resolved and all six checks passed on head `24ea5e8` in
+  run `46117285643`. PR #72 head `ef1f5e3` passed all six checks in run
+  `46124118809`; PR #73 head `b50c5a9` passed all six checks in run `46126117628`.
+  PR #74 head `944b457` passed all six checks in run `46128237140`; PR #75 head
+  `a7c6ccd` passed all six checks in run `46129784597`; PR #76 head `dba21f1` passed
+  all six checks in run `46132280041`; PR #77 final head `387b91c` passed all six
+  checks in run `46134599825`; PR #78 implementation head `5c3bd12` passed all six
+  checks in run `46135887060`. All remain open and unmerged for owner review.
+- PR #76 (`codex/gpu-documentation-link-checks`) adds a standard-library Markdown
+  link and heading checker to local verification and manifests CI. It is stacked on
+  PR #75.
+- PR #77 (`codex/gpu-expiry-safeguard-tests`) adds mocked-provider Terraform tests
+  for bounded expiry and least-privilege termination. Its three tests, full local
+  verification, and Terraform validation pass; implementation head `75f91e3` passed
+  all six required CI jobs in run `46133957636`. It is stacked on PR #76.
+- PR #78 (`codex/gpu-network-guardrail-tests`) adds mocked-provider checks for no
+  inbound security-group rules, TCP 80/443-only egress, and the instance's single
+  project security group. All four Terraform tests and full local verification pass;
+  implementation head `5c3bd12` passed all six required jobs in `46135887060`. Its
+  later documentation head `6aeb638` had one HTTP 500 in local E2E; rerunning that job
+  passed all six checks in `46136477854`. The first failure's cause is unknown. It is
+  stacked on PR #77.
+- PR #79 (`codex/gpu-project-tag-guardrails`) makes ownership, expiry, cost-scope,
+  and data-class tags explicit on every GPU-root resource type where the pinned
+  provider exposes tags. Its mock test checks 11 taggable resources; individual
+  Scheduler schedules have no `tags` argument in this provider schema, so the schedule
+  group is tagged and the schedule retains its exact project-specific name. Local
+  formatting, validation, and all five mocked Terraform assertions pass. Implementation
+  head `2e92165` passed all six required jobs in run `46137645356`; final documentation
+  head `efe7eed` passed all six in `46138350722`. No AWS/GPU behavior is implied.
+- PR #80 (`codex/gpu-input-constraint-tests`) adds negative plan tests for
+  the initial single-`g6.xlarge` restriction, the disallowed `g5` family, storage bounds,
+  region/project pins, and malformed AMI IDs. All 12 GPU-root mocked Terraform tests
+  pass locally. The first region test also violated the availability-zone validation;
+  it now isolates the region input. Ticket, docs index, and CI link-checker updates are
+  prepared. Final documentation head `6145e25` passed all six required jobs in run
+  `46139713692`. No AWS/GPU behavior is implied.
+- PR #81 is open on top of #80 at final head `3cb8139`; all six required jobs passed
+  in run `46142107889`. Its validator reviews the exact saved plan,
+  checks all 14 expected managed resources and critical instance/network/tag/expiry
+  settings, prints only a sanitized summary, and repeats validation before apply.
+  Fake-CLI coverage ensures an unsafe saved plan never reaches Terraform apply. The
+  33 focused tests and 12 GPU-root Terraform mocks pass locally. It does not replace
+  human review of the full plan or the separate cloud authorization gates.
+- PR #82 is open on top of #81 at final head `d5afac7`; all six required checks passed
+  in run `46143890538`. It checks the project expiry schedule group and EC2 terminate
+  action. Its focused plan and wrapper suite passes 35 tests. This is fixture evidence,
+  not proof of an actual schedule execution.
+- PR #83 is open on top of #82 at final head `4c75115`; all six required CI jobs
+  passed in run `46146275508`. It uses Terraform's saved-plan configuration
+  expressions to require the expiry schedule role and input, and the IAM policy's
+  role and resource, to reference this exact project instance. Twenty-four focused
+  validator tests and 39 combined plan/wrapper tests pass locally. Its initial CI run
+  `46145456879` caught a stale fake plan in the wrapper suite; the corrected head
+  passed all six jobs. A real AWS-provider plan is still required to confirm the
+  expression shape. No AWS resource or GPU execution occurred.
+- PR #84 is open on top of refreshed #83 head `142d0f3`; restacked head `798b2e8`
+  passed all six required CI jobs in run `46171879043`. It extends saved-plan review
+  to the VPC, subnet, route, gateway, route-table association, security group, and
+  instance topology. The refreshed branch passes 67 focused tests and 12 mocked
+  Terraform cases. Live AWS plan evidence remains open.
+- Current restacked heads #66–#71 all passed their six required jobs: #66 `2c5766e`
+  (`46117369933`), #67 `7b9fb9f` (`46117439007`), #68 `6afa0ef` (`46117499822`),
+  #69 `f21d61a` (`46117561667`), #70 `5f70852` (`46117637674`), and #71 `63df036`
+  (`46119306265`). All six required jobs passed on those heads. These are CI/local
+  checks only; they do not establish AWS or GPU behavior. All PRs remain open and
+  unmerged pending owner review; no merge was performed.
+- The repository has prepared source for a separate EC2 L4 environment, host
+  configuration, Docker deployment, vLLM gateway path, tenant controls, monitoring,
+  benchmark/evaluation/release tooling, incident procedures, and cleanup. This is
+  implementation/static/local evidence only. No L4 driver install, GPU computation,
+  real vLLM inference, GPU benchmark, or cloud teardown has been demonstrated.
+- AWS denied the initial quota request by email. The owner reports manually appealing
+  through the existing case. The latest read-only request history is `CASE_CLOSED` with
+  desired value `4.0`, and applied On-Demand G/VT quota is `4.0`. Do not create a
+  duplicate request. The expected account was verified; project-tag inventory and the
+  project EC2 instance query returned zero.
+- The corrected 12-hour estimate is `$18.5193` with `$6.4807` arithmetic headroom
+  under the `$25` ceiling. This is only a planning estimate. Shared Terraform backend
+  and budget resources were absent in the last exact-name inventory, and the recorded
+  bootstrap preview used a placeholder alert recipient. Bootstrap, live backend plan,
+  recipient validation, current pricing, and explicit apply authorization remain
+  separate gates; quota approval alone is not permission to spend.
+- This project has created no AWS resources, downloaded no model weights, used zero
+  verified GPU instance hours, and recorded `$0` project-specific AWS spend.
+
 
 ## Ordered implementation packages
 
@@ -260,25 +288,33 @@ cost and quota gate passes.
 - [x] Enforce the expected AWS account through the provider and fail an instance
   launch when the selected AZ does not offer the approved type.
 - [x] Render and parse the cloud-init YAML; actual host behavior remains unverified.
+- [x] Add mocked-provider Terraform tests for the guest timer, one-time cloud
+  schedule, role scope/trust, shutdown and volume behavior, and expiry input limits.
+  These verify configuration only; they do not replace the real expiry test below.
+- [x] Add mocked-provider assertions that the host has no inbound rules and exactly
+  two public IPv4 outbound rules, TCP 80 and 443; confirm the single L4 instance uses
+  only the project security group and selected subnet. The effective deployed rules
+  remain unverified until AWS provisioning.
 - [x] Pin the exact Canonical Ubuntu 24.04 amd64 AMI and reject an untrusted or
   unavailable image before plan/apply; keep destroy planning independent of AMI lookup.
 - [x] Refresh and inspect a pinned-AMI local-state preview. Its plan contains 14
   creates for one `g6.xlarge`; it is ignored locally and is not suitable for apply.
 - [ ] Create and inspect the final remote-state saved plan and confirm the full current
-  cost and budget recipient. The quota is now approved at 4.0 vCPUs, but do not apply
-  until the remote state, recipient/Budget, $25 total cost, exact plan, expiry, and
-  separate authorization gates are cleared.
+  cost and budget recipient. The owner reports quota approval and the latest applied
+  quota reads `4.0` vCPUs and request history says `CASE_CLOSED` with desired value 4.0;
+  the state bucket and verified Budget recipient are absent. Do not apply until the exact plan, owner authorization, and $25 project
+  gates are cleared.
 
 **Exit gate:** exact plan creates one authorized L4 and only enumerated project
-resources, estimated total remains below $25 with safety margin, expiry is tested,
-and teardown/absence commands are ready.
+resources, estimated total remains below $25 with safety margin, both real expiry
+paths are independently tested, and teardown/absence commands are ready.
 
 ### Package 3 — Manual Linux, NVIDIA, CUDA, Docker, and Ansible
 
 **Status:** PR #50 contains a non-billable ordered install manifest and hashed PyTorch lock. PR #57 adds a universal hash-locked Ansible 2.21.6 controller and local-host role for the dated Ubuntu/NVIDIA/CUDA/Docker candidate set. Its six checks, including one clean-room local run, passed on head `4795f12` in `46045068200`; PR #57 is ready for review. No GPU host has been configured; candidates are not runtime-verified.
 
 - [x] Select and pin a candidate standard Ubuntu 24.04 x86_64 AMI, R580.196.11 host
-  driver, CUDA Toolkit 13.0.3, Docker Engine 29.9.3, NVIDIA Container Toolkit 1.20.2,
+  driver, CUDA Toolkit 13.0.3, Docker Engine 29.9.3/Compose 5.8.1, NVIDIA Container Toolkit 1.20.2,
   Python 3.12, standalone PyTorch 2.14.0+cu130, vLLM 0.34.0, and the pinned Qwen
   revision using official release and artifact metadata. Version-family compatibility
   is researched on paper; live kernel, signed-index, package-install, model-license,
@@ -310,12 +346,9 @@ sanitized output are retained, and a repeated Ansible run makes no unintended ch
 ### Package 4 — CUDA performance laboratory
 
 **Status:** PR #49 (`codex/gpu-cuda-lab-preparation`) is open. PR #65's bounded Triton
-vector-add and Nsight instructions are rebased onto current PR #64 head `2e2e4dd`.
-Earlier PR #65 head `49076a5` passed all six required jobs in run `46114955314`; its
-local-e2e job is recorded as the single integrated local CPU clean-room acceptance
-run in `docs/governance/VALIDATION.md`. The current PR #65 head requires fresh checks.
-The designated run validates the local CPU stack only; no kernel has been compiled on
-a GPU and no real measurements exist.
+vector-add and Nsight instructions are restacked locally on PR #64 head `06f1a11`.
+Twelve focused tests and full `make verify` (193 passed, 2 skipped) pass locally.
+Parent PR #64 passed all six checks in run `46114151883`. PR #65 source head `49076a5` passed all six required jobs in run `46114955314`; its local-e2e job is the one designated integrated clean-room run for this GPU goal, recorded in `docs/gpu-lab/EVIDENCE_MANIFEST.md`. Historical PR #31 separately records two local clean-room runs. Governance follow-up head `24ea5e8` passed all six checks in `46117285643`; its P1 evidence thread is resolved and PR #65 is ready for owner review. No kernel has been compiled on a GPU and no real measurements exist.
 
 - [x] Prepare bounded CPU/GPU vector and matrix operations, separate host/device
   copies, supported precision checks, and warmup/repeat controls.
@@ -374,11 +407,10 @@ tokenizer preflight. None has live GPU inference evidence.
 - [x] Run `make demo-gateway-cancellation` through the local flagship flow. CI run
   `46066808334` cancelled ten streams across both CPU gateway processes and verified
   each active gauge and the shared Redis lease hash returned to zero.
-- [ ] Rerun `make demo-redis-outage` after the shared rollout-store fix. In CI run
-  `46066808334`, the first replica returned HTTP 500 instead of the expected 503;
-  `INCIDENT-LOCAL-REDIS-001.md` records the failure. The exit trap restarted Redis,
-  but gateway readiness after recovery was not tested because the assertion failed.
-  The local fix and focused tests are ready for the next PR workflow.
+- [x] Rerun `make demo-redis-outage` after the shared rollout-store fix. CI run
+  `46068015904` verified HTTP 503 from both gateways while Redis was unavailable,
+  Redis recovery, and readiness on both gateways. The initial HTTP 500 and root cause
+  remain in `INCIDENT-LOCAL-REDIS-001.md` as a real local incident history.
 - [ ] Verify the stream/admission contract against the pinned live vLLM runtime and
   route real GPU-backed requests.
 - [x] Preserve ONNX defaults and add vLLM as a separately configured single-target
@@ -414,7 +446,7 @@ captured and described with units and limits.
 
 ### Package 8 — Benchmarking, FinOps, evaluation, release, and rollback
 
-**Status:** PRs #47–#52 prepare static benchmarking, evaluation, private MLflow evidence, and sequential-release design. PR #52 head `55f4d59` passed all five checks in run `46020258170`. PR #60 adds an authenticated gateway benchmark with privacy-safe metadata and a strict L4 guard. Its current head `9fc23f2` passed all six required jobs in run `46162969703`. Actual GPU performance, live model evaluation, and release/rollback behavior remain outstanding.
+**Status:** PRs #47–#52 prepare static benchmarking, evaluation, private MLflow evidence, and sequential-release design. PR #52 head `55f4d59` passed all five checks in run `46020258170`. PR #60 adds an authenticated gateway benchmark with privacy-safe metadata and a strict L4 guard. Current rebased head `9a8bd28` passed focused tests locally and its fresh six-job CI is running. Actual GPU performance, live model evaluation, and release/rollback behavior remain outstanding.
 
 The existing ONNX release API still does not support the one-target vLLM profile. PR
 #52 adds a private MLflow tracking service and evaluator report publication, while PR
@@ -442,22 +474,27 @@ and rollback evidence exist and fit the budget.
 
 ### Package 9 — Controlled incident drills and recovery
 
-**Status:** not started. Prepare reversible drills, commands, and recovery steps first.
+**Status:** local failure/recovery evidence and reversible GPU drill preparation exist;
+real GPU incident exercises remain unstarted.
 
-- [ ] Cover representative GPU/container/model/admission/monitoring failures without
-  destructive host changes.
-- [ ] Capture real logs, telemetry, detection, root-cause alternatives, recovery time,
-  verification, and prevention for every drill.
+- [x] Prepare safe, reversible GPU/container/model/admission/monitoring drill steps
+  and host recovery methods without destructive host changes.
+- [ ] Execute representative failures on the authorized L4; capture genuine logs,
+  telemetry, detection, root-cause alternatives, recovery time, verification, and
+  prevention for every executed drill.
 
 **Exit gate:** reports prove real failure and independent recovery; no simulated error
 is presented as an executed incident.
 
 ### Package 10 — Automation, clean-room reproduction, and teardown
 
-**Status:** not started.
+**Status:** automation source, static checks, and the designated local CPU clean-room
+cycle are prepared and CI-validated; cloud reproduction and teardown remain pending.
 
-- [ ] Complete Makefile/Ansible/Compose/CI automation; normal PR CI must never launch
-  paid AWS jobs.
+- [x] Prepare Makefile/Ansible/Compose/CI automation and ensure normal PR CI never
+  launches paid AWS jobs.
+- [ ] Validate host automation on the real L4 and independently test its expiry and
+  teardown behavior without touching unrelated resources.
 - [ ] Recreate from clean project state using only documented commands; capture exact
   stack outputs and evidence.
 - [ ] Export sanitized evidence and charts before teardown. Destroy only the authorized
@@ -483,13 +520,14 @@ cost status, educational artifacts, and goal closure are complete.
 - If the complete mandatory work cannot be done under $25, stop paid work, document
   remaining requirements, finish non-billable work, and ask before increasing the
   ceiling or changing the design.
-- Historical snapshot: the applied quota was zero in the checked regions before the
-  appeal was resolved. The current `us-east-1` result is 4.0 applied vCPUs and
-  `CASE_CLOSED`; no duplicate request is needed. The quota does not bypass the
-  remaining budget, backend, exact-plan, expiry, capacity, and apply gates.
+- The latest `us-east-1` applied G/VT quota is `4.0` vCPUs and request history is
+  `CASE_CLOSED` with desired value 4.0. Previously checked `us-east-2` and `us-west-2`
+  values were zero. Do not send a duplicate appeal. Recheck
+  current quota and live capacity before any plan/apply; quota value alone is not
+  launch authorization.
 - Provisional 12-hour estimate: about `$10.68` before tax for one g6.xlarge, one public
   IPv4, 100 GiB gp3, short-lived S3 state and lock objects, one scheduler invocation,
   and 1 GiB of internet egress. A 25% tax allowance plus `$5` general reserve gives
-  about `$18.35`. This is neither a provider quote nor authorization. Confirm current
+  about `$18.5193` per the corrected 2026-11-28 Price List API inputs in `COST_REPORT.md`. This is neither a provider quote nor authorization. Confirm current
   rates, the account tax profile, aggregate data-transfer usage, state retention, and
   exact plan immediately before any paid run.

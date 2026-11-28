@@ -2,19 +2,18 @@
 
 Research was started on 2026-11-26 and updated on 2026-11-28. This remains a Phase 1 design record, not a final compatibility matrix. Recheck sources immediately before implementation because prices, quota, software releases, and model artifacts change.
 
-**Latest quota observation (2026-11-28):** the applied On-Demand G/VT quota reads
-`4.0` vCPUs and the later read-only request-history check reports `CASE_CLOSED`.
-Earlier same-day results reported `CASE_OPENED` and are historical. Earlier
-zero-quota results are also historical. EC2 lists `g6.xlarge` in five us-east-1 AZs;
-this does not reserve launch capacity. See ticket73 for the earlier read-only query,
-empty project resource inventory, and guarded preflight stop at the missing state
-bucket.
+**Latest quota observation (2026-11-28):** the owner reports AWS approved the request,
+and the applied On-Demand G/VT quota reads `4.0` vCPUs. The read-only request-history
+query now reports `CASE_CLOSED` with desired value `4.0`; earlier `CASE_OPENED` and
+zero-quota records below are historical. EC2 lists `g6.xlarge` in five us-east-1 AZs;
+this does not reserve launch capacity. The state bucket, lock table, and project Budget
+are absent; see the cost and readiness records before planning any apply.
 
 ## AWS hardware, region and quota
 
 - AWS's [G6 product page](https://aws.amazon.com/ec2/instance-types/g6/) and [accelerated instance specification table](https://docs.aws.amazon.com/ec2/latest/instancetypes/ac.html) describe G6 as NVIDIA L4 based. The single-GPU `g6.xlarge` is listed with 4 vCPUs, 16 GiB host memory, one L4, and 22 GiB of listed GPU memory; `g6.2xlarge` has 8 vCPUs, 32 GiB, and one L4 with the same listed GPU memory. The GPU is commonly described as a 24 GB L4; AWS's table expresses the per-instance memory as 22 GiB. Capacity and runtime compatibility still need live validation.
 - Read-only `describe-instance-type-offerings` in `us-east-1` listed `g6.xlarge` in `us-east-1a`, `1b`, `1c`, `1d`, and `1f`; it listed `g6.2xlarge` in `1a`, `1b`, `1c`, `1d`, and `1f`. Offering means the type is supported in that AZ, not that capacity can be launched.
-- A historical read-only Service Quotas lookup returned `Running On-Demand G and VT instances = 0.0 vCPUs`, quota code `L-DB2E81BA`. Later 2026-11-28 checks returned applied quota `4.0`; request history first showed `CASE_OPENED`, then `CASE_CLOSED`. AWS [EC2 instance quota documentation](https://docs.aws.amazon.com/ec2/latest/instancetypes/ec2-instance-quotas.html) says this quota is adjustable; AWS's [quota increase procedure](https://docs.aws.amazon.com/servicequotas/latest/userguide/request-quota-increase.html) notes increases require a request and may be reviewed. The user reported GPU capacity was approved. The applied value is enough numerically for one `g6.xlarge`, but there is no reserved AZ capacity. Do not submit a duplicate appeal or quota request.
+- A historical read-only Service Quotas lookup returned `Running On-Demand G and VT instances = 0.0 vCPUs`, quota code `L-DB2E81BA`. The latest 2026-11-28 read-only check returns applied quota `4.0` and request history `CASE_CLOSED` with desired value 4.0. AWS [EC2 instance quota documentation](https://docs.aws.amazon.com/ec2/latest/instancetypes/ec2-instance-quotas.html) describes this quota; the applied value is sufficient on paper for one `g6.xlarge`, but it does not reserve capacity or authorize provisioning. Do not submit a duplicate request.
 - Read-only AWS Price List API queries on 2026-11-28 returned the `g6.xlarge`
   `BoxUsage` On-Demand rate at **$0.8048 per instance-hour** for Linux, no
   preinstalled software, shared tenancy, and `US East (N. Virginia)`, effective
@@ -70,7 +69,7 @@ Continue with current primary documentation before each phase: [AWS G6](https://
 ## Decisions still open
 
 - Whether the `$25` cap can cover the requested GPU-dependent validation with enough runtime to install the driver, download the model, integrate/observe/benchmark it, run safe incident drills, and export evidence. The instance-only estimate leaves room but time-consuming manual setup could use it quickly.
-- Whether AWS has live G6 capacity in the selected AZ when a separately authorized launch is ready. The applied quota is 4.0 vCPUs and the later request-history check is `CASE_CLOSED`; neither reserves capacity. Do not submit a duplicate request.
+- The prior disagreement between request-history and applied-quota records has been reconciled by a later read-only query showing `CASE_CLOSED` and 4.0 applied vCPUs. Capacity, Budget, remote-state, exact-plan, cost, and apply gates remain.
 - Exact Ubuntu LTS point release/AMI, kernel, driver branch, CUDA compatibility, Docker Toolkit release, PyTorch build, vLLM release, and container image digest.
 - Exact encrypted Terraform state/locking arrangement that follows repository governance without creating long-lived costs above the project cap.
 - Which monitoring components can coexist on 16 GiB host memory without invalidating the inference experiment; measure before selecting `g6.2xlarge`.
@@ -430,7 +429,7 @@ The install-role candidates were refreshed from HTTPS package metadata on 2026-1
 | --- | --- | --- |
 | NVIDIA Ubuntu 24.04 CUDA repository | `cuda-keyring` 1.1-1; headless R580 driver 580.196.11; CUDA Toolkit 13.0.3 | `Packages.gz` metadata gave keyring SHA-256 `d2a6b11c096396d868758b86dab1823b25e14d70333f1dfa74da5ddaf6a06dba` and Toolkit SHA-256 `8286faab8b7a61f3fe669c03ad1bb042dc322582a3dc7df44a4b3302a30ca5fb`. The role pins APT versions and keyring package checksum. Detached APT metadata signature verification and actual installation remain required on the host. |
 | NVIDIA Container Toolkit repository | 1.20.2-1 for four required AMD64 packages | The public package index lists this package set. Repository key SHA-256 fetched from NVIDIA's published `gpgkey` URL: `c880576d6cf75a48e5027a871bac70fd0421ab07d2b55f30877b21f1c87959c9`. The playbook binds the APT source to that keyring and pins each package version. |
-| Docker Ubuntu repository | Engine/CLI 29.9.3, containerd 2.4.2, Buildx 0.39.1, Compose 5.8.0 | The published Ubuntu Noble amd64 package index provided these versions. Docker signing-key SHA-256 fetched from the official repository URL: `1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570`. The Ansible role pins the key bytes and the installed package versions. |
+| Docker Ubuntu repository | Engine/CLI 29.9.3, containerd 2.4.2, Buildx 0.39.1, Compose 5.8.1 | The 2026-11-28 Ubuntu Noble amd64 index still lists the pinned Engine/CLI/containerd/Buildx packages. Docker Compose 5.8.1 is the latest index entry and was released 2026-11-27; its release notes include a fix to `compose up --wait` readiness and completion handling. The Compose package SHA-256 is `9929835b00e60dadf2e8e7b843c2cd3fc3920cc3ea7148db4d1f15c9287eae10`. Docker signing-key SHA-256 fetched from the official repository URL: `1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570`. The Ansible role pins the key bytes and installed package versions. |
 
 The playbook is deliberately run locally on the EC2 host through a root shell
 opened with Systems Manager Session Manager. This avoids adding SSH ingress or
@@ -443,6 +442,32 @@ check. Neither syntax-check nor check-mode establishes that the package set work
 with an L4 or the pinned vLLM image.
 
 Official sources: NVIDIA's [CUDA repository package index](https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/Packages.gz), [Container Toolkit repository instructions](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html), the [Container Toolkit repository key](https://nvidia.github.io/libnvidia-container/gpgkey), Docker's [Ubuntu Noble AMD64 package index](https://download.docker.com/linux/ubuntu/dists/noble/stable/binary-amd64/Packages.gz), and the [Docker repository key](https://download.docker.com/linux/ubuntu/gpg). The metadata/key downloads were read-only research. Ansible wheels were installed only in `/tmp/gpu-ansible-venv`; no host APT packages, model artifacts, or container images were installed or downloaded.
+
+## 2026-11-28 — Final static software-candidate recheck before the GPU batch
+
+The public vendor package indexes and upstream release metadata were queried again
+through Python's standard HTTP client and the GitHub CLI. The NVIDIA CUDA Ubuntu 24.04
+index still lists the selected CUDA keyring `1.1-1`, driver pin/headless/utilities
+`580.196.11-1ubuntu1`, and CUDA Toolkit `13.0.3-1`. NVIDIA's AMD64 Container Toolkit
+index still lists all four configured packages at `1.20.2-1`. Docker's Noble AMD64
+index still contains the selected Engine/CLI `29.9.3`, containerd `2.4.2`, and Buildx
+`0.39.1` packages.
+
+The Docker index now lists Compose plugin `5.8.1-1~ubuntu.24.04~noble`; its metadata
+SHA-256 is
+`9929835b00e60dadf2e8e7b843c2cd3fc3920cc3ea7148db4d1f15c9287eae10`. The upstream
+Compose `v5.8.1` release was published on 2026-11-27 and fixes `compose up --wait`
+readiness/completion behavior, which is useful for the operator's health-check path.
+The Ansible pin and manual guide now use 5.8.1 instead of the still-available 5.8.0.
+The GitHub CLI latest-release endpoint returned vLLM `v0.34.0` at this check. The
+project retains it as the current candidate because its published image metadata
+matches the separate PyTorch CUDA 13.0 candidate. This is release and image metadata,
+not a tested runtime combination.
+
+These checks prove package-index presence and recorded release metadata only. No
+package was downloaded or installed, the repository signatures were not verified on
+an Ubuntu host, and no driver/CUDA/PyTorch/vLLM combination has been executed on an L4.
+Refresh all indexes and signatures immediately before the authorized run.
 
 ## 2026-11-27 — small CUDA container digest
 
@@ -638,11 +663,13 @@ AMI.
 | `docker-ce-cli` | `5:29.9.3-1~ubuntu.24.04~noble` amd64 | `24f78a893cece8d345c4e90b5163907c047b996b747265f873743e8b0b0546d4` |
 | `containerd.io` | `2.4.2-4~ubuntu.24.04~noble` amd64 | `15cc3d6c64422ed278f60cb3c9a5df760a3de38055affc335c6ee40c12411b75` |
 | `docker-buildx-plugin` | `0.39.1-1~ubuntu.24.04~noble` amd64 | `a9ecd4ab59dbd52f395d07712a840bc7d145c5f8bec4880d5531e0443aeceba5` |
-| `docker-compose-plugin` | `5.8.0-1~ubuntu.24.04~noble` amd64 | `ca5130d92e95f3e27901d8d9916e388d7ddde0b6ba94798a6877dfa0a14714d8` |
+| `docker-compose-plugin` | `5.8.1-1~ubuntu.24.04~noble` amd64 | `9929835b00e60dadf2e8e7b843c2cd3fc3920cc3ea7148db4d1f15c9287eae10` |
 | `torch` | `2.14.0+cu130`, CPython 3.12, Linux x86_64 | `9c5693d3ca91743202034094ad3b3df20b5eb1373d5e0bc8a5d976be12c35302` |
 
-The Docker versions are the last listed amd64 versions in the official Ubuntu 24.04
-stable package index fetched at this review. The PyTorch wheel came from the official
+Docker Engine/CLI, containerd, Buildx, and Compose candidates are present in the
+official Ubuntu 24.04 amd64 package index checked on 2026-11-28. Compose 5.8.1 is the
+latest listed version; its exact package SHA-256 comes from that index, and the
+matching upstream release notes were read with the GitHub CLI. The PyTorch wheel came from the official
 CUDA 13.0 wheel index. PyTorch 2.14.0 was selected to match the researched PyTorch
 version inside the candidate vLLM 0.34.0 image; the index also listed 2.14.1, so this
 is a compatibility-alignment choice, not a claim that 2.14.0 is newest. The wheel is
