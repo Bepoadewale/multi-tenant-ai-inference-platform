@@ -2257,3 +2257,13 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Current CI:** PR #65 run `46164362977` passed all six jobs; PR #66 run `46164644804` and PR #67 run `46164896175` are active. PR #68 needs fresh checks after publication.
 - **Cost/security:** no credentials, cloud mutation, GPU, model download, or spend. $25 ceiling and separate apply authorization remain.
 - **Next:** publish PR #68 with exact lease against old head `6afa0ef`, update its description, and monitor one CI run.
+
+## 2026-11-28 — Restack and reconcile single-L4 cost research in PR #69
+
+- **Phase:** Phase 2 cost-readiness research; all commands were non-mutating.
+- **Branch / PR:** PR #69 (`codex/gpu-price-refresh`) replayed four cost-focused commits onto refreshed PR #68 head `ff88165`, replacing the old parent `6afa0ef`.
+- **Research and correction:** retained the read-only AWS Price List results for EC2 `g6.xlarge`, public IPv4, gp3, S3, DynamoDB, and Scheduler. Corrected 100 GiB to 107.3742 decimal GB for the gp3 GB-month price. The plan estimate is `$18.51932705` including the stated assumptions, leaving `$6.48067295` under the $25 ceiling. This is not an invoice, exact-plan result, or spend authorization.
+- **Conflict handling:** refreshed research notes were reconciled with the newly approved quota and `CASE_CLOSED`; earlier zero-quota text remains dated historical context. Ticket #69 retains the detailed rate assumptions and validation limits.
+- **CI:** PR #66 run `46164644804` passed all six jobs. PR #67 run `46164896175` and #68 run `46165126075` were active at this snapshot. PR #69 needs fresh CI on the rebased head.
+- **AWS / GPU / cost:** Price List reads are catalog queries only; no infrastructure, GPU, model download, or spend. State, Budget recipient, exact saved plan, capacity, expiry, and separate apply authorization remain open.
+- **Next:** publish #69 with exact lease against old head `f21d61a`, update the PR body, and watch one CI run.

@@ -66,15 +66,16 @@ Old quota-denial statements below are dated historical snapshots, not current st
   invocation, data-transfer allowance, tax contingency, and a reserve. It still
   requires exact AMI, price, egress, tax-profile, and state-retention confirmation;
   it is not permission to apply.
-- PRs #30–#68 remain open and unmerged; merge authorization is outstanding. PR #59
+- PRs #30–#69 remain open and unmerged; merge authorization is outstanding. PR #59
   head `0cfbedb` passed six checks in `46162611345`; #60 head `9fc23f2` passed six
   checks in `46162969703`; #61 head `1474752` passed six checks in `46163194154`.
   PR #62 run `46163327188`, #63 run `46163484312`, and #64 run `46163910205` passed
   all six refreshed jobs. PR #65 head `37b3b30` passed `46164362977`; its earlier
   head `49076a5` passed six checks in `46114955314` and includes the designated local
-  CPU clean-room record. PR #66 head `846b5cf` is running `46164644804`; PR #67 head
-  `5dc225f` is running `46164896175`. PR #68 is restacked locally onto #67 and needs
-  fresh CI. PR #53
+  CPU clean-room record. PR #66 head `846b5cf` passed `46164644804`. PR #67 head
+  `5dc225f` run `46164896175` and #68 head `ff88165` run `46165126075` are active.
+  PR #69 is restacked locally onto #68 and needs fresh CI. Its refreshed catalog-based
+  planning envelope is `$18.51932705`, not authorization. PR #53
   code head `e623b75` passed all five checks in `46023306230`, including a Linux AMD64
   gateway image build and CPU end-to-end. PR #56 head `852c873` passed all five checks
   in `46040861818`; PR #57 Ansible head `4795f12` passed all six checks, including a
