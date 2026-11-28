@@ -17,6 +17,9 @@ monitoring. It has not been applied to AWS.
   an encrypted 100 GiB `gp3` root disk deleted on termination.
 - A narrow instance role for Systems Manager. The role used by EventBridge Scheduler
   can terminate only this instance ARN.
+- Every resource type that the pinned AWS provider exposes as taggable carries explicit
+  project, environment, owner, cost-scope, data-class, expiry, and Name tags. Terraform
+  tests assert these values directly; they do not rely only on provider `default_tags`.
 - Two independent expiry controls: a persistent Ubuntu `systemd` timer installed by
   cloud-init and a one-time EventBridge Scheduler call. Both use the same exact UTC
   expiry. EC2 terminates the instance after the guest shuts down.
@@ -54,6 +57,9 @@ The Scheduler one-time schedule remains in the Terraform state after firing with
 repository's currently pinned AWS provider. The normal Terraform destroy removes it;
 it has no repeat rule. If a Codex or operator session ends early, its target still
 terminates the instance at the exact deadline.
+The pinned AWS provider does not expose tags on an individual Scheduler schedule, so
+the schedule itself is not tagged. Its schedule group is project-tagged, and the
+schedule uses the exact project name and remains managed through this dedicated root.
 
 The expiry timestamp is part of cloud-init user data. Changing it after deployment
 forces a replacement so the guest timer and cloud schedule cannot silently drift.

@@ -27,6 +27,8 @@ locals {
     data_class  = "synthetic-only"
   }
 
+  resource_tags = merge(local.required_tags, { Name = local.name })
+
   expiry_systemd = formatdate("YYYY-MM-DD HH:mm:ss 'UTC'", var.expires_at)
 }
 
@@ -35,13 +37,13 @@ resource "aws_vpc" "gpu" {
   enable_dns_support   = true
   enable_dns_hostnames = true
 
-  tags = { Name = local.name }
+  tags = local.resource_tags
 }
 
 resource "aws_internet_gateway" "gpu" {
   vpc_id = aws_vpc.gpu.id
 
-  tags = { Name = local.name }
+  tags = local.resource_tags
 }
 
 resource "aws_subnet" "gpu" {
@@ -50,7 +52,7 @@ resource "aws_subnet" "gpu" {
   availability_zone       = var.availability_zone
   map_public_ip_on_launch = true
 
-  tags = { Name = local.name }
+  tags = local.resource_tags
 }
 
 resource "aws_route_table" "gpu" {
@@ -61,7 +63,7 @@ resource "aws_route_table" "gpu" {
     gateway_id = aws_internet_gateway.gpu.id
   }
 
-  tags = { Name = local.name }
+  tags = local.resource_tags
 }
 
 resource "aws_route_table_association" "gpu" {
@@ -90,7 +92,7 @@ resource "aws_security_group" "gpu" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = { Name = local.name }
+  tags = local.resource_tags
 }
 
 resource "aws_iam_role" "instance" {
@@ -104,6 +106,8 @@ resource "aws_iam_role" "instance" {
       Action    = "sts:AssumeRole"
     }]
   })
+
+  tags = local.resource_tags
 }
 
 resource "aws_iam_role_policy_attachment" "ssm_core" {
@@ -114,6 +118,8 @@ resource "aws_iam_role_policy_attachment" "ssm_core" {
 resource "aws_iam_instance_profile" "gpu" {
   name = local.name
   role = aws_iam_role.instance.name
+
+  tags = local.resource_tags
 }
 
 resource "aws_instance" "gpu" {
@@ -143,7 +149,7 @@ resource "aws_instance" "gpu" {
     delete_on_termination = true
   }
 
-  volume_tags = local.required_tags
+  volume_tags = local.resource_tags
 
   lifecycle {
     precondition {
@@ -158,11 +164,13 @@ resource "aws_instance" "gpu" {
     }
   }
 
-  tags = { Name = local.name }
+  tags = local.resource_tags
 }
 
 resource "aws_scheduler_schedule_group" "gpu" {
   name = local.name
+
+  tags = local.resource_tags
 }
 
 resource "aws_iam_role" "expiry" {
@@ -180,6 +188,8 @@ resource "aws_iam_role" "expiry" {
       }
     }]
   })
+
+  tags = local.resource_tags
 }
 
 resource "aws_iam_role_policy" "expiry" {
