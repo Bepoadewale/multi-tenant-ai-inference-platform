@@ -5,11 +5,11 @@
 | Phase | Status | Evidence / next gate |
 | --- | --- | --- |
 | 1. Audit, research, architecture | Complete | Baseline, direct request/admission audit, proposed diagrams, official-source research notes, risk register, cost estimate, backlog, evidence manifest, and passing PR checks are recorded. PR human review/merge remains open; exact package versions and cost inputs are rechecked before implementation/apply. |
-| 2. Single-L4 EC2 Terraform | In progress — static only | Separate root, account/quota/AZ preflight, checksum-gated plan/apply/destroy scripts, guest plus AWS expiry, and read-only cleanup verifier are drafted. Ten fake-CLI regression cases cover profile propagation, absent Scheduler group, wrong account/quota, missing apply confirmation, changed create/destroy plan checksums, destroy account guard, and destroy-only plan generation. Local `make verify` passes (60 tests); CI for the new test head is pending. The duplicate push trigger is disabled for feature branches. Backend-free validation passed; latest AWS-backed local-state preview proposed 14 creates for one `g6.xlarge` in `us-east-1c`, not an apply plan. Applied quota remains zero; the increase request is `CASE_OPENED`. |
+| 2. Single-L4 EC2 Terraform | In progress — static only | Separate root, account/quota/AZ preflight, checksum-gated plan/apply/destroy scripts, guest plus AWS expiry, and read-only cleanup verifier are drafted. Ten fake-CLI regression cases cover profile propagation, absent Scheduler group, wrong account/quota, missing apply confirmation, changed create/destroy plan checksums, destroy account guard, and destroy-only plan generation. `make verify` passes locally (60 tests). PR #32 head `da2567e` passed all four required CI jobs in run `45933749318`. Backend-free validation passed; latest AWS-backed local-state preview proposed 14 creates for one `g6.xlarge` in `us-east-1c`, not an apply plan. Applied quota remains zero; the increase request is `CASE_OPENED`. |
 | 3. Ubuntu/NVIDIA/CUDA/Ansible | Not started | Manual host and container GPU computation, followed by repeat Ansible run. |
 | 4. CUDA performance lab | Not started | Synchronized real-GPU experiments and profiler evidence. |
 | 5. vLLM and Qwen serving | Not started | Pinned artifacts and actual L4 inference/streaming. |
-| 6. Multi-tenant GPU gateway | Not started | Real routed requests, shared limits, failure and cancellation accounting. |
+| 6. Multi-tenant GPU gateway | Local correctness work in progress; no GPU integration | PR #33's latest code commit is `635f61d`; local tests cover vLLM final usage, in-band errors, gateway usage estimates, and cancellation. CI is rerunning after the rebase and evidence update. Shared Redis lease/reconciliation design and real GPU routing remain outstanding. |
 | 7. GPU/AI observability | Not started | Live metrics, dashboards, alert, trace correlation. |
 | 8. Benchmarks and FinOps | Not started | Reproducible measured report with raw evidence references and cost method. |
 | 9. Evaluation and releases | Not started | Actual evaluation, candidate rejection and rollback. |
@@ -43,13 +43,12 @@
 
 ## Current Next Actions
 
-1. Resolve PR #32 CI results and review feedback; keep the PR stacked on #30 until the
-   goal-registration base is merged.
-2. Track the pending four-vCPU G/VT quota request while preparing the exact
+1. Resolve PR #33 CI results and remaining review feedback; keep it stacked on #32.
+2. Resolve human review for PR #32; keep it stacked on #30 until the goal
+   registration base is merged.
+3. Track the pending four-vCPU G/VT quota request while preparing the exact
    remote-state plan and full resource/cost summary. Do not apply.
-3. Continue local gateway correctness and reproducibility work in a separate focused
-   PR before live vLLM tenant integration.
-4. Keep PRs #30 and #31 open for human review; their required checks currently pass.
-   PR #32 is open as a draft with required checks running.
+4. Keep PRs #30–#36 on their current review branches; none is merged or has been pushed
+   directly to `main`.
 
 Update this table and the detailed goal after each implementation package. A phase is complete only when its acceptance gate has actual evidence.

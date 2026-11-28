@@ -595,3 +595,56 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** publish the verifier correction, test, and truthful baseline record with
   the current PR package. Keep this baseline clearly distinct from future teardown
   evidence.
+
+## 2026-11-27T00:20Z — Local vLLM streaming and cancellation package
+
+- **Phase:** local prerequisite work for Phase 6; Phase 2 remains the active cloud
+  phase. No AWS resource or GPU was used.
+- **Branch / parent:** `codex/gateway-stream-accounting`, initially based on PR #32
+  commit `24336cf`; it was later rebased onto PR #32 head `da2567e`.
+- **Objective and changes:** close the audited vLLM streaming usage/TTFT gaps before
+  live inference. The adapter requests/parses the final usage event; the gateway
+  supports client `stream_options`, records measured versus estimated usage, measures
+  first-content delay, and records terminal cancellation/error outcomes once.
+- **Setup failures retained:** `.venv` and the ignored ONNX fixture were absent. The
+  first Ruff command failed because its binary did not exist; the first test collection
+  failed because the fixture was absent. Installed editable dependencies and generated
+  the ignored fixture. A test initially expected bytes although this direct response
+  iterator yielded strings; corrected the assertion. The first fake Redis pipeline also
+  omitted a positional `hset` form and failed before its target assertion; updated the
+  fake to model both forms.
+- **Earlier validation snapshots:** the initial package reached 5 targeted/55 full
+  tests; subsequent usage-option checks reached 7/57; the stream-failure case reached
+  8/58. Each snapshot had one existing Starlette deprecation warning. These are retained
+  as history; later validation is recorded below.
+- **Evidence boundary:** vLLM used `httpx.MockTransport`; cancellation used the local
+  in-memory limiter. No real vLLM server, Redis recovery, or GPU behavior was tested.
+- **Quota/cost:** the 4-vCPU request remained pending; applied quota remained zero. No
+  infrastructure mutation, GPU hours, or AWS spend occurred.
+
+## 2026-11-27T00:25Z — PR #33 implementation committed
+
+- **Original implementation commit:** `1186e30` (`fix: preserve vLLM stream usage and
+  cancellation`), later replayed during rebase as `130bddd`.
+- **PR:** #33 was opened against PR #32's `codex/gpu-ec2-foundation` branch. The PR
+  branch was later rebased onto PR #32 head `da2567e` to preserve the stack.
+- **Validation at that point:** Ruff passed; targeted tests reported 8 passed and the
+  full suite reported 58 passed with one existing warning. Later review-fix validation
+  is recorded below.
+
+## 2026-11-27 — PR #32 latest checks and PR #33 review fixes
+
+- **PR #32:** the single watcher reached terminal success for head `da2567e`; run
+  `45933749318` passed Python, manifests, supply-chain, and local-e2e.
+- **PR #33 findings:** in-band vLLM error events after HTTP 200 were silently ignored;
+  string-yielding backends omitted final usage when clients requested it. Both issues
+  were fixed. Error frames now fail the backend stream; estimated usage is emitted once
+  when the backend has no measured usage.
+- **Current validation:** targeted streaming suite **10 passed**; `make verify` passed
+  Ruff, **60 tests**, pip-audit with no known vulnerabilities, and Docker Compose
+  validation, with one existing Starlette/httpx warning.
+- **Rebase and publication:** PR #33 was rebased on PR #32 head `da2567e`; source and
+  tests are in `635f61d`. The force-with-lease push succeeded. Checks on the new PR head
+  are still pending; one watcher will be used.
+- **Cloud boundary:** no vLLM server, Redis, AWS mutation, or GPU was used. Goal spend
+  remains `$0`; GPU hours remain `0`; quota and apply gates are unchanged.

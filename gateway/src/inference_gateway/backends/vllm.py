@@ -6,6 +6,7 @@ from collections.abc import AsyncIterator
 from time import perf_counter
 
 import httpx
+from inference_gateway.backends.base import BackendStreamChunk
 from inference_gateway.models import ChatCompletionRequest, Usage
 
 
@@ -18,13 +19,16 @@ class VllmBackend:
         )
 
     def _payload(self, request: ChatCompletionRequest, stream: bool) -> dict:
-        return {
+        payload = {
             "model": self.model_id,
             "messages": [message.model_dump() for message in request.messages],
             "max_tokens": request.max_tokens,
             "temperature": request.temperature,
             "stream": stream,
         }
+        if stream:
+            payload["stream_options"] = {"include_usage": True}
+        return payload
 
     async def health(self) -> bool:
         try:
@@ -51,7 +55,7 @@ class VllmBackend:
         # vLLM non-streaming does not expose true TTFT; record it only from streaming instrumentation.
         return content, usage, (perf_counter() - started) * 1000
 
-    async def stream(self, request: ChatCompletionRequest) -> AsyncIterator[str]:
+    async def stream(self, request: ChatCompletionRequest) -> AsyncIterator[BackendStreamChunk]:
         # Streaming is intentionally not retried: a client can have received partial output.
         try:
             async with httpx.AsyncClient(
@@ -62,11 +66,31 @@ class VllmBackend:
                 ) as response:
                     response.raise_for_status()
                     async for line in response.aiter_lines():
-                        if not line.startswith("data: ") or line == "data: [DONE]":
+                        if not line.startswith("data:"):
                             continue
-                        payload = json.loads(line.removeprefix("data: "))
-                        token = payload["choices"][0].get("delta", {}).get("content")
-                        if token:
-                            yield token
-        except httpx.HTTPError as error:
+                        data = line.removeprefix("data:").strip()
+                        if data == "[DONE]":
+                            break
+                        payload = json.loads(data)
+                        if not isinstance(payload, dict):
+                            raise TypeError("vLLM stream event must be an object")
+                        if "error" in payload:
+                            raise ValueError("vLLM returned an error event")
+                        raw_usage = payload.get("usage")
+                        usage = Usage(**raw_usage) if raw_usage is not None else None
+                        if usage is not None:
+                            yield BackendStreamChunk(usage=usage)
+                        choices = payload.get("choices", [])
+                        if choices:
+                            content = choices[0].get("delta", {}).get("content")
+                            if content:
+                                yield BackendStreamChunk(content=content)
+        except (
+            httpx.HTTPError,
+            json.JSONDecodeError,
+            KeyError,
+            TypeError,
+            ValueError,
+            AttributeError,
+        ) as error:
             raise RuntimeError("vLLM stream failed") from error
