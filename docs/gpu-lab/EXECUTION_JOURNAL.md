@@ -1256,8 +1256,8 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 ## 2026-11-28 — Fix vLLM benchmark tokenizer selection and failure cleanup
 
 - **Phase:** Phase 8 static benchmark preparation; PR #47.
-- **Branch:** `codex/gpu-benchmark-preparation`, worktree based on remote head
-  `5374f5c` before this change is committed.
+- **Branch:** `codex/gpu-benchmark-preparation`; fix committed as `ac4184b` and pushed
+  to PR #47.
 - **Starting state:** PR review identified that vLLM's benchmark client would treat
   the API alias `gpu-default` as the tokenizer model, and that timeout/interruption
   cleanup used the final matrix item instead of the item currently running.
@@ -1277,10 +1277,13 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   worktree has no such environment; using the already installed hash-locked
   environment avoided changing project dependencies. No Docker service, model
   download, benchmark request, AWS resource, or GPU was used.
-- **Evidence:** local tests and dry-run are static/local evidence only. Updated CI
-  evidence is pending publication of this fix; the earlier PR #47 CI run does not
-  validate these edits.
+- **Evidence:** PR #47 head `ac4184b` passed all five required CI jobs in run
+  `46107629939`, including Python tests/dry-run, local E2E, Terraform/manifests,
+  observability validation, and supply-chain checks. This is CI/static/local evidence;
+  it does not demonstrate vLLM execution or GPU measurements.
 - **Cloud/cost:** no AWS use, GPU hours, or spend.
-- **Next:** commit and push these benchmark-specific changes with an exact
-  `--force-with-lease` against the observed PR #47 head; then watch one CI run and
-  address both review threads only after the updated checks pass.
+- **Review follow-up:** after the updated checks passed, the two P1 review threads
+  were addressed with code/test evidence and resolved. PR #47 remains open and
+  stacked on PR #46; no merge or cloud work was performed.
+- **Next:** continue static evaluation and operational-preparation review. The $25
+  cap, zero approved G-series quota, and pending appeal continue to block GPU runs.
