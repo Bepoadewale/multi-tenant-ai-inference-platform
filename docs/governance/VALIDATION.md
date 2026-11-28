@@ -798,3 +798,31 @@ again left zero project-labelled containers, volumes, or networks, with `.venv`,
 `.local`, and generated `models/` absent. Both cycles therefore validate the packaged
 operator-console drill-downs and fixed Prometheus-backed model observability without
 depending on prior project state.
+
+## PR #56 host release-controller clean-room validation
+
+**Initial tested head:** `ad106997d7848f4ea4d319ed70db8a32dcdb4d53` on
+2026-11-27. **GitHub Actions run:** [46039778508](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/actions/runs/46039778508).
+
+All five required checks passed. The single fresh-runner `local-e2e` job executed:
+
+```console
+make install
+make bootstrap-local
+make smoke
+make demo-flagship
+make verify
+make clean-local
+```
+
+The job installed the project environment, bootstrapped local services, passed smoke
+and flagship demos, passed the repository verification suite, then ran project-scoped
+cleanup successfully. This demonstrates reproducibility of the existing local CPU
+platform with the controller code present; it does not test controller commands
+against a live model, AWS, or a GPU.
+
+After this run passed, review found that the host controller treated float `1.0` as
+equal to the required integer tensor-parallel size. The validator now rejects
+non-integer types and has a regression test. This is a material configuration-safety
+fix. The updated PR head must receive required checks again; do not repeat the
+clean-room sequence for unrelated work.

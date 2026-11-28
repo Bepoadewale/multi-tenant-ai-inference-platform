@@ -677,21 +677,29 @@ def main() -> int:
     restore_parser.add_argument("--env-file", type=Path, default=DEFAULT_ENV_FILE)
     restore_parser.add_argument("--state-file", type=Path, default=DEFAULT_STATE_FILE)
     args = parser.parse_args()
-    controller = HostController(
-        env_file=args.env_file,
-        state_file=args.state_file,
-    )
     try:
         if args.command == "apply":
+            controller = HostController(
+                env_file=args.env_file,
+                state_file=args.state_file,
+            )
             token = getpass.getpass("Platform admin bearer token: ")
             if not token.strip():
                 parser.error("a short-lived platform.admin token is required")
             controller.api_url = args.api_url.rstrip("/")
             controller.deploy(args.plan_id, token.strip())
         elif args.command == "initialize":
+            controller = HostController(
+                env_file=args.env_file,
+                state_file=args.state_file,
+            )
             manifest = manifest_from_json(json.loads(args.manifest_file.read_text(encoding="utf-8")))
             controller.initialize_champion(manifest)
         elif args.command == "model-digest":
+            controller = HostController(
+                env_file=args.env_file,
+                state_file=args.state_file,
+            )
             print(controller.model_digest(args.model_id, args.revision))
             return 0
         elif args.command == "manifest-from-report":
@@ -713,8 +721,16 @@ def main() -> int:
                 print(output.decode())
             return 0
         elif args.command == "recover":
+            controller = HostController(
+                env_file=args.env_file,
+                state_file=args.state_file,
+            )
             controller.recover()
         else:
+            controller = HostController(
+                env_file=args.env_file,
+                state_file=args.state_file,
+            )
             controller.restore_active()
     except (
         ControllerError,

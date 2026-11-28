@@ -315,6 +315,57 @@ def test_recover_cli_prints_success_without_a_plan_id(tmp_path, monkeypatch, cap
     assert capsys.readouterr().out == "active champion was restored and verified\n"
 
 
+def test_manifest_from_report_does_not_initialize_host_controller(tmp_path, monkeypatch, capsys):
+    revision = "a" * 40
+    artifact_digest = "b" * 64
+    manifest = _manifest(
+        tmp_path,
+        alias="candidate",
+        revision=revision,
+        artifact_digest=artifact_digest,
+    )
+    report_path = tmp_path / f"candidate-{revision}.json"
+    runtime_path = tmp_path / "runtime.json"
+    runtime_path.write_text(json.dumps(CONFIG), encoding="utf-8")
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "gpu_release_controller.py",
+            "manifest-from-report",
+            str(report_path),
+            "--model-id",
+            MODEL_ID,
+            "--model-revision",
+            revision,
+            "--model-license",
+            "Apache-2.0",
+            "--model-artifact-sha256",
+            artifact_digest,
+            "--vllm-image",
+            IMAGE,
+            "--runtime-config",
+            str(runtime_path),
+            "--source-commit",
+            SOURCE_COMMIT,
+            "--alias",
+            "candidate",
+        ],
+    )
+
+    def unexpected_host_initialization(**kwargs):
+        pytest.fail(f"manifest generation must not initialize a host controller: {kwargs}")
+
+    monkeypatch.setattr("scripts.gpu_release_controller.HostController", unexpected_host_initialization)
+
+    assert main() == 0
+    generated = json.loads(capsys.readouterr().out)
+    assert generated["model_revision"] == manifest.model_revision
+    assert generated["model_artifact_sha256"] == manifest.model_artifact_sha256
+    assert generated["runtime_config"] == CONFIG
+
+
 @pytest.mark.parametrize("candidate_fails", [False, True])
 def test_deploy_commits_candidate_or_restores_champion(tmp_path, monkeypatch, candidate_fails):
     champion, candidate, _, record = _release_pair(tmp_path)

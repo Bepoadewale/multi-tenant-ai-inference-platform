@@ -13,9 +13,9 @@ known champion if candidate readiness fails.
 - PR #55 provides the authenticated planning and approval API. Its latest recorded
   head `de4c6e7` passed all five required jobs in GitHub run `46034523863`.
 - [PR #56](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/56)
-  is open as a draft on `codex/gpu-release-host-controller`, stacked on PR #55's
-  `codex/gpu-llm-release-api` branch. Initial source commit: `70a0227`; a focused
-  type-safety follow-up is being prepared.
+  is open on `codex/gpu-release-host-controller`, stacked on PR #55's
+  `codex/gpu-llm-release-api` branch. Controller source commits: `70a0227` and
+  `852c873`; the initial code head passed CI and the follow-up needs revalidation.
 - No AWS resource, EC2 host, GPU, model download, or GPU hour was used.
 - The controller has local fake-based tests only. Deployment, rollback, interruption
   recovery, and GPU behavior remain unverified on a real host.
@@ -94,6 +94,21 @@ inside the planned GPU batch, before the controlled release operation.
   missing model-artifact environment mapping; these were corrected and the focused
   suite rerun. Review also caught that non-`apply` CLI commands lacked `plan_id` in
   their final success message; a regression test now covers `recover`.
+
+## Review follow-up — manifest command must not initialize a host controller
+
+The review reproduced an `AttributeError` because `manifest-from-report` was creating
+`HostController` before command dispatch. That command has no host-state arguments and
+only reads a sanitized report and runtime configuration. Host controller construction
+now occurs only in commands that use host state or deployment controls. A regression
+test supplies valid report/configuration files and fails immediately if the CLI tries
+to construct a host controller.
+
+The focused release-controller suite passes **17 tests**, Ruff passes, and
+`git diff --check` passes. The PR's existing local clean-room evidence remains valid
+for the local CPU platform; GitHub CI must rerun on this changed controller commit.
+No AWS, model artifact, or GPU was used. Live model deployment and recovery remain
+unverified until the approved L4 batch.
 
 ## Security and financial considerations
 
