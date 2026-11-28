@@ -18,6 +18,9 @@ terraform validate
 
 ## Future, owner-authorized bootstrap flow
 
+Use Terraform 1.10 or newer. The state migration enables the S3 backend's native
+lockfile together with the existing DynamoDB lock table.
+
 The scripts below prepare a private saved plan, require its SHA-256 digest for apply,
 and keep Terraform logs and the first local state under `.local/` (ignored by Git).
 They do not request an AWS change until the explicit apply command is run. The first

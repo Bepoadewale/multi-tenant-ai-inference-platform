@@ -33,6 +33,16 @@ apply or mutate AWS resources.
 - Keep a private local state copy after migration for recovery; do not automatically
   delete it.
 - Clearly state that an AWS Budget is an alert, not a hard cost limit.
+- Require Terraform 1.10 or newer because the migration enables the native S3
+  `use_lockfile` backend option, first available in Terraform 1.10.
+
+## Research
+
+The [official HashiCorp S3 backend documentation](https://developer.hashicorp.com/terraform/language/backend/s3)
+documents `use_lockfile` and marks DynamoDB-based S3 locking as deprecated. The
+repository keeps both mechanisms during migration because its existing backend
+contract uses the DynamoDB lock table. Terraform 1.10+ is therefore the minimum for
+this workflow.
 
 ## Changes
 
@@ -63,6 +73,9 @@ apply or mutate AWS resources.
 - The pre-existing bootstrap preview target was invoked without its required account
   variable and stopped immediately. It made no AWS call; no retry was needed because
   static Terraform validation was run separately.
+- Review found that the bootstrap's old Terraform minimum (`1.8.0`) was below the
+  S3-native lockfile feature requirement (`1.10`). Updated the bootstrap root and
+  operator guide to require Terraform `>=1.10.0, <2.0.0` before publishing the PR.
 - Pull request CI is pending. No Terraform plan, apply, or state migration was run.
 
 ## Security and cost
@@ -86,5 +99,7 @@ incurred by this ticket.
 
 ## Acceptance status
 
-**Local acceptance passed; PR CI pending.** Cloud bootstrap and state migration remain
-intentionally unexecuted until independently authorized.
+**Local acceptance passed before the minimum-version correction; the bootstrap
+Terraform validation is being rerun and PR CI will verify the corrected head.** Cloud
+bootstrap and state migration remain intentionally unexecuted until independently
+authorized.
