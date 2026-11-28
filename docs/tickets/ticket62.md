@@ -57,3 +57,13 @@ is required. The rebased set passed `git diff --check` and a local check of 75 r
 Markdown links across nine changed Markdown files. The report continues to use empty
 measurement fields rather than inventing GPU outcomes. No AWS/GPU operation or
 separate clean-room run occurred.
+
+
+## 2026-11-28 restack validation
+
+Rebased PR #62 from former PR #61 head `bfd3449` onto refreshed PR #61 head
+`1474752`. The benchmark and incident documents were retained, with local link
+validation across seven changed Markdown files and `git diff --check` passing. The
+benchmark report labels all missing GPU results as not measured; the incident handbook
+contains procedures and does not claim incidents that have not occurred. No AWS/GPU
+operation or spend occurred. Fresh CI is pending publication.

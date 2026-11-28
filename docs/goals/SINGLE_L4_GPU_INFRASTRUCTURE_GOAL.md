@@ -3,7 +3,7 @@
 **Status: ACTIVE — Phase 2, isolated EC2 infrastructure (static preparation only)**
 **Source of truth:** this document, the linked execution journal, pull requests, and evidence records.  
 **Last updated:** 2026-11-28 16:01 UTC
-**Current branch:** PR #61 interview guide has been rebased onto refreshed PR #60 head `9fc23f2`; its 106 questions and answers and relative links pass local checks, with fresh CI pending. PR #58 run `46162221680` passed; PR #59 run `46162611345` and PR #60 run `46162969703` are in progress.
+**Current branch:** PR #62 benchmark and incident handbooks have been restacked onto refreshed PR #61 head `1474752`; relative links in seven changed Markdown files pass and the reports clearly label unmeasured work. Fresh PR #62 CI is pending. PR #58 passed; PRs #59, #60, and #61 have active CI runs.
 **Registration PR:** [#30 — docs: register single-L4 GPU infrastructure goal](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/30) (open; current head `04cb564`, required checks passed). **Phase 2 PR:** [#32 — guarded single-L4 EC2 foundation](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/32) (open and ready for review; current head `da2567e`).
 **Baseline repair PR:** [#31 — fix: apply audited dependency constraints](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/31) (open; head `9710932`, required checks passed).
 **GPU quota:** the latest read-only CLI check confirms the existing request is `CASE_CLOSED` with desired value 4.0 and applied On-Demand G/VT quota is 4.0 vCPUs in `us-east-1`, sufficient numerically for one `g6.xlarge`. This does not reserve AZ capacity or authorize provisioning. Do not submit another quota request.
