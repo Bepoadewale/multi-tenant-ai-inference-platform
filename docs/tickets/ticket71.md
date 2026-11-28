@@ -8,7 +8,7 @@ unchecked even though the dependent controller PR implements it.
 
 ## Current state
 
-- PR #70 current head `5f70852` passed all six required jobs in run `46117637674`. PR #71 head `2edf036` passed all six in `46118688165`; the current review-state documentation follow-up needs its own fresh CI. Both PRs remain open and unmerged; this records CI/local validation, not live AWS or GPU results.
+- PR #70 current head `5f70852` passed all six required jobs in run `46117637674`. PR #71 current head `63df036` passed all six in `46119306265`. Both PRs remain open and unmerged; this records CI/local validation, not live AWS or GPU results.
 - The release controller from PR #56 is source-tested and CI-validated on its recorded
   commit, but it has not been run against the GPU host, a live vLLM container, or real
   model weights. Live champion verification, inference, rollback, and interruption
