@@ -49,7 +49,8 @@ unverified.
   dry-run/Make previews, and diff checks.
 - [x] Pass PR checks on the preceding candidate (all six jobs in runs
   `46085794180` and `46086647676`).
-- [ ] Publish the final kernel declaration fix and pass checks on the final PR head.
+- [x] Publish the final kernel declaration fix; all six checks passed on code commit
+  `39ecace` in run `46087597029`, including the workflow local E2E job.
 - [ ] Obtain human review; do not merge without owner authorization.
 
 ## Acceptance criteria
@@ -78,8 +79,8 @@ Triton. This source-layout correction has 11 focused local tests, and `make veri
 passes 187 tests (2 skipped), the dependency audit, Compose checks, GPU observability
 configuration validation, and existing benchmark/evaluation/CUDA planning targets.
 `bash -n`, the Triton dry-run, the host-wrapper Make preview, Python compilation,
-relative-link checks, and `git diff --check` pass. The final-head CI run remains
-required. All these checks validate local preparation, not a CUDA kernel or profiler
+relative-link checks, and `git diff --check` pass. The final code commit `39ecace` passed all six required jobs in run `46087597029`. A documentation-only follow-up records release-backlog status; its check results are
+tracked on the current PR head. All these checks validate local preparation, not a CUDA kernel or profiler
 on an L4.
 
 ## Security and financial considerations

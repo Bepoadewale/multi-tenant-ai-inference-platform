@@ -118,9 +118,10 @@ five checks passed on latest head `de4c6e7` in run `46034523863`. PR #56 prepare
 host-only deployment controller and has 16 focused local tests passing; updated head
 `852c873` passed all five checks in `46040861818`.
 PR #55 remains open and unmerged. [PR #56](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/56)
-is open as a draft, stacked on PR #55. Initial head `ad10699` passed all five required
+is open and ready for review, stacked on PR #55. Initial head `ad10699` passed all five required
 checks in run `46039778508`, including one clean-room local end-to-end cycle. The
-current type-safety follow-up passed full local validation; its checks are pending.
+material tensor-parallel integer type-safety follow-up is head `852c873`; all five
+required checks passed in run `46040861818`, including the one workflow clean-room cycle.
 
 - [x] Bind full model revision, artifact digest, license, serving image/configuration,
   evaluation suite/report digests, and source commit.
@@ -137,7 +138,8 @@ current type-safety follow-up passed full local validation; its checks are pendi
   passes Ruff, 144 tests (2 skipped), audit, Compose/monitoring validation, and
   benchmark/evaluation/CUDA dry runs.
 - [x] Complete one CI clean-room cycle on the first validated controller head.
-- [ ] Rerun required CI after a material tensor-parallel type-safety fix.
+- [x] Rerun required CI after the material tensor-parallel type-safety fix; all five
+  jobs passed on head `852c873` in run `46040861818`.
 - [ ] Verify active champion, model bytes, sequential restart, inference, rollback,
   and interrupted-transaction recovery on the authorized L4 host.
 
