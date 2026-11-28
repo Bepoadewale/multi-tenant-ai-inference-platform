@@ -812,8 +812,8 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 
 - **Phase:** Phase 2 remains static-only; GPU execution is blocked.
 - **Starting state:** PR #38 head `5256060` is under its one active CI watcher. No GPU
-  resources exist or were created. The existing quota request ID is recorded in the
-  project ledger; do not create another request.
+  resources exist or were created. The request identifier is omitted from this public
+  journal; do not create another request.
 - **New evidence:** the owner provided an AWS email stating that the 4-vCPU On-Demand
   G/VT quota increase was denied and that the case may be reopened with a detailed use
   case. A read-only Service Quotas history query still reports `CASE_OPENED` for the

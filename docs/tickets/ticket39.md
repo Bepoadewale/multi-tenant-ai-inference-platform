@@ -8,6 +8,13 @@ and prepare (but do not send) a detailed appeal draft.
 
 ## Current state
 
+**Status update (2026-11-28):** this ticket preserves the denial and zero-quota
+evidence captured on 2026-11-27. The owner later reported that AWS approved the
+appeal, and a read-only CLI check confirms an applied 4.0-vCPU quota in `us-east-1`.
+The request-history API still says `CASE_OPENED`. This quota does not reserve live
+capacity or authorize a launch; use the current [goal](../goals/SINGLE_L4_GPU_INFRASTRUCTURE_GOAL.md)
+and [status](../gpu-lab/IMPLEMENTATION_STATUS.md) for remaining gates.
+
 The applied On-Demand G and VT quota is zero in `us-east-1`, `us-east-2`, and
 `us-west-2`. The owner supplied an AWS email saying the existing 4-vCPU
 `us-east-1` request was denied. A fresh Service Quotas history query still reports
@@ -68,9 +75,9 @@ hard $25 spending ceiling and does not assert that an AWS Budget alert is a hard
 ## Evidence and limitations
 
 The email itself was supplied by the owner; the repository stores only its sanitized
-status. The Service Quotas API and email disagree about the request status. Regional
-offerings do not prove capacity, and zero applied quota prevents launching in all
-three checked regions. No appeal has been sent and no approval is claimed.
+historical status. The Service Quotas API and email disagreed about the request status
+at the time. Regional offerings do not prove capacity. No capacity reservation,
+infrastructure, or GPU execution is demonstrated by this ticket.
 
 ## Outstanding work
 
