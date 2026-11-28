@@ -12,27 +12,28 @@ flowchart LR
   Subnet --> IGW[Internet Gateway]
   IGW -->|outbound HTTPS| Internet[Public internet and AWS public service endpoints]
   EC2 --> Disk[Encrypted gp3 root/data volume]
-  EC2 -->|outbound HTTPS| Packages[Ubuntu, Docker, model registry, image registry]
+  EC2 -->|outbound TCP 80/443| Packages[Ubuntu, Docker, model registry, image registry]
   EC2 -. no NAT Gateway .-> Internet
   Tags[Project tags + expiry guard] -. governs .-> EC2
   TF[Terraform workstation] -->|encrypted state + S3 lock file| State[S3 versioned private state bucket]
-  TF -. repository-required lock .-> Lock[DynamoDB on-demand lock table]
+  TF -. repository-required lock .-> Lock[Repository DynamoDB lock table]
   Expiry[Boot-scheduled bounded shutdown timer] -. instance shutdown terminates EC2 .-> EC2
 ```
 
 The state bucket, lock table, and expiry are proposed controls, not deployed
-resources. Use a private versioned bucket with the Terraform S3 lock file and the
-dedicated DynamoDB lock table required by the repository's cloud-pilot rule. HashiCorp
-marks DynamoDB locking deprecated, so the table is a compatibility/policy control
-and can be removed only after that repository rule changes; the two lock mechanisms
-must be configured and tested together. The guest timer is a second independent
-runtime limit; it must shut down the machine while EC2 terminates after a guest-
-initiated shutdown. Before any paid apply, test the actual startup path and expiry
-behavior. The instance must also delete its encrypted gp3 volume on termination.
-Session Manager access uses an instance role and outbound HTTPS; it does not need an
-inbound SSH rule. The public subnet still has an egress path, so limit it to the test
-window and document that the instance has a public address even when no inbound
-service port is open.
+resources. Reuse the repository's private, versioned state bucket and repository-
+scoped DynamoDB lock table from its existing bootstrap contract. Assign the GPU root a
+unique `gpu-ec2/` state-key namespace, and use Terraform's S3 lock file too. HashiCorp
+marks DynamoDB locking deprecated but documents support for both locks during
+migration; configure and test this with the selected Terraform release. The guest
+timer is a second independent runtime limit; it must shut down the machine while EC2
+terminates after a guest-initiated shutdown. Before any paid apply, test the actual
+startup path and expiry behavior. The instance must also delete its encrypted gp3
+volume on termination.
+Session Manager access uses an instance role and outbound TCP 443; it does not need
+an inbound SSH rule. Package mirrors may also need outbound TCP 80. The public subnet
+still has an egress path, so limit it to the test window and document that the
+instance has a public address even when no inbound service port is open.
 
 ## Proposed host and request path
 
