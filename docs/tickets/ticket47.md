@@ -1,0 +1,133 @@
+# Ticket 47 — Prepare reproducible single-L4 serving benchmarks
+
+## Objective
+
+Prepare a bounded benchmark batch that can run after an approved single-L4 deployment,
+using vLLM's official serving benchmark, real run metadata, and output stored outside
+public Git. Do not report fabricated performance measurements.
+
+## Current state
+
+The repository's current `benchmarks/load_test.py` is marked `local-mock`, sends a fixed
+local token, and gathers all requests concurrently regardless of the `--concurrency`
+argument. It remains useful only for its existing local mock workflow. It is not the
+GPU benchmark harness.
+
+## Research and decisions
+
+- Use the vLLM 0.34.0 official `vllm bench serve` interface with OpenAI chat endpoint,
+  synthetic token lengths, concurrency cap, warm-up, aggregate JSON results, and
+  TTFT/TPOT/ITL/end-to-end percentile reporting.
+- Use deterministic random workloads so no real prompts or customer data are needed.
+- Keep the client on the private Compose network and grant it no GPU reservation.
+- Save aggregate result JSON only; do not enable detailed per-request response capture.
+- Stop at the first failed case and preserve partial files outside the repository.
+- Keep short-prompt concurrency 16 behind an explicit flag until lower levels show
+  sufficient GPU memory margin.
+
+## Changes
+
+- Added a versioned JSON workload matrix for short, medium, and long-context cases.
+- Added a runner that checks context plus a chat-template safety margin, verifies the
+  actual IMDSv2 region/type against the allowed `us-east-1` single-GPU G6 configuration,
+  and checks for an NVIDIA L4 before execution,
+  then records commit, GPU/driver/memory, model revision, container and framework
+  versions, vLLM maximum sequence/context/memory settings, workload shape, concurrency,
+  and repetition.
+- Added a Compose benchmark-client profile. It uses the pinned vLLM image but requests
+  no GPU; output is bind-mounted to an explicitly chosen host path.
+- Added a local dry-run target and linked it into `make verify`.
+- Added a 120-minute batch runtime cap and 10-minute per-command timeout by default.
+- Centralized the benchmark container name so timeout and interruption cleanup target
+  the exact named container for that workload repetition.
+- Separated the served API alias (`gpu-default`) from the tokenizer model ID. The
+  official vLLM benchmark defaults the tokenizer ID to the API model name, which would
+  try to load `gpu-default` as a tokenizer and fail before generating measurements.
+- Carried each run's exact container name next to its command so timeout and
+  interruption cleanup stop the active benchmark container, including the first run.
+- Added regression coverage for both timeout and keyboard-interruption cleanup on the
+  first run of a multi-case matrix.
+- Added a regression test that verifies the runner command and cleanup name agree for
+  a non-first repetition.
+- Corrected the Trivy GitHub Actions input so `HIGH,CRITICAL` is passed as one quoted
+  severity value instead of YAML parsing `CRITICAL` as a separate input.
+- Added a non-cloud GitHub Actions step that parses the GPU Compose profile and runs
+  the benchmark dry-run even if the separate long local E2E job fails.
+- Documented that direct vLLM results do not include gateway overhead, Redis quotas,
+  or tenant behavior; an authenticated gateway benchmark remains a separate task.
+
+## Validation
+
+- `make gpu-benchmark-plan` produced 11 default workload cases and 33 commands across
+  three repetitions. With `--allow-concurrency-16`, it produced 12 cases and 36
+  commands.
+- The generated commands use `vllm bench serve`, have valid input/output/context
+  bounds, save aggregate results, do not enable response-level detailed output, and
+  mount an output directory outside the repository.
+- `python3.12 -m py_compile`, Ruff for the new runner, `make gpu-compose-config`, and
+  `git diff --check` passed.
+- The targeted cleanup-name regression test passed with an isolated Python 3.12 pytest
+  invocation; Ruff and bytecode compilation passed for the runner and test. The
+  workstation's Python 3.12 environment does not include pytest, so the test used
+  `uvx` without changing the repository environment.
+- No Docker profile service, model, benchmark request, AWS resource, or GPU was used.
+- PR head `ac4184b` passed all five required CI jobs in run `46107629939`, including
+  Python tests/dry-run and local E2E. This is CPU/static CI evidence; it does not
+  validate a running vLLM service or GPU benchmark.
+- Documentation follow-up head `78b6188` also passed all five required jobs in run
+  `46108247828`. The current PR head therefore has passing checks after both the code
+  fix and the evidence/status refresh.
+- On 2026-11-28, `.venv/bin/ruff` and the focused tests passed using the existing
+  hash-locked Python environment from the adjacent PR #57 worktree: Ruff passed and
+  `gateway/tests/test_gpu_benchmark_runner.py` reported 3 passed. `make
+  gpu-benchmark-plan` still produced 11 cases and 33 commands; inspection confirms
+  the generated command contains `--model gpu-default --tokenizer
+  Qwen/Qwen2.5-1.5B-Instruct`. `git diff --check` passed. No Docker client, model,
+  AWS resource, or GPU was started. The benchmark source was checked against the
+  official vLLM v0.34.0 implementation, which defaults tokenizer ID to model ID:
+  <https://github.com/vllm-project/vllm/blob/v0.34.0/vllm/benchmarks/serve.py>.
+- After rebasing the candidate onto PR #46 head `6df97e7`, `make gpu-benchmark-plan`
+  again produced 11 cases and 33 commands with the 120-minute batch and 600-second
+  per-command bounds. One regression test passed; Ruff, `make gpu-compose-config`, and
+  `git diff --check` passed. Make echoes the command before its JSON output, so the
+  JSON was parsed from the output after skipping that first echoed line.
+- PR #47 CI run `45993312156` passed all five required jobs: local E2E, manifests,
+  Python, supply-chain, and GPU observability. The Trivy log shows `INPUT_SEVERITY:
+  HIGH,CRITICAL` and no malformed-input warning. This is static/CPU CI evidence only.
+
+## Security and financial considerations
+
+The runner refuses a non-L4 GPU, regions other than `us-east-1`, and instance types
+outside `g6.xlarge`/`g6.2xlarge`. This is an execution guard, not cloud authorization.
+Aggregate benchmark JSON and the metadata file stay outside public Git by default.
+The 33-run plan is only a proposed workload; estimate its runtime during the approved
+batch and stop early if required evidence, time, or the $25 total budget is at risk.
+
+## Outstanding work
+
+- PR #47 is open stacked on PR #46. The current review fixes are local and require
+  updated PR CI and review confirmation.
+- Recheck the pinned vLLM image and CLI flags against the exact runtime inside the
+  benchmark container immediately before execution.
+- Add a separate authenticated gateway benchmark for end-to-end overhead and
+  multi-tenant quota behavior.
+- Run the matrix on real L4 hardware, retain genuine raw results, plot measurements,
+  investigate outliers, and calculate complete request/token costs.
+
+## Troubleshooting update
+
+Static review found that emergency cleanup constructed the container name from the
+overall matrix index, while Docker Compose names it from the workload repetition. The
+names diverged after the first run, so a timed-out later benchmark could leave its
+container running. The runner now uses one shared name helper for both `docker compose
+run --name` and timeout/interruption cleanup. The regression check verifies repetition
+3, which catches the mismatch. No container was started during this investigation.
+
+The rebased PR #46 workflow emitted an `Unexpected input(s) 'CRITICAL'` warning for
+the Trivy action. Its inline YAML map did not quote the comma-separated severity
+value. The workflow now uses a multiline input map and quotes `HIGH,CRITICAL`; the
+updated PR #47 CI run must confirm the action accepts the configuration.
+
+## Acceptance status
+
+**Static preparation only. No GPU benchmark evidence exists.**

@@ -134,6 +134,13 @@ services:
       retries: 20
     restart: unless-stopped
 
+  benchmark:
+    image: ${VLLM_IMAGE:?set VLLM_IMAGE to an immutable image digest}
+    entrypoint: ["vllm"]
+    command: ["--help"]
+    profiles: [gpu-benchmark]
+    restart: "no"
+
   dcgm-exporter:
     image: nvcr.io/nvidia/k8s/dcgm-exporter:4.7.0-4.9.0@sha256:2490e1dfb5baaee6765ef2841813af7d978bb459a566c22c326a8fc27c64eea9
     command: ["--collectors", "/etc/dcgm-exporter/l4-metrics.csv", "--collect-interval", "5000"]

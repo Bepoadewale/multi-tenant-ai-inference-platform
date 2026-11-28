@@ -100,6 +100,17 @@ Before the paid window begins, prepare and review:
 - commands to collect logs, metrics, traces, benchmark JSON, and sanitized screenshots;
 - the post-destroy AWS verifier and a list of exactly scoped project resource filters.
 
+Run `make gpu-benchmark-plan` locally to validate the context-safe vLLM workload
+matrix and inspect the exact prepared command list. It does not contact AWS, start
+Docker, or send inference requests. The paid run uses
+`benchmarks/gpu_inference/run_vllm_matrix.py` and stores aggregate results outside
+the public repository; it omits per-request response capture. Direct vLLM results
+do not include gateway overhead or multi-tenant quotas.
+The runner verifies EC2 instance type and region through IMDSv2, confirms an NVIDIA
+L4 is visible, limits a batch to 120 minutes by default, and times out a single run
+after 10 minutes. These checks supplement, but do not replace, the independent
+instance expiry and exact-cost approval.
+
 Do not put the saved plan, Terraform state, AWS output containing identifiers, model
 weights, private data, or credentials in public Git.
 
@@ -244,6 +255,13 @@ clocks, synchronize GPU measurements, record repeated samples, and preserve raw
 JSON outside public Git. Do not compare results when prompt/output shapes differ.
 Stop a test on out-of-memory, runaway queue growth, disk pressure, or when remaining
 runtime/cost reserve becomes insufficient.
+
+The static direct-server matrix is defined in `benchmarks/gpu_inference/workloads.json`.
+It starts with 256/64, 1,024/128, and 4,096/128 input/output token shapes; uses 100
+measured prompts after five warm-ups and three repetitions; and holds short-prompt
+concurrency 16 behind an explicit operator flag. Check measured GPU memory and actual
+tokenizer/context behavior before enabling that level. A separate authenticated
+gateway benchmark is still required to measure gateway overhead and tenant admission.
 
 Run deterministic model evaluations and release checks only after inference is
 stable. Demonstrate candidate rejection and sequential known-good rollback. With one

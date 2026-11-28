@@ -1,4 +1,4 @@
-.PHONY: install test lint audit run demo load-test bootstrap-local smoke status public-demo demo-local demo-overload demo-routing demo-failure demo-timeout demo-metering demo-observability demo-recovery demo-model-registry demo-release-control demo-capacity demo-operational-evidence demo-remediation demo-agent-tools demo-self-service demo-edge-adapter demo-sandboxed-agent demo-operator-console demo-flagship verify clean-local destroy-local helm-lint terraform-validate cloud-delivery-validate pilot-guardrails-plan pilot-cloud-plan pilot-cloud-apply pilot-cloud-push-image pilot-cloud-bootstrap-runtime pilot-cloud-smoke pilot-cloud-validate pilot-cloud-destroy gpu-ec2-preflight gpu-ec2-validate gpu-compose-config gpu-observability-validate gpu-ec2-bootstrap-preview-plan gpu-ec2-preview-plan gpu-ec2-plan gpu-ec2-apply gpu-ec2-destroy-plan gpu-ec2-destroy-apply gpu-ec2-verify-clean
+.PHONY: install test lint audit run demo load-test bootstrap-local smoke status public-demo demo-local demo-overload demo-routing demo-failure demo-timeout demo-metering demo-observability demo-recovery demo-model-registry demo-release-control demo-capacity demo-operational-evidence demo-remediation demo-agent-tools demo-self-service demo-edge-adapter demo-sandboxed-agent demo-operator-console demo-flagship verify clean-local destroy-local helm-lint terraform-validate cloud-delivery-validate pilot-guardrails-plan pilot-cloud-plan pilot-cloud-apply pilot-cloud-push-image pilot-cloud-bootstrap-runtime pilot-cloud-smoke pilot-cloud-validate pilot-cloud-destroy gpu-ec2-preflight gpu-ec2-validate gpu-compose-config gpu-observability-validate gpu-benchmark-plan gpu-benchmark gpu-ec2-bootstrap-preview-plan gpu-ec2-preview-plan gpu-ec2-plan gpu-ec2-apply gpu-ec2-destroy-plan gpu-ec2-destroy-apply gpu-ec2-verify-clean
 PYTHON ?= python3.12
 VENV := .venv
 PY := $(VENV)/bin/python
@@ -82,6 +82,7 @@ verify:
 	docker compose config --quiet
 	$(MAKE) gpu-compose-config
 	$(MAKE) gpu-observability-validate
+	$(MAKE) gpu-benchmark-plan
 clean-local:
 	./scripts/clean-local.sh
 destroy-local:
@@ -123,6 +124,10 @@ gpu-compose-config:
 	docker compose --env-file deployments/single-gpu/.env.example -f deployments/single-gpu/compose.yaml config --quiet
 gpu-observability-validate:
 	./scripts/validate-gpu-observability.sh
+gpu-benchmark-plan:
+	$(PYTHON) benchmarks/gpu_inference/run_vllm_matrix.py --dry-run
+gpu-benchmark:
+	$(PYTHON) benchmarks/gpu_inference/run_vllm_matrix.py
 gpu-ec2-bootstrap-preview-plan:
 	./scripts/gpu-ec2-bootstrap-preview-plan.sh
 gpu-ec2-preview-plan:

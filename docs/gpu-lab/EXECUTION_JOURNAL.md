@@ -1144,3 +1144,157 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** inspect the #46 CI result, resolve any reviewable validation issue, then
   continue non-billable deployment preparation while quota and appeal outcome remain
   unresolved.
+
+## 2026-11-27 — Prepare direct vLLM benchmark matrix
+
+- **Phase:** Phase 8 static preparation; no inference measurement or GPU execution.
+- **Branch:** `codex/gpu-benchmark-preparation`, prepared on top of the current PR #46
+  head before PR #45's current CI run completes. PR #47 is not yet open.
+- **Starting state:** existing `benchmarks/load_test.py` is marked local-mock and
+  launches all requests together even though it reports a concurrency field; it does
+  not measure vLLM TTFT/TPOT or authenticate requests to the gateway.
+- **Research:** reviewed the official vLLM 0.34.0 `bench serve` reference for the
+  OpenAI chat backend, random token lengths, max concurrency, warmups, aggregate
+  output, metadata labels, and TTFT/TPOT/ITL/end-to-end percentiles.
+- **Changes:** added a benchmark-client Compose profile with no GPU reservation, a
+  three-shape synthetic matrix, a runner that checks context bounds and one-L4
+  metadata, aggregate-only output saved outside Git, and a `make gpu-benchmark-plan`
+  dry-run included in `make verify`. Concurrency 16 is opt-in after lower-load memory
+  checks. The direct test is documented as excluding gateway and tenant overhead.
+- **Validation:** `python3.12 -m py_compile`, Ruff, `make gpu-benchmark-plan`,
+  `make gpu-compose-config`, and `git diff --check` passed. Dry-run produced 11 cases
+  and 33 commands; opt-in concurrency 16 produced 12 cases and 36 commands. No Docker
+  profile service was started and no benchmark API request was sent.
+- **Security and cost:** output is outside public Git; detailed request payload output
+  is not enabled. No AWS or model resources, GPU hours, or spend were used.
+- **Outstanding:** an authenticated gateway benchmark is still needed, and vLLM CLI
+  flags/pins must be verified inside the exact image before the authorized batch. No
+  actual performance/cost result exists.
+- **Troubleshooting:** an attempt to parse `make gpu-benchmark-plan` stdout as raw JSON
+  failed because Make echoes its command line; invoking the Python dry-run directly
+  produced the intended JSON record. The Make target itself completed successfully.
+- **Next:** finish the static review, then publish PR #47 after reconciling the
+  PR #45/#46 stack.
+
+## 2026-11-27 — Fix benchmark timeout container targeting
+
+- **Phase:** Phase 8 static preparation; PR #47 candidate branch.
+- **Branch:** `codex/gpu-benchmark-preparation`; PR #47 is not open yet.
+- **Starting state:** PR #45's capacity demo fix is pushed and its CI watcher is active.
+  Review of the stacked benchmark runner found a potential cleanup mismatch after the
+  first benchmark repetition.
+- **Finding:** Compose names each client container from workload, concurrency, and
+  repetition. The timeout handler used the overall run index, so later timeouts could
+  ask Docker to stop a different, nonexistent container and leave the actual client
+  alive.
+- **Change:** one helper now creates the container name for both `compose run --name`
+  and timeout/interruption cleanup. Added a targeted regression test for repetition 3.
+- **Validation:** first test attempt could not collect the test because the standalone
+  pytest environment did not include the repository root on `sys.path`; the test now
+  adds that root explicitly. The workstation's default Python 3.12 has no pytest, so
+  `uvx --python 3.12 --from pytest pytest -q gateway/tests/test_gpu_benchmark_runner.py`
+  ran the targeted test in a temporary tool environment: 1 passed. Ruff, Python 3.12
+  bytecode compilation, and `git diff --check` passed. No Docker container or GPU
+  benchmark was launched.
+- **Cost/security:** local validation only; no AWS resources, GPU hours, or spend.
+- **Next:** await PR #45's existing CI watcher, then reconcile the PR #46/#47 branch
+  stack and run CI against the corrected cleanup code.
+
+## 2026-11-27 — Rebase and revalidate benchmark preparation
+
+- **Phase:** Phase 8 static preparation.
+- **Branch / parent:** `codex/gpu-benchmark-preparation`, rebased to PR #46 head
+  `6df97e7`, which includes PR #45's passing capacity-demo fix.
+- **Action:** transplanted only the two benchmark-specific commits onto the updated
+  observability branch. A first broad rebase attempt began replaying PR #46's commits
+  and encountered documentation conflicts; it was aborted without changing the branch.
+  The focused rebase using the original PR #46 base then applied the benchmark package
+  cleanly apart from status documentation, which was reconciled to retain current PR
+  #45/#46 facts and show the benchmark as a candidate, not an open PR.
+- **Validation:** `make gpu-benchmark-plan` produced 11 cases and 33 commands within
+  120 minutes; a targeted cleanup-name regression test passed (1 test); Ruff,
+  `make gpu-compose-config`, and `git diff --check` passed. No Docker profile, model,
+  AWS resource, or GPU request was started. The first JSON parsing attempt included
+  Make's echoed command; parsing after that line succeeded, as noted in ticket47.
+- **CI / cost:** PR #46 new-head run is in progress. No AWS spend or GPU hours.
+- **Next:** push the updated branch and open PR #47 against PR #46, then watch its CI.
+
+## 2026-11-27 — Correct Trivy severity input parsing
+
+- **Phase:** Phase 11 static CI preparation; discovered while reviewing PR #46 checks.
+- **Branch / PR:** `codex/gpu-benchmark-preparation`, PR #47.
+- **Finding:** PR #46's workflow emitted `Unexpected input(s) 'CRITICAL'` from the
+  Trivy action. The inline YAML map left the comma-separated severity value unquoted,
+  so `CRITICAL` was parsed as a separate action input rather than part of `HIGH,CRITICAL`.
+- **Change:** rewrote that action's `with` section as a normal mapping and quoted the
+  combined severity string so both requested severities are passed as one value.
+- **Validation:** pending the next PR #47 CI run; inspect the action log for the
+  absence of the warning. No AWS or GPU activity.
+- **Validation:** Ruby's YAML parser accepted `.github/workflows/ci.yml`; `git diff
+  --check` passed. The PR #47 workflow must still confirm the Trivy action accepts the
+  value without warnings.
+- **Next:** push the fix and watch the resulting PR #47 run; no local clean-room rerun.
+
+## 2026-11-27 — Confirm rebased observability and benchmark CI
+
+- **Phase:** Phases 7/8/11, static validation only.
+- **PR #46:** rebased head `6df97e7` passed all five required checks in run
+  `45992409372`, including the dedicated GPU observability schema job. No monitoring
+  stack or GPU was started.
+- **PR #47:** head `33a1586` passed all five required checks in run `45993312156`:
+  local E2E, manifests, Python, supply-chain, and GPU observability. The supply-chain
+  log now passes `HIGH,CRITICAL` as a single Trivy severity input without the earlier
+  malformed-input warning.
+- **Evidence:** both runs are indexed in `EVIDENCE_MANIFEST.md`; ticket46/ticket47 and
+  implementation status record the static-only boundary.
+- **Cloud and cost:** no AWS resource, GPU hour, model download, inference benchmark,
+  or goal-specific AWS spend.
+- **Next:** continue static preparation for evaluation and incident exercises, then
+  refresh shared status docs and PR descriptions. The single-L4 experiment still
+  requires quota approval and the complete $25 cost/plan authorization gate.
+
+## 2026-11-28 — Fix vLLM benchmark tokenizer selection and failure cleanup
+
+- **Phase:** Phase 8 static benchmark preparation; PR #47.
+- **Branch:** `codex/gpu-benchmark-preparation`; fix committed as `ac4184b` and pushed
+  to PR #47.
+- **Starting state:** PR review identified that vLLM's benchmark client would treat
+  the API alias `gpu-default` as the tokenizer model, and that timeout/interruption
+  cleanup used the final matrix item instead of the item currently running.
+- **Research:** inspected the official vLLM v0.34.0 `bench serve` implementation at
+  `https://github.com/vllm-project/vllm/blob/v0.34.0/vllm/benchmarks/serve.py`; when
+  `--tokenizer` is omitted, it uses `--model` as the tokenizer ID. The checked-in API
+  alias is not the model repository ID.
+- **Changes:** added `model_id` to the workload matrix and pass it via `--tokenizer`
+  while retaining the served alias for `--model`. The runner now stores each command
+  with its exact container name and uses that name for timeout/interruption cleanup.
+  Tests cover the generated flags and both failure paths on the first run of a
+  multi-case matrix.
+- **Validation:** Ruff passed using the existing Python environment in the adjacent
+  PR #57 worktree; `gateway/tests/test_gpu_benchmark_runner.py` passed all 3 tests.
+  `make gpu-benchmark-plan` generated 11 cases and 33 commands; `git diff --check`
+  passed. The first attempt to use a PR-local `.venv` failed because this detached
+  worktree has no such environment; using the already installed hash-locked
+  environment avoided changing project dependencies. No Docker service, model
+  download, benchmark request, AWS resource, or GPU was used.
+- **Evidence:** PR #47 head `ac4184b` passed all five required CI jobs in run
+  `46107629939`, including Python tests/dry-run, local E2E, Terraform/manifests,
+  observability validation, and supply-chain checks. This is CI/static/local evidence;
+  it does not demonstrate vLLM execution or GPU measurements.
+- **Cloud/cost:** no AWS use, GPU hours, or spend.
+- **Review follow-up:** after the updated checks passed, the two P1 review threads
+  were addressed with code/test evidence and resolved. PR #47 remains open and
+  stacked on PR #46; no merge or cloud work was performed.
+- **Next:** continue static evaluation and operational-preparation review. The $25
+  cap, zero approved G-series quota, and pending appeal continue to block GPU runs.
+
+## 2026-11-28 — Verify benchmark evidence follow-up CI
+
+- **Phase:** Phase 8 static preparation; PR #47 documentation update.
+- **Head and result:** commit `78b6188` passed all five required jobs in run
+  `46108247828`, including local E2E. The evidence manifest and ticket now distinguish
+  the code-head run `46107629939` from this documentation-head run.
+- **Boundary:** these checks did not start vLLM, contact a model, use AWS, or execute a
+  GPU benchmark. No GPU hours or project spend were incurred.
+- **Next:** rebase the evaluation preparation on the current PR #47 head and continue
+  the static review queue.
