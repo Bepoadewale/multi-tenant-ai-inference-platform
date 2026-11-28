@@ -2,7 +2,8 @@ FROM python:3.12-slim
 WORKDIR /app
 COPY pyproject.toml ./
 COPY requirements-container.txt ./
-RUN pip install --no-cache-dir -r requirements-container.txt
+COPY constraints.txt ./
+RUN pip install --no-cache-dir -c constraints.txt -r requirements-container.txt
 COPY gateway/src ./gateway/src
 COPY scripts/create_model.py ./scripts/create_model.py
 RUN pip install --no-deps . \

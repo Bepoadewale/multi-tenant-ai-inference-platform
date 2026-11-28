@@ -1,5 +1,56 @@
 # Validation
 
+## Dependency-audit baseline repair
+
+**Date:** 2026-11-26
+**Scope:** Local dependency and container reproducibility repair. No AWS identity,
+cloud resource, GPU, or paid service was used.
+
+The Phase 1 baseline `make verify` passed Ruff and 50 tests, but `pip-audit` found
+84 advisory records across seven transitive dependency distributions. The existing
+install and gateway image paths did not apply a shared dependency constraint file.
+The repair adds `constraints.txt` and applies it to both local development installs
+and the gateway image build. The constraints set minimum safe versions rather than
+replacing the application's declared dependencies.
+
+Validation commands and observed results:
+
+```console
+make install
+make verify
+docker build -t inference-gateway:dependency-audit -f gateway/Dockerfile .
+make clean-local
+```
+
+`make install` selected certifi 2026.11.20, filelock 4.3.1, GitPython 3.2.1,
+MLflow 3.18.0, OpenTelemetry API 1.45.2, Pillow 13.0.0, and pyasn1 0.6.5.
+The container image built successfully on the local arm64 Docker engine. `make verify`
+passed Ruff, **50 tests** (one existing Starlette/httpx deprecation warning),
+`pip-audit` (`No known vulnerabilities found`; the editable project distribution is
+skipped), and Docker Compose configuration validation.
+
+Two full clean-room cycles were completed from project-scoped cleanup. Each cycle
+installed dependencies, bootstrapped the local Compose platform, passed `make smoke`
+and `make demo-flagship`, passed `make verify`, and ended with `make clean-local`.
+During diagnosis, rerunning the flagship sequence on the same populated Redis instance
+returned HTTP 429 in `demo-agent-tools`: the earlier demo requests had consumed the
+tenant's minute quota. This was not counted as a clean-room pass. A new
+`make clean-local`/install/bootstrap reset the state, after which the entire flagship
+sequence passed with exit status 0. This establishes that the documented clean start
+works and records that repeated cumulative demos on one stateful stack can exhaust
+the fixture quota. Expected connection resets during controlled service restarts
+remained visible in the demo log; their assertions passed.
+
+The pre-existing `.local/self-service/profiles.db` was moved outside the repository
+before cleanup and restored afterward. Final `docker compose ps -aq` returned no
+project containers; `.venv` and generated `models/` were absent. The standalone test
+image `inference-gateway:dependency-audit` was removed. The restored profile database
+remains local user state and is not part of this PR.
+
+This validates dependency installation and the existing CPU/local platform only. It
+does not establish NVIDIA, CUDA, vLLM, AWS, GPU inference, performance, or cloud cost
+behavior.
+
 ## Future Cloud-Pilot Evidence Template
 
 Do not populate this template until a cloud pilot is actually authorized and run.

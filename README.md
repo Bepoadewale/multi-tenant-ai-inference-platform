@@ -81,6 +81,11 @@ make verify
 make clean-local
 ```
 
+Local installs and the gateway container build both apply the shared minimum-version
+security constraints in [`constraints.txt`](constraints.txt). The dependency audit
+and current clean-room evidence are recorded in
+[`docs/governance/VALIDATION.md`](docs/governance/VALIDATION.md).
+
 `make demo-flagship` runs the connected success and failure story. The Operator Console
 is available at [http://localhost:8091](http://localhost:8091). `make clean-local`
 removes only this repository's containers, images, generated artifacts, and local state.

@@ -1,0 +1,9 @@
+# Minimum versions required to avoid advisories found by pip-audit on 2026-11-26.
+# These are dependency constraints, not new direct application dependencies.
+certifi>=2026.10.18
+filelock>=4.2.1
+GitPython>=3.2.1
+mlflow>=3.17.2
+opentelemetry-api>=1.45.2
+Pillow>=13.0.0
+pyasn1>=0.6.5
