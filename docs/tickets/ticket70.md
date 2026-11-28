@@ -9,11 +9,7 @@ the stack works on an NVIDIA L4.
 
 ## Current state
 
-PR #69 is open on branch `codex/gpu-price-refresh`; its head passed all six required
-checks, including the workflow's one local end-to-end cycle. PR #70 is open on
-`codex/gpu-readiness-architecture-facts`, stacked on #69. Its head passed all six
-required jobs in run `46100965350`, including local E2E. No review decision is
-recorded. Applied G/VT quota remains zero, and no GPU or AWS resources have been
+PR #69 head `81c09df` is published on the updated #68 stack; fresh run `46115952390` is active and historical checks do not validate this head. PR #70 has been locally rebased onto #69 head `81c09df`; its new head is not yet published. Earlier PR #70 head `caf3f4b` passed six jobs in run `46101649412`, but that run does not validate this rebase. No review decision is recorded. Applied G/VT quota remains zero, and no GPU or AWS resources have been
 created for this lab.
 
 ## Research and architecture
@@ -33,14 +29,13 @@ candidate pending a fresh review and real host validation.
   driver installation, CUDA computation, container access, and inference evidence.
 - [x] The L4 remains labeled as the required validation boundary.
 - [x] Local documentation links and whitespace validation pass.
-- [x] The single required PR workflow completes successfully.
+- [x] The prior PR #70 head passed its required workflow.
+- [ ] Publish the rebased PR #70 and pass current required CI.
 
 ## Commands and validation
 
 `git diff --check` passed. A relative-link scan over the seven changed Markdown files
-found no missing targets. PR #70 head `6505de52ab2a691af1e3171375df68b5d97aa123`
-passed all six required jobs in run `46100965350`, including the workflow's local
-end-to-end job. No separate clean-room rerun was performed; the documentation change
+found no missing targets. Prior PR #70 head `caf3f4b` passed all six required jobs in run `46101649412`, including the workflow local E2E job. The rebased PR #70 requires a new run. No separate clean-room rerun was performed; the documentation change
 does not modify implementation, and the PR workflow owns its one local cycle.
 
 ## Issues, alternatives, and limitations
@@ -65,4 +60,4 @@ added. No AWS calls, downloads, infrastructure changes, GPU runtime, or cost.
 
 Evidence includes the diff, local link/whitespace checks, and GitHub run
 `46100965350`. Those establish documentation consistency only, not runtime
-compatibility. Human review and merge remain open.
+compatibility. The rebased head needs CI and human review; merge remains subject to authorization.
