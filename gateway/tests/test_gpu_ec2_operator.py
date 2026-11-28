@@ -1,6 +1,8 @@
 import json
+import os
 import stat
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -13,6 +15,27 @@ IDENTITY = {
     "instance_type": "g6.xlarge",
     "region": "us-east-1",
 }
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+@pytest.mark.parametrize("script", ["gpu_ec2_smoke.py", "gpu_ec2_evidence.py"])
+def test_host_cli_help_runs_directly_without_pythonpath(script):
+    environment = os.environ.copy()
+    environment.pop("PYTHONPATH", None)
+
+    result = subprocess.run(
+        [sys.executable, str(REPO_ROOT / "scripts" / script), "--help"],
+        cwd=REPO_ROOT,
+        env=environment,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=10,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "usage:" in result.stdout
+    assert "ModuleNotFoundError" not in result.stderr
 
 
 def test_host_guard_matches_explicit_account_and_instance(monkeypatch):

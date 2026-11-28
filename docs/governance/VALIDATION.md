@@ -851,6 +851,68 @@ against a live model, AWS, or a GPU.
 
 After this run passed, review found that the host controller treated float `1.0` as
 equal to the required integer tensor-parallel size. The validator now rejects
+non-integer types and has a regression test. A later review found `manifest-from-report`
+needlessly initialized host state and raised `AttributeError`; the command now creates
+a host controller only for operations that use it. Updated head
+`473db1cee7fa0aacb826d7a6e94fbf020c7c9c74` passed all five required jobs, including
+another local CPU end-to-end job, in run
+[46105533251](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/actions/runs/46105533251).
+No host model release, AWS action, or GPU behavior was exercised.
+
+## PR #64 host-operator preparation clean-room evidence
+
+**Date:** 2026-11-27
+
+**PR head:** `8045c10f43bc8acbd0cf75d52a03fa559f69447a`
+
+**GitHub Actions run:** [46084793573](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/actions/runs/46084793573)
+
+**Environment:** fresh GitHub-hosted Ubuntu 24.04 runner with Python 3.12. The job
+used a fresh checkout and the repository's local CPU Compose stack. It had no AWS
+credentials and did not run paid cloud operations.
+
+The `local-e2e` job executed this exact sequence from the repository root:
+
+```bash
+make install
+make bootstrap-local
+make smoke
+make demo-flagship
+make verify
+make clean-local
+```
+
+On failure, the workflow was configured to print `docker compose ps -a` and
+`docker compose logs --no-color`; those diagnostic steps did not run because the
+sequence passed. All six required jobs in run `46084793573` passed. The local flow
+installed the project environment, started its CPU ONNX Compose stack, passed smoke
+checks and the flagship success/failure demonstrations, ran lint, tests, dependency
+audit, and Compose validation, then removed only project-labeled containers, images,
+volumes, network, and generated local artifacts. The job log ends with the scoped
+cleanup success message.
+
+This is local CPU clean-room evidence for PR #64. It does not demonstrate the guarded
+host wrappers against EC2, NVIDIA L4 access, CUDA, Docker GPU passthrough, or vLLM
+inference. Separate fake-based tests cover local host-guard and operator-wrapper
+behavior. The direct-entrypoint regression tests also prove the smoke and evidence
+`--help` commands work without a `PYTHONPATH`; they make no host or AWS call.
+make install
+make bootstrap-local
+make smoke
+make demo-flagship
+make verify
+make clean-local
+```
+
+<<<<<<< HEAD
+The job installed the project environment, bootstrapped local services, passed smoke
+and flagship demos, passed the repository verification suite, then ran project-scoped
+cleanup successfully. This demonstrates reproducibility of the existing local CPU
+platform with the controller code present; it does not test controller commands
+against a live model, AWS, or a GPU.
+
+After this run passed, review found that the host controller treated float `1.0` as
+equal to the required integer tensor-parallel size. The validator now rejects
 non-integer types and has a regression test. This is a material configuration-safety
 fix. A later review found `manifest-from-report` needlessly initialized host state and
 raised `AttributeError`; the command now creates a host controller only for operations
@@ -859,3 +921,19 @@ head `473db1cee7fa0aacb826d7a6e94fbf020c7c9c74` passed all five required jobs,
 including another local CPU end-to-end job, in run
 [46105533251](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/actions/runs/46105533251).
 No host model release, AWS action, or GPU behavior was exercised.
+=======
+On failure, the workflow was configured to print `docker compose ps -a` and
+`docker compose logs --no-color`; those diagnostic steps did not run because the
+sequence passed. All six required jobs in run `46084793573` passed. The local flow
+installed the project environment, started its CPU ONNX Compose stack, passed smoke
+checks and the flagship success/failure demonstrations, ran lint, tests, dependency
+audit, and Compose validation, then removed only project-labeled containers, images,
+volumes, network, and generated local artifacts. The job log ends with the scoped
+cleanup success message.
+
+This is local CPU clean-room evidence for PR #64. It does not demonstrate the guarded
+host wrappers against EC2, NVIDIA L4 access, CUDA, Docker GPU passthrough, or vLLM
+inference. Separate fake-based tests cover local host-guard and operator-wrapper
+behavior. The latest direct-entrypoint regression tests also prove the smoke and
+evidence `--help` commands work without a `PYTHONPATH`; they make no host or AWS call.
+>>>>>>> 81362cb (fix: make GPU host tools directly executable)

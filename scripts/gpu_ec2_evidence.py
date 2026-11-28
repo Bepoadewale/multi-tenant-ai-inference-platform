@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import subprocess
@@ -9,9 +10,10 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
-from scripts.gpu_ec2_host_guard import verify_host
-
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+from scripts.gpu_ec2_host_guard import verify_host  # noqa: E402
 
 
 def _run(command: list[str], *, timeout: int = 15) -> dict[str, object]:
@@ -115,8 +117,16 @@ def collect(destination: Path | None = None) -> Path:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "destination",
+        nargs="?",
+        type=Path,
+        help="private output directory outside the repository",
+    )
+    args = parser.parse_args()
     try:
-        path = collect(Path(sys.argv[1]) if len(sys.argv) > 1 else None)
+        path = collect(args.destination)
     except (OSError, ValueError, subprocess.SubprocessError) as error:
         print(f"evidence capture failed: {type(error).__name__}", file=sys.stderr)
         return 1

@@ -11,9 +11,11 @@ from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
-from scripts.gpu_ec2_host_guard import verify_host
-
 REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO))
+
+from scripts.gpu_ec2_host_guard import verify_host  # noqa: E402
+
 TOKEN_FILE = REPO / ".local/identity/tokens.json"
 GATEWAYS = ("http://127.0.0.1:8081", "http://127.0.0.1:8082")
 TIMEOUT_SECONDS = 30

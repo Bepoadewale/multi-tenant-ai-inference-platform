@@ -113,6 +113,21 @@ The readiness-documentation follow-up `3815390` also passed all six required che
 including the workflow local E2E cycle, in run `46083985132`; PR #64 is marked ready
 for review and remains unmerged.
 
+## Review follow-up — direct entrypoints and validation record
+
+The review found that direct execution of `scripts/gpu_ec2_smoke.py` and
+`scripts/gpu_ec2_evidence.py` could not import `scripts.gpu_ec2_host_guard` when
+`PYTHONPATH` was unset. Both entrypoints now add the repository root to their import
+path before loading the shared guard. The evidence command now parses `--help` before
+attempting host identity checks. A subprocess regression test runs both direct
+`--help` commands with `PYTHONPATH` removed.
+
+Validation evidence for the clean GitHub runner cycle in run `46084793573` is now in
+`docs/governance/VALIDATION.md`, with the exact `make install`, `make bootstrap-local`,
+`make smoke`, `make demo-flagship`, `make verify`, and `make clean-local` sequence and
+its CPU/local limits. The focused local check passed Ruff, 19 tests, and both direct
+entrypoint help commands without `PYTHONPATH`. No AWS or GPU operation occurred.
+
 ## Outstanding work
 
 - Complete required PR CI and address automated review.
