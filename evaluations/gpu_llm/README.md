@@ -32,25 +32,56 @@ tests exercise the deterministic scoring helpers without a model.
 
 ## Authorized runtime invocation
 
-Only after the exact GPU deployment plan, cost, quota, expiry, and teardown gates have
-been approved, run the evaluator on the EC2 host or from a trusted host that can reach
-the private gateway. Keep the report outside the repository:
+Run these only after the exact GPU deployment plan, cost, quota, expiry, and teardown
+gates are approved. The vLLM API is private to the Compose network; port 8000 is not
+published on the EC2 host. The benchmark image has a read-only copy of this evaluator
+so it can call vLLM by its private Compose service name. From the repository root on
+the EC2 host, set the verified model revision and a host directory outside the repo:
+replace the angle-bracket placeholder with the verified 40-character model commit
+before running the command.
 
 ```bash
-export GPU_EVAL_BASE_URL=http://127.0.0.1:8000/v1
-export GPU_EVAL_MODEL=gpu-default
-export GPU_EVAL_MODEL_REVISION=989aa7980e4cf806f80c7fef2b1adb7bc71aa306
-python3 evaluations/gpu_llm/run_evaluation.py \
-  --output /var/tmp/gpu-lab/evaluation/qwen-1.5b-results.json
+export GPU_MODEL_REVISION=<verified-40-character-model-commit>
+export GPU_EVAL_OUTPUT_DIR=/var/tmp/gpu-lab/evaluation
+mkdir -p "$GPU_EVAL_OUTPUT_DIR"
+docker compose --env-file deployments/single-gpu/.env \
+  -f deployments/single-gpu/compose.yaml run --rm --no-deps \
+  --entrypoint python \
+  --volume "$GPU_EVAL_OUTPUT_DIR:/results:rw" \
+  benchmark /opt/gpu-evaluation/run_evaluation.py \
+  --base-url http://vllm:8000/v1 \
+  --model gpu-default \
+  --model-revision "$GPU_MODEL_REVISION" \
+  --output /results/vllm-results.json
 ```
 
-The bearer token is optional for the direct local lab endpoint. If the protected
-gateway is used, provide its signed tenant bearer token through
-`GPU_EVAL_BEARER_TOKEN`; the program does not print or store that value. The runner
-records case IDs, pass/fail, elapsed time, token
-counts when the server returns them, the suite digest, and a digest of each generated
-answer. It never saves prompts or generated text. The report file is restricted to
-the current user on Unix-like systems.
+This runs the evaluator inside the benchmark container, where Compose DNS resolves
+`vllm`; it does not publish the inference API to the network. The report is written
+to the host directory `/var/tmp/gpu-lab/evaluation`.
+
+For an end-to-end check through tenant authentication and gateway routing, run the
+evaluator on the EC2 host against the gateway's loopback-only port. The gateway's
+client-facing model name is `chat-default` (the backend-only vLLM alias is
+`gpu-default`). Obtain a signed tenant token through the tenant identity workflow and
+keep it in the host environment; do not put it in shell history or a file committed
+to Git. Replace the model-revision placeholder with the verified 40-character
+commit before running the command; `read -s` accepts the token without echoing it or
+putting its value in shell history:
+
+```bash
+export GPU_EVAL_BASE_URL=http://127.0.0.1:8081/v1
+export GPU_EVAL_MODEL=chat-default
+export GPU_EVAL_MODEL_REVISION=<verified-40-character-model-commit>
+read -rsp 'Tenant token: ' GPU_EVAL_BEARER_TOKEN; printf '\n'; export GPU_EVAL_BEARER_TOKEN
+python3 evaluations/gpu_llm/run_evaluation.py \
+  --output /var/tmp/gpu-lab/evaluation/gateway-results.json
+```
+
+The token is read from the environment and is not printed or stored in the report.
+The runner records case IDs, pass/fail, elapsed time, token counts when returned, the
+suite digest, and a digest of each generated answer. It never saves prompts or
+generated text. The report file is restricted to the current user on Unix-like
+systems.
 
 By default, subjective response text is not printed or saved. For a controlled
 interactive review, add `--show-subjective-response` and inspect it directly in the

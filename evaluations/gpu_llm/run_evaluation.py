@@ -53,7 +53,8 @@ def check_completion(text: str, check: dict) -> tuple[bool | None, str]:
         return None, "subjective response requires human review"
     if kind == "exact_number":
         number = re.escape(str(check["value"]))
-        passed = re.search(rf"(?<![\w.]){number}(?![\w]|\.\d)", text) is not None
+        # A sign belongs to a numeric token, so `-4` must not satisfy expected `4`.
+        passed = re.search(rf"(?<![\w.+-]){number}(?![\w]|\.\d)", text) is not None
         return passed, "expected number present" if passed else "expected number missing"
     if kind == "json_object":
         try:
@@ -152,7 +153,33 @@ def request_case(
     try:
         payload = json.loads(body)
         completion = payload["choices"][0]["message"]["content"]
+        usage = payload.get("usage")
     except (json.JSONDecodeError, KeyError, IndexError, TypeError):
+        return {
+            "case_id": case["id"],
+            "category": case["category"],
+            "http_status": status,
+            "passed": False,
+            "manual_review_required": False,
+            "latency_ms": elapsed_ms,
+            "error_class": "InvalidCompletionSchema",
+        }
+    if usage is None:
+        usage = {}
+    token_fields = ("prompt_tokens", "completion_tokens")
+    if (
+        not isinstance(completion, str)
+        or not isinstance(usage, dict)
+        or any(
+            usage.get(field) is not None
+            and (
+                not isinstance(usage[field], int)
+                or isinstance(usage[field], bool)
+                or usage[field] < 0
+            )
+            for field in token_fields
+        )
+    ):
         return {
             "case_id": case["id"],
             "category": case["category"],
@@ -165,7 +192,6 @@ def request_case(
     if case["check"]["type"] == "manual_review" and show_subjective_response:
         print(f"\nHuman review only — {case['id']} (do not redirect this output):\n{completion}\n")
     passed, summary = check_completion(completion, case["check"])
-    usage = payload.get("usage") or {}
     return {
         "case_id": case["id"],
         "category": case["category"],

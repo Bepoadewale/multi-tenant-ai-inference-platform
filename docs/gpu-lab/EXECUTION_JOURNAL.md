@@ -1388,3 +1388,40 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   request or mutation. No cost or GPU runtime.
 - **Evidence:** exact tool state and its limits are recorded in
   `LOCAL_ENVIRONMENT_READINESS.md` and the evidence manifest.
+
+
+## 2026-11-28 — Harden LLM evaluation scoring and endpoint instructions
+
+- **Phase:** Phase 9 static evaluation preparation; PR #48.
+- **Branch / starting head:** `codex/gpu-evaluation-preparation`, remote head
+  `79e7f8f`; this branch depends on the earlier PR #47 head and must be rebased
+  after PR #47 CI settles.
+- **Starting state:** review found that an expected positive number could match inside
+  a negative answer, invalid completion/usage types could throw before writing the
+  aggregate report, and the evaluator instructions used an unpublished vLLM host port
+  and backend-only model ID at the gateway.
+- **Changes:** signed number boundaries are excluded from exact-number checks;
+  completion content must be a string and usage/token counts must have valid types or
+  the case is recorded as `InvalidCompletionSchema`. The Compose benchmark service
+  mounts the evaluator read-only. The README now documents direct private-network
+  execution through Compose DNS and a separate authenticated gateway path using its
+  loopback port and client-facing `chat-default` alias.
+- **Validation:** Ruff passed; the focused evaluation suite passed 9 tests. The dry-run
+  reported seven cases and `network_requests: 0`; `docker compose config --quiet` and
+  `git diff --check` passed. No model call, container, AWS resource, or GPU was used.
+- **Full-suite attempt:** `make lint` passed, but `make test` could not collect 10
+  gateway modules because this isolated worktree did not contain the ignored
+  `models/tiny-intent-classifier.onnx` file that `make install` normally generates.
+  I did not run `make install`, so no hidden model files were created in this worktree.
+  The focused tests passed; updated PR CI will run the repository setup and full suite.
+- **Failed attempt:** the first new HTTP-mock test run failed because the mock's
+  context manager yielded a different mock object. Setting `__enter__` to return the
+  configured response fixed the test harness; no production behavior was altered to
+  satisfy the mock.
+- **Evidence limits:** these tests demonstrate local response-shape handling and
+  static invocation configuration only. The exact pinned vLLM runtime response,
+  gateway authentication, and live model evaluation still require the authorized GPU
+  batch.
+- **Cloud/cost:** no AWS use, GPU hours, or spend.
+- **Next:** commit the fix, rebase PR #48 on the updated benchmark PR #47 head, then
+  run one CI cycle and address the three review threads.

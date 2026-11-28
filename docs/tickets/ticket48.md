@@ -38,6 +38,16 @@ runtime. No LLM evaluation has run.
   review pending” from a fully clear evaluation.
 - Documented runtime invocation and the checks that must be confirmed against the
   exact vLLM runtime before the authorized batch.
+- Tightened exact-number matching so a signed token such as `-4` or `+4` cannot pass
+  a check expecting the unsigned value `4`.
+- Validate successful response completion and token-usage types before scoring. A
+  malformed response now becomes a failed case in the report instead of raising an
+  uncaught exception that discards prior case results.
+- Documented and configured separate runnable paths for private vLLM access from the
+  benchmark container and authenticated gateway access through loopback port 8081.
+  The examples use the correct backend alias (`gpu-default`) and gateway model
+  (`chat-default`). The evaluator source is mounted read-only into the benchmark
+  service.
 
 ## Acceptance criteria
 
@@ -60,6 +70,22 @@ runtime. No LLM evaluation has run.
   `4.`; the matcher now allows sentence punctuation while rejecting `14` and `4.5`.
 - An initial Ruff run found one unused import; it was removed before the passing run.
 - No GPU, model, or AWS resource is used. PR CI remains pending.
+- Review follow-up on 2026-11-28: Ruff passed and the focused evaluation suite passed
+  9 tests. New cases reject signed-number mismatches and verify that null/list
+  completions, non-object usage, and non-integer token counts become failed report
+  rows. `make gpu-evaluation-plan` reported seven cases and zero network requests;
+  Docker Compose configuration validation and `git diff --check` passed. No model,
+  container, AWS resource, or GPU was started. Updated PR CI is pending.
+- The first mocked-HTTP test attempt failed because `MagicMock`'s context manager
+  returned a separate mock instead of the configured response. The test double now
+  returns itself from `__enter__`; the production code was not changed for that test
+  harness issue.
+- An additional attempt to run the full repository test target with the existing
+  shared virtual environment failed during collection in 10 gateway modules because
+  this isolated worktree had no generated `models/tiny-intent-classifier.onnx` file.
+  `make install` normally creates that ignored local artifact. It was not run here, so
+  no hidden local model files were generated. The benchmark/evaluation-focused tests
+  and Ruff passed; the updated PR CI run remains the full-suite validation path.
 - The code and status-document head `24b149c` passed all five required CI jobs in run
   `45996207684`. A follow-up documentation-only head `5af5562` is running through CI.
 
