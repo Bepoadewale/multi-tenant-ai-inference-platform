@@ -2171,3 +2171,16 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   spend.
 - **Next:** finish Markdown link validation, publish the focused handbook update, and
   track its six standard PR checks.
+
+## 2026-11-28 — Validate the handbook concept-coverage update
+
+- **Phase:** pre-quota educational documentation.
+- **PR #59:** head `5d812ae` passed all six required jobs in run `46122060966`,
+  including the routine local end-to-end workflow. The ticket and evidence manifest
+  now identify that exact head and run.
+- **Clean-room boundary:** this did not start another manual clean-room run. The one
+  designated project-level local CPU cycle remains the record in
+  `docs/governance/VALIDATION.md`.
+- **AWS / GPU / cost:** no account call, cloud mutation, GPU, model download, or spend.
+- **Next:** leave PR #59 open for owner review; the documentation covers concepts and
+  plans but cannot establish real L4 behavior.

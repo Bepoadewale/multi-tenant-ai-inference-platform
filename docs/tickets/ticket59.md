@@ -38,15 +38,16 @@ claim that static preparation is proof of live GPU operation.
 - [x] `git diff --check` passes.
 - [x] Previous handbook head `34c4a44` passed all six required jobs in run
   `46112594557`.
-- [ ] The concept-coverage follow-up passes its fresh PR checks.
+- [x] Concept-coverage follow-up head `5d812ae` passed all six required jobs in run
+  `46122060966`.
 - [ ] Human review is complete; PR remains unmerged until authorized.
 
 ## Validation and evidence
 
 - `git diff --check` passed.
 - A local relative-link check passed for the handbook and documentation index.
-- Previous head `34c4a44` passed six checks in run `46112594557`; this documentation
-  follow-up requires fresh CI.
+- Previous head `34c4a44` passed six checks in run `46112594557`; concept-coverage
+  follow-up head `5d812ae` passed six in `46122060966`.
 - Prior PR #58 evidence: run `46068015904`, all six checks passed. This is local CPU
   Compose validation only and is not evidence that this handbook's CI has passed.
 - No GPU, AWS, model download, benchmark, or cloud spending occurred.
@@ -55,8 +56,8 @@ claim that static preparation is proof of live GPU operation.
 
 The text is an educational reference, not a substitute for the remaining hardware
 experiments. Version-sensitive instructions must be refreshed before the approved GPU
-batch. CI and human review remain outstanding. After PR #58 changes its base, retarget
-this stacked PR and resolve any resulting review feedback.
+batch. Human review remains outstanding. After PR #58 changes its base, retarget this
+stacked PR and resolve any resulting review feedback.
 
 ## Rebase follow-up — 2026-11-28
 
@@ -76,5 +77,6 @@ between an MLflow tracking record, a model registry, artifact storage, and the l
 model process, and added cost-per-million-input/output-token formulas. Expanded the
 explanations of concurrency, SLO error budgets, fault isolation, and the actual local
 Redis incident. These are concept and repository explanations; no runtime behavior or
-new GPU evidence is claimed. `git diff --check` passed. The revised handbook requires
-fresh CI on this branch.
+new GPU evidence is claimed. `git diff --check` passed. Updated head `5d812ae` passed
+all six jobs in run `46122060966`, including routine local E2E. No additional manual
+clean-room run occurred.
