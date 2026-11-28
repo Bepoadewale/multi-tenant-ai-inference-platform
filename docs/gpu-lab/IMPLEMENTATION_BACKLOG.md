@@ -231,8 +231,10 @@ captured and described with units and limits.
 
 **Status:** PR #47 is open on `codex/gpu-benchmark-preparation` against PR #46. The
 direct vLLM serving matrix and capped runner passed local static validation and all
-five required checks in run `45993312156`; its timeout cleanup regression test passes.
-Gateway benchmarking, actual results, evaluation, and releases remain outstanding.
+five required checks in run `45994609421`; its timeout cleanup regression test passes.
+Gateway benchmarking, actual performance results, actual model evaluation, and
+releases remain outstanding. Ticket #48 adds a static synthetic evaluation suite and
+dry-run; its CI and runtime behavior remain pending.
 
 - [x] Prepare the official `vllm bench serve` runner, context-bounded synthetic
   workloads, gated high concurrency, repeated aggregates, and hardware/software
@@ -242,7 +244,9 @@ Gateway benchmarking, actual results, evaluation, and releases remain outstandin
   or prompt/response content.
 - [ ] Run representative workload/precision/concurrency experiments inside the
   authorized GPU runtime window; compute full request and million-token cost.
-- [ ] Prepare versioned synthetic evaluations and deterministic quality/format gates.
+- [x] Prepare versioned synthetic tasks with deterministic quality/format gates and
+  a human-review marker for subjective summarization. The runner's dry-run makes no
+  network requests; no LLM has been evaluated yet.
 - [ ] Demonstrate sequential candidate approval, rejection, known-good reload, and
   verified rollback on the single L4.
 

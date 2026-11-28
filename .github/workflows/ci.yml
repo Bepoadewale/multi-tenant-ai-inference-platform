@@ -24,7 +24,7 @@ jobs:
         with: {python-version: "3.12"}
       - run: make install
       - run: make lint && make test && docker compose config --quiet
-      - run: make gpu-compose-config && make gpu-benchmark-plan
+      - run: make gpu-compose-config && make gpu-benchmark-plan && make gpu-evaluation-plan
       - run: make audit
   manifests:
     runs-on: ubuntu-24.04

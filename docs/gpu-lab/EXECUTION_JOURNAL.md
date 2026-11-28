@@ -1,8 +1,6 @@
 # GPU Lab Execution Journal
 
-<<<<<<< HEAD
 ## 2026-11-27 — Quota status rechecked without mutation
-=======
 ## 2026-11-27 — Attempt the authorized quota-case update with AWS CLI
 
 - **Phase:** Phase 2 — static-only EC2 preparation; GPU execution remains blocked.
@@ -35,7 +33,6 @@
   cost, expiry, and automation work that does not require GPU runtime.
 
 ## 2026-11-27 — PR #40 status follow-up checks passed
->>>>>>> e837919 (docs: record quota case CLI blocker)
 
 - **Phase:** Phase 2 static-only preflight; no cloud resource creation or spend.
 - **Command:** read-only AWS Service Quotas queries in `us-east-1` checked the existing
@@ -1298,3 +1295,147 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   GPU benchmark. No GPU hours or project spend were incurred.
 - **Next:** rebase the evaluation preparation on the current PR #47 head and continue
   the static review queue.
+## 2026-11-27 — Prepare a deterministic LLM evaluation suite
+
+- **Phase:** Phase 9 static preparation; no model evaluation.
+- **Branch:** `codex/gpu-evaluation-preparation`, based on the passing PR #47 stack.
+- **Starting state:** the repository had governed ONNX model-release demos but no
+  versioned evaluation suite for the planned Qwen/vLLM runtime.
+- **Change:** added seven synthetic cases covering arithmetic/factual response,
+  structured JSON, instruction following, subjective summarization, simple reasoning,
+  technical explanation, and malformed JSON input. Added a stdlib Python evaluator,
+  deterministic check helpers, a no-network dry-run, owner-only aggregate output
+  outside the repository, and a required model-revision field for actual execution.
+  Prompts and response text are not written to the report; a response digest and token
+  counts are recorded when available. The subjective summary remains a human-review
+  item and does not become an automatic pass.
+- **Troubleshooting:** the first exact-number matcher rejected a correct answer ending
+  with sentence punctuation. A focused test caught this; the expression now allows
+  punctuation while not accepting a larger number or a decimal prefix. Ruff also
+  identified one unused import, which was removed.
+- **Validation:** `make gpu-evaluation-plan` reported seven cases and zero network
+  requests. Four Python 3.12 tests passed; Ruff, bytecode compilation, JSON parsing,
+  and `git diff --check` passed. No vLLM, model, Docker evaluation service, AWS
+  resource, or GPU was used.
+- **Security and cost:** optional API credentials are read only from the environment;
+  reports are excluded from public Git by default. No AWS spend or GPU hours.
+- **Next:** publish the evaluation-preparation PR and validate its CI. On the L4,
+  confirm actual OpenAI response shape, usage fields, malformed-input status, and
+  candidate report output before connecting evaluation to governed release decisions.
+
+## 2026-11-27 — Tighten evaluation review and report safeguards
+
+- **Phase:** Phase 9 static preparation; no request to the model.
+- **Branch:** `codex/gpu-evaluation-preparation`, based on PR #47 head `9936e11`.
+- **Finding and change:** an evaluation with all deterministic checks passing could
+  still need a person to inspect the subjective summary. The CLI now returns exit
+  code 2 for that state, so an automated release step cannot treat it as approved. A
+  separate `--show-subjective-response` flag allows an operator to inspect the
+  synthetic answer interactively; by default it is not printed or saved. Reports are
+  created with owner-only mode from the initial file descriptor, not chmodded only
+  after writing.
+- **Troubleshooting:** five focused tests pass after the numeric punctuation fix. A
+  shell-quoted f-string used only to summarize dry-run output failed to parse; the
+  reporting command was changed to `str.format`, and the dry-run then confirmed seven
+  cases and zero network requests. No evaluation behavior depended on that shell
+  one-liner.
+- **Validation:** targeted Python 3.12 tests: 5 passed; Ruff across repository Python
+  source/test/benchmark/evaluation/script paths passed; bytecode compilation,
+  `make gpu-evaluation-plan`, and `git diff --check` passed.
+- **Cloud and cost:** no model, Docker evaluation service, AWS operation, GPU hour, or
+  spend. PR #48 CI remains pending.
+
+## 2026-11-27 — Open evaluation preparation PR
+
+- **Phase:** Phase 9 static evaluation preparation.
+- **Branch / PR / commit:** `codex/gpu-evaluation-preparation`, PR #48 against PR #47,
+  initial head `b67d74e`.
+- **Action:** opened PR #48 with the task suite, evaluator, tests, CI dry-run, README,
+  ticket, and evidence/status links. The PR description states the exact local checks
+  and the limitations before GPU execution.
+- **Validation before publication:** `make gpu-evaluation-plan` reported seven cases
+  and zero network requests; five Python 3.12 tests passed; Ruff across source,
+  tests, benchmarks, evaluations, and scripts passed; bytecode, JSON/workflow parsing,
+  and `git diff --check` passed.
+- **Related CI:** PR #47's updated documentation head `9936e11` passed all five
+  required jobs in run `45994609421`. PR #48's required checks are now pending.
+- **Cloud and cost:** no LLM request, AWS resource, GPU hour, or goal-specific AWS
+  spend.
+- **Next:** watch PR #48's checks, fix any real failure, then continue preparing the
+  CUDA lab and incident drill without claiming runtime evidence.
+
+## 2026-11-27 — Confirm evaluation code CI and track environment-doc refresh
+
+- **PR #48 code head:** `24b149c` passed all five required jobs in run `45996207684`,
+  including Python and local E2E. CI did not contact a model or AWS.
+- **Documentation follow-up:** added the exact local workstation tool inventory and
+  link to `LOCAL_ENVIRONMENT_READINESS.md` in commit `5af5562`. The checks for this
+  latest docs head are running in PR run `45997123263`; no result is claimed yet.
+- **Cost/cloud:** no GPU or AWS operation, no model load, and no spend.
+
+## 2026-11-27 — Record workstation tool readiness
+
+- **Phase:** cross-phase non-billable preparation.
+- **Branch:** `codex/gpu-evaluation-preparation`, PR #48.
+- **Inventory:** macOS 25.6.0 arm64; AWS CLI 2.32.6; Terraform 1.14.0; Docker
+  Compose v2.40.3; Python 3.12.12; GitHub CLI authenticated as Bepoadewale.
+  `ansible-playbook`, `nvcc`, `nvidia-smi`, and `nvidia-container-cli` are not
+  installed on this local workstation.
+- **Interpretation:** local static checks, Terraform tooling, Compose rendering, and
+  PR work are available. The local Mac is not the target Linux/L4 host. No CUDA or
+  Ansible installation was attempted; Ansible follows manual host setup in this goal.
+- **Cloud/cost:** did not inspect or print local AWS configuration and made no AWS
+  request or mutation. No cost or GPU runtime.
+- **Evidence:** exact tool state and its limits are recorded in
+  `LOCAL_ENVIRONMENT_READINESS.md` and the evidence manifest.
+
+
+## 2026-11-28 — Harden LLM evaluation scoring and endpoint instructions
+
+- **Phase:** Phase 9 static evaluation preparation; PR #48.
+- **Branch / starting head:** `codex/gpu-evaluation-preparation`, remote head
+  `79e7f8f`; this branch depends on the earlier PR #47 head and must be rebased
+  after PR #47 CI settles.
+- **Starting state:** review found that an expected positive number could match inside
+  a negative answer, invalid completion/usage types could throw before writing the
+  aggregate report, and the evaluator instructions used an unpublished vLLM host port
+  and backend-only model ID at the gateway.
+- **Changes:** signed number boundaries are excluded from exact-number checks;
+  completion content must be a string and usage/token counts must have valid types or
+  the case is recorded as `InvalidCompletionSchema`. The Compose benchmark service
+  mounts the evaluator read-only. The README now documents direct private-network
+  execution through Compose DNS and a separate authenticated gateway path using its
+  loopback port and client-facing `chat-default` alias.
+- **Validation:** Ruff passed; the focused evaluation suite passed 9 tests. The dry-run
+  reported seven cases and `network_requests: 0`; `docker compose config --quiet` and
+  `git diff --check` passed. No model call, container, AWS resource, or GPU was used.
+- **Full-suite attempt:** `make lint` passed, but `make test` could not collect 10
+  gateway modules because this isolated worktree did not contain the ignored
+  `models/tiny-intent-classifier.onnx` file that `make install` normally generates.
+  I did not run `make install`, so no hidden model files were created in this worktree.
+  The focused tests passed; updated PR CI will run the repository setup and full suite.
+- **Failed attempt:** the first new HTTP-mock test run failed because the mock's
+  context manager yielded a different mock object. Setting `__enter__` to return the
+  configured response fixed the test harness; no production behavior was altered to
+  satisfy the mock.
+- **Evidence limits:** these tests demonstrate local response-shape handling and
+  static invocation configuration only. The exact pinned vLLM runtime response,
+  gateway authentication, and live model evaluation still require the authorized GPU
+  batch.
+- **Cloud/cost:** no AWS use, GPU hours, or spend.
+- **Next:** commit the fix, rebase PR #48 on the updated benchmark PR #47 head, then
+  run one CI cycle and address the three review threads.
+
+## 2026-11-28 — Verify evaluation fixes and resolve review feedback
+
+- **Phase:** Phase 9 static preparation; PR #48.
+- **Head/base:** PR #48 head `a5bb235`, rebased on PR #47 head `260e249`.
+- **CI:** run `46108950555` passed all five required jobs, including the full Python
+  setup/test job and local E2E. This confirms the repository setup path that the
+  isolated local `make test` attempt could not reproduce without generating the
+  ignored ONNX fixtures in that worktree.
+- **Review:** all three findings were answered and resolved with the fixed numeric
+  check, failed-case response validation, and corrected private-vLLM/gateway
+  instructions. No model request was sent.
+- **Cloud/cost:** no AWS operation, GPU hour, or spend.
+- **Next:** update the evidence/status documentation, then rebase and continue PR #49.

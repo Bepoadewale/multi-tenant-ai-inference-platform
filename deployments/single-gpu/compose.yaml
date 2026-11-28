@@ -138,6 +138,8 @@ services:
     image: ${VLLM_IMAGE:?set VLLM_IMAGE to an immutable image digest}
     entrypoint: ["vllm"]
     command: ["--help"]
+    volumes:
+      - ../../evaluations/gpu_llm:/opt/gpu-evaluation:ro
     profiles: [gpu-benchmark]
     restart: "no"
 
