@@ -68,5 +68,6 @@ is involved.
 
 ## Acceptance status
 
-Local mocked-provider tests and full local verification pass. PR CI is pending. No
-cloud or GPU result is claimed.
+Local mocked-provider tests and full local verification pass. PR #78 implementation
+head `5c3bd12` passed all six required jobs in run `46135887060`. No cloud or GPU
+result is claimed.
