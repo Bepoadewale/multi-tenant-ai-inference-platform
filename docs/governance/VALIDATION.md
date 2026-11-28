@@ -824,5 +824,10 @@ against a live model, AWS, or a GPU.
 After this run passed, review found that the host controller treated float `1.0` as
 equal to the required integer tensor-parallel size. The validator now rejects
 non-integer types and has a regression test. This is a material configuration-safety
-fix. The updated PR head must receive required checks again; do not repeat the
-clean-room sequence for unrelated work.
+fix. A later review found `manifest-from-report` needlessly initialized host state and
+raised `AttributeError`; the command now creates a host controller only for operations
+that use it, and a regression test generates a manifest without host access. Updated
+head `473db1cee7fa0aacb826d7a6e94fbf020c7c9c74` passed all five required jobs,
+including another local CPU end-to-end job, in run
+[46105533251](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/actions/runs/46105533251).
+No host model release, AWS action, or GPU behavior was exercised.

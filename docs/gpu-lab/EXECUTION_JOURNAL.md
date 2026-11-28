@@ -17,6 +17,22 @@
   remaining non-billable work and do not merge without authorization.
 
 
+## 2026-11-28 — PR #56 release-manifest review fix passed CI
+
+- **Phase:** Phase 9 static release tooling; Phase 2 remains quota-blocked.
+- **Branch / PR:** `codex/gpu-release-host-controller`, PR #56, tested head
+  `473db1cee7fa0aacb826d7a6e94fbf020c7c9c74`.
+- **Validation:** GitHub Actions run `46105533251` passed all five required jobs,
+  including the fresh-runner local CPU end-to-end sequence. Local Ruff and the focused
+  release-controller suite passed **17 tests**. Governance validation records the
+  original successful clean-room sequence and this updated-head run.
+- **Result:** the `manifest-from-report` review finding is fixed; no host-state files
+  are required to generate a metadata manifest. The CLI regression fails if a host
+  controller is constructed during manifest generation.
+- **AWS / GPU / cost:** none; no AWS operation, EC2 host, model artifact, GPU, or spend.
+- **Next:** reply to and resolve the release-controller review finding; continue
+  remaining non-billable work and do not merge without authorization.
+
 ## 2026-11-28 — Fix PR #56 manifest command initialization
 
 - **Phase:** Phase 9 static model-release preparation; Phase 2 remains blocked by zero applied G/VT quota.
