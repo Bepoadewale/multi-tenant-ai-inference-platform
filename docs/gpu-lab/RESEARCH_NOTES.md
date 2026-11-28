@@ -373,3 +373,46 @@ No profiler, exporter, alert, or live metric was executed during this source rev
 These are current documentation-based design inputs, not validation against a pinned
 server. The vLLM API key and a private network are complementary controls; neither is
 proof of hardware isolation or production availability.
+
+## 2026-11-27 — Single-L4 execution-batch preparation
+
+Official vendor sources were rechecked to turn the compatibility notes into a
+time-bounded GPU session procedure:
+
+- NVIDIA's [Ubuntu Driver Installation Guide](https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/latest/ubuntu.html)
+  covers Ubuntu 24.04, running-kernel headers, branch/version pinning, headless
+  package selection, reboot, and post-install checks. It recommends a smaller
+  compute-only installation for a server that does not drive a display. The manual
+  host procedure therefore uses a signed distribution package and compute-only path,
+  rather than a desktop stack or opaque machine image.
+- NVIDIA's [CUDA Linux Installation Guide](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/)
+  is the source for the final Ubuntu/kernel/compiler support check. Keep the host
+  Toolkit for `nvcc` and CUDA C++ exercises; a CUDA-enabled vLLM container already
+  supplies user-space libraries and does not require host Toolkit libraries simply
+  to serve the model.
+- NVIDIA's [Container Toolkit install guide](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
+  requires a working host NVIDIA driver, configures Docker with `nvidia-ctk`, and
+  shows pinning all four related packages to the same release. Preserve this order:
+  driver, toolkit packages, Docker runtime configuration, daemon restart, container
+  GPU test.
+- The official [PyTorch install selector](https://docs.pytorch.org/get-started/locally/)
+  says to choose the CUDA wheel appropriate to the machine and verify
+  `torch.cuda.is_available()`. The lab adds tensor allocation, synchronized matrix
+  multiplication, correctness checks, and observed GPU activity because availability
+  alone does not prove a real computation completed.
+- vLLM's [GPU installation guide](https://docs.vllm.ai/en/stable/getting_started/installation/gpu/)
+  and [Docker deployment guide](https://docs.vllm.ai/en/latest/deployment/docker/)
+  document the official `vllm/vllm-openai` image, pinned release tags, shared memory,
+  and driver compatibility. The current guide says CUDA 13 images require an R580-or-
+  newer driver for the normal path; compatibility mode for selected older driver
+  branches is explicit. This supports rechecking the recorded R580 package candidate
+  but does not establish an L4 run. Keep the image pinned by digest and do not enable
+  compatibility mode by assumption.
+- The official [PyTorch selector](https://docs.pytorch.org/get-started/locally/) and
+  vLLM image must be reconciled before installation. Do not independently install a
+  different PyTorch/CUDA stack into the vLLM image.
+
+These sources informed `GPU_BATCH_RUNBOOK.md`, which groups setup, model serving,
+tenant checks, telemetry, experiments, evidence export, and cleanup into one paid
+window. All version pins remain candidates until final date-of-run checks. No GPU
+host, package, container, CUDA computation, vLLM server, or inference was executed.
