@@ -4,7 +4,7 @@ This file records execution specific to the single-L4 project. Historical local 
 
 ## 2026-11-26 — Baseline repository and read-only AWS preflight
 
-- **Repository SHA:** `c8f02ed` baseline; docs are being prepared on `codex/single-l4-gpu-goal`.
+- **Repository SHA:** `c8f02ed` baseline; subsequent implementation and validation entries identify their own branch and commit.
 - **Scope:** Phase 1 audit and read-only preflight. No AWS mutation, Terraform plan/apply, EC2 launch, or GPU execution.
 - **Identity:** the configured `ai-platform-pilot-key` profile returned the expected AWS account. Account identifier is intentionally not repeated in this public file.
 - **Current project resources:** Resource Groups Tagging API query for exact `project=multi-tenant-ai-inference-platform` returned `[]`; EC2 query for the same project tag returned `[]` in `us-east-1`. These exact-tag queries do not exclude untagged or differently tagged resources.
@@ -167,6 +167,80 @@ This establishes current local lint/test/static configuration outcomes and read-
   processes, a Redis outage under live traffic, live vLLM, or GPU behavior.
 - **Cloud boundary:** no AWS changes; project-specific spend remains `$0` and GPU
   instance-hours remain `0`.
+
+## 2026-11-27 — Model-aware token preflight prework
+
+- **Branch:** `codex/tokenizer-admission-preflight`, based on PR #34.
+- **Scope:** bounded chat input, tenant-specific input/output token limits, vLLM
+  chat-tokenizer adapter, model context validation, request-rate/concurrency admission
+  before tokenization, and atomic exact token reservation before inference. This is
+  local-only preparation; no AWS resource, live vLLM, or GPU was used.
+- **Official research:** vLLM's current protocol describes chat messages and returns
+  token count plus max context length. Its security guide documents that `/tokenize`,
+  metrics, and health endpoints are not covered by the server API key, and shared
+  processes share runtime/cache state. See `RESEARCH_NOTES.md` and `RISK_REGISTER.md`.
+- **Commands/results:** Ruff passed; focused tests reported **22 passed, 2 optional
+  Redis skips**. Full `make verify` passed with **72 passed, 2 optional Redis skips**,
+  one existing Starlette deprecation warning, and `pip-audit` reporting no known
+  vulnerabilities. `docker compose config --quiet` and `git diff --check` passed.
+  Both Redis integration tests passed against disposable local Redis 7.4.
+- **Fixes during validation:** Ruff first reported unsorted imports in the new Redis
+  service and limiter test; Ruff auto-fixed import order and the rerun passed. A
+  gateway test verifies that an exact quota overrun is rejected before backend
+  inference and that reservation/capacity state is released.
+- **Limits:** vLLM responses are mocked; Redis is one local server with two limiter
+  clients. This does not prove live vLLM compatibility, independent gateway processes,
+  private Compose-network enforcement, cache salt behavior, AWS, GPU, or production
+  availability. The request-count/content bounds and token preflight are code evidence
+  only until the runtime is pinned and exercised.
+
+## 2026-11-27 — PR #35 lease renewal during tokenizer preflight
+
+- **Scope:** prevent the concurrency reservation from expiring during a valid but slow
+  vLLM tokenizer request. No cloud resource or GPU was used.
+- **Change:** start the lease watcher immediately after shared admission, retain it
+  through tokenization and exact reservation adjustment, and stop it on success or all
+  preflight failure/cancellation paths. The normal generation/stream path starts its
+  own watcher after preflight.
+- **Regression:** a local `TenantLimiter` with a 30 ms lease and an async tokenizer
+  delay of 100 ms completes the request and releases reservation state. Targeted tests:
+  21 passed.
+- **Validation:** `make verify` passed Ruff, **87 tests**, pip-audit, and Docker Compose
+  configuration; two opt-in Redis tests were skipped. A disposable local Redis 7.4
+  integration run passed **2 tests**. `git diff --check` passed.
+- **Limitations:** tokenizer and inference use mocks; Redis tests use one local Redis
+  process. This does not verify a live vLLM release, separate gateway processes,
+  production network failure, or GPU execution. Commit `59cca44` was local at capture.
+
+## 2026-11-27 — PR #35 CI failure and single-run policy
+
+- **Commit:** `97bfcfc` on `codex/tokenizer-admission-preflight`.
+- **Evidence:** GitHub runs `45921908625` (`push`) and `45921912244`
+  (`pull_request`) ran the same `local-e2e` workflow. Both passed smoke, then failed
+  in `make demo-flagship` → `demo-local`. The prior assertions did not print which
+  expectation failed. These were duplicate CI event runs, not a request for two
+  clean-room reproductions.
+- **Policy:** one complete clean-room cycle is sufficient; repeat only after a failed
+  cycle or a relevant fix. The two successful CPU clean-room cycles under PR #31 are
+  retained as historical evidence and will not be repeated for this goal.
+- **Root cause:** the gateway treated every `VllmBackend` HTTP adapter as a vLLM
+  model. The local CPU ONNX target also uses an HTTP adapter, but has no `/tokenize`
+  endpoint. The GPU preflight therefore failed on the existing CPU streaming demo.
+- **Fix and local result:** the gateway now invokes tokenizer preflight only when the
+  catalog declares `runtime: vllm`; a vLLM model with a non-vLLM backend fails closed.
+  A regression test covers the ONNX HTTP target. `make verify` passed with **73
+  passed, 2 optional Redis skips**, one existing Starlette deprecation warning, no
+  known dependency vulnerabilities, and valid Compose configuration. The first
+  attempt exposed a positional argument mistake in the new test's `Usage` fixture;
+  switching it to named fields fixed the test.
+- **Next CI:** `demo-local.sh` now reports the failed stream or HTTP assertion and its
+  synthetic response. CI is configured for pull requests and pushes to `main`, so
+  feature-branch commits run once. Bash syntax, workflow YAML parsing, and
+  `git diff --check` pass.
+- **Verified fix:** commit `ee4b46c` passed all four required jobs in one PR-triggered
+  workflow (`45923987903`). Its fresh-runner `local-e2e` job passed, including the
+  previously failing streaming demo. This was one local CPU end-to-end execution,
+  not an AWS/GPU clean-room reproduction.
 
 ## Future GPU execution template
 

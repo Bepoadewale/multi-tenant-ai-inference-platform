@@ -5,7 +5,7 @@ from enum import StrEnum
 from typing import Literal
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class ServingMode(StrEnum):
@@ -26,6 +26,8 @@ class TenantQuota(BaseModel):
     tokens_per_minute: int = Field(gt=0)
     concurrent_requests: int = Field(gt=0)
     daily_token_quota: int = Field(gt=0)
+    max_input_tokens: int = Field(default=8192, gt=0)
+    max_output_tokens: int = Field(default=2048, gt=0)
     simulated_gpu_slots: int = Field(default=0, ge=0)
 
 
@@ -71,7 +73,7 @@ class ModelDefinition(BaseModel):
 
 class ChatMessage(BaseModel):
     role: Literal["system", "user", "assistant"]
-    content: str
+    content: str = Field(max_length=8192)
 
 
 class StreamOptions(BaseModel):
@@ -80,11 +82,18 @@ class StreamOptions(BaseModel):
 
 class ChatCompletionRequest(BaseModel):
     model: str
-    messages: list[ChatMessage] = Field(min_length=1)
+    messages: list[ChatMessage] = Field(min_length=1, max_length=32)
     max_tokens: int = Field(default=64, ge=1, le=2048)
     stream: bool = False
     stream_options: StreamOptions | None = None
     temperature: float = Field(default=0.7, ge=0, le=2)
+
+    @model_validator(mode="after")
+    def enforce_content_size(self) -> ChatCompletionRequest:
+        content_bytes = sum(len(message.content.encode("utf-8")) for message in self.messages)
+        if content_bytes > 65_536:
+            raise ValueError("combined message content exceeds 65536 bytes")
+        return self
 
 
 class Usage(BaseModel):

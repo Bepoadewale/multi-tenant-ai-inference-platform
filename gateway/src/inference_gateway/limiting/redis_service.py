@@ -12,6 +12,7 @@ from inference_gateway.limiting.redis_lua import (
     RELEASE_LUA,
     RELEASE_QUEUE_LUA,
     RENEW_LUA,
+    RESERVE_USAGE_LUA,
 )
 from inference_gateway.limiting.service import AdmissionReservation
 from inference_gateway.models import Tenant
@@ -95,6 +96,36 @@ class RedisTenantLimiter:
         except redis.RedisError as error:
             raise HTTPException(503, "shared admission lease unavailable") from error
         return bool(int(result))
+
+    async def reserve_usage(
+        self, tenant: Tenant, reservation: AdmissionReservation, estimated_tokens: int
+    ) -> AdmissionReservation:
+        if estimated_tokens < 0:
+            raise ValueError("estimated_tokens must not be negative")
+        keys = self._keys(tenant.id)
+        try:
+            result = await self.client.eval(
+                RESERVE_USAGE_LUA,
+                4,
+                keys[1],
+                keys[2],
+                keys[3],
+                keys[5],
+                reservation.request_id,
+                time_ns() // 1_000_000,
+                60_000,
+                tenant.quotas.tokens_per_minute,
+                tenant.quotas.daily_token_quota,
+                estimated_tokens,
+            )
+        except redis.RedisError as error:
+            raise HTTPException(503, "shared admission unavailable") from error
+        allowed, reason = int(result[0]), str(result[1])
+        if not allowed:
+            if reason == "reservation_expired":
+                raise HTTPException(503, "admission reservation expired")
+            raise HTTPException(429, f"tenant {reason} quota exceeded")
+        return AdmissionReservation(reservation.request_id, estimated_tokens)
 
     async def release(
         self,
