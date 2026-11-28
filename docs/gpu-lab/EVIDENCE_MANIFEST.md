@@ -168,6 +168,8 @@ evidence.
 
 | PR #66 restack after clean-room evidence registration | 2026-11-28 | Research/readiness / PR #66 | Git rebase and documentation review | PR #66 is locally based on PR #65 documentation head `24ea5e8`, which carries the designated clean-room record. | Current PR #66 head `039619e` is unpublished and unvalidated; no GPU, AWS, or spend. |
 
+| PR #67 rebase onto current PR #66 | 2026-11-28 | Readiness tracking / PR #67 | Git rebase and documentation review | PR #67's current branch is locally replayed on PR #66 head `12cc2eb`; old status conflicts were kept from newer parent documentation and historical PR #67 evidence remains labeled by capture time. | The new PR #67 head is not yet published or CI-validated; no AWS/GPU action or manual clean-room run occurred. |
+
 ## Entry format for future evidence
 
 For every new item, record:

@@ -8,8 +8,7 @@ target clear.
 
 ## Current state
 
-- PR #66 final head `094576e522ad188df240c4b822a31eda41280694` passed all six required
-  jobs in run `46093702808`, including the workflow local end-to-end cycle.
+- PR #66 prior head `094576e` passed all six required jobs in run `46093702808`. Its current rebased head `12cc2eb` is on the updated PR #65 stack; fresh CI run `46115502844` is in progress.
 - One read-only CLI snapshot on 2026-11-28 found 37 open PRs, #30–#66. Every PR was
   non-draft and all displayed check runs were completed successfully. The snapshot
   does not show review approval, merge permission, or merged code.
@@ -27,9 +26,7 @@ target clear.
   workflow file requires a manual dispatch and explicit inputs; no AWS step ran. The
   reason for the empty push event is unknown and does not affect the required PR CI.
 - The untracked root `uv.lock` belongs to the user and remains untouched.
-- PR #67 commit `609dd48` passed all six required jobs in run `46094571561`, including
-  the workflow local E2E cycle. This was the pre-follow-up head; inspect GitHub for the
-  current check rollup.
+- PR #67 current rebased head has not yet been published; its historical CI runs apply only to the original pre-restack commits and do not validate this new base.
 
 ## Research and design
 
@@ -54,9 +51,9 @@ target clear.
   manually-dispatched AWS workflow did not run any job.
 - [x] Record the absent shared-state/budget prerequisites and separate bootstrap
   authorization gate.
-- [x] Pass all six required checks on initial PR commit `609dd48` in run
-  `46094571561`, including one workflow local E2E cycle.
+- [x] Preserve the historical pre-restack CI evidence and label it as such.
 - [x] Add the ticket to the documentation index, evidence manifest, and journal.
+- [ ] Publish the rebased PR #67 and pass its current required CI.
 - [ ] Obtain human review; do not merge without owner authorization.
 
 ## Validation
@@ -68,8 +65,9 @@ gh pr list --state open --limit 100 \
   --json number,isDraft,statusCheckRollup
 ```
 
-The query found 37 open, non-draft PRs with completed successful displayed checks at
-01:40Z, before PR #67 opened. Local documentation checks and `git diff --check` are
+The historical query found 37 open PRs with completed successful displayed checks at
+01:40Z, before PR #67 opened. It is only a point-in-time snapshot; the current draft
+state, PR count, and check results must be taken from GitHub after restacking. Local documentation checks and `git diff --check` are
 recorded in the execution journal. PR #66's final head and PR #67's initial commit
 each passed the workflow local E2E once; no separate manual clean-room run was started.
 
