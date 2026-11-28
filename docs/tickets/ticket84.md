@@ -70,8 +70,25 @@ fixture, and the focused suite passes.
 
 ## Security, cost, and remaining work
 
-No AWS API call, Terraform plan or apply, GPU instance, Docker build, model download,
-or project spend occurred. Before applying, inspect the actual saved plan and verify
-the route and references against the provider's output. The internet route allows
+During the original static validation, no AWS API call, Terraform plan or apply, GPU
+instance, Docker build, model download, or project spend occurred. A later, separate
+read-only AWS reconciliation is recorded below. Before applying, inspect the actual
+saved plan and verify the route and references against the provider's output. The internet route allows
 outbound package/model retrieval from the public subnet; inbound access remains
 blocked and internal services remain loopback-bound.
+
+
+## Current AWS gate reconciliation (2026-11-28 15:06 UTC)
+
+A fresh read-only AWS CLI check confirms the existing quota request is closed with a
+desired value of 4.0 vCPUs and the applied On-Demand G/VT quota is 4.0. It is enough
+on paper for one `g6.xlarge`, but does not reserve availability-zone capacity. Exact
+project-tag, EC2, state-bucket, lock-table, and project-Budget lookups found no matching
+resources. The account has no Billing alternate contact. A different account Budget
+was listed, but its coverage of this project is not established and it is not relied
+upon. No Terraform plan/apply or resource change occurred.
+
+The remaining gates are a valid private notification recipient, reviewed bootstrap
+saved plan, remote state and lock, exact GPU-root saved plan, refreshed total cost and
+capacity, expiry and teardown review, and separate apply authorization. This note is
+read-only evidence and does not authorize cloud spending.

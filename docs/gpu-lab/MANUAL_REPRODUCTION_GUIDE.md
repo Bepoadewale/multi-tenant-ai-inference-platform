@@ -71,8 +71,9 @@ AWS_PROFILE=ai-platform-pilot-key aws service-quotas get-service-quota \
 
 The value must be at least 4 vCPUs for one `g6.xlarge`. The owner now reports that
 AWS approved the request, and the latest read-only CLI check confirms `4.0` applied
-vCPUs. The request-history view still says `CASE_OPENED`; treat that as stale history,
-not as an applied quota of zero. Quota alone does not authorize a paid launch. Recheck
+vCPUs. The latest request-history read reports `CASE_CLOSED` with desired value 4.0,
+and the applied quota is 4.0. Recheck both before planning; neither reserves live
+availability-zone capacity. Quota alone does not authorize a paid launch. Recheck
 the live quota and actual AZ capacity immediately before planning/applying; do not
 submit a duplicate request.
 

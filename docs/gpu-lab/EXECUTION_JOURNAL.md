@@ -2917,3 +2917,39 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   gates; do not let quota approval alone trigger GPU launch.
 - **Evidence limits and cost:** mergeability and review-decision data are a point-in-
   time GitHub snapshot. No AWS mutation, Terraform operation, GPU hour, or spend.
+
+
+## 2026-11-28 15:06 UTC — Verify quota case closure and recheck project cloud gates
+
+- **Phase and scope:** Phase 2 read-only AWS status reconciliation and non-billable
+  readiness. No cloud mutation.
+- **Starting state:** working in the PR #84 worktree at the published plan-network
+  documentation follow-up. No Terraform mutation monitor or GPU instance was active.
+- **Objective:** reconcile the approved-quota report with Service Quotas history and
+  inspect exact project-scoped state, lock, Budget, and compute resources.
+- **Commands and results:** verified the expected account through STS;
+  `get-service-quota` reports `Running On-Demand G and VT instances` = `4.0`;
+  `list-requested-service-quota-change-history` reports the existing request
+  `CASE_CLOSED`, desired value `4.0`; exact project-tag resource inventory is empty;
+  exact EC2 project-tag inventory is empty; the expected state bucket, DynamoDB lock
+  table, and project Budget are absent. `get-alternate-contact --alternate-contact-type
+  BILLING` returned `ResourceNotFoundException` (no Billing alternate contact). The
+  account Budget list returned other Budget records; no other Budget was treated as a
+  project-specific guardrail or used.
+- **Errors and troubleshooting:** exact-name table and Budget lookups returned expected
+  not-found errors; these prove absence only for those exact names. One combined CLI
+  command stopped after the expected missing-table response, so the exact Budget lookup
+  was rerun separately and confirmed absent.
+- **Decision:** quota is now verified as applied and its request is closed; do not
+  submit another request. No GPU launch yet: project remote state and lock, a verified
+  private Budget recipient, current complete cost and live capacity review, exact saved
+  plan review, expiry/teardown confirmation, and separate apply authorization remain.
+- **Evidence limits and cost:** quota value does not reserve AZ capacity; exact
+  project-tag and exact-name searches do not rule out untagged resources. The account
+  Budget list does not establish this project is covered. No raw account identifier,
+  Budget email, case reference, credentials, or unrelated Budget name is recorded. No
+  AWS resource was created or changed, no GPU hour was consumed, and no project spend
+  was incurred.
+- **Next:** publish this factual status reconciliation through PR #84; then restack
+  PRs #43 and #53 on their updated parents and revalidate each current head. Continue
+  static review while keeping AWS read-only.

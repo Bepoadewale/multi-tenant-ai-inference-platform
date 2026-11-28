@@ -222,3 +222,5 @@ For every new item, record:
 Store future sanitized image evidence below `evidence/` by phase. Keep large raw logs,
 model files, Terraform plans, Terraform state, and sensitive artifacts outside public
 Git history. Export and index evidence before destroying the authorized lab.
+
+| Read-only quota case, project resource, backend, and Budget recheck | 2026-11-28 15:06 UTC | Phase 2 readiness / PR #84 follow-up | AWS STS, Service Quotas, Resource Groups Tagging API, EC2, S3, DynamoDB, Budgets, and Account APIs | Expected account verified; request history is `CASE_CLOSED` with desired value 4.0 and applied On-Demand G/VT quota is 4.0 vCPUs. Exact project-tag resources, project EC2 instances, expected state bucket, lock table, and project Budget were not found. No Billing alternate contact exists. | Read-only scope only; does not reserve AZ capacity, prove absence of untagged resources, establish that another account Budget covers the project, verify a private recipient, create remote state, approve/apply a plan, or demonstrate GPU access. No credentials, account identifier, contact address, case reference, or unrelated Budget names retained. |
