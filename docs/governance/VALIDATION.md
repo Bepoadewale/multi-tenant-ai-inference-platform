@@ -128,7 +128,7 @@ TF_VAR_budget_alert_email=<non-committed address> make pilot-guardrails-plan
 make pilot-cloud-plan
 ```
 
-The identity guard accepted account `654654474502`. The ephemeral backend-free
+The identity guard accepted the configured AWS account. The ephemeral backend-free
 bootstrap plan proposed **7 to add, 0 to change, 0 to destroy**: an encrypted,
 versioned state bucket; public-access block; ownership controls; DynamoDB lock table;
 and monthly budget notifications. The ephemeral backend-free runtime plan proposed

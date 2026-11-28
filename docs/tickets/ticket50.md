@@ -14,7 +14,7 @@ claim L4 compatibility.
   has been installed on the workstation and no host was configured.
 - The owner reports manually sending an appeal in the existing AWS support case. The
   last documented applied G/VT quota is zero, so infrastructure remains blocked.
-- This work is [PR #50](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/50), stacked on open PR #49; required checks are pending. It does not authorize an AWS call or spend.
+- This work is [PR #50](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/50), stacked on open PR #49. A read-only GitHub CLI check on 2026-11-28 confirms the PR is open, non-draft, and all five required jobs passed in run `46016503614`. This records CI status only; it does not authorize an AWS call or spend.
 
 ## Research and decisions
 

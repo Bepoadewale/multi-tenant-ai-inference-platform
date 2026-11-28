@@ -30,7 +30,7 @@ This leaves about `$15.27` under the `$25` cap for all other charges, but it is 
 
 - The vLLM [per-request metrics guide](https://docs.vllm.ai/en/latest/features/per_request_metrics/) states that streaming usage/metrics arrive in a final usage chunk when `stream_options.include_usage=true` (or when the server forces it). The local gateway adapter now requests and parses that chunk, while exposing a usage-only chunk to a client only when the client requested it. This is mock/local contract validation, not proof against a running vLLM version; verify again against the pinned release.
 - Current [vLLM GPU installation documentation](https://docs.vllm.ai/en/latest/getting_started/installation/gpu/) describes CUDA-specific prebuilt binaries, currently CUDA 13.0 in the `latest` view reached during research. Its [stable documentation](https://docs.vllm.ai/en/stable/getting_started/installation/gpu/) and version-specific release pages can represent a different current package matrix. The project must pin a specific vLLM release, wheel/container digest, Python, PyTorch/CUDA build, and driver, then test that combination on the L4. Do not use `latest` or infer compatibility just from `nvidia-smi`.
-- The [Qwen/Qwen2.5-1.5B-Instruct model card](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct) identifies the model as Apache-2.0 licensed and documents its model family and usage. Verify the repository license file at the exact pinned model commit, artifact SHA-256, tokenizer, chat template, context requirements, and vLLM support before download. The browser page currently points at a moving `main`; it is not yet a pinned artifact.
+- The [Qwen/Qwen2.5-1.5B-Instruct model card](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct) describes the model and its use. Read-only Hub API metadata is recorded below for immutable revision `989aa7980e4cf806f80c7fef2b1adb7bc71aa306`: it reports Apache-2.0 and a `model.safetensors` size of 3,087,467,144 bytes with SHA-256 `dd924a11b4c220f385b51ffa522daea7c9f3d850e31b162bb5661df483c6d3ee`. No model weight file has been downloaded. Before download, verify the exact revision's license file, tokenizer, chat template, context requirements, and pinned vLLM support; metadata inspection is not runtime validation.
 - AWS lists 22 GiB per L4 on these instances (roughly the familiar 24 GB nominal figure). All usable GPU memory is shared by model weights, runtime/workspaces, CUDA graphs and attention KV cache. Start with the smallest model; measure context and concurrency before attempting 7B or quantized variants.
 
 ## Source list for later implementation research
@@ -40,7 +40,7 @@ Continue with current primary documentation before each phase: [AWS G6](https://
 ## Decisions still open
 
 - Whether the `$25` cap can cover the requested GPU-dependent validation with enough runtime to install the driver, download the model, integrate/observe/benchmark it, run safe incident drills, and export evidence. The instance-only estimate leaves room but time-consuming manual setup could use it quickly.
-- Whether AWS approves the open 4-vCPU On-Demand G/VT request; track its status and do not submit a duplicate.
+- Whether AWS changes the applied quota after the owner-reported appeal. The denial email and API's `CASE_OPENED` status disagree; the applied quota is still zero. Track the existing case and do not submit a duplicate.
 - Exact Ubuntu LTS point release/AMI, kernel, driver branch, CUDA compatibility, Docker Toolkit release, PyTorch build, vLLM release, and container image digest.
 - Exact encrypted Terraform state/locking arrangement that follows repository governance without creating long-lived costs above the project cap.
 - Which monitoring components can coexist on 16 GiB host memory without invalidating the inference experiment; measure before selecting `g6.2xlarge`.
@@ -356,9 +356,11 @@ correlation remain unverified until the approved single-L4 batch.
   for exact facts/schema constraints; treat model-graded quality as subjective,
   version the evaluator and prompts, and do not retain sensitive prompt contents.
 - The Qwen 1.5B [model card](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct)
-  currently displays Apache-2.0. The page is mutable; before download, fetch the
-  license file and model metadata at an immutable commit and record file digests.
-  This research does not authorize redistribution of model weights.
+  is mutable. Read-only Hub metadata for immutable revision
+  `989aa7980e4cf806f80c7fef2b1adb7bc71aa306` reports Apache-2.0 and the
+  `model.safetensors` SHA-256 recorded above. The weight file has not been
+  downloaded; verify the exact revision's license file and digest during the bounded
+  GPU batch. This research does not authorize redistribution of model weights.
 - Docker's [Compose GPU support guide](https://docs.docker.com/compose/how-tos/gpu-support/)
   requires GPU capability reservation and allows a count of one. Device visibility
   does not give tenant isolation or partition the L4; vLLM and the hardware telemetry
