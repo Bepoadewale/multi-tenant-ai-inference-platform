@@ -2195,3 +2195,14 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **AWS / GPU / cost:** no AWS calls or mutations, GPU use, model download, benchmark measurement, or spend.
 - **CI:** PR #61 fresh checks are pending; PR #62 fresh CI has not been triggered yet.
 - **Next:** publish this restack with exact lease against old head `90e4aca`, then watch the one PR-triggered workflow.
+
+
+## 2026-11-28 — Restack the evidence-based final-report draft
+
+- **Phase:** continuous documentation preparation; the report remains a pre-GPU draft, not a final deliverable.
+- **Branch / PR:** `codex/gpu-final-project-report-draft`, PR #63, parent PR #62 head `8927734`; rebased from old PR #62 head `90e4aca`.
+- **Change review:** retained the report's 28-chapter structure and draft banner. Corrected its current quota statement to the approved 4.0-vCPU result and named the remaining remote-state, Budget, exact-plan, and apply gates. All GPU-specific evidence sections remain pending real execution.
+- **Validation:** relative Markdown links across seven changed files passed; `git diff --check` passed.
+- **AWS / GPU / cost:** no AWS operation, GPU, model download, measured result, or spend.
+- **CI:** PR #63 fresh CI has not been triggered yet; parent PR #62 run is pending.
+- **Next:** publish with exact lease against old PR #63 head `d25413f`, update the PR description, and track its required checks.

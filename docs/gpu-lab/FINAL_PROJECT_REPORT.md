@@ -2,9 +2,11 @@
 
 > **Status: PRE-GPU DRAFT — NOT THE FINAL PROJECT REPORT.** The repository has
 > substantial local implementation, static AWS preparation, and CI evidence, but
-> AWS G/VT quota is still zero. No L4 host, CUDA computation, vLLM inference, GPU
-> benchmark, live GPU incident, AWS bill, or cloud teardown has been recorded. The
-> empirical sections below must be completed from real evidence after an authorized
+> Read-only AWS checks now show 4.0 applied On-Demand G/VT vCPUs; this clears the
+> quota threshold for one `g6.xlarge`, but the project remote state, lock table, and
+> Budget are absent and no apply is authorized. No L4 host, CUDA computation, vLLM
+> inference, GPU benchmark, live GPU incident, AWS bill, or cloud teardown has been
+> recorded. Complete the empirical sections from real evidence after an authorized
 > GPU batch; do not remove this banner before the final acceptance review.
 
 ## Report status and evidence labels
@@ -34,9 +36,11 @@ bounded benchmark/evaluation tools, governed sequential release controls, operat
 runbooks, and learning documents. The existing CPU ONNX service remains the executed
 inference path.
 
-**Final outcome:** pending. AWS denied the original On-Demand G/VT quota request; the
-owner reports submitting an appeal through the existing support case. Applied quota
-is zero, so the host has not been provisioned. No real L4 inference result exists.
+**Final outcome:** pending. The initial On-Demand G/VT request was denied, then the
+existing case was closed with 4.0 vCPUs applied according to the 2026-11-28 read-only
+check. This is sufficient by quota only. The project state/lock and Budget are absent,
+a private alert recipient and exact saved-plan review are outstanding, and no apply is
+authorized. The host has not been provisioned; no real L4 inference result exists.
 
 Complete this summary only after recording the final GPU batch, remaining acceptance
 gates, all-in cost estimate and billing status, teardown verification, and unresolved

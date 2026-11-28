@@ -47,3 +47,16 @@ ceiling and quota blocker remain in force.
 - Complete all empirical chapters only after an authorized L4 execution.
 - Export the searchable PDF and editable Word report after final evidence is present.
 - Human review and merge remain required.
+
+
+## 2026-11-28 restack and status correction
+
+Rebased PR #63 from former PR #62 head `90e4aca` onto current PR #62 head `8927734`.
+The report's 28-chapter draft was retained. A stale zero-quota statement was corrected:
+read-only AWS now shows 4.0 applied On-Demand G/VT vCPUs, but project state/lock,
+Budget recipient, exact-plan, and apply-authorization gates remain open. The document
+continues to label all GPU, inference, benchmark, incident, billing, and teardown
+results as pending actual evidence.
+
+Relative links in seven changed Markdown files passed; `git diff --check` passed. No
+AWS/GPU operation or spend occurred. Fresh PR CI is pending publication.
