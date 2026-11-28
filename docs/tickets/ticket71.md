@@ -28,13 +28,20 @@ actions has been run on the authorized GPU host.
 
 - [x] Backlog checkboxes match the current controller source and test evidence.
 - [x] Runtime acceptance remains explicitly unverified.
-- [ ] Markdown link and whitespace checks pass.
-- [ ] PR CI passes once on the final head.
+- [x] Markdown link and whitespace checks pass.
+- [x] PR CI passes on implementation head `99eb3284a388f5a54616dc843a2e134c4acc570a`.
 
 ## Security and cost
 
 Documentation-only change. No secrets, model artifacts, Terraform state, or private
 AWS output are added. No AWS calls, GPU work, or spending.
+
+## Validation
+
+`git diff --check` and relative links in the five changed Markdown files passed. PR
+#71 head `99eb3284a388f5a54616dc843a2e134c4acc570a` passed all six required jobs in
+run `46102374147`, including local E2E. This verifies repository/static behavior,
+not model release on a real host.
 
 ## Limitations
 
