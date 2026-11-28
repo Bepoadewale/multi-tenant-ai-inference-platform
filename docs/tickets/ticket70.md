@@ -9,8 +9,12 @@ the stack works on an NVIDIA L4.
 
 ## Current state
 
-PR #69 head `81c09df` is published on the updated #68 stack; fresh run `46115952390` is active and historical checks do not validate this head. PR #70 has been locally rebased onto #69 head `81c09df`; its new head is not yet published. Earlier PR #70 head `caf3f4b` passed six jobs in run `46101649412`, but that run does not validate this rebase. No review decision is recorded. Applied G/VT quota remains zero, and no GPU or AWS resources have been
-created for this lab.
+PR #69 prior head `81c09df` passed all six jobs in run `46115952390`; the current
+restacked head `f21d61a` needs fresh CI. PR #70 previous head `e5af488` passed all six
+required jobs in run `46116077981`, including local E2E; the current local head
+`56bd866` is rebased onto PR #69 head `f21d61a` and is not yet published. No review
+decision is recorded. The latest recorded applied G/VT quota is zero, and no GPU or
+AWS resource has been created for this lab.
 
 ## Research and architecture
 
@@ -30,12 +34,13 @@ candidate pending a fresh review and real host validation.
 - [x] The L4 remains labeled as the required validation boundary.
 - [x] Local documentation links and whitespace validation pass.
 - [x] The prior PR #70 head passed its required workflow.
+- [x] Rebase PR #70 on current PR #69 head `f21d61a`.
 - [ ] Publish the rebased PR #70 and pass current required CI.
 
 ## Commands and validation
 
 `git diff --check` passed. A relative-link scan over the seven changed Markdown files
-found no missing targets. Prior PR #70 head `caf3f4b` passed all six required jobs in run `46101649412`, including the workflow local E2E job. The rebased PR #70 requires a new run. No separate clean-room rerun was performed; the documentation change
+found no missing targets. Prior PR #70 head `e5af488` passed six required jobs in run `46116077981`, including local E2E. That result does not validate the rebased head `56bd866`, which needs fresh CI. No separate clean-room rerun was performed; the documentation change
 does not modify implementation, and the PR workflow owns its one local cycle.
 
 ## Issues, alternatives, and limitations
@@ -58,6 +63,4 @@ added. No AWS calls, downloads, infrastructure changes, GPU runtime, or cost.
 
 ## Evidence and outstanding work
 
-Evidence includes the diff, local link/whitespace checks, and GitHub run
-`46100965350`. Those establish documentation consistency only, not runtime
-compatibility. The rebased head needs CI and human review; merge remains subject to authorization.
+Prior evidence includes successful PR #70 run `46116077981` and local diff/link checks. Those establish documentation consistency only, not runtime compatibility. The new rebased head needs CI and human review; merge remains subject to authorization. The designated clean-room record at source `49076a5`, run `46114955314`, validates local CPU only.

@@ -182,6 +182,8 @@ evidence.
 
 | PR #69 restack on current CI-readiness parent | 2026-11-28 | Cost planning / PR #69 | Rebase and document review | Cost estimate remains `$18.5193` with all assumptions labeled; PR #69 is locally based on PR #68 head `6afa0ef`. | Prior passing CI run `46115952390` does not validate the new head `bc0ea0e`; no new AWS/GPU action or spend. |
 
+| PR #70 rebase on refreshed cost branch | 2026-11-28 | Architecture preparation / PR #70 | Rebase and documentation review | Candidate versions remain labeled as researched pins; PR #70 is locally based on PR #69 head `f21d61a`. | Previous CI passed on old head `e5af488`; current local head `56bd866` is unpublished and not validated for runtime or L4 compatibility. |
+
 ## Entry format for future evidence
 
 For every new item, record:
