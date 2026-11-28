@@ -434,6 +434,18 @@ JSON outside public Git. Do not compare results when prompt/output shapes differ
 Stop a test on out-of-memory, runaway queue growth, disk pressure, or when remaining
 runtime/cost reserve becomes insufficient.
 
+Run the bounded CUDA C++ and PyTorch labs before LLM benchmarks. Check the Triton
+plan locally with `make gpu-triton-plan`; on the approved host, use the separately
+confirmed `make gpu-ec2-triton` wrapper. For one short Nsight Systems capture, use
+the prepared command in `benchmarks/cuda_performance/README.md`. It records the
+host/API/kernel timeline for the CUDA vector-add exercise, not a representative
+serving benchmark. Run Nsight Compute only if its CLI and hardware counters are
+available; its counter replay changes timings and may require administrator access.
+Record counter restrictions instead of changing driver policy. Do not collect Nsight
+and DCGM hardware counters concurrently, and keep both report files private outside
+Git. This adds a small bounded profiling exercise to the GPU batch, not a separate
+instance session.
+
 The static direct-server matrix is defined in `benchmarks/gpu_inference/workloads.json`.
 It starts with 256/64, 1,024/128, and 4,096/128 input/output token shapes; uses 100
 measured prompts after five warm-ups and three repetitions; and holds short-prompt

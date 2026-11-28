@@ -512,6 +512,69 @@ and the result matches the expected value. Observe GPU activity during the workl
 memory. Compare them with `nvidia-smi`, driver output, and the locked requirements.
 Do not interpret CPU fallback as success.
 
+### Check the Triton and Nsight profiling plans
+
+The Triton kernel is a separate, bounded Python implementation of vector addition.
+On the **local workstation**, check its workload without loading CUDA packages or
+touching a GPU:
+
+```bash
+make gpu-triton-plan
+```
+
+On the **EC2 host through SSM**, after the exact batch is approved, run the guarded
+Triton experiment:
+
+```bash
+GPU_EC2_TRITON_CONFIRM=run make gpu-ec2-triton
+```
+
+The wrapper checks IMDSv2 account, instance, region, instance type, and one visible L4,
+then uses the pinned `/opt/gpu-lab/torch-venv` Python environment. It limits runtime to
+60 seconds by default (120 maximum) and writes a mode-0600 aggregate JSON result under
+`/var/tmp/gpu-lab/cuda-performance/`. **Expected:** one L4 is reported, the output
+matches PyTorch exactly, and the private result file contains timing and software
+metadata. The byte-rate is only an effective traffic estimate, not measured DRAM
+bandwidth.
+
+For **Nsight Systems**, first check whether `nsys` is present in the installed toolkit.
+Use it on the small CUDA C++ vector-add program, which verifies the L4 before running:
+
+```bash
+mkdir -p /var/tmp/gpu-lab/profiling
+chmod 700 /var/tmp/gpu-lab/profiling
+command -v nsys
+nsys --version
+nsys profile --trace=cuda,nvtx --sample=none --cpuctxsw=none \
+  --force-overwrite=true --stats=true \
+  --output=/var/tmp/gpu-lab/profiling/vector-add \
+  /tmp/gpu-lab-vector-add 1048576 5 20
+```
+
+The capture shows CUDA API and kernel timeline behavior; profiling adds overhead, so
+do not use its duration as an ordinary benchmark result. **Expected:** an
+`vector-add.nsys-rep` file and a CUDA kernel summary. Retain the report privately.
+Review it with `nsys stats --report cuda_gpu_kern_sum
+/var/tmp/gpu-lab/profiling/vector-add.nsys-rep`.
+
+Nsight Compute (`ncu`) can collect kernel counters, but NVIDIA's driver may restrict
+those counters to administrators. Run one bounded sample only if `ncu` is installed
+and available in the reviewed experiment:
+
+```bash
+ncu --version
+sudo ncu --set basic --launch-count 1 --force-overwrite \
+  --export /var/tmp/gpu-lab/profiling/vector-add \
+  /tmp/gpu-lab-vector-add 1048576 5 20
+```
+
+If it reports `ERR_NVGPUCTRPERM`, record the restriction and skip those counters; do
+not weaken driver security settings. Run Nsight and DCGM hardware-counter profiling at
+separate times because they can contend for the same counters. If the selected CUDA
+Toolkit does not include `nsys` or `ncu`, record it as unavailable rather than adding
+an unreviewed package during the paid run. The [CUDA lab guide](../../benchmarks/cuda_performance/README.md)
+explains the metrics, limitations, and official references.
+
 ## 8. Serve the Qwen model manually with vLLM
 
 The first model is `Qwen/Qwen2.5-1.5B-Instruct` at revision

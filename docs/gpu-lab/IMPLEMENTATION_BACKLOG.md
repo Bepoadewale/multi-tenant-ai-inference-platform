@@ -252,9 +252,12 @@ and teardown/absence commands are ready.
 
 **Status:** PR #50 contains a non-billable ordered install manifest and hashed PyTorch lock. PR #57 adds a universal hash-locked Ansible 2.21.6 controller and local-host role for the dated Ubuntu/NVIDIA/CUDA/Docker candidate set. Its six checks, including one clean-room local run, passed on head `4795f12` in `46045068200`; PR #57 is ready for review. No GPU host has been configured; candidates are not runtime-verified.
 
-- [ ] Select and pin a standard Ubuntu 24.04 x86_64 AMI, kernel, NVIDIA driver,
-  CUDA Toolkit, Docker Engine, NVIDIA Container Toolkit, Python, and PyTorch after
-  verifying the exact version matrix against the pinned vLLM build.
+- [x] Select and pin a candidate standard Ubuntu 24.04 x86_64 AMI, R580.196.11 host
+  driver, CUDA Toolkit 13.0.3, Docker Engine 29.9.3, NVIDIA Container Toolkit 1.20.2,
+  Python 3.12, standalone PyTorch 2.14.0+cu130, vLLM 0.34.0, and the pinned Qwen
+  revision using official release and artifact metadata. Version-family compatibility
+  is researched on paper; live kernel, signed-index, package-install, model-license,
+  artifact, and runtime verification remain mandatory before or during the L4 batch.
 - [x] Record ordered host/container components, candidate versions, verification
   points, stop conditions, and items deliberately kept off the host in
   `GPU_HOST_INSTALL_MANIFEST.md`.
@@ -262,8 +265,9 @@ and teardown/absence commands are ready.
   CPython 3.12 / Linux x86_64; keep the install separate from the vLLM image.
 - [ ] Recheck signed package indexes and exact package versions against the pinned AMI
   and live Ubuntu kernel before launch; retain the reviewed package metadata.
-- [ ] Prepare scripts, packages, commands, output capture, and recovery steps before
-  launching paid compute.
+- [x] Prepare install automation, CUDA/PyTorch/Triton experiments, bounded host
+  commands, output capture, and recovery steps before paid compute; the commands are
+  recorded in the host manifest, manual guide, and batch runbook.
 - [ ] Manually install the driver and run `nvidia-smi`, a CUDA container, and a
   synchronized PyTorch computation on the L4.
 - [x] Prepare the Ansible role, signed-repository configuration, version pins, and
@@ -281,16 +285,18 @@ sanitized output are retained, and a repeated Ansible run makes no unintended ch
 ### Package 4 — CUDA performance laboratory
 
 **Status:** PR #49 (`codex/gpu-cuda-lab-preparation`) is open. Its current restacked
-head passes all five required jobs. The bounded CUDA C++ vector-add and synchronized
-PyTorch matrix/transfer lab is static preparation. No kernel has been compiled and no
-real measurements exist.
+head passes all five required jobs. PR #65 prepares a Triton vector-add experiment and
+documented Nsight Systems/Compute profiling commands. These are static/local checks;
+no kernel has been compiled on a GPU and no real measurements exist.
 
 - [x] Prepare bounded CPU/GPU vector and matrix operations, separate host/device
   copies, supported precision checks, and warmup/repeat controls.
 - [x] Use CUDA events plus explicit synchronization for GPU timings; test the dry-run
   without importing PyTorch or touching a GPU.
-- [ ] Prepare optional Triton/Nsight exercises after runtime compatibility and tool
-  availability are confirmed.
+- [x] Prepare an optional Triton vector-add experiment using the existing hash-locked
+  Triton dependency, with a no-GPU plan, L4/host guard, result verification, runtime
+  cap, and private output. Document short Nsight Systems/Compute samples, counter
+  permission limits, package-availability checks, and separation from normal timings.
 - [ ] Compile and execute the experiments on the real single L4.
 - [ ] Record design, warm-up, repetitions, hardware/software context, raw values, and
   profiler availability before interpreting results.
