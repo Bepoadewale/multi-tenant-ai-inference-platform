@@ -2371,3 +2371,14 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **CI:** PR #76 run `46168201575` and #77 run `46168512412` are in progress. PR #78 old remote head `6aeb638b3cfe63ba9832e72d0ce3f3786dd7bfdd`; current local head `c8c8eb3` is unpublished and needs fresh CI.
 - **AWS / GPU / cost:** no AWS call, mutation, instance, GPU operation, model download, or spend. Quota approval does not complete the remaining launch gates.
 - **Next:** run the docs validator and diff check after status edits, publish with exact lease against old PR #78 head, update its PR body, and watch one fresh CI run.
+
+## 2026-11-28 — Restack and validate resource tags in PR #79
+
+- **Date and time:** 2026-11-28 17:08 UTC.
+- **Phase:** Phase 2 ownership, cost-attribution, and expiry metadata; non-billable tests.
+- **Starting state:** PR #79 was based on old PR #78 head `6aeb638`; current PR #78 head is `179240c`.
+- **Changes:** rebased the explicit tag map and mocked tag test onto current PR #78; retained the schedule-group tagging limitation because the locked provider schema does not expose schedule tags. Kept refreshed parent status records during conflict resolution.
+- **Validation:** `make gpu-ec2-validate` passes Terraform formatting, validation, and five mocked tests (expiry, network, and resource tags). `make gpu-docs-validate` checked 30 files. No AWS API call was made.
+- **CI:** PR #76 run `46168201575` passed. PR #77 run `46168512412` and #78 run `46168796270` are in progress. PR #79 old remote head `efe7eed486a0683cbc48d684137c8c5cd11d35a6`; local rebased implementation head `f369b9e` needs current-head CI.
+- **AWS / GPU / cost:** no mutation, resource, instance, GPU operation, model download, or spend. Quota approval does not clear the remote-state, Budget, exact-plan, live capacity, expiry, or separate apply gates.
+- **Next:** publish #79 with an exact lease against its old remote head, update the PR description, and monitor one CI run.

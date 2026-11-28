@@ -13,13 +13,13 @@ remote-state plan, updated price/AZ-capacity review, independent expiry check, a
 separate apply authorization remain required. The user-set $25 total ceiling remains.
 Old quota-denial statements below are dated historical snapshots, not current state.
 
-**Latest PR checks (2026-11-28):** PRs #71–#75 passed refreshed CI; PR #76 head
-`2f2456d` run `46168201575` is in progress. PR #77 expiry guardrails are rebased on
-current PR #76 and need fresh CI. The three mocked Terraform expiry tests pass locally.
+**Latest PR checks (2026-11-28):** PRs #71–#76 passed refreshed CI. PR #77 current
+head `7ee48eb` run `46168512412` and PR #78 current head `179240c` run `46168796270`
+are in progress. The three mocked Terraform expiry tests and four combined expiry/
+network tests pass locally on their current stacks.
 
-PR #77 current head `7ee48eb` run `46168512412` is in progress. PR #78 network
-guardrail tests are locally rebased on #77 at `c8c8eb3`; all four mocked expiry and
-network cases pass through `make gpu-ec2-validate`. Fresh CI for #78 is pending.
+PR #79 resource-tag guardrails are locally rebased on #78 at `f369b9e`; five mocked
+cases pass through `make gpu-ec2-validate`. Its fresh CI is pending.
 
 ## Current state
 
