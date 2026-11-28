@@ -17,11 +17,19 @@ target clear.
   the remote backend. The preflight requires four On-Demand G/VT vCPUs; the latest
   applied quota is zero. The remote-state plan is therefore not available through the
   guarded command until quota changes. Do not bypass that safety check.
+- The exact-name AWS inventory recorded on 2026-11-26 found the planned shared S3
+  state bucket, DynamoDB lock table, and budget absent. The bootstrap preview has
+  seven creates and an invalid placeholder email. After quota changes, the remote plan
+  still requires separately authorized bootstrap resources and a verified budget
+  recipient. Do not treat quota approval as authorization to create them.
 - A separate workflow run `46093697237` appeared on the branch push for the
   manually-dispatched AWS OIDC workflow. GitHub reported zero jobs and no logs. The
   workflow file requires a manual dispatch and explicit inputs; no AWS step ran. The
   reason for the empty push event is unknown and does not affect the required PR CI.
 - The untracked root `uv.lock` belongs to the user and remains untouched.
+- PR #67 commit `609dd48` passed all six required jobs in run `46094571561`, including
+  the workflow local E2E cycle. This was the pre-follow-up head; inspect GitHub for the
+  current check rollup.
 
 ## Research and design
 
@@ -31,6 +39,8 @@ target clear.
   for current PR heads, checks, reviews, and merge state.
 - Keep Terraform preflight guards intact. Quota approval can enable a reviewed plan;
   it does not authorize an apply or GPU spend.
+- The shared state/budget bootstrap remains an AWS mutation with its own review and
+  authorization gate. Keep this distinct from the quota gate.
 - Treat the zero-job workflow run as an unexplained failed run, not as a cloud failure
   or successful OIDC validation.
 
@@ -41,6 +51,10 @@ target clear.
 - [x] Label older package status notes as historical snapshots.
 - [x] Record that the remote plan is stopped by the zero-quota guard and that the
   manually-dispatched AWS workflow did not run any job.
+- [x] Record the absent shared-state/budget prerequisites and separate bootstrap
+  authorization gate.
+- [x] Pass all six required checks on initial PR commit `609dd48` in run
+  `46094571561`, including one workflow local E2E cycle.
 - [x] Add the ticket to the documentation index, evidence manifest, and journal.
 - [ ] Obtain human review; do not merge without owner authorization.
 
@@ -53,15 +67,16 @@ gh pr list --state open --limit 100 \
   --json number,isDraft,statusCheckRollup
 ```
 
-The query found 37 open, non-draft PRs with completed successful displayed checks.
-Local documentation checks and `git diff --check` are recorded in the execution
-journal. No separate clean-room run was started; the PR workflow already performed
-one local E2E cycle on PR #66's final head.
+The query found 37 open, non-draft PRs with completed successful displayed checks at
+01:40Z, before PR #67 opened. Local documentation checks and `git diff --check` are
+recorded in the execution journal. PR #66's final head and PR #67's initial commit
+each passed the workflow local E2E once; no separate manual clean-room run was started.
 
 ## Security and financial considerations
 
 No AWS command, credential, resource mutation, GPU operation, model download, or spend
-was used for this ticket. The plan guard was reviewed but not bypassed. The $25 cap,
+was used for this ticket. The plan guard was reviewed but not bypassed. The bootstrap
+preview is not apply-ready and no placeholder budget alert will be used. The $25 cap,
 quota gate, exact-plan review, expiry safeguards, and explicit apply authorization
 remain in force.
 
