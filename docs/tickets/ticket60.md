@@ -99,3 +99,17 @@ overhead. Semaphore wait is measured in the client and is not server queue depth
 Client cancellation and lease recovery are tested separately. A status distribution
 from one short run is not a production admission guarantee. No real gateway, vLLM,
 AWS, L4, cancellation, server queue depth, benchmark, or cost result is claimed.
+
+
+## 2026-11-28 restack and local verification
+
+PR #60 was restacked from former PR #58 head `59925fd` onto current PR #58 head
+`fa4d819`; this PR is a sibling of PR #59, not its descendant. Eight PR-specific
+commits were replayed. The worktree did not have a `.venv`, so the first direct test
+command stopped before collection; the existing PR #58 Python 3.12 environment was
+used without changing dependency state.
+
+The focused test suite passed **8 tests**, Ruff passed, and the no-network dry run
+reported 18 planned requests at concurrency 6 for all three tenants with no content
+saved. `git diff --check` passed. No real inference request, GPU, model download, AWS
+operation, or spend occurred. PR #58 run `46162221680` subsequently passed all six required checks; sibling PR #59 run `46162611345` remained in progress. Refreshed CI remains to be triggered on the new PR #60 head.
