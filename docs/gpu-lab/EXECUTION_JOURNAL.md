@@ -17,6 +17,17 @@
   remaining non-billable work and do not merge without authorization.
 
 
+## 2026-11-28 — Restack and validate PR #58 local tenant and operator preparation
+
+- **Phase:** Phase 2 remains quota-blocked; Phase 3–6 code and instructions are being prepared without a GPU.
+- **Branch / PR:** `codex/gpu-manual-reproduction-guide`, PR #58, rebased from former base `4795f12` onto PR #57 head `d5e4570`.
+- **Rebase choice:** kept the updated upstream goal/status text where old PR #58 commits carried stale snapshots. PR #58-specific failures remain in ticket #58 and this journal; source and test changes remain in the branch diff.
+- **First test attempt:** focused gateway tests failed during collection because the new worktree did not contain the ignored, locally generated `models/tiny-intent-classifier.onnx` CPU fixture. Ran `make install` in the new PR #58 worktree; it created the local Python environment and both local ONNX fixtures. No clean-room cleanup was run.
+- **Validation:** `make verify` passed Ruff, **153 tests** (2 skipped), dependency audit, Compose/monitoring checks, and benchmark/evaluation/CUDA dry-run plans. One existing Starlette/httpx warning remains. The suite made zero GPU operations and zero model-network requests.
+- **Historical troubleshooting retained:** earlier PR #58 workflows failed because the Trivy installer could not locate the requested versions and the smoke script hid a failing assertion. The package switched to a checksum-verified release archive and named, secret-safe smoke assertions. The initial Redis outage drill exposed HTTP 500 from a rollout-state read; the fix returns fail-closed 503 and persists rollout state before changing local weights. Earlier CI validated recovery and cross-gateway cancellation using local CPU Compose.
+- **Cost and limits:** no AWS, GPU, model download, or cloud spend. No local clean-room run was performed; keep the single integrated clean-room run for after the stack stabilizes.
+- **Next:** publish the rebased branch with an exact force-with-lease, run its required checks once, then continue restacking PRs #59–#71.
+
 ## 2026-11-28 — Rebase and validate Ansible host configuration
 
 - **Phase:** Phase 3 static host-configuration preparation; no GPU host access.

@@ -223,3 +223,27 @@ recovery. No separate manual clean-room run was launched.
 The guide cannot yet include actual command output or empirically confirmed expected
 GPU metrics because no L4 instance is available. Those sections remain prospective
 until evidence from a real approved GPU session is collected.
+
+## Rebase and local validation follow-up — 2026-11-28
+
+PR #58 was rebased from its former PR #57 base `4795f12` onto updated PR #57 head
+`d5e4570`. Repeated stale goal/journal snapshots were resolved in favor of the updated
+base; PR #58's implementation history and failure analysis remain in this ticket and
+the execution journal.
+
+The first focused test attempt failed during collection because this new worktree did
+not contain the ignored, locally generated `models/tiny-intent-classifier.onnx` CPU
+fixture. `make install` created the project virtual environment and both CPU model
+fixtures in this isolated worktree. Then `make verify` passed Ruff, **153 tests**
+(2 skipped), dependency audit, Compose/monitoring checks, and benchmark, evaluation,
+and CUDA dry-run plans. A Starlette/httpx deprecation warning remains. This was not a
+clean-room run, did not use a GPU, and made no AWS calls. The single integrated
+clean-room run remains pending for after the stack stabilizes.
+
+The older failure history is preserved above: two Trivy installer paths could not
+find their requested versions; the smoke script initially hid which assertion had
+failed; and the first local Redis outage drill detected HTTP 500 before the expected
+fail-closed response. The follow-up uses an integrity-checked Trivy archive, named
+smoke assertions, and shared rollout-state errors mapped to HTTP 503. Run
+`46068015904` later verified local Redis recovery, both gateway 503 responses, and ten
+cross-gateway stream cancellations. These are local CPU results, not L4 evidence.
