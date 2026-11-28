@@ -35,7 +35,7 @@ syntax.
 
 ## Validation
 
-Three focused tests passed. Ruff passed for the checker and tests. `make gpu-docs-validate` checked all 27 README/goal/GPU-lab/current-ticket documents. Full `make verify` passed Ruff, 202 tests (2 skipped), dependency audit, Compose, observability, benchmark/evaluation/CUDA dry runs, and the link target. `make terraform-validate` passed all three roots; `git diff --check` passed. The previous PR #76 head `777335c` passed all six required jobs in run `46131623135`; this is historical after the current restack. No manual clean-room cycle or cloud/GPU operation was run.
+Three focused tests passed. Ruff passed for the checker and tests. `make gpu-docs-validate` checked all 27 README/goal/GPU-lab/current-ticket documents. Full `make verify` passed Ruff, 202 tests (2 skipped), dependency audit, Compose, observability, benchmark/evaluation/CUDA dry runs, and the link target. `make terraform-validate` passed all three roots; `git diff --check` passed. The previous PR #76 head `777335c` passed all six required jobs in run `46131623135`; this is historical after the current restack. On the refreshed local stack, the documentation validator again checked 27 files, all 3 focused tests and Ruff passed, and `git diff --check` passed. Fresh PR CI remains pending. No manual clean-room cycle or cloud/GPU operation was run.
 
 ## Security and financial boundary
 
@@ -49,4 +49,4 @@ cost is incurred.
 
 ## Acceptance status
 
-**The earlier head passed local and PR CI acceptance. The refreshed head still needs CI.** No AWS/GPU validation is claimed.
+**Current local documentation checks pass; fresh PR CI and owner review remain pending.** No AWS/GPU validation is claimed.
