@@ -176,6 +176,9 @@ GPU validation: print `torch.__version__`, `torch.version.cuda`,
 `torch.cuda.is_available()`, device name, and memory; allocate CUDA tensors; multiply
 matrices; call `torch.cuda.synchronize()` before timing; verify the result and observe
 nonzero GPU activity during the workload. A CPU fallback is a failed GPU check.
+The isolated PyTorch wheel and its hash-locked install procedure are documented in
+the [CUDA performance lab guide](../../benchmarks/cuda_performance/README.md). Check
+free disk before installation; do not add these libraries to the vLLM container.
 
 The current vendor docs recommend distribution packages on Ubuntu and describe a
 headless driver path. The exact driver and Toolkit packages are deliberately not
@@ -288,10 +291,10 @@ evidence when available. Until billing settles, label it as an estimate.
 ## Current research set and compatibility decision
 
 The 2026-11-27 research record contains provisional candidates: Ubuntu 24.04 amd64;
-NVIDIA driver package branch/version candidate R580; CUDA Toolkit candidate 13.0.3;
-NVIDIA Container Toolkit `1.20.2-1`; and an official vLLM OpenAI image candidate
-`v0.34.0` with an AMD64 digest. These are **not final pins** and no compatibility has
-been proven on the L4. vLLM's current official Docker guide says CUDA 13 images need
+NVIDIA driver R580.196.11; CUDA Toolkit 13.0.3; NVIDIA Container Toolkit `1.20.2-1`;
+Docker Engine 29.9.3 and Compose plugin 5.8.0; PyTorch `2.14.0+cu130` for CPython
+3.12; and the vLLM OpenAI image `v0.34.0` with an AMD64 digest. These are **not final
+pins** and no compatibility has been proven on the L4. vLLM's current official Docker guide says CUDA 13 images need
 an R580-or-newer host driver normally and describe an explicit compatibility mode
 for selected older driver branches; prefer a compatible native driver instead of
 enabling compatibility implicitly. PyTorch should be installed from the official

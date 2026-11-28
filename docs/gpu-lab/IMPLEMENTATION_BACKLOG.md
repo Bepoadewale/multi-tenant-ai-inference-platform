@@ -141,16 +141,25 @@ and teardown/absence commands are ready.
 
 ### Package 3 — Manual Linux, NVIDIA, CUDA, Docker, and Ansible
 
-**Status:** not started.
+**Status:** non-billable install manifest is in open PR #50 (`codex/gpu-host-install-manifest`); checks are pending and no GPU host has been configured. The documented candidate stack is not a final pin or a runtime-verified combination.
 
 - [ ] Select and pin a standard Ubuntu 24.04 x86_64 AMI, kernel, NVIDIA driver,
   CUDA Toolkit, Docker Engine, NVIDIA Container Toolkit, Python, and PyTorch after
   verifying the exact version matrix against the pinned vLLM build.
+- [x] Record ordered host/container components, candidate versions, verification
+  points, stop conditions, and items deliberately kept off the host in
+  `GPU_HOST_INSTALL_MANIFEST.md`.
+- [x] Resolve and hash-lock the standalone PyTorch 2.14.0 CUDA 13.0 dependencies for
+  CPython 3.12 / Linux x86_64; keep the install separate from the vLLM image.
+- [ ] Recheck signed package indexes and exact package versions against the pinned AMI
+  and live Ubuntu kernel before launch; retain the reviewed package metadata.
 - [ ] Prepare scripts, packages, commands, output capture, and recovery steps before
   launching paid compute.
 - [ ] Manually install the driver and run `nvidia-smi`, a CUDA container, and a
   synchronized PyTorch computation on the L4.
 - [ ] Then implement Ansible roles/playbooks and run them twice to test idempotency.
+- [ ] Resolve the MLflow registry path for the single-GPU release/evaluation phase;
+  MLflow is in the default local Compose but not in the dedicated GPU Compose profile.
 
 **Exit gate:** real GPU and container computation passes, exact versions and raw
 sanitized output are retained, and a repeated Ansible run makes no unintended changes.

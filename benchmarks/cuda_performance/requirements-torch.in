@@ -1,0 +1,2 @@
+# Standalone Linux CUDA validation environment. Keep separate from the vLLM image.
+torch==2.14.0+cu130

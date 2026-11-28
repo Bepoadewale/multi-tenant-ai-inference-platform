@@ -1528,3 +1528,56 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   still required.
 - **Next:** publish the rebased branch using the exact expected remote head, watch one
   current-head CI cycle, and resolve both review threads after it passes.
+## 2026-11-27 — Prepare ordered GPU host install manifest
+
+- **Phase:** Phase 3 static preparation; no GPU host or package install.
+- **Branch:** `codex/gpu-host-install-manifest`, based on PR #49 documentation head
+  `a7afcdf`.
+- **Objective:** make the exact install order and the host/container split easy to
+  review before the short paid execution window.
+- **Work:** added `GPU_HOST_INSTALL_MANIFEST.md` covering Ubuntu, SSM, matched kernel
+  headers, compute-only NVIDIA driver, Toolkit-only CUDA compiler, Docker, NVIDIA
+  Container Toolkit, isolated PyTorch, pinned vLLM, Qwen artifact, gateway/Redis, and
+  the local observability stack. Linked it from the documentation index and status.
+- **Research boundary:** version candidates are copied from dated official-source
+  research; Docker packages and standalone PyTorch still require an exact refreshed
+  selection. The full matrix remains unverified on L4.
+- **Validation:** documentation links, status consistency, and whitespace checks are
+  to be completed before the PR is published.
+- **Security/cost:** no AWS calls, infrastructure, model/image downloads, or spend.
+- **Next:** finish local documentation checks, open the focused PR, and keep the GPU
+  work behind quota, exact-plan, $25, runtime, expiry, and teardown gates.
+
+- **Publication:** opened PR #50 at `1097acb`, stacked on PR #49. Required checks are
+  pending. Local Markdown-link and whitespace checks passed before publication.
+
+## 2026-11-27 — Confirm CUDA preparation PR checks
+
+- **PR / head:** PR #49, docs follow-up head `a7afcdf`.
+- **Result:** all five required jobs passed in run `45999972463`, including Python,
+  manifests, supply-chain, local end-to-end, and GPU observability validation.
+- **Evidence limit:** the workflow used a CPU-only runner; it did not compile CUDA,
+  contact AWS, download a model, or demonstrate L4 behavior.
+- **Cost:** no AWS resources, GPU hours, model or image downloads, or spend.
+
+## 2026-11-27 — Resolve hash-locked PyTorch CUDA dependencies
+
+- **Phase:** Phase 3 static preparation, branch `codex/gpu-host-install-manifest`.
+- **Research:** queried the official PyTorch CUDA 13.0 wheel index and Docker's
+  official Ubuntu 24.04 amd64 package index. Recorded the PyTorch wheel and metadata
+  hashes plus candidate Docker Engine, containerd, Buildx, and Compose package
+  versions/hashes in `RESEARCH_NOTES.md`.
+- **Failed approaches:** the first `uv` resolution put PyPI before the PyTorch index
+  and could not find `torch==2.14.0+cu130`. A direct-wheel resolution began fetching
+  a 529-MiB Torch wheel; it was interrupted before installation. Cache state was not
+  inspected or cleaned. The successful approach made the official PyTorch index the
+  first index and used PyPI as fallback with `first-index` resolution.
+- **Result:** `uv 0.9.15` resolved 29 pinned packages and SHA-256 hashes for CPython
+  3.12 / x86_64 Linux into `requirements-torch.lock`. Resolver fetched a 1.2-MiB
+  setuptools distribution for metadata; no package was installed in the local Python
+  environment. No model or container image was downloaded.
+- **Validation:** the lock includes the selected Torch wheel hash and CUDA dependency
+  versions; final preflight still must refresh and review the lock.
+- **Cost/resources:** no AWS calls, GPU use, or spend.
+- **Next:** add the lock to the focused host-install PR, update installation steps,
+  then validate the package and scripts only on an authorized Ubuntu/L4 host.
