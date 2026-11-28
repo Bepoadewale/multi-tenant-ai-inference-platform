@@ -45,6 +45,6 @@ but the complete $25 cost gate and exact saved-plan review remain separately req
 
 ## Acceptance status
 
-Local Terraform formatting, validation, and all 12 mocked cases pass. PR/CI evidence
-will be recorded in this ticket, the GPU journal, the implementation status, and the
-evidence manifest after publication.
+Local Terraform formatting, validation, all 12 mocked cases, and the 31-file docs link
+check pass. PR #80 is open at head `cf25f6d`; all six required jobs passed in run
+`46139054282`. This is static/local evidence only; no AWS or GPU behavior is claimed.
