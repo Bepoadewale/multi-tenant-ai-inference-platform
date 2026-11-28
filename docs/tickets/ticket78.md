@@ -37,8 +37,11 @@ executable assertion that guarded this shape.
 ## Validation
 
 The previous PR #78 implementation head `5c3bd12` passed six CI jobs in run
-`46135887060`; this is historical after the current restack. On refreshed PR #77
-head `7ee48eb`, the network test and three expiry tests pass with
+`46135887060`; this is historical after the current restack. PR #78's intermediate
+head `179240c` also passed all six jobs in run `46168796270`. The branch is now
+restacked onto PR #77 follow-up head `58165d1`, which records the local cancellation
+demo isolation fix after the earlier local-e2e failure. On the refreshed stack, the
+network test and three expiry tests pass with
 `terraform test -no-color` using the AWS mock provider. `make gpu-docs-validate`
 checked 29 Markdown files after restacking, and `git diff --check` passed. Before this restack,
 `make verify` passed Ruff, 202 repository tests (2 skipped),
@@ -47,7 +50,8 @@ Markdown-link validation. `make terraform-validate` passed the bootstrap, EKS, a
 roots, including all four mocked Terraform tests. `git diff --check` passed. The
 observability validator pulled four digest-pinned images; they were pruned after the
 run, and no containers or image tags remained locally. This was not a clean-room run.
-Fresh PR CI is pending. No new AWS operation or GPU validation occurred.
+Fresh CI for this restacked head is pending. No new AWS operation or GPU validation
+occurred.
 
 AWS documents that security groups begin with no inbound rules, are stateful, and
 allow return traffic for connections initiated by the instance. The chosen policy
@@ -72,5 +76,6 @@ is involved.
 
 ## Acceptance status
 
-Four mocked Terraform tests pass on the refreshed source. Fresh PR CI remains pending.
-No cloud or GPU result is claimed.
+Four mocked Terraform tests pass on the refreshed source. Prior PR #78 CI passed, but
+that result predates the updated base; current-head CI remains pending. No cloud or GPU
+result is claimed.
