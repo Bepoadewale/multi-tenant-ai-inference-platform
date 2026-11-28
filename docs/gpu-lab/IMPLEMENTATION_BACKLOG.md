@@ -22,12 +22,17 @@ pull requests must include the repository's clean-room evidence.
 - PR #37 is open against PR #32 to record the dated Ubuntu/NVIDIA/CUDA, vLLM image,
   and pinned Qwen model compatibility candidates. It is research evidence, not proof
   of GPU execution; exact target-AMI packages and real L4 validation remain open.
-- PR #38 is being prepared as a focused model-artifact verification helper based on
-  PR #37. Its fixture tests do not replace checking the actual downloaded artifact.
+- PR #38 is open as a focused model-artifact verification helper based on PR #37.
+  Head `5256060` records the verifier, fixture tests, and Terraform validation; its
+  documentation-only check run is in progress. Fixture tests do not replace checking
+  the actual downloaded artifact.
+- PR #39 is open against PR #38 to record the quota denial, regional quota checks,
+  and an unsent appeal draft. It does not submit an AWS message or quota request.
 - No AWS resources or GPU instance hours have been used by this goal.
-- The account's applied On-Demand G and VT quota is zero. A 4-vCPU quota increase
-  request was submitted on 2026-11-27 and AWS reports `CASE_OPENED` (pending); see the
-  execution journal. Do not submit a duplicate.
+- The applied On-Demand G and VT quota is zero in `us-east-1`, `us-east-2`, and
+  `us-west-2`. AWS email reports that the 4-vCPU `us-east-1` request was denied, while
+  Service Quotas history still returns `CASE_OPENED`. See the journal and the unsent
+  `QUOTA_APPEAL_DRAFT.md`. Do not submit a duplicate request or launch.
 - The existing repository budget and Terraform state guardrails use a repository-
   scoped bucket and lock table. GPU state must use a unique key namespace, not create
   duplicate guardrails. The budget uses email notifications. A recipient must be
@@ -258,9 +263,10 @@ cost status, educational artifacts, and goal closure are complete.
 - If the complete mandatory work cannot be done under $25, stop paid work, document
   remaining requirements, finish non-billable work, and ask before increasing the
   ceiling or changing the design.
-- The applied G/VT On-Demand quota is currently zero. A user-requested 4-vCPU quota
-  increase is open with AWS; do not submit another request and do not launch until AWS
-  approves it and the exact bounded cost/resource plan and apply gates pass.
+- The applied G/VT On-Demand quota is zero in three checked regions. The first
+  4-vCPU request was denied by email, though the API history remains `CASE_OPENED`.
+  Do not duplicate it or launch. Resolve the status and, if the owner elects to
+  appeal, reopen the existing case using the documented use case.
 - Provisional 12-hour estimate: about `$10.68` before tax for one g6.xlarge, one public
   IPv4, 100 GiB gp3, short-lived S3 state and lock objects, one scheduler invocation,
   and 1 GiB of internet egress. A 25% tax allowance plus `$5` general reserve gives
