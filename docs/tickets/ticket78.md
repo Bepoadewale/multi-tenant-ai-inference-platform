@@ -36,14 +36,18 @@ executable assertion that guarded this shape.
 
 ## Validation
 
-The network test and three expiry tests pass with `terraform test -no-color` using
-the AWS mock provider. `make verify` passed Ruff, 202 repository tests (2 skipped),
+The previous PR #78 implementation head `5c3bd12` passed six CI jobs in run
+`46135887060`; this is historical after the current restack. On refreshed PR #77
+head `7ee48eb`, the network test and three expiry tests pass with
+`terraform test -no-color` using the AWS mock provider. `make gpu-docs-validate`
+checked 29 Markdown files after restacking, and `git diff --check` passed. Before this restack,
+`make verify` passed Ruff, 202 repository tests (2 skipped),
 the dependency audit, Compose and observability validation, GPU dry-run plans, and
 Markdown-link validation. `make terraform-validate` passed the bootstrap, EKS, and GPU
 roots, including all four mocked Terraform tests. `git diff --check` passed. The
 observability validator pulled four digest-pinned images; they were pruned after the
-run, and no containers or image tags remain locally. This was not a clean-room run.
-PR CI remains pending.
+run, and no containers or image tags remained locally. This was not a clean-room run.
+Fresh PR CI is pending. No new AWS operation or GPU validation occurred.
 
 AWS documents that security groups begin with no inbound rules, are stateful, and
 allow return traffic for connections initiated by the instance. The chosen policy
@@ -68,6 +72,5 @@ is involved.
 
 ## Acceptance status
 
-Local mocked-provider tests and full local verification pass. PR #78 implementation
-head `5c3bd12` passed all six required jobs in run `46135887060`. No cloud or GPU
-result is claimed.
+Four mocked Terraform tests pass on the refreshed source. Fresh PR CI remains pending.
+No cloud or GPU result is claimed.

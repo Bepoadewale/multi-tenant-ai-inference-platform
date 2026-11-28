@@ -2360,3 +2360,14 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **CI:** PRs #74 and #75 runs `46167348257` and `46167762231` passed. PR #76 run `46168201575` is in progress. PR #77 old remote head `387b91c4056aef0ecb6c4c5330e24204496c884e`; current local head `7dc4992` needs publication and fresh CI.
 - **AWS / GPU / cost:** no AWS API call, mutation, instance, GPU operation, model download, or spend. Quota is approved, but remote state, Budget/recipient, exact plan/cost, capacity, expiry execution, and separate apply authorization remain open.
 - **Next:** complete documentation checks, push with exact lease against old PR #77 head `387b91c4056aef0ecb6c4c5330e24204496c884e`, update its description, and monitor one fresh CI run.
+
+## 2026-11-28 — Restack and validate network guardrails in PR #78
+
+- **Date and time:** 2026-11-28 17:07 UTC.
+- **Phase:** Phase 2 network safety validation; static and non-billable.
+- **Starting state:** PR #78 was based on old PR #77 head `387b91c`; current PR #77 head is `7ee48eb`.
+- **Changes:** rebased the mocked network test and ticket onto current PR #77. Kept refreshed parent status documentation; the security-group risk-register entry and Terraform test remain.
+- **Validation:** `make gpu-ec2-validate` passed format, validation, and all four mocked Terraform tests (three expiry and one network test). `make gpu-docs-validate` checked 29 Markdown files, and `git diff --check` passed. The Terraform tests assert zero ingress, only TCP 80/443 egress, and the single instance's network references. No AWS network rule or instance was created.
+- **CI:** PR #76 run `46168201575` and #77 run `46168512412` are in progress. PR #78 old remote head `6aeb638b3cfe63ba9832e72d0ce3f3786dd7bfdd`; current local head `c8c8eb3` is unpublished and needs fresh CI.
+- **AWS / GPU / cost:** no AWS call, mutation, instance, GPU operation, model download, or spend. Quota approval does not complete the remaining launch gates.
+- **Next:** run the docs validator and diff check after status edits, publish with exact lease against old PR #78 head, update its PR body, and watch one fresh CI run.

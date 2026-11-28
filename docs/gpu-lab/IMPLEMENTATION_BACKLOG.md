@@ -17,6 +17,10 @@ Old quota-denial statements below are dated historical snapshots, not current st
 `2f2456d` run `46168201575` is in progress. PR #77 expiry guardrails are rebased on
 current PR #76 and need fresh CI. The three mocked Terraform expiry tests pass locally.
 
+PR #77 current head `7ee48eb` run `46168512412` is in progress. PR #78 network
+guardrail tests are locally rebased on #77 at `c8c8eb3`; all four mocked expiry and
+network cases pass through `make gpu-ec2-validate`. Fresh CI for #78 is pending.
+
 ## Current state
 
 - Phase 1 design gate is complete. The repository audit and candidate architecture are recorded in
