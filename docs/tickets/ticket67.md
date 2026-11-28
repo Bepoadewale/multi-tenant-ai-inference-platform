@@ -49,6 +49,7 @@ target clear.
 - [x] Capture one CLI snapshot of all open PRs and their check states.
 - [x] Record the final PR #66 check result and current PR count in the goal and status.
 - [x] Label older package status notes as historical snapshots.
+- [x] Remove stale “current head” claims from the goal's older PR references.
 - [x] Record that the remote plan is stopped by the zero-quota guard and that the
   manually-dispatched AWS workflow did not run any job.
 - [x] Record the absent shared-state/budget prerequisites and separate bootstrap
