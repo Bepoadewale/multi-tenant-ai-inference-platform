@@ -46,6 +46,33 @@ def _nested(after: dict[str, Any], key: str) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
 
+def _resource_expressions(plan: dict[str, Any], address: str) -> dict[str, Any]:
+    configuration = plan.get("configuration")
+    root_module = configuration.get("root_module") if isinstance(configuration, dict) else None
+    resources = root_module.get("resources") if isinstance(root_module, dict) else None
+    if not isinstance(resources, list):
+        raise ValueError("saved plan configuration expressions are missing")
+    matches = [
+        resource
+        for resource in resources
+        if isinstance(resource, dict)
+        and resource.get("mode") == "managed"
+        and resource.get("address") == address
+    ]
+    if len(matches) != 1 or not isinstance(matches[0].get("expressions"), dict):
+        raise ValueError(f"saved plan configuration for {address} is missing or ambiguous")
+    return matches[0]["expressions"]
+
+
+def _references(expression: Any) -> set[str]:
+    if not isinstance(expression, dict):
+        return set()
+    references = expression.get("references")
+    if not isinstance(references, list) or any(not isinstance(item, str) for item in references):
+        return set()
+    return set(references)
+
+
 def validate(
     plan: dict[str, Any],
     *,
@@ -161,6 +188,39 @@ def validate(
             "saved plan expiry must use the project schedule group and exact UTC deadline "
             "to invoke EC2 TerminateInstances"
         )
+
+    # The EC2 ID and IAM role ARN are unknown until apply, so Terraform's planned
+    # values cannot prove their relationship. Its machine-readable configuration
+    # retains expression references; bind both schedule arguments to this exact
+    # instance and the project's narrowly scoped expiry role.
+    schedule_expressions = _resource_expressions(plan, "aws_scheduler_schedule.expiry")
+    target_expressions = schedule_expressions.get("target")
+    if not isinstance(target_expressions, list) or len(target_expressions) != 1:
+        raise ValueError("saved plan expiry must contain one configured termination target")
+    target_expression = target_expressions[0]
+    if not isinstance(target_expression, dict):
+        raise ValueError("saved plan expiry target configuration is invalid")
+    expected_role_references = {"aws_iam_role.expiry.arn", "aws_iam_role.expiry"}
+    expected_instance_references = {"aws_instance.gpu.id", "aws_instance.gpu"}
+    target_arn_expression = target_expression.get("arn")
+    if not isinstance(target_arn_expression, dict) or target_arn_expression.get(
+        "constant_value"
+    ) != "arn:aws:scheduler:::aws-sdk:ec2:terminateInstances":
+        raise ValueError("saved plan expiry target configuration must call EC2 TerminateInstances")
+    if _references(target_expression.get("role_arn")) != expected_role_references:
+        raise ValueError("saved plan expiry target must use the project-only termination role")
+    if _references(target_expression.get("input")) != expected_instance_references:
+        raise ValueError("saved plan expiry target must reference only the project GPU instance")
+
+    policy_expressions = _resource_expressions(plan, "aws_iam_role_policy.expiry")
+    if _references(policy_expressions.get("role")) != {
+        "aws_iam_role.expiry.id",
+        "aws_iam_role.expiry",
+    }:
+        raise ValueError("saved plan expiry policy must attach to the project termination role")
+    expected_instance_arn_references = {"aws_instance.gpu.arn", "aws_instance.gpu"}
+    if _references(policy_expressions.get("policy")) != expected_instance_arn_references:
+        raise ValueError("saved plan expiry policy must reference only the project GPU instance")
 
     return changes
 

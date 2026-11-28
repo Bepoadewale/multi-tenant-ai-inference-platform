@@ -99,7 +99,58 @@ def _plan() -> dict:
                 "change": {"actions": ["create"], "after": after},
             }
         )
-    return {"resource_changes": changes}
+    return {
+        "resource_changes": changes,
+        "configuration": {
+            "root_module": {
+                "resources": [
+                    {
+                        "address": "aws_scheduler_schedule.expiry",
+                        "mode": "managed",
+                        "expressions": {
+                            "target": [
+                                {
+                                    "arn": {
+                                        "constant_value": "arn:aws:scheduler:::aws-sdk:ec2:terminateInstances"
+                                    },
+                                    "role_arn": {
+                                        "references": [
+                                            "aws_iam_role.expiry.arn",
+                                            "aws_iam_role.expiry",
+                                        ]
+                                    },
+                                    "input": {
+                                        "references": [
+                                            "aws_instance.gpu.id",
+                                            "aws_instance.gpu",
+                                        ]
+                                    },
+                                }
+                            ]
+                        },
+                    },
+                    {
+                        "address": "aws_iam_role_policy.expiry",
+                        "mode": "managed",
+                        "expressions": {
+                            "role": {
+                                "references": [
+                                    "aws_iam_role.expiry.id",
+                                    "aws_iam_role.expiry",
+                                ]
+                            },
+                            "policy": {
+                                "references": [
+                                    "aws_instance.gpu.arn",
+                                    "aws_instance.gpu",
+                                ]
+                            },
+                        },
+                    },
+                ]
+            }
+        },
+    }
 
 
 def _validate(plan: dict) -> list[dict]:
@@ -212,6 +263,63 @@ def test_rejects_unsafe_plan_mutations(mutation, message: str) -> None:
     plan = deepcopy(_plan())
     mutation(plan)
     with pytest.raises(ValueError, match=message):
+        _validate(plan)
+
+
+@pytest.mark.parametrize(
+    "address, expression, references, message",
+    [
+        (
+            "aws_scheduler_schedule.expiry",
+            "role_arn",
+            ["aws_iam_role.instance.arn", "aws_iam_role.instance"],
+            "project-only termination role",
+        ),
+        (
+            "aws_scheduler_schedule.expiry",
+            "input",
+            ["aws_instance.other.id", "aws_instance.other"],
+            "only the project GPU instance",
+        ),
+        (
+            "aws_iam_role_policy.expiry",
+            "policy",
+            ["aws_instance.other.arn", "aws_instance.other"],
+            "only the project GPU instance",
+        ),
+    ],
+)
+def test_rejects_expiry_bindings_to_other_resources(
+    address: str, expression: str, references: list[str], message: str
+) -> None:
+    plan = _plan()
+    resource = next(
+        item
+        for item in plan["configuration"]["root_module"]["resources"]
+        if item["address"] == address
+    )
+    target_expression = resource["expressions"]
+    if address == "aws_scheduler_schedule.expiry":
+        target_expression["target"][0][expression] = {"references": references}
+    else:
+        target_expression[expression] = {"references": references}
+
+    with pytest.raises(ValueError, match=message):
+        _validate(plan)
+
+
+def test_rejects_schedule_configuration_for_another_action() -> None:
+    plan = _plan()
+    schedule = next(
+        item
+        for item in plan["configuration"]["root_module"]["resources"]
+        if item["address"] == "aws_scheduler_schedule.expiry"
+    )
+    schedule["expressions"]["target"][0]["arn"]["constant_value"] = (
+        "arn:aws:scheduler:::aws-sdk:lambda:invoke"
+    )
+
+    with pytest.raises(ValueError, match="configuration must call EC2 TerminateInstances"):
         _validate(plan)
 
 

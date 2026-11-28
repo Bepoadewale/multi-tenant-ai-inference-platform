@@ -17,6 +17,47 @@
   remaining non-billable work and do not merge without authorization.
 
 
+## 2026-11-28 — Bind the saved GPU expiry target to project resources
+
+- **Phase:** Phase 2 static-only Terraform safety preparation; no GPU or AWS mutation.
+- **Starting state:** PR #82 final head `d5afac7` was clean and all six required CI
+  jobs passed in run `46143890538`. The saved-plan validator checked the project
+  schedule group and `TerminateInstances` action, but not the configured target role
+  or resource references.
+- **Branch/worktree:** `codex/gpu-expiry-binding-review`, based on PR #82 in
+  `/private/tmp/multi-tenant-ai-inference-platform-pr83`.
+- **Research:** read HashiCorp's official Terraform JSON output format. Since an EC2
+  identifier and generated IAM role ARN can remain unknown until apply, the plan's
+  `change.after` values may omit them; the parsed configuration retains expression
+  references that can be compared by exact resource address.
+- **Changes:** the saved-plan validator now requires the expiry schedule target to
+  reference this GPU instance and the project's expiry role. It also requires the
+  expiry IAM policy's role and resource references to bind to those same resources.
+  Added fixture cases for incorrect target roles and instance references, ticket83,
+  docs index entry, and documentation-link validation.
+- **Failed approaches:** the first test command used `python`, unavailable on the
+  workstation; `python3` was Python 3.14 without pytest. The first test run then
+  exposed an incorrect expectation that the IAM policy's ARN reference also included
+  the `.id` path; the code and fixture were corrected to the actual `.arn` reference.
+- **CI failure and fix:** PR #83 run `46145456879` showed that the shared wrapper
+  test fixture also needed Terraform's configuration expressions. The saved-plan
+  validator correctly refused its older resource-changes-only fixture. Added the
+  same role/instance/action bindings to that fake plan; the combined validator and
+  wrapper suites then passed **39 tests**. A new PR CI run is still required.
+- **Validation:** the focused validator suite passed **24 tests**;
+  Ruff passed, the local docs-link checker validated 34 Markdown files, and
+  `git diff --check` passed. The first local focused run did not include the wrapper
+  suite, which is why CI caught the incomplete fixture update.
+  Terraform fixture checks do not prove the live AWS provider's JSON shape. The next
+  permitted remote plan should confirm it before any apply.
+- **Security/evidence limits:** this checks resource references, not the runtime
+  schedule's successful delivery. Terraform mock tests separately check the policy
+  action and scope; a real scheduled termination remains unverified. No AWS query or
+  mutation, Terraform plan, GPU operation, model download, Docker build/container,
+  local clean-room run, or project spend occurred.
+- **Next:** update the PR record, push the wrapper fixture fix to PR #83, and watch
+  its new CI run. Do not merge without owner authorization.
+
 ## 2026-11-28 — Restack and validate PR #58 local tenant and operator preparation
 
 - **Phase:** Phase 2 remains quota-blocked; Phase 3–6 code and instructions are being prepared without a GPU.
@@ -2471,3 +2512,23 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **AWS / GPU / cost:** no AWS calls, resources, GPU actions, or spend.
 - **Next:** publish PR #82 with an exact force-with-lease, monitor its CI, then restack
   PR #83 onto the verified new head.
+
+## 2026-11-28 — Bind expiry plan to the project instance and role
+
+- **Date and time:** 2026-11-28 17:31 UTC.
+- **Phase:** Phase 2 saved-plan validation; static and local only.
+- **CI:** PR #77 follow-up run `46169578415`, PR #78 run `46170127067`, and PR #79
+  run `46170178018` passed all six jobs. PR #80 run `46170356996` had five jobs
+  passed and local-e2e pending; PR #81 run `46170595453` had three jobs passed and
+  three pending. PR #82 run `46170895199` had Ansible, GPU observability, and
+  manifests passed, with Python, local-e2e, and supply-chain pending.
+- **Changes:** restacked PR #83 on PR #82 head `0164511`. Its plan validator verifies
+  Terraform configuration references bind the schedule role and termination target
+  to this project's expiry role and single EC2 instance. Preserved current parent
+  status records and recorded PR #83 detail in ticket83.
+- **Validation:** the focused tests passed 39 cases; Ruff passed; docs validation
+  checked 34 files; `git diff --check` passed. Current-head CI and live-provider plan
+  shape verification remain outstanding. No clean-room run.
+- **AWS / GPU / cost:** no AWS calls or mutations, GPU, model download, or spend.
+- **Next:** publish PR #83 with an exact force-with-lease and monitor CI; only then
+  restack the current final queued PR #84.

@@ -99,7 +99,60 @@ def _safe_plan_json(ami: str, az: str, expiry: str) -> str:
         }
         for address in sorted(EXPECTED_ADDRESSES)
     ]
-    return json.dumps({"resource_changes": changes})
+    return json.dumps(
+        {
+            "resource_changes": changes,
+            "configuration": {
+                "root_module": {
+                    "resources": [
+                        {
+                            "address": "aws_scheduler_schedule.expiry",
+                            "mode": "managed",
+                            "expressions": {
+                                "target": [
+                                    {
+                                        "arn": {
+                                            "constant_value": "arn:aws:scheduler:::aws-sdk:ec2:terminateInstances"
+                                        },
+                                        "role_arn": {
+                                            "references": [
+                                                "aws_iam_role.expiry.arn",
+                                                "aws_iam_role.expiry",
+                                            ]
+                                        },
+                                        "input": {
+                                            "references": [
+                                                "aws_instance.gpu.id",
+                                                "aws_instance.gpu",
+                                            ]
+                                        },
+                                    }
+                                ]
+                            },
+                        },
+                        {
+                            "address": "aws_iam_role_policy.expiry",
+                            "mode": "managed",
+                            "expressions": {
+                                "role": {
+                                    "references": [
+                                        "aws_iam_role.expiry.id",
+                                        "aws_iam_role.expiry",
+                                    ]
+                                },
+                                "policy": {
+                                    "references": [
+                                        "aws_instance.gpu.arn",
+                                        "aws_instance.gpu",
+                                    ]
+                                },
+                            },
+                        },
+                    ]
+                }
+            },
+        }
+    )
 
 
 def _write_executable(path: Path, content: str) -> None:
