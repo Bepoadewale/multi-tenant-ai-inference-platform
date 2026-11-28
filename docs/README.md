@@ -21,6 +21,7 @@ has run locally, and what the AWS plan reviewed.
 | plain-English concepts for the single-L4 inference stack | [AI infrastructure handbook](gpu-lab/AI_INFRASTRUCTURE_HANDBOOK.md) · [ticket 75](tickets/ticket75.md) |
 | validate relative links in the project goal, GPU guide, and lab documents | [`make gpu-docs-validate`](../Makefile) · [ticket 76](tickets/ticket76.md) |
 | test the single-L4 expiry controls without AWS access | [`terraform test`](../Makefile) · [ticket 77](tickets/ticket77.md) |
+| test that the GPU host has no inbound rules and bounded outbound ports | [mocked Terraform network test](tickets/ticket78.md) |
 | guarded EC2 host configuration, deployment, smoke checks, incident drill, and evidence capture | [manual reproduction guide](gpu-lab/MANUAL_REPRODUCTION_GUIDE.md#use-the-guarded-host-operation-wrappers-after-the-manual-lesson) · [ticket 64](tickets/ticket64.md) |
 | bounded Triton kernel and Nsight profiler preparation | [CUDA performance lab](../benchmarks/cuda_performance/README.md) · [ticket 65](tickets/ticket65.md) |
 | reconciliation of model, quota, CI, and public-evidence facts | [ticket 66](tickets/ticket66.md) |
