@@ -35,6 +35,7 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
       - run: terraform fmt -check -recursive infrastructure/terraform
       - run: make terraform-validate
+      - run: make gpu-docs-validate
       - uses: azure/setup-helm@v4
       - run: make cloud-delivery-validate
   gpu-observability:

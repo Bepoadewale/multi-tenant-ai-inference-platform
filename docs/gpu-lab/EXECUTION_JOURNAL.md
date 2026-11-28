@@ -2328,7 +2328,7 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 
 ## 2026-11-28 — Restack AI infrastructure handbook in PR #75
 
-- **Date and time:** 2026-11-28 16:55 UTC.
+- **Date and time:** 2026-11-28 17:00 UTC.
 - **Phase:** continuous non-billable learning documentation.
 - **Starting state:** PR #75 `codex/gpu-infrastructure-handbook` was based on old PR #74 head `944b457`; current PR #74 head is `3cf1eec`.
 - **Objective:** carry the handbook and its supporting documentation onto the latest bootstrap and quota-control stack.
@@ -2337,3 +2337,15 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **GitHub status:** PRs #71 and #72 refreshed runs `46166173924` and `46166571475` passed. PR #73 run `46167001745` and #74 run `46167348257` are active. Current PR #75 is local and not yet published.
 - **AWS / GPU / cost:** no AWS query or mutation, no instance, GPU operation, model download, or spend. Quota is approved; budget, recipient, remote state, final plan/cost, live capacity, expiry, and separate apply authorization remain open.
 - **Next:** finish link and documentation checks, publish #75 with exact lease against old remote head `a7c6ccd64181d89fb794ffa3bdb02eb1f1d720eb`, update the PR description, and follow one current-head CI run.
+
+## 2026-11-28 — Restack documentation link checks in PR #76
+
+- **Date and time:** 2026-11-28 16:55 UTC.
+- **Phase:** Phase 11 local and CI documentation validation; non-billable.
+- **Starting state:** PR #76 was based on old PR #75 head `a7c6ccd`; current PR #75 head is `76325be`.
+- **Objective:** carry the standard-library Markdown link checker onto the current learning handbook and bootstrap stack.
+- **Conflict handling:** rebased four PR #76 commits. Kept the latest parent goal, status, backlog, and journal during conflicts, then reconciled current PR/CI and quota status. The checker and ticket remain intact.
+- **Validation:** `make gpu-docs-validate` passed on the current stack, checking 27 Markdown files; 3 focused checker tests passed; Ruff passed for the checker and tests; `git diff --check` passed. Prior PR #76 head `777335c` passed all six CI jobs in `46131623135`. The earlier full `make verify` result is documented in ticket76; a new full run is not needed for these status-only changes.
+- **GitHub:** PR #73 run `46167001745` passed. PR #74 run `46167348257` and PR #75 run `46167762231` are active. PR #76 old remote head `dba21f141b36e52f18e8897735b5981fcf74415b`; local rebased head `99fe443` is unpublished.
+- **AWS / GPU / cost:** no AWS call, mutation, GPU, model download, instance-hour, or spend. Quota approval does not clear the remaining cost/state/expiry/apply gates.
+- **Next:** run the current documentation checks and targeted tests, record results, push PR #76 with exact lease against its old remote head, and watch one fresh CI run.

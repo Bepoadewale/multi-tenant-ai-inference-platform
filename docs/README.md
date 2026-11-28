@@ -19,6 +19,7 @@ has run locally, and what the AWS plan reviewed.
 | expanded learning chapters in the pre-GPU report draft | [final report draft](gpu-lab/FINAL_PROJECT_REPORT.md) · [ticket 72](tickets/ticket72.md) |
 | latest AWS quota, capacity, and project-resource reconciliation | [implementation status](gpu-lab/IMPLEMENTATION_STATUS.md) · [cost report](gpu-lab/COST_REPORT.md) · [ticket 73](tickets/ticket73.md) |
 | plain-English concepts for the single-L4 inference stack | [AI infrastructure handbook](gpu-lab/AI_INFRASTRUCTURE_HANDBOOK.md) · [ticket 75](tickets/ticket75.md) |
+| validate relative links in the project goal, GPU guide, and lab documents | [`make gpu-docs-validate`](../Makefile) · [ticket 76](tickets/ticket76.md) |
 | guarded EC2 host configuration, deployment, smoke checks, incident drill, and evidence capture | [manual reproduction guide](gpu-lab/MANUAL_REPRODUCTION_GUIDE.md#use-the-guarded-host-operation-wrappers-after-the-manual-lesson) · [ticket 64](tickets/ticket64.md) |
 | bounded Triton kernel and Nsight profiler preparation | [CUDA performance lab](../benchmarks/cuda_performance/README.md) · [ticket 65](tickets/ticket65.md) |
 | reconciliation of model, quota, CI, and public-evidence facts | [ticket 66](tickets/ticket66.md) |
