@@ -163,10 +163,13 @@ account and AMI, then stopped at the intended fail-closed gate:
 backend, budget, or resource-creation steps. The existing case remains
 `CASE_OPENED`; no AWS mutation occurred. No GPU hours or spend were used.
 
-The API test is now published as commit `56a0493`; all six PR jobs passed in run
-`46065078837`, including the automatic local E2E job. This workflow ran before the
-new Redis outage and cross-gateway cancellation drills were added, so those changes
-still require their own PR workflow. No separate local clean-room run was launched.
+The API test is published as commit `56a0493`; all six PR jobs passed in run
+`46065078837`. The later PR #58 head `351f164db89c34f612ae792532f8302c0be82442`
+passed all six required jobs in run `46068015904`. Its local E2E log confirms ten
+cross-gateway stream cancellations released the request gauges and shared Redis
+leases; both gateways returned HTTP 503 during the Redis outage and recovered
+readiness after Redis restarted. These are local CPU Compose results, not live GPU
+recovery. No separate manual clean-room run was launched.
 
 ## Local, no-GPU admission fault drills
 
@@ -180,12 +183,11 @@ still require their own PR workflow. No separate local clean-room run was launch
   exit trap, and verifies both readiness checks recover. Both are wired into the
   flagship local E2E flow. The manual reproduction guide explains the commands and
   recovery.
-- **Static validation:** Bash syntax, Ruff, bytecode compilation, Make target
-  resolution, and `git diff --check` passed. A first Ruff run found an import-order
-  issue; it was fixed. The new scripts have not yet been run against containers.
-- **Pending:** validate actual cancellation/disconnect semantics and Redis restart in
-  the single GitHub local E2E run on the new PR head; update this record with the
-  result. No second manual clean-room run is planned.
+- **Validation:** Bash syntax, Ruff, bytecode compilation, Make target resolution,
+  and `git diff --check` passed. PR #58 head `351f164db89c34f612ae792532f8302c0be82442`
+  passed all six required jobs in run `46068015904`; its local E2E logs contain the
+  expected cancellation, fail-closed 503, and Redis recovery messages. This is local
+  CPU evidence. No second manual clean-room run is planned.
 - **AWS / GPU:** none. The existing AWS preflight stopped at quota `0.0`; no cloud
   mutation or spend occurred.
 
