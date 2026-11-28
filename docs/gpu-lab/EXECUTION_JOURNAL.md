@@ -2385,7 +2385,7 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 
 ## 2026-11-28 — Resolve local cancellation demo CI failure and refresh GPU input tests
 
-- **Date and time:** 2026-11-28 17:30 UTC.
+- **Date and time:** 2026-11-28 17:24 UTC.
 - **Phase:** Phase 2 non-billable CI and Terraform guardrail readiness.
 - **Starting state:** PR #77 run `46168512412` failed in `local-e2e` after the local
   and overload demos passed. The cancellation demo then received HTTP 429 before it
@@ -2409,3 +2409,26 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   apply authorization gates remain outstanding.
 - **Next:** verify PR #77's single CI watcher result, then refresh dependent PR branches
   and publish PR #80 using an exact lease. Keep the existing one-run clean-room policy.
+
+## 2026-11-28 — Restack network, tag, and input guardrails on the cancellation fix
+
+- **Date and time:** 2026-11-28 17:24 UTC.
+- **Phase:** Phase 2 non-billable readiness; no cloud actions.
+- **Changes:** restacked PR #78 on PR #77 commit `58165d1`, PR #79 on refreshed PR
+  #78 commit `cbf07ef`, and PR #80 on refreshed PR #79 commit `fca2715`. Updated the
+  goal, implementation status, backlog, tickets, journal, and evidence manifest with
+  the failed-run context and current CI state.
+- **Validation:** PR #78 local Terraform validation passed all four mocked cases and
+  the docs checker covered 29 files. PR #79 passed all five mock cases and checked 30
+  Markdown files. PR #80 head `a81c4ca` passed all 12 mock cases and checked 31
+  Markdown files. `git diff --check` passed. These are non-cloud checks; no repeated
+  clean-room cycle was run.
+- **CI:** PR #79's previous head `faf024a` passed all six jobs in run `46169103723`.
+  PR #77 follow-up run `46169578415` showed five jobs passed and local-e2e pending at
+  the last watcher update. Fresh CI for restacked PRs #78 and #79 is pending; PR #80
+  is prepared locally but not yet published.
+- **AWS / GPU / cost:** no AWS call, instance, GPU operation, model download, or
+  spend. Remote state, Budget and recipient, final exact plan/cost, capacity, expiry
+  verification, and separate apply authorization remain open.
+- **Next:** publish PR #80 against its exact current remote head, then monitor its
+  checks and continue with saved-plan PR #81 after the refreshed base checks pass.

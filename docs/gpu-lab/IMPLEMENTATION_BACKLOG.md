@@ -13,15 +13,13 @@ remote-state plan, updated price/AZ-capacity review, independent expiry check, a
 separate apply authorization remain required. The user-set $25 total ceiling remains.
 Old quota-denial statements below are dated historical snapshots, not current state.
 
-**Latest PR checks (2026-11-28):** PRs #71–#76 passed refreshed CI. PR #78 head
-`179240c` passed all six jobs in run `46168796270`. PR #77 head `58165d1` is awaiting
-CI after run `46168512412` failed in the local cancellation demo; the follow-up resets
-the disposable Redis fixture and prints rejection details. PR #79 head `faf024a` has
-five jobs passed and local-e2e pending in run `46169103723`.
-
-PR #80's local refreshed head `565913e` passes its 12 mocked Terraform tests and the
-31-file documentation check; fresh CI is pending publication. These static checks do
-not demonstrate AWS or GPU behavior.
+**Latest PR checks (2026-11-28):** PR #77 follow-up run `46169578415` has five jobs
+passed and local-e2e pending; its previous run failed before cancellation when the
+local Redis demo state was not isolated. PR #78 and #79 have been restacked onto that
+follow-up and each passes its local Terraform mock suite; refreshed CI is pending.
+PR #80 local head `a81c4ca` passes all 12 mocked Terraform tests and the 31-file
+documentation check; publication and fresh CI are pending. These static checks do not
+demonstrate AWS or GPU behavior.
 
 ## Current state
 
