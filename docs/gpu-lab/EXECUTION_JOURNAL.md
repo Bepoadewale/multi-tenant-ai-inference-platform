@@ -2328,7 +2328,7 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 
 ## 2026-11-28 — Restack AI infrastructure handbook in PR #75
 
-- **Date and time:** 2026-11-28 17:00 UTC.
+- **Date and time:** 2026-11-28 17:03 UTC.
 - **Phase:** continuous non-billable learning documentation.
 - **Starting state:** PR #75 `codex/gpu-infrastructure-handbook` was based on old PR #74 head `944b457`; current PR #74 head is `3cf1eec`.
 - **Objective:** carry the handbook and its supporting documentation onto the latest bootstrap and quota-control stack.
@@ -2349,3 +2349,14 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **GitHub:** PR #73 run `46167001745` passed. PR #74 run `46167348257` and PR #75 run `46167762231` are active. PR #76 old remote head `dba21f141b36e52f18e8897735b5981fcf74415b`; local rebased head `99fe443` is unpublished.
 - **AWS / GPU / cost:** no AWS call, mutation, GPU, model download, instance-hour, or spend. Quota approval does not clear the remaining cost/state/expiry/apply gates.
 - **Next:** run the current documentation checks and targeted tests, record results, push PR #76 with exact lease against its old remote head, and watch one fresh CI run.
+
+## 2026-11-28 — Restack and locally validate expiry guardrails in PR #77
+
+- **Date and time:** 2026-11-28 17:00 UTC.
+- **Phase:** Phase 2 expiry safety and Phase 11 static testing; no cloud access.
+- **Starting state:** PR #77 was based on old PR #76 head `dba21f1`; current PR #76 head is `2f2456d`.
+- **Changes:** rebased the mocked Terraform expiry tests and documentation onto current PR #76. Kept refreshed parent goal/status/backlog/journal on conflicts; the expiry Terraform tests and ticket remain.
+- **Validation:** `make gpu-ec2-validate` passed formatting, validation, and three mocked-provider tests. `make gpu-docs-validate` checked 28 Markdown files, and `git diff --check` passed. These Terraform tests render/evaluate configuration only and do not contact AWS.
+- **CI:** PRs #74 and #75 runs `46167348257` and `46167762231` passed. PR #76 run `46168201575` is in progress. PR #77 old remote head `387b91c4056aef0ecb6c4c5330e24204496c884e`; current local head `7dc4992` needs publication and fresh CI.
+- **AWS / GPU / cost:** no AWS API call, mutation, instance, GPU operation, model download, or spend. Quota is approved, but remote state, Budget/recipient, exact plan/cost, capacity, expiry execution, and separate apply authorization remain open.
+- **Next:** complete documentation checks, push with exact lease against old PR #77 head `387b91c4056aef0ecb6c4c5330e24204496c884e`, update its description, and monitor one fresh CI run.

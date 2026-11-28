@@ -44,8 +44,10 @@ would be inappropriate for a cost-safety test.
 
 ## Validation
 
-`make gpu-ec2-validate` passes Terraform formatting, validation, and `terraform test
--no-color` (three tests). `make verify` passed Ruff, 202 repository tests (2 skipped),
+The previous PR #77 head `75f91e3` passed all six CI jobs in run `46133957636`; that
+result predates the current stack. After rebasing onto current PR #76 head `2f2456d`,
+`make gpu-ec2-validate` passes Terraform formatting, validation, and
+`terraform test -no-color` (three tests). Before the restack, `make verify` passed Ruff, 202 repository tests (2 skipped),
 the dependency audit, Compose/observability validation, GPU dry-run plans, and the
 documentation-link checker. `make terraform-validate` passed bootstrap, EKS, and GPU
 roots, including the mocked tests. `git diff --check` passed. The first full test
@@ -73,9 +75,9 @@ GPU hour, model download, or project spend is involved.
 
 ## Acceptance status
 
-Local mocked-provider coverage and full local verification pass. PR #77 implementation
-head `75f91e3` passed all six required jobs in run `46133957636`. No cloud or GPU
-result is claimed.
+Local mocked-provider coverage and `make gpu-ec2-validate` pass on the refreshed
+source. Fresh current-head CI is pending after publication. No cloud or GPU result is
+claimed.
 
 ## References
 
