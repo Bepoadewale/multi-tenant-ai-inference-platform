@@ -25,6 +25,7 @@ handbook labels the architecture as proposed and points readers to current evide
 - Explain NCCL, tensor/pipeline parallelism, multi-node training, and Kubernetes GPU
   scheduling as background only; clearly state they are not implemented here.
 - Link the handbook from both the main README and documentation index.
+- Add a truthful entry to the evidence manifest and keep its table structure valid.
 - Correct the manual reproduction guide's stale quota note: the latest recorded
   applied quota is 4.0 vCPUs, but request history and approval evidence remain
   unresolved, and other cloud gates still block a paid launch.
@@ -40,7 +41,7 @@ GPU, model-serving, benchmark, or production reliability evidence.
 
 ## Validation
 
-Markdown link/heading validation passed across seven touched documents, and `git diff
+Markdown link/heading validation passed across eight touched documents, and `git diff
 --check` passed. Upstream PR #74 head `944b457` passed all six required checks in run
 `46128237140`. PR #75 CI and final editorial review remain pending.
 No software behavior changed; no local clean-room run, AWS operation, image/model
