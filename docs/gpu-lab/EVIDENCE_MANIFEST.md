@@ -185,6 +185,8 @@ evidence.
 
 | PR #70 rebase on refreshed cost branch | 2026-11-28 | Architecture preparation / PR #70 | Rebase and documentation review | Candidate versions remain labeled as researched pins; PR #70 is locally based on PR #69 head `f21d61a`. | Previous CI passed on old head `e5af488`; current local head `56bd866` is unpublished and not validated for runtime or L4 compatibility. |
 
+| PR #71 release-backlog rebase and current snapshot | 2026-11-28 | Release readiness / PR #71 | Local rebase, GitHub CLI inventory, documentation review | Backlog now distinguishes controller source from live host acceptance and records 41 open PRs, three drafts, and the corrected cost estimate at capture time. | Snapshot can become stale; new PR #71 head is not published or CI-validated. No L4 release, GPU rollback, AWS operation, or manual clean-room run occurred. |
+
 ## Entry format for future evidence
 
 For every new item, record:
