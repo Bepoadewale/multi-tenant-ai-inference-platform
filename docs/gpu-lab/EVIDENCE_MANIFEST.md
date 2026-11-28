@@ -166,6 +166,8 @@ evidence.
 | PR #64 and PR #65 refreshed heads | 2026-11-28 | Host operator and CUDA preparation / #64 `2e2e4dd`, #65 current rebased head | GitHub Actions pending | New PR checks were triggered after publication/restack. | CI success until each run reaches terminal success. No AWS or GPU execution. |
 | `make verify` on PR #58 rebased worktree | 2026-11-28 | Local static and CPU validation / PR #58 / `050ef6e` | Local workstation commands | Ruff passed; 160 tests passed and 2 were skipped; dependency audit reported no known vulnerabilities; Compose and monitoring configuration checks passed; benchmark/evaluation/CUDA plans performed zero GPU operations and no network requests. Four exact digest-pinned observability images were removed after the validation and no containers depended on them. | Clean-room reproduction, CUDA execution, model pull, AWS access, real GPU inference, performance results, or AWS cost. |
 
+| PR #66 restack after clean-room evidence registration | 2026-11-28 | Research/readiness / PR #66 | Git rebase and documentation review | PR #66 is locally based on PR #65 documentation head `24ea5e8`, which carries the designated clean-room record. | Current PR #66 head `039619e` is unpublished and unvalidated; no GPU, AWS, or spend. |
+
 ## Entry format for future evidence
 
 For every new item, record:

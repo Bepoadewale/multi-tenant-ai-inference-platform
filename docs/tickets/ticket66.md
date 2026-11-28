@@ -9,9 +9,11 @@ engineering is predominantly real L4 execution and validation.
 
 ## Current state
 
-- PR #65 is open as a draft; rebased head `49076a5` has fresh required checks in
-  progress (run `46114955314`). PR #66 has been locally rebased onto #65 head `49076a5`;
-  it must be pushed and checked before review.
+- PR #65 remains draft. Source head `49076a5` passed all six required jobs in run
+  `46114955314`, including the designated local CPU clean-room cycle. The governance
+  record is now added in PR #65 follow-up head `24ea5e8`; that head needs fresh CI.
+  PR #66 has been locally rebased onto #65 head `24ea5e8`; its rebased head is not yet
+  published and needs current CI.
 - PR #50 remains open; its historical checks passed on the recorded head in run
   `46016503614`.
 - The latest recorded read-only AWS CLI check found applied On-Demand G/VT quota `0.0`.
@@ -45,7 +47,7 @@ engineering is predominantly real L4 execution and validation.
 - [x] Correct model metadata and quota facts while keeping historical events intact.
 - [x] Record commands and evidence in the journal and manifest.
 - [x] Update the documentation index, cost report, audit, research notes, and ticket #50.
-- [x] Rebase PR #66 onto updated PR #65 head `49076a5`.
+- [x] Rebase PR #66 onto updated PR #65 head `24ea5e8`.
 - [ ] Push rebased PR #66 and pass its current required CI.
 - [ ] Obtain human review; do not merge without owner authorization.
 
@@ -82,6 +84,6 @@ remain in force.
 ## Evidence and outstanding work
 
 The execution journal records the checks made on 2026-11-28; the evidence manifest
-records their limits. The current rebased PR head must pass CI before review. The GPU-dependent
+records their limits. The current rebased PR head must pass CI before review. The one selected local CPU clean-room acceptance record is in `docs/governance/VALIDATION.md` (source head `49076a5`, run `46114955314`); it does not establish GPU or AWS behavior. The GPU-dependent
 acceptance criteria remain incomplete until performed on a real L4. The quota appeal
 outcome remains an external dependency.
