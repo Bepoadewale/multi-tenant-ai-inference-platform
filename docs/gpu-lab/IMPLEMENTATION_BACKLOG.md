@@ -69,11 +69,11 @@ Old quota-denial statements below are dated historical snapshots, not current st
 - PRs #30–#65 remain open and unmerged; merge authorization is outstanding. PR #59
   head `0cfbedb` passed six checks in `46162611345`; #60 head `9fc23f2` passed six
   checks in `46162969703`; #61 head `1474752` passed six checks in `46163194154`.
-  PR #62 run `46163327188` and #63 run `46163484312` are still running. PR #64
-  refreshed head `2e2e4dd` is published with fresh CI pending. PR #65 is rebased onto
-  #64 head `2e2e4dd`; its earlier head `49076a5` passed six checks in `46114955314`
-  and includes the designated local CPU clean-room record. Current-head checks for
-  #65 are pending. PR #53
+  PR #62 run `46163327188`, #63 run `46163484312`, and #64 run `46163910205` passed
+  all six refreshed jobs. PR #65 head `37b3b30` is running `46164362977`; its earlier
+  head `49076a5` passed six checks in `46114955314` and includes the designated local
+  CPU clean-room record. PR #66 is rebased onto #65 and needs current CI after
+  publication. PR #53
   code head `e623b75` passed all five checks in `46023306230`, including a Linux AMD64
   gateway image build and CPU end-to-end. PR #56 head `852c873` passed all five checks
   in `46040861818`; PR #57 Ansible head `4795f12` passed all six checks, including a

@@ -12,9 +12,11 @@ claim L4 compatibility.
 - The repository already has a detailed batch runbook and dated vendor research.
 - The workstation is macOS arm64 and is not the target Ubuntu host. No Ansible package
   has been installed on the workstation and no host was configured.
-- The owner reports manually sending an appeal in the existing AWS support case. The
-  last documented applied G/VT quota is zero, so infrastructure remains blocked.
-- This work is [PR #50](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/50), stacked on open PR #49; required checks are pending. It does not authorize an AWS call or spend.
+- The latest read-only check on 2026-11-28 confirms 4.0 applied On-Demand G/VT vCPUs
+  and `CASE_CLOSED`, enough by quota for one `g6.xlarge`. Remote state, Budget,
+  exact-plan/cost, expiry, live capacity, and separate apply authorization still gate
+  infrastructure. No AWS resource has been created by this ticket.
+- This work is [PR #50](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/50), stacked on open PR #49. A read-only GitHub CLI check on 2026-11-28 confirms the PR is open, non-draft, and all five required jobs passed in run `46016503614`. This records CI status only; it does not authorize an AWS call or spend.
 
 ## Research and decisions
 

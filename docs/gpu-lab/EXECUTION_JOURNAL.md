@@ -2226,3 +2226,13 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Validation:** 12 focused Triton tests pass on the rebased source; Ruff passes for the Triton module and tests; `bash -n scripts/gpu-ec2-triton.sh`, `make gpu-triton-plan`, and `git diff --check` pass. The dry run reports zero network requests and zero GPU operations. A link scan found 107 valid relative links across nine changed Markdown files. The previous base passed 12 focused tests and `make verify` (193 passed, 2 skipped); those are not fresh-head checks.
 - **AWS / GPU / cost:** no AWS query or mutation, no GPU or model activity, and no spend. Quota is approved at 4.0 vCPUs; state/locking, Budget, exact plan/cost, expiry, capacity, and separate apply gates remain open.
 - **Next:** publish using an exact lease against old PR #65 head `24ea5e8`, update the PR description, and watch one refreshed CI run.
+
+## 2026-11-28 — Reconcile current quota and research facts in PR #66
+
+- **Phase:** Phase 1 evidence/status upkeep and non-billable readiness work.
+- **Branch / PR:** PR #66 (`codex/gpu-research-fact-reconciliation`) rebased from old PR #65 parent `24ea5e8` onto current PR #65 head `37b3b30`.
+- **Changes:** reconciled current quota/request status in research notes, repository audit, cost report, ticket #50, ticket #66, backlog, and goal-facing status while preserving dated historical quota-zero records. Current read-only AWS result is 4.0 vCPUs applied and `CASE_CLOSED`; quota is not capacity or apply authority. Qwen revision/digest notes remain metadata checks, not model downloads.
+- **Validation:** 62 relative Markdown links across seven changed Markdown files resolve; `git diff --check` passes. No GPU, runtime, or model tests apply to this documentation update.
+- **CI:** refreshed runs for PRs #59–#64 passed, including #64 run `46163910205`; PR #65 run `46164362977` is active. PR #66 requires a new run after publication.
+- **AWS / cost:** no AWS query in this session beyond the documented prior result, no AWS mutation, no spend, no GPU or model download. The $25 ceiling and open launch gates remain.
+- **Next:** run final status/link review, publish #66 with an exact lease against old head `2c5766e`, update its PR description, and monitor its one required CI run.
