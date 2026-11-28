@@ -762,6 +762,34 @@ overlapping Compose operations to leave stale project state. The lock records it
 owner PID; an interrupted owner leaves a stale lock that the next project lifecycle
 command safely reclaims. The lock does not affect other Docker Compose projects.
 
+## PR #57 Ansible host-preparation clean-room evidence
+
+**Tested head:** `4795f12b153b9fdebe48395d852518eb58a02511`.
+**GitHub Actions run:** [46045068200](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/actions/runs/46045068200).
+**Environment:** fresh GitHub-hosted Ubuntu 24.04 runner. This was the repository's
+local CPU Compose path; the job had no AWS credentials and used no L4 hardware.
+
+The `local-e2e` job completed this exact sequence:
+
+```bash
+make install
+make bootstrap-local
+make smoke
+make demo-flagship
+make verify
+make clean-local
+```
+
+The project installed, bootstrapped its local services, passed smoke and flagship
+success/failure demonstrations, completed verification, and ran scoped cleanup. The
+workflow log confirms it removed only this repository's Compose resources, locally
+built images, volumes, and generated artifacts. All six required jobs passed.
+
+This validates the local CPU platform and CI parsing for the Ansible package as it
+existed at that head. It does not execute Ansible against Ubuntu, install a GPU driver,
+or validate check mode or reboot behavior on EC2. The current PR follow-up changes
+check-mode and post-reboot task gates; they need validation on the updated PR head.
+
 ## Operator-console drill-down and model-observability clean-room validation
 
 **Date:** 2026-09-29

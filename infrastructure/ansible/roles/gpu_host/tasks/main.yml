@@ -30,6 +30,7 @@
   register: gpu_host_lspci
   changed_when: false
   check_mode: false
+  when: not ansible_check_mode or gpu_host_lspci_binary.stat.exists
 
 - name: Stop unless the EC2 host exposes exactly one NVIDIA L4
   ansible.builtin.assert:
@@ -39,6 +40,14 @@
     fail_msg: >-
       Expected exactly one NVIDIA accelerator in lspci. The installed driver is
       not required yet, but the host must expose the authorized L4 device.
+  when: not ansible_check_mode or gpu_host_lspci_binary.stat.exists
+
+- name: Explain deferred PCI discovery during check mode
+  ansible.builtin.debug:
+    msg: >-
+      pciutils is not installed and Ansible check mode will not install it.
+      PCI device discovery is deferred until the normal configuration run.
+  when: ansible_check_mode and not gpu_host_lspci_binary.stat.exists
 
 - name: Install matching Ubuntu kernel headers and repository tools
   ansible.builtin.apt:

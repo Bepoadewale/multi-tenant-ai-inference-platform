@@ -83,6 +83,22 @@ Final review added a conditional `pciutils` install for a stock AMI that lacks
 check mode. The playbook syntax check passed again; the updated source needs its own
 CI run because these are execution-safety changes.
 
+## Review follow-up — defer unavailable hardware checks safely
+
+Review found that forcing `lspci` to run during check mode still failed on a stock AMI:
+Ansible previews installing `pciutils` but does not install it. The inventory command
+and its L4 assertion now defer when check mode sees no existing `lspci`; a message says
+the check will run during normal configuration after package installation. Review also
+found that a reboot-required state skipped the NVIDIA command but still ran the GPU
+assertion, preventing the operator from reaching the reboot checkpoint. The assertion
+now shares the same reboot and package-change condition as the command.
+
+After installing the pinned Ansible environment into the project `.venv`,
+`make gpu-ansible-validate` and `git diff --check` passed. These are syntax and static
+checks only; no Ubuntu host, GPU, package installation, or check-mode execution was
+used. PR CI must validate the updated source head. Manual installation, post-reboot
+GPU checks, and idempotency remain open for the approved L4 batch.
+
 Syntax validation and `--list-tasks` parse the playbook; neither executes a task or
 proves package/driver/GPU compatibility. One initial validation shell command ran
 from the wrong working directory and could not resolve the Ansible binary. Rerunning

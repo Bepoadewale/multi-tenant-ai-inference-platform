@@ -25,6 +25,9 @@
     fail_msg: >-
       NVIDIA driver verification failed. Expected one {{ gpu_host_gpu_name }};
       inspect nvidia-smi and the kernel module before proceeding.
+  when: >-
+    not gpu_host_reboot_required.stat.exists and
+    not gpu_host_driver_install.changed
 
 - name: Check the installed CUDA compiler
   ansible.builtin.command:
