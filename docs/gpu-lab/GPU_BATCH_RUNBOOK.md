@@ -130,8 +130,11 @@ make gpu-ec2-plan
 make gpu-ec2-apply
 ```
 
-The apply wrapper must verify the planned digest and the expected account before
-Terraform can create resources. This creates one `g6.xlarge` only. Use Systems
+The exported account, AZ, AMI, expiry, and reviewed saved-plan digest must remain the
+same between plan and apply. The wrapper checks the plan's allowed resources and
+security settings twice and prints only a sanitized summary; it also verifies the
+expected account before Terraform can create resources. This creates one `g6.xlarge`
+only. Use Systems
 Manager Session Manager from the local workstation for host administration; do not
 open an SSH or application port to the internet. Confirm the instance is SSM-online
 before running package installation. If the apply result is uncertain, inspect its

@@ -170,7 +170,7 @@ gpu-ec2-triton:
 gpu-release-controller-help:
 	$(PY) scripts/gpu_release_controller.py --help
 gpu-docs-validate:
-	$(PYTHON) scripts/check_gpu_docs_links.py README.md docs/README.md docs/goals/SINGLE_L4_GPU_INFRASTRUCTURE_GOAL.md docs/gpu-lab/*.md docs/tickets/ticket74.md docs/tickets/ticket75.md docs/tickets/ticket76.md docs/tickets/ticket77.md docs/tickets/ticket78.md docs/tickets/ticket79.md docs/tickets/ticket80.md
+	$(PYTHON) scripts/check_gpu_docs_links.py README.md docs/README.md docs/goals/SINGLE_L4_GPU_INFRASTRUCTURE_GOAL.md docs/gpu-lab/*.md docs/tickets/ticket74.md docs/tickets/ticket75.md docs/tickets/ticket76.md docs/tickets/ticket77.md docs/tickets/ticket78.md docs/tickets/ticket79.md docs/tickets/ticket80.md docs/tickets/ticket81.md
 gpu-ec2-bootstrap-preview-plan:
 	./scripts/gpu-ec2-bootstrap-preview-plan.sh
 gpu-ec2-bootstrap-plan:

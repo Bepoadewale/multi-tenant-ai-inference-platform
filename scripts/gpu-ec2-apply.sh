@@ -7,6 +7,7 @@ set -euo pipefail
 }
 : "${EXPECTED_AWS_ACCOUNT_ID:?set EXPECTED_AWS_ACCOUNT_ID}"
 : "${GPU_EC2_AZ:?set GPU_EC2_AZ}"
+: "${GPU_EC2_UBUNTU_AMI_ID:?set the same reviewed Canonical Ubuntu AMI ID used to plan}"
 : "${GPU_EC2_EXPIRES_AT:?set the exact UTC expiry}"
 : "${GPU_EC2_PLAN_SHA256:?set the reviewed saved-plan SHA-256}"
 
@@ -24,4 +25,10 @@ export AWS_PROFILE="${AWS_PROFILE:-ai-platform-pilot-key}"
 export AWS_REGION="${AWS_REGION:-us-east-1}"
 export GPU_EC2_INSTANCE_TYPE="g6.xlarge"
 "$root/scripts/gpu-ec2-preflight.sh"
-terraform -chdir="$root/infrastructure/terraform/environments/gpu-ec2" apply -input=false "$plan_file"
+terraform_root="$root/infrastructure/terraform/environments/gpu-ec2"
+terraform -chdir="$terraform_root" show -json "$plan_file" |
+  GPU_EC2_UBUNTU_AMI_ID="$GPU_EC2_UBUNTU_AMI_ID" \
+    GPU_EC2_AZ="$GPU_EC2_AZ" \
+    GPU_EC2_EXPIRES_AT="$GPU_EC2_EXPIRES_AT" \
+    python3 "$root/scripts/gpu_ec2_plan_summary.py"
+terraform -chdir="$terraform_root" apply -input=false "$plan_file"

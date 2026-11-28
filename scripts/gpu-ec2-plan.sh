@@ -36,5 +36,11 @@ terraform -chdir="$terraform_root" plan -input=false \
   -var="expires_at=${GPU_EC2_EXPIRES_AT}" \
   -out="$plan_file"
 
+terraform -chdir="$terraform_root" show -json "$plan_file" |
+  GPU_EC2_UBUNTU_AMI_ID="$GPU_EC2_UBUNTU_AMI_ID" \
+    GPU_EC2_AZ="$GPU_EC2_AZ" \
+    GPU_EC2_EXPIRES_AT="$GPU_EC2_EXPIRES_AT" \
+    python3 "$root/scripts/gpu_ec2_plan_summary.py"
+
 python3 -c 'import hashlib,pathlib,sys; print(hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest())' "$plan_file"
 echo "Review this exact plan and its cost/resource scope before any apply. The saved plan is local and must not be committed."
