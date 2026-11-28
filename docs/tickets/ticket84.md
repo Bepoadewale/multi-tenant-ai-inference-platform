@@ -1,6 +1,6 @@
 # Ticket 84 — Verify the single-L4 network topology in the saved plan
 
-**Status:** [PR #84](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/84) is restacked on refreshed PR #83 head `142d0f3`. Published head `f2963db` passed all six CI jobs in run `46173687147`. The branch passes 67 focused tests, 12 mocked Terraform cases, Ruff, documentation validation across 35 files, and `git diff --check`. Owner review remains pending. No AWS operation.
+**Status:** [PR #84](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/84) is restacked on refreshed PR #83 head `142d0f3`. Published head `5ba4470` passed all six CI jobs in run `46175433425`. The branch passes 67 focused tests, 12 mocked Terraform cases, Ruff, documentation validation across 35 files, and `git diff --check`. Owner review remains pending. No AWS operation.
 
 ## Objective
 
@@ -102,5 +102,6 @@ artifact tests pass (**67 tests**), Ruff passes for the changed Python files,
 Restacked head `798b2e8` passed all six required CI jobs in run `46171879043`. The
 status follow-up head `4a4f542` also passed all six, including local-e2e, in run
 `46172702249`. The follow-up head `f2963db` also passed all six checks in run
-`46173687147`. No AWS plan, apply, infrastructure, GPU operation, model download, or
+`46173687147`. The history-correction head `5ba4470` also passed all six jobs in run
+`46175433425`. No AWS plan, apply, infrastructure, GPU operation, model download, or
 spend occurred during this restack.

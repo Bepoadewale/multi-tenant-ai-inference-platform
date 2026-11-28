@@ -5,11 +5,11 @@ claim that any cloud or GPU phase has run. Every package uses its own focused br
 and pull request. Review and required CI checks must pass before merge; implementation
 pull requests must include the repository's clean-room evidence.
 
-## Latest PR and engineering status — 2026-11-28 18:09 UTC
+## Latest PR and engineering status — 2026-11-28 18:28 UTC
 
 PRs #77–#83 passed all six required checks on their refreshed heads, including the
-local CPU end-to-end job. PR #84 head `f2963db` passed all six jobs, including
-local-e2e, in run `46173687147` after current-quota and clean-room-record corrections.
+local CPU end-to-end job. PR #84 head `5ba4470` passed all six jobs, including
+local-e2e, in run `46175433425` after quota and clean-room history corrections.
 Its local validation passed 67 focused tests, 12 mocked Terraform cases, Ruff, the
 35-file docs checker, and `git diff --check`. Historical PR #31 records two local
 clean-room cycles. The single designated integrated clean-room evidence for this GPU
@@ -35,9 +35,11 @@ At capture time, this section was the handoff. Detailed package notes below are 
 records; use the goal, implementation status, tickets, and live GitHub records for newer
 state. The owner wants every feasible code, automation, local/static validation,
 documentation, and CI task finished before the paid GPU batch. Only real-L4 execution
-and its immediate live safety gates should remain at that point. The one designated local
-CPU clean-room run passed and is recorded in `docs/governance/VALIDATION.md`; no further
-manual local clean-room run is planned. The cloud/GPU clean-room remains Phase 12 work.
+and its immediate live safety gates should remain at that point. Historical PR #31
+records two local CPU clean-room cycles. The one designated integrated clean-room run
+for this GPU goal is PR #65 CI run `46114955314`, recorded in
+`docs/gpu-lab/EVIDENCE_MANIFEST.md`; no extra manual local clean-room run is planned.
+The cloud/GPU clean-room remains Phase 12 work.
 
 - The latest GitHub inventory found **54 open PRs** from #30–#84 except #54; none is
   a draft or has an approving review. PRs #43 and #53 conflict after parent updates;
@@ -346,7 +348,7 @@ sanitized output are retained, and a repeated Ansible run makes no unintended ch
 **Status:** PR #49 (`codex/gpu-cuda-lab-preparation`) is open. PR #65's bounded Triton
 vector-add and Nsight instructions are restacked locally on PR #64 head `06f1a11`.
 Twelve focused tests and full `make verify` (193 passed, 2 skipped) pass locally.
-Parent PR #64 passed all six checks in run `46114151883`. PR #65 source head `49076a5` passed all six required jobs in run `46114955314`; the local-e2e job is recorded as the single integrated local CPU clean-room acceptance run in `docs/governance/VALIDATION.md`. Governance follow-up head `24ea5e8` passed all six checks in `46117285643`; its P1 evidence thread is resolved and PR #65 is ready for owner review. No kernel has been compiled on a GPU and no real measurements exist.
+Parent PR #64 passed all six checks in run `46114151883`. PR #65 source head `49076a5` passed all six required jobs in run `46114955314`; its local-e2e job is the one designated integrated clean-room run for this GPU goal, recorded in `docs/gpu-lab/EVIDENCE_MANIFEST.md`. Historical PR #31 separately records two local clean-room runs. Governance follow-up head `24ea5e8` passed all six checks in `46117285643`; its P1 evidence thread is resolved and PR #65 is ready for owner review. No kernel has been compiled on a GPU and no real measurements exist.
 
 - [x] Prepare bounded CPU/GPU vector and matrix operations, separate host/device
   copies, supported precision checks, and warmup/repeat controls.

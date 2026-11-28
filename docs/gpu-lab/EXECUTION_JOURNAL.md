@@ -3052,3 +3052,19 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   resources or project spend.
 - **Next:** keep this distinction in the persistent goal and backlog; continue
   non-billable work without repeating a manual clean-room cycle.
+
+## 2026-11-28 18:28 UTC — Validate clean-room history correction
+
+- **Phase and branch:** Phase 2 status records, PR #84, branch
+  `codex/gpu-network-plan-review`; commit `5ba4470`.
+- **Starting state:** clean-room history correction was published and its six-job PR
+  run was still active.
+- **Validation:** GitHub Actions run `46175433425` completed successfully on head
+  `5ba4470`; all six required checks passed, including local-e2e. `make
+  gpu-docs-validate` validated 35 Markdown files and `git diff --check` passed for the
+  correction set.
+- **Evidence boundary:** the historical two-run PR #31 record remains intact. The
+  GPU-goal designated run is PR #65 run `46114955314`; routine CI passes do not add a
+  second manual clean-room cycle. No AWS/GPU operation or spend occurred.
+- **Next:** continue non-billable readiness work; wait for the owner's Budget recipient
+  response before building a concrete Budget bootstrap plan.
