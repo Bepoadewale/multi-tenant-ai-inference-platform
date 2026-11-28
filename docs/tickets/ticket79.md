@@ -34,12 +34,14 @@ mutation was performed to confirm tag propagation in a live account.
 ## Validation
 
 The earlier implementation head `2e92165` passed all six CI jobs in run
-`46137645356`; that result is historical after restacking. On current parent PR #78
-head `179240c`, GPU-root formatting and `terraform validate` pass, and
+`46137645356`; that result is historical after restacking. The intermediate head
+`faf024a` passed all six jobs, including local-e2e, in run `46169103723`. The branch is
+now restacked on PR #78 head `cbf07ef`, which itself includes the PR #77 cancellation
+demo follow-up. On this refreshed stack, GPU-root formatting and `terraform validate` pass, and
 `terraform test -no-color` passes all five cases: three expiry tests, one network
 test, and the resource-tag case. `make gpu-docs-validate` checks the project Markdown
 set and `git diff --check` passes. The tests use the provider mock and make no AWS API
-calls. Fresh CI on the published #79 head remains required.
+calls. Fresh CI on this published #79 head remains required.
 
 ## Failed approaches retained
 
@@ -61,5 +63,5 @@ were involved.
 
 Local evidence is static and mocked; it does not establish AWS tag propagation or
 absence of untagged resources. [PR #79](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/79)
-is open; the earlier implementation head `2e92165` passed run `46137645356` before
-restacking. Current local validation passes, and fresh CI is pending.
+is open; intermediate head `faf024a` passed run `46169103723` before this restack.
+Current local validation passes, and fresh CI is pending.
