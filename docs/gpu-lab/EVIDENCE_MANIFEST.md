@@ -173,6 +173,8 @@ evidence.
 
 | PR #67 restack after PR #66 clean-room record | 2026-11-28 | Backlog status / PR #67 | Local rebase and conflict review | PR #67 is locally rebased on PR #66 head `2c5766e` and retains its ticket and current-state snapshot. | Current head `5f1b911` is unpublished and has no current CI; no AWS/GPU action or spend. |
 
+| PR #68 rebase on current backlog status | 2026-11-28 | Automation readiness / PR #68 | Local rebase and documentation review | PR #68's automation audit is locally based on updated PR #67 head `7b9fb9f`. | Current head `224b035` is unpublished and lacks fresh CI; no AWS/GPU action occurred. |
+
 ## Entry format for future evidence
 
 For every new item, record:

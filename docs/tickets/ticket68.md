@@ -17,7 +17,7 @@ AWS/host execution clearly separate.
 - The separate AWS workflow uses `workflow_dispatch` with explicit operation and
   confirmation inputs. It is not invoked by ordinary pull-request CI.
 - The guarded host wrappers and fake-based tests are in PR #64; all six required CI jobs passed on head `06f1a11` in run `46114151883`. No AWS host or GPU operation has been performed.
-- PR #65 head `49076a5` passed all six required checks in `46114955314`; PR #66 head `12cc2eb` is on the updated stack and its run `46115502844` is active. PR #67 was locally restacked onto #66 head `12cc2eb`; its new head is not yet published.
+- PR #65 source head `49076a5` passed all six jobs in `46114955314`; the designated local clean-room record is in `docs/governance/VALIDATION.md`. PR #65 governance follow-up head `24ea5e8` needs fresh CI. PR #66 head `2c5766e` and PR #67 head `7b9fb9f` are newly published and need current checks. PR #68 has been locally rebased onto #67 head `7b9fb9f`; current head `224b035` is not yet published.
 - The remote plan remains blocked by zero applied G/VT quota and absent shared
   bootstrap resources. The $25 ceiling and separate apply authorization remain.
 
@@ -38,6 +38,7 @@ AWS/host execution clearly separate.
 - [x] Update the backlog and implementation status to mark automation source ready,
   with host/AWS execution still outstanding.
 - [x] Add this ticket to the documentation index, goal, journal, and evidence manifest.
+- [x] Rebase PR #68 on PR #67 head `7b9fb9f`.
 - [ ] Publish rebased PR #68 and pass current required CI.
 - [ ] Obtain human review; do not merge without owner authorization.
 
@@ -55,7 +56,7 @@ limit, not authority to bypass quota, bootstrap, plan review, or apply confirmat
 
 ## Evidence and outstanding work
 
-The source audit and CI workflow demonstrate automation readiness only. Terraform
+The source audit and CI workflow demonstrate automation readiness only. The selected local CPU clean-room record is `docs/governance/VALIDATION.md` (source `49076a5`, run `46114955314`). Terraform
 apply, Ansible on Ubuntu, Docker GPU access, real inference, teardown, and independent
 cleanup verification remain unexecuted. The quota and bootstrap authorization gates
 remain open.
