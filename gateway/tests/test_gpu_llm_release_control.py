@@ -157,11 +157,19 @@ def test_plan_requires_independent_approval_and_stores_audit_identity(tmp_path):
         candidate=candidate,
     )
     with pytest.raises(ReleaseValidationError, match="pending approval with no approver"):
-        store.save(replace(pending, status="APPROVED", approved_by=pending.requester))
+        store.save(
+            replace(pending, status="APPROVED", approved_by=pending.requester),
+            champion=champion,
+            candidate=candidate,
+        )
     with pytest.raises(ReleaseValidationError, match="pending approval with no approver"):
-        store.save(replace(pending, status="PENDING_APPROVAL", approved_by="other-reviewer"))
+        store.save(
+            replace(pending, status="PENDING_APPROVAL", approved_by="other-reviewer"),
+            champion=champion,
+            candidate=candidate,
+        )
 
-    plan = store.save(pending)
+    plan = store.save(pending, champion=champion, candidate=candidate)
     restored_champion, restored_candidate = store.get_manifests(plan.plan_id)
     assert restored_champion.sha256 == champion.sha256
     assert restored_candidate.sha256 == candidate.sha256

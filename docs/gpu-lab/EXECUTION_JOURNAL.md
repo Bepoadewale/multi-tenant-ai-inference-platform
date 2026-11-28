@@ -1,10 +1,23 @@
 # GPU Lab Execution Journal
 
-## 2026-11-27 — Quota status rechecked without mutation
-<<<<<<< HEAD
-=======
+## 2026-11-28 — Rebase authenticated release planning onto approval-integrity fix
 
->>>>>>> eb01cf0 (feat: add authenticated single-GPU release planning)
+- **Phase:** Phase 9 static model-release preparation; quota-gated GPU validation remains pending.
+- **Branch / PR:** `codex/gpu-llm-release-api`, PR #55, rebased from predecessor `69f0b39` onto PR #54 head `cfcc1be`.
+- **Troubleshooting:** the rebase exposed overlap in the plan store and tests. Kept the newer store guard that rejects inserted plans with an approver, and retained #55 manifest-digest checks. An initial focused test run found that #54 now requires champion and candidate manifests as keyword arguments; updated the invalid-insert and normal-save test paths to supply both.
+- **Validation:** focused release-control and API suites passed **13 tests**; Ruff and `git diff --check` passed. One pre-existing Starlette/httpx deprecation warning remains.
+- **Cost and limits:** local tests only; no AWS, GPU, model download, or spend. The required single integrated clean-room run remains planned after the static stack settles; no second clean-room run was started.
+- **Next:** publish the rebased PR #55 branch with an exact force-with-lease, run its checks, then restack descendants and resolve conflicts without losing each package's evidence.
+
+## 2026-11-27 — Quota status rechecked without mutation
+
+
+## 2026-11-27 — Quota status rechecked without mutation
+
+- **Phase:** Phase 2 static-only EC2 preparation; no AWS mutation.
+- **Historical state at that check:** the owner-provided AWS email reported that the initial 4-vCPU request was denied. The owner reported manually sending an appeal through the existing case. At that time, read-only Service Quotas history showed `CASE_OPENED` and applied quota `0.0` vCPUs. This historical snapshot is superseded by the 2026-11-28 read-only check, which shows `CASE_CLOSED` and 4.0 applied vCPUs.
+- **Decision at that time:** do not submit a duplicate request or start billable infrastructure. Continue non-billable code, deployment, and runbook preparation.
+- **Cost:** no resources or GPU instance-hours used by this check.
 ## 2026-11-27 — Attempt the authorized quota-case update with AWS CLI
 
 - **Phase:** Phase 2 — static-only EC2 preparation; GPU execution remains blocked.

@@ -14,8 +14,8 @@ Docker daemon or restart vLLM.
   independent approval. It also records the candidate manifests in the shared,
   single-host SQLite volume.
 - [PR #55](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/55)
-  is open on branch `codex/gpu-llm-release-api`, based on PR #54. Its initial checks
-  are pending.
+  is open on branch `codex/gpu-llm-release-api`, based on PR #54. The previous head
+  passed all five required jobs; the rebased head needs a fresh CI run.
 - This is local/static validation only. No AWS or GPU resources have been used.
 
 ## Research and design
@@ -98,5 +98,22 @@ rollback, or GPU behavior.
 ## Acceptance status
 
 **Authenticated release planning and independent approval are implemented and locally
-tested, and all five required PR checks pass. Deployment, live state and artifact
-verification, GPU execution, and rollback remain incomplete.**
+tested. The previous head passed all five required PR checks; CI for the rebased head
+is pending. Deployment, live state and artifact verification, GPU execution, and
+rollback remain incomplete.**
+## Rebase follow-up — 2026-11-28
+
+PR #54 added a guard that requires every stored plan to remain pending and
+unapproved until the separate approval action runs. PR #55 was rebased onto that
+change. The rebase exposed an overlap in the shared plan store and its tests; the
+final code keeps both safeguards: it verifies the champion and candidate manifest
+digests against the plan, then rejects any inserted plan with approval fields set.
+The test suite now passes the manifest inputs required by the updated store API.
+
+- Focused release-control and API tests: **13 passed**.
+- Ruff and `git diff --check`: passed.
+- One existing Starlette/httpx deprecation warning remains.
+- The PR head and its CI checks are being updated. No AWS, GPU, model download, or
+  cloud spend was used.
+- The single integrated clean-room run remains planned for after the static PR stack
+  has settled. No second local clean-room run was started.
