@@ -16,8 +16,8 @@ AWS/host execution clearly separate.
   paid AWS actions.
 - The separate AWS workflow uses `workflow_dispatch` with explicit operation and
   confirmation inputs. It is not invoked by ordinary pull-request CI.
-- The guarded host wrappers and fake-based tests are in PR #64; required CI passed on
-  its recorded code head. No AWS host or GPU operation has been performed.
+- The guarded host wrappers and fake-based tests are in PR #64; all six required CI jobs passed on head `06f1a11` in run `46114151883`. No AWS host or GPU operation has been performed.
+- PR #65 head `49076a5` passed all six required checks in `46114955314`; PR #66 head `12cc2eb` is on the updated stack and its run `46115502844` is active. PR #67 was locally restacked onto #66 head `12cc2eb`; its new head is not yet published.
 - The remote plan remains blocked by zero applied G/VT quota and absent shared
   bootstrap resources. The $25 ceiling and separate apply authorization remain.
 
@@ -38,15 +38,14 @@ AWS/host execution clearly separate.
 - [x] Update the backlog and implementation status to mark automation source ready,
   with host/AWS execution still outstanding.
 - [x] Add this ticket to the documentation index, goal, journal, and evidence manifest.
+- [ ] Publish rebased PR #68 and pass current required CI.
 - [ ] Obtain human review; do not merge without owner authorization.
 
 ## Validation
 
 Static source inspection checked Makefile targets, `.github/workflows/ci.yml`, and
 `.github/workflows/aws-pilot-oidc.yml`. PR #64's recorded required CI and local fake
-tests provide implementation evidence; this ticket does not rerun them. The current
-PR workflow performs its normal required checks. No separate manual clean-room run is
-planned.
+tests provide implementation evidence; this ticket does not rerun them. The current PR workflow must validate the rebased head; prior parent checks do not cover this change. No separate manual clean-room run was started. One integrated run remains planned after the non-GPU stack settles.
 
 ## Security and financial considerations
 
