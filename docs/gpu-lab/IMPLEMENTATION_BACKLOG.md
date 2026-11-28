@@ -59,11 +59,50 @@ pull requests must include the repository's clean-room evidence.
   invocation, data-transfer allowance, tax contingency, and a reserve. It still
   requires exact AMI, price, egress, tax-profile, and state-retention confirmation;
   it is not permission to apply.
-- PRs #32–#52 are still open and unmerged. After restacking PRs #37–#51 behind the
-  gateway safety fixes in #33–#36, every required check passes on current heads. PR
-  #51's current-head workflow is `46017455801`. No AWS resources or GPU execution.
+- PRs #32–#53 are open and unmerged. PR #52 follow-up head `1f02955` passed run
+  `46021471851`. PR #53 tested code head `e623b75` passed all five required checks in
+  run `46023306230`, including a Linux amd64 Docker image build and CPU end-to-end.
+  A documentation-only PR #53 follow-up awaits checks. No AWS resources or GPU
+  execution.
 
 ## Ordered implementation packages
+
+### Cross-cutting package — repeatable gateway image inputs
+
+**Status:** PR #53 adds a pinned Python base-image digest and 124-package
+hash-locked runtime requirements. Local lock coverage passes; Linux amd64 image build
+and CPU end-to-end validation passed in CI run `46023306230`. The Python 3.12 CUDA
+learning lock and pinned vLLM image remain separate.
+
+- [x] Pin the multi-platform official Python slim Bookworm base image by OCI index
+  digest.
+- [x] Generate universal runtime dependency hashes and require them during image
+  installation.
+- [x] Add a CI/local lock coverage check.
+- [x] Confirm the Docker image builds on Linux amd64 and local CPU flows remain healthy.
+
+**Exit gate:** CI builds the shared gateway image from the pinned base and hash-locked
+Python dependencies.
+
+**Evidence:** PR #53 run `46023306230` passed all five required jobs. The Linux amd64
+image build, dependency audit, and existing CPU local end-to-end flow passed.
+
+### Package — immutable single-L4 LLM release records
+
+**Status:** PR #54 adds local manifest/plan digest validation, stale-input protection,
+and independent-approver state in SQLite. Authenticated API and host-side deployment
+are not included in this package.
+
+- [x] Bind full model revision, artifact digest, license, serving image/configuration,
+  evaluation suite/report digests, and source commit.
+- [x] Reject deterministic failures, unpinned image tags, multi-GPU configuration,
+  tampered manifests/plans, stale manifests, and self-approval.
+- [ ] Connect plan approval to the existing signed `release.approve` identity.
+- [ ] Link plan and manifest records to the actual MLflow run and verified model file.
+- [ ] Implement and test the host-side sequential restart and verified rollback path.
+
+**Exit gate:** authenticated independent approval binds to the exact candidate and
+runtime, then a bounded operator command can deploy or restore it on one L4.
 
 ### Package 0 — Goal charter and baseline gates
 

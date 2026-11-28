@@ -1788,3 +1788,103 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Next:** publish the documentation follow-up, wait for its CI, then continue
   non-billable preparation for exact container dependency pins and sequential release
   plan controls. Applied GPU quota remains zero.
+
+## 2026-11-27 — Prepare pinned gateway container build inputs
+
+- **Phase:** Non-billable repeatability work; Phase 2 remains blocked by quota.
+- **Branch:** `codex/gpu-container-build-locks`, based on PR #52 head `1f02955`.
+- **Starting state:** the shared gateway image used `python:3.12-slim` and installed
+  version ranges without artifact hashes. The GPU vLLM image and host packages were
+  pinned separately, but gateway, evaluator, and MLflow dependencies could drift.
+- **Research:** queried the Docker Official Python OCI index metadata. The
+  `python:3.12-slim-bookworm` index digest is
+  `sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64` and
+  advertises Linux amd64/arm64, with image annotation Python 3.12.16. Registry
+  metadata only was read; no layers were downloaded. Official PyPI metadata shows
+  MLflow 3.18.0 as a published release with provenance.
+- **Changes:** generated a universal SHA-256 lock for 124 packages from
+  `requirements-container.txt`; pinned the Dockerfile base image by OCI index digest;
+  switched pip install to `--require-hashes`; added a Python lock coverage validator,
+  Make target, and CI calls. This applies to the existing CPU app and GPU gateway
+  because they share one Dockerfile; the separately pinned vLLM image and CUDA
+  learning lock are unchanged.
+- **Validation:** `make container-dependencies-validate` passed and reported 124
+  pinned packages with hashes; Python 3.12 bytecode compile and Ruff passed; Markdown
+  link scan across 21 documents found no missing local links; `git diff --check`
+  passed. `pip-audit -s osv -r requirements-container.lock` reported no known
+  vulnerabilities. Docker Engine 29.0.1 and Buildx v0.29.1 are available and the
+  daemon responds; the registry metadata inspect completed. The first YAML syntax
+  check passed Ruby 2.6's unsupported `aliases:` keyword and failed; rerunning
+  `YAML.load_file` without that newer keyword parsed the workflow successfully. CI
+  repeats the lock audit and Linux image build.
+- **Cost/security:** no AWS call/write, image layer download/build, model download,
+  GPU hour, or project spend. The Docker metadata query supports both local arm64 and
+  EC2 amd64; CI will test the actual Linux amd64 installation.
+- **Limitations:** the package lock is static until the Docker build and dependency
+  audit pass; it does not prove GPU-host behavior. The workstation's default Python
+  remains 3.14.0; GPU and project tooling use explicit Python 3.12.
+- **Next:** watch PR #53 run `46023306230` for the Linux image build, lock audit, and
+  CPU end-to-end checks. Review failures before deciding on any follow-up edits.
+
+## 2026-11-27 — Publish shared container reproducibility PR
+
+- **Phase:** Non-billable repeatability work; Phase 2 remains blocked by quota.
+- **Branch / PR:** `codex/gpu-container-build-locks`, [PR #53](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/53), stacked on PR #52.
+- **Commit:** `e623b7512a750c776412c2287547981763aba592`.
+- **Starting infrastructure state:** no goal-owned AWS resources; the existing G/VT quota remains zero. No cloud mutation occurred.
+- **Changes:** published a Python base-image digest, universal hash lock, lock verifier, and CI checks. Updated the goal, status, backlog, ticket, and evidence records to identify the opened PR.
+- **Validation:** local lock coverage and GPU Compose configuration passed; the precise lock passed `pip-audit -s osv`; PR #52 remained green. PR #53 CI run `46023306230` has five jobs in progress (Python, GPU observability, supply chain, local E2E, and manifests).
+- **Cost/security:** no GPU, AWS resources, layers built locally, or cloud spend. GitHub Actions uses repository CI only; no AWS credentials or cloud actions are configured by this PR.
+- **Next:** allow one watcher to monitor run `46023306230`; diagnose any failed job, then continue the next non-billable readiness package.
+
+## 2026-11-27 — Verify container CI and reconcile MLflow install notes
+
+- **Phase:** Non-billable repeatability work; Phase 2 remains blocked by quota.
+- **Branch / PR:** `codex/gpu-container-build-locks`, PR #53.
+- **Validation:** GitHub run `46023306230` completed successfully for head `e623b7512a750c776412c2287547981763aba592`. All five jobs passed. The supply-chain job built the gateway Docker image on Linux amd64, ran Trivy, and generated an SBOM. The Python job passed the hash-lock audit, lint, tests, GPU static plans, and dependency audit. The local E2E job passed `make smoke`, `make demo-flagship`, `make verify`, and `make clean-local` on the disposable CI runner.
+- **Review finding:** the host installation manifest still described MLflow as absent from the GPU Compose profile, although PR #52 added a private MLflow service. Corrected the manifest to explain that it is disposable, uses the encrypted root disk, and requires evidence export before teardown.
+- **Cost/security:** no AWS mutation, GPU execution, or cloud spend. GitHub CI work ran on ephemeral hosted runners.
+- **Next:** validate and publish the documentation correction, then continue local implementation work on sequential LLM model release controls.
+
+## 2026-11-27 — Restore local Python 3.12 validation environment
+
+- **Phase:** Non-billable GPU readiness; Phase 2 remains blocked by quota.
+- **Branch / PR:** `codex/gpu-container-build-locks`, PR #53 documentation follow-up.
+- **Starting state:** the `.venv` directory was absent. The first `make verify` failed immediately because `.venv/bin/python` did not exist; no tests ran in that attempt.
+- **Recovery:** ran the repository's `make install` using Python 3.12.12. It created `.venv`, installed the declared development dependencies, and regenerated the ignored local ONNX fixtures. No tracked model source or cloud resource changed.
+- **Validation:** the subsequent `make verify` passed Ruff, 116 tests (2 skipped), dependency audit with no known vulnerabilities, and base/GPU Compose configuration. GPU observability syntax and dashboard validation passed. Benchmark, evaluation, and CUDA plans ran in dry-run mode with zero GPU operations and zero network requests. `git diff --check` passed.
+- **Warning:** test startup emitted the repository's existing Starlette/httpx deprecation warning; no test failed.
+- **Cost/security:** all work was local; no cloud service, GPU, or AWS resource was used.
+- **Next:** publish the verified documentation correction, then implement and review sequential LLM release controls without assuming that runtime GPU behavior has been proven.
+
+## 2026-11-27 — Prepare immutable LLM release records
+
+- **Phase:** Phase 9 static implementation; Phase 2 remains blocked by quota.
+- **Branch:** `codex/gpu-sequential-llm-release`, based on the green PR #53 documentation head.
+- **Starting state:** PR #53 latest documentation head `2153942` passed all five required checks in GitHub run `46025160292`. The existing release API still applies only to the ONNX weighted canary; it cannot deploy the single vLLM target.
+- **Research/design:** preserve the existing ONNX API. Bind the LLM's full model commit, artifact digest, runtime image digest/configuration, evaluation suite and report digests, source commit, and current champion into a sequential release plan. Approval state must be separate from the immutable plan digest and must come from a different actor.
+- **Changes:** added local release manifest, plan, stale-input validation, and SQLite independent-approval primitives; added focused tests and updated the release design, evaluator instructions, backlog, status, index, and ticket #54. No deployment endpoint or Docker control was added.
+- **Troubleshooting:** the first focused test run found two champion fixtures whose report revision did not match; corrected their fixture metadata. Ruff reported import ordering; auto-fix and rerun passed. A later test-edit initially placed the multi-GPU assertion in the wrong test scope; corrected it before acceptance. Seven focused tests now pass.
+- **Security boundary:** the approval store accepts an actor string and is not itself an identity provider. It must not authorize deployment until an API obtains requester/approver identity from the existing verified role tokens and checks the actual MLflow run and model artifact.
+- **Cost:** local-only code and tests; no AWS call, model download, GPU, or spend.
+- **Next:** finish ticket/status records, run the complete local validation suite, then open PR #54 stacked on PR #53. Follow with authenticated approval and a safe host-side sequential deployment/rollback package.
+- **Validation completion:** full `make verify` passed Ruff, 123 tests (2 skipped), and the dependency audit; GPU Compose and observability validation passed, and benchmark/evaluation/CUDA targets remained dry runs with zero model requests or GPU operations. The single-L4 CPU/GPU Compose configuration parsed successfully. No local model-serving containers were started.
+
+## 2026-11-28 — Protect release approval state and report snapshot integrity
+
+- **Phase:** Phase 9 static model-release preparation; PR #54.
+- **Branch / starting head:** `codex/gpu-sequential-llm-release`, remote head
+  `69f0b39`; its upstream evaluation/CUDA stack still needs updated heads.
+- **Starting state:** review found that `save()` accepted caller-edited approval fields
+  because status and approver are excluded from the immutable plan digest, and that
+  manifest creation validated one report read but hashed a second read of the same path.
+- **Changes:** `save()` now only accepts new plans in `PENDING_APPROVAL` with no
+  approver. Manifest creation reads the report once, parses the snapshot, and computes
+  its SHA-256 from those same bytes. Tests cover self-approved/mutated inserts and a
+  simulated concurrent report overwrite after the snapshot read.
+- **Validation:** Ruff passed; the focused release-control suite passed 8 tests;
+  `git diff --check` passed. No model, MLflow service, AWS resource, or GPU was used.
+- **Evidence limits:** tests prove local state and byte-snapshot checks only. They do not
+  establish authenticated identity, live artifact trust, deployment, or rollback.
+- **Next:** publish after restacking on the current predecessor, run PR CI, then reply
+  to and resolve the two review threads with the passing evidence.

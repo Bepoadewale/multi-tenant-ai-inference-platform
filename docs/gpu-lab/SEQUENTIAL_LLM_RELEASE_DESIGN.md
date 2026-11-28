@@ -1,8 +1,10 @@
 # Single-GPU LLM Release Design
 
-**Status:** sequential release remains proposed; PR #52 adds a static private MLflow
-tracking service and sanitized evaluation upload path. No LLM release has been
-registered or deployed through the GPU profile. **Reviewed:** 2026-11-27.
+**Status:** PR #54 implements and tests the local immutable manifest, plan digest,
+stale-input, and independent-approval record primitives. The authenticated API,
+MLflow registration, sequential vLLM restart, deployment verification, and rollback
+remain unimplemented and unexecuted. PR #52 adds a private MLflow tracking service
+and sanitized evaluation upload path. **Reviewed:** 2026-11-27.
 
 ## Why the current release flow cannot deploy the GPU model
 
@@ -14,10 +16,10 @@ both names point to the same vLLM process would not create a real canary; loadin
 large models concurrently would also violate the one-L4 capacity constraint.
 
 PR #52 adds a small MLflow tracking server to the GPU Compose profile and lets the
-evaluator upload its sanitized report. The default local Compose registry is still not
-reachable from EC2, so the GPU host has its own temporary SQLite and artifact volume.
-This completes only the static/local evidence-storage path; it does not satisfy the
-model release, independent approval, deployment, or rollback criteria.
+evaluator upload its sanitized report. The GPU host has its own temporary SQLite and
+artifact volume. PR #54 adds a tested local data/control layer for candidate metadata
+and approval records. These pieces still do not provide an authenticated release API,
+model registration, deployment, or rollback.
 
 Keep the existing ONNX flow unchanged. Add a separate LLM release path that records
 model artifacts and uses a sequential vLLM restart on the single L4.
@@ -108,6 +110,16 @@ replacement across multiple serving replicas.
 
 - [x] Static Compose and evaluator configuration targets a private MLflow tracking
   server; a live MLflow/model-registry request still requires the L4 batch.
+- [x] Local code binds a candidate's full model revision, artifact digest, runtime
+  image digest/configuration, evaluation suite/report digests, and source commit into
+  a deployment manifest.
+- [x] Local code rejects failed deterministic evaluation, unpinned runtime images,
+  multi-GPU configuration, manifest tampering, and stale champion/candidate inputs.
+- [x] A local SQLite approval journal rejects self-approval and preserves the
+  independently approved actor; this does not yet prove authenticated API identity.
+- The approval API must derive reviewer identity from the existing signed role token.
+- Plan and candidate records must be linked to the actual MLflow evaluation run and
+  verified model artifact before any host deployment.
 - A sanitized evaluation report is linked to a pinned model revision and runtime
   image digest.
 - A deterministic failing candidate is rejected before approval or deployment.
@@ -121,5 +133,6 @@ replacement across multiple serving replicas.
 - All controls use the one L4 and account for the service interruption; no concurrent
   canary, multi-GPU, or HA claim is made.
 
-No acceptance item is complete from this design document alone. Runtime release and
-rollback evidence requires the authorized L4 batch and must fit the $25 ceiling.
+The checked local record/approval items still do not prove an authenticated release,
+deployment, or rollback. Runtime release evidence requires the authorized L4 batch
+and must fit the $25 ceiling.

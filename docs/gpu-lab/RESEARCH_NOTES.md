@@ -589,3 +589,30 @@ Sources: [MLflow tracking server architecture](https://mlflow.org/docs/latest/se
 and [MLflow artifact stores](https://mlflow.org/docs/latest/self-hosting/architecture/artifact-store/).
 Recheck flags and storage behavior against the pinned MLflow package before the GPU
 batch.
+
+## Reproducible gateway container inputs — 2026-11-27
+
+The project gateway image is used by both the existing CPU services and the new
+single-GPU Compose profile. It previously used the floating `python:3.12-slim` tag
+and installed ranges directly. The image now pins the official multi-platform
+`python:3.12-slim-bookworm` OCI index digest
+`sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64`, observed
+to provide Python 3.12.16 and Linux amd64/arm64 variants on this review date. The
+base-image metadata query did not download image layers.
+
+The runtime requirement ranges are inputs in `requirements-container.txt`. They now
+resolve to `requirements-container.lock`, generated with uv 0.9.15 using universal
+resolution and SHA-256 hashes. It pins 124 packages, including MLflow 3.18.0. The
+lock's SHA-256 is
+`397cf115c94ec63b4a9e7d3168971b3f4a36093865f1c4114cd9717843764ec2`. The Dockerfile
+uses pip's `--require-hashes`, so an artifact with an unrecorded hash is rejected.
+`make container-dependencies-validate` checks that every direct input has a locked,
+hashed package. The build validation in CI installs this file during the container
+build. This is a deterministic build-input check; it does not demonstrate that the
+image runs on EC2 or that the dependencies are compatible with an L4.
+
+Sources: the [Docker Official Python image](https://hub.docker.com/_/python),
+[MLflow 3.18.0 on PyPI](https://pypi.org/project/mlflow/3.18.0/), and the
+[MLflow tracking-server guide](https://mlflow.org/docs/latest/self-hosting/architecture/tracking-server/).
+Refresh the OCI digest, package lock, advisory review, and compatibility checks before
+changing the GPU runtime.
