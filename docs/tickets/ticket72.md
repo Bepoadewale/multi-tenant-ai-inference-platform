@@ -45,7 +45,10 @@ authorized GPU batch.
 - `git diff --check` — passed.
 - Report word count — increased from approximately 2,700 to 4,500 words.
 - No tests or GPU commands were run; this is documentation-only work.
-- GitHub Actions review remains pending until the pull request is published.
+- PR #72 CI passed all six jobs at initial head `c01fbca` in run
+  [46123579368](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/actions/runs/46123579368),
+  including the repository's ordinary local end-to-end job. This was routine PR CI,
+  not a second project-designated clean-room run.
 
 ## Security, financial, and evidence notes
 

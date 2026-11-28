@@ -179,3 +179,7 @@ quota or cloud authorization gates. The report remains a pre-GPU draft. The next
 action is to review the docs-only PR #72, then continue other independently useful
 non-billable readiness work while the existing AWS appeal is pending. Do not repeat
 the designated local clean-room run.
+
+PR #72 initial head `c01fbca` passed all six required GitHub CI jobs in run
+`46123579368`; the routine PR local end-to-end job is not a second project-level
+clean-room run. The PR remains open and unmerged for owner review.
