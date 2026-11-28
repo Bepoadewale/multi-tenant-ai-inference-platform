@@ -90,3 +90,31 @@ does not mean eight or sixteen sequences are running on the GPU at once. The run
 records the active vLLM sequence, context, and GPU memory-utilization settings for
 each measured batch. Raising `--max-num-seqs` requires a separate model-memory check
 and Compose configuration review before the next batch.
+
+## Authenticated gateway comparison
+
+`run_gateway_benchmark.py` compares a small direct-vLLM baseline with the authenticated
+gateway, then sends a bounded concurrent request set across the customer-support,
+internal-engineering, and research identities. It records status codes, request
+latency, client-side semaphore wait, throughput, and runtime-reported token counts.
+The prompts are fixed synthetic text; the report never stores request or response
+content, bearer tokens, response bodies, or error details. Reports are written with
+owner-only permissions below `.local/`.
+
+On the **local workstation**, `make gpu-gateway-benchmark-plan` validates and prints
+the plan. It does not read identities or make network requests. For an authorized L4
+batch, run `make gpu-gateway-benchmark` on the **EC2 host** after both gateway ports
+and vLLM are ready. This command requires IMDSv2 to report one approved `g6` instance
+in `us-east-1` and exactly one visible L4. It uses the generated local identity file
+and saves the sanitized result to `.local/gpu-lab/gateway-benchmark/`.
+
+The report's direct-versus-gateway P50 difference is exploratory. The requests are not
+perfectly isolated, and runtime cache state, model scheduling, and network timing can
+change between them. It should not be called pure gateway overhead. The reported
+semaphore wait is queueing in the load generator, not a measurement of the server's
+internal queue. Status counts by synthetic tenant show observed admission behavior;
+they do not prove a fixed rejection rate. The separate cancellation drill checks that
+cancelled streams release reservations. Until a real L4 run completes, the tool and
+its dry-run are preparation, not benchmark evidence. The runner limits the concurrent
+phase to 60 requests, concurrency 2–16, and a 15-second per-request timeout; even if
+all requests time out, the bounded request phases take about ten minutes or less.

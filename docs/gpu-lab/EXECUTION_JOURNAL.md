@@ -2143,3 +2143,34 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Remaining launch gates:** remote-state bootstrap, valid private Budget alert recipient and project Budget, current exact price and AZ-capacity check, remote saved-plan review, expiry safeguards, and separate apply authorization. Keep the $25 ceiling and one bounded GPU batch.
 - **CI results:** PR #56 run `46160784399` passed all five required checks, including local E2E. PR #57 run `46161064613` passed all six required checks, including Ansible and local E2E. PR #58 fresh CI has not yet been published at this journal entry.
 - **Next:** review the final PR #58 diff, push with exact lease against `59925fd`, update the PR description, and watch the single triggered run. Then carry descendants from their respective old parent heads, preserving only each PR's own commit range.
+
+## 2026-11-28 — Revalidate rebased PR #60 gateway benchmark
+
+- **Phase:** Phase 8 benchmark preparation; GPU execution remains pending L4 quota and
+  the bounded spend gates.
+- **Branch / PR:** PR #60 (`codex/authenticated-gateway-benchmark`), rebased onto the
+  current PR #58 guide head `59925fd`; implementation head at validation was `840f8c0`.
+- **Starting state:** PR #60's earlier passing run applied to its former head
+  `2e2d177`. New automated-review fixes had been added for truncated HTTP responses
+  and P50 comparisons that included failed requests.
+- **Commands / results:** focused gateway benchmark tests passed (8); focused Ruff
+  passed; `make gpu-gateway-benchmark-plan` printed its bounded no-network plan;
+  `git diff --check` passed.
+- **Changes:** updated ticket, status, and goal records to mark the earlier CI result
+  as historical and require fresh checks for the rebased code. No implementation
+  changes in this validation session.
+- **Cost / security:** no AWS call, resource, model download, live inference, GPU,
+  credential, or spend. No local clean-room run was launched.
+- **Next:** publish the documentation update on PR #60, watch its single fresh CI run,
+  then rebase PR #61 and continue with the remaining pre-GPU stack.
+
+
+## 2026-11-28 — Restack and locally validate PR #60 gateway benchmarking
+
+- **Phase:** Phase 8 benchmark preparation; actual GPU benchmarking remains pending the launch controls and authorized L4 batch.
+- **Branch / PR:** `codex/authenticated-gateway-benchmark`, PR #60. Its parent is PR #58, not sibling PR #59. Rebased from former PR #58 head `59925fd` onto current PR #58 head `fa4d819`; eight PR #60 commits were replayed.
+- **Troubleshooting:** shared implementation-status conflicts were resolved using current parent status, then the benchmark row was re-added. The PR #60 worktree had no `.venv`; the first local test command failed before collection. Reused the already prepared PR #58 Python 3.12 environment without modifying this worktree's dependency state.
+- **Validation:** focused benchmark suite passed 8 tests; Ruff passed; the 18-request, concurrency-6 dry run listed all three tenants and saved no content. The dry run made no network requests. `git diff --check` passed.
+- **Limits and cost:** no real gateway/vLLM requests, GPU, AWS query/write, model downloads, or spend. No benchmark measurements were generated.
+- **Current CI:** PR #58 run `46162221680` passed all six required checks. Sibling PR #59 run `46162611345` was still in progress at this journal snapshot. PR #60 new CI has not yet been published.
+- **Next:** finish current-status docs and ticket, push with an exact lease against old PR #60 head `9a8bd28`, update its PR body, and watch the triggered checks.
