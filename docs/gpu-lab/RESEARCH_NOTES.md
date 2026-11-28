@@ -38,6 +38,14 @@ GB-Mo unit, so 12 hours costs about `$0.1432`, not `$0.0133`. This corrects the 
 subtotal below; it does not authorize provisioning. See [`COST_REPORT.md`](COST_REPORT.md)
 for the complete estimate and its remaining assumptions.
 
+The same read-only regional queries found S3 Standard's first-tier storage at
+`$0.023/GB-Mo`, S3 write/list requests at `$0.005` per 1,000 and GET requests at
+`$0.0004` per 1,000, DynamoDB on-demand reads/writes at `$0.125/$0.625` per million
+request units, and Scheduler at no charge for the first 14 million invocations. The
+project keeps higher positive allowances for requests and expiry so the estimate does
+not depend on unused free-tier allocation. Full assumptions and conversions are in
+the cost report.
+
 | Component | Current input | 12-hour planning amount |
 | --- | --- | ---: |
 | One Linux `g6.xlarge` | AWS Price List API, `$0.8048/hour` | `$9.6576` |

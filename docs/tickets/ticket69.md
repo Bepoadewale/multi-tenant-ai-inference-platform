@@ -17,9 +17,15 @@ clear.
 - The first arithmetic check found the old 100-GiB gp3 line was understated by about
   ten times. The API uses GB-Mo; 100 GiB is about 107.3742 decimal GB, making 12-hour
   storage about `$0.1432` rather than `$0.0133`.
-- The corrected 12-hour planning envelope is `$18.5172` (about `$18.52`), including existing egress,
-  state, tax, and contingency assumptions. This is not a quote, invoice, hard cap, or
+- The corrected 12-hour planning envelope is `$18.51932705` (about `$18.52`), including
+  existing egress, state, tax, and contingency assumptions. It leaves `$6.48067295`
+  under the $25 ceiling. This is an estimate, not a quote, invoice, hard cap, or
   spending authorization.
+- Additional read-only Price List queries verified S3 Standard first-tier storage at
+  `$0.023/GB-Mo`, S3 write/list requests at `$0.005/1,000`, S3 GET requests at
+  `$0.0004/1,000`, DynamoDB on-demand writes/reads at `$0.625/$0.125` per million
+  request units, and EventBridge Scheduler's first 14 million invocations at no
+  charge. Existing positive request/expiry reserves remain in the estimate.
 - The latest read-only check confirms 4.0 applied On-Demand G/VT vCPUs and
   `CASE_CLOSED`. This is enough by quota for one `g6.xlarge`, but not capacity or
   spending approval. No GPU or AWS resources have been created by this project.
