@@ -14,9 +14,17 @@ remain open.
 - AWS's [G6 product page](https://aws.amazon.com/ec2/instance-types/g6/) and [accelerated instance specification table](https://docs.aws.amazon.com/ec2/latest/instancetypes/ac.html) describe G6 as NVIDIA L4 based. The single-GPU `g6.xlarge` is listed with 4 vCPUs, 16 GiB host memory, one L4, and 22 GiB of listed GPU memory; `g6.2xlarge` has 8 vCPUs, 32 GiB, and one L4 with the same listed GPU memory. The GPU is commonly described as a 24 GB L4; AWS's table expresses the per-instance memory as 22 GiB. Capacity and runtime compatibility still need live validation.
 - Read-only `describe-instance-type-offerings` in `us-east-1` listed `g6.xlarge` in `us-east-1a`, `1b`, `1c`, `1d`, and `1f`; it listed `g6.2xlarge` in `1a`, `1b`, `1c`, `1d`, and `1f`. Offering means the type is supported in that AZ, not that capacity can be launched.
 - Historical read-only Service Quotas lookup returned `Running On-Demand G and VT instances = 0.0 vCPUs`, quota code `L-DB2E81BA`. AWS [EC2 instance quota documentation](https://docs.aws.amazon.com/ec2/latest/instancetypes/ec2-instance-quotas.html) says this quota is adjustable; AWS's [quota increase procedure](https://docs.aws.amazon.com/servicequotas/latest/userguide/request-quota-increase.html) notes increases require a request and may be reviewed. A 4-vCPU increase was submitted for one `g6.xlarge`; at the time, the owner reported a denial email and appeal. The latest 2026-11-28 CLI status is recorded above; do not submit a duplicate request.
-- A read-only AWS Price List API query on 2026-11-26, filtered for `g6.xlarge`, Linux, shared tenancy, `US East (N. Virginia)`, returned **$0.8048 per instance-hour**. This is the AWS catalog price, not a settled bill. Instance-only totals are `$6.4384` for 8 hours and `$9.6576` for 12 hours.
-- [Amazon VPC pricing](https://aws.amazon.com/vpc/pricing/) currently lists an in-use public IPv4 address at `$0.005/hour`, billed per second with a 60-second minimum. If the public-subnet/no-inbound design needs one public IPv4 for outbound package/model downloads and SSM, add `$0.06` for a 12-hour window. Avoiding NAT Gateway is material to the small budget.
-- [EBS pricing](https://aws.amazon.com/ebs/pricing/) documents gp3 per-second billing and gives an example regional rate of `$0.08/GiB-month`, with 3,000 baseline IOPS and 125 MiB/s included. At that example rate, 100 GiB for 12 hours is about `$0.0133`; confirm us-east-1's current rate and actual retained duration before apply.
+- Read-only AWS Price List API queries on 2026-11-28 returned the `g6.xlarge`
+  `BoxUsage` On-Demand rate at **$0.8048 per instance-hour** for Linux, no
+  preinstalled software, shared tenancy, and `US East (N. Virginia)`, effective
+  2026-11-01. The API also returned separate unused-capacity-reservation terms; those
+  are not the running-instance rate. It returned an in-use public IPv4 rate of
+  `$0.005/hour` and gp3 storage at `$0.08/GB-Mo`. These are catalog rates, not a
+  capacity guarantee or settled bill. Instance-only totals are `$6.4384` for 8 hours
+  and `$9.6576` for 12 hours; one in-use public IPv4 adds `$0.06`. A 100-GiB volume
+  converts to about 107.3742 decimal GB, so 12 hours of gp3 storage adds about
+  `$0.1432`. Confirm the billing quantity and actual retained duration against the
+  final plan.
 - AWS [Session Manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html) avoids inbound SSH and key management. Check SSM Agent, instance role, endpoint reachability, and required IAM access. The instance still needs outbound HTTPS for package/model downloads. Recheck current Session Manager pricing and logging choices when finalizing the cost sheet.
 - IMDSv2 is configured with `HttpTokens=required` per [EC2 metadata options](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-IMDS-new-instances.html). Docker/container access needs a deliberate hop-limit choice; do not increase it without a specific need.
 - AWS's [EC2 NVIDIA driver guide](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/install-nvidia-driver.html) confirms G6 supports Tesla drivers; the [public driver matrix](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/public-nvidia-driver.html) identifies G6 as an L4 with minimum driver version 525.0. The current AWS guide includes manual Ubuntu 24.04 driver/CUDA installation instructions. NVIDIA's [Ubuntu driver guide](https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/latest/ubuntu.html) documents header preparation, version pinning, compute-only install, and reboot. Candidate OS: standard Ubuntu 24.04 x86_64. The final driver/CUDA pair remains unresolved until a pinned vLLM build is selected and checked against the L4 and host kernel.
@@ -24,14 +32,20 @@ remain open.
 
 ## Initial cost gate (not the final authorization estimate)
 
+The 2026-11-28 AWS Price List API refresh found a decimal-place error in the previous
+gp3 calculation. A 100-GiB volume is estimated as 107.3742 decimal GB for the API's
+GB-Mo unit, so 12 hours costs about `$0.1432`, not `$0.0133`. This corrects the small
+subtotal below; it does not authorize provisioning. See [`COST_REPORT.md`](COST_REPORT.md)
+for the complete estimate and its remaining assumptions.
+
 | Component | Current input | 12-hour planning amount |
 | --- | --- | ---: |
 | One Linux `g6.xlarge` | AWS Price List API, `$0.8048/hour` | `$9.6576` |
 | One public IPv4, if used | AWS VPC pricing, `$0.005/hour` | `$0.0600` |
-| 100 GiB gp3 | Example rate `$0.08/GiB-month`, 12/720 of a 30-day month | `$0.0133` |
-| Subtotal above | Excludes state/lock, log ingestion, data transfer, taxes, and unexpected use | **`$9.7309`** |
+| 100 GiB gp3 | `$0.08/GB-Mo` × 107.3742 GB × 12/720 | `$0.1432` |
+| Subtotal above | Excludes state/lock, log ingestion, data transfer, taxes, and unexpected use | **`$9.8608`** |
 
-This leaves about `$15.27` under the `$25` cap for all other charges, but it is not a complete total estimate or permission to apply. Confirm exact AMI/storage/billing dimensions, Terraform state and lock costs, CloudWatch/log choices, public IP duration, model download, data transfer, taxes, and resource cleanup. Prefer default EBS performance, avoid NAT and persistent endpoints, bound egress, and make state resources temporary where repository governance allows.
+This leaves about `$15.14` under the `$25` cap for all other charges, but it is not a complete total estimate or permission to apply. Confirm exact AMI/storage/billing dimensions, Terraform state and lock costs, CloudWatch/log choices, public IP duration, model download, data transfer, taxes, and resource cleanup. Prefer default EBS performance, avoid NAT and persistent endpoints, bound egress, and make state resources temporary where repository governance allows.
 
 ## vLLM and model starting point
 
@@ -47,7 +61,10 @@ Continue with current primary documentation before each phase: [AWS G6](https://
 ## Decisions still open
 
 - Whether the `$25` cap can cover the requested GPU-dependent validation with enough runtime to install the driver, download the model, integrate/observe/benchmark it, run safe incident drills, and export evidence. The instance-only estimate leaves room but time-consuming manual setup could use it quickly.
-- Whether current regional capacity is available at the time of the authorized launch. Quota is approved, but it does not reserve an instance in an Availability Zone. Check fresh capacity immediately before any reviewed plan/apply.
+- Historical open question at the time of the initial research: whether AWS would
+  change the applied quota after the owner-reported appeal. The latest quota state is
+  recorded at the top of this document; check regional capacity immediately before a
+  separately authorized launch.
 - Exact Ubuntu LTS point release/AMI, kernel, driver branch, CUDA compatibility, Docker Toolkit release, PyTorch build, vLLM release, and container image digest.
 - Exact encrypted Terraform state/locking arrangement that follows repository governance without creating long-lived costs above the project cap.
 - Which monitoring components can coexist on 16 GiB host memory without invalidating the inference experiment; measure before selecting `g6.2xlarge`.

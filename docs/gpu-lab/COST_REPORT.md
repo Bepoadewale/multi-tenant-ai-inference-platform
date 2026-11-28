@@ -1,7 +1,7 @@
 # GPU Lab Cost Report — Preliminary Estimate
 
 **Status:** planning estimate only; no cloud resources have been created.  
-**Pricing research date:** 2026-11-27 (recheck before any plan or apply).  
+**Pricing research date:** 2026-11-28 (AWS Price List API refresh; recheck before any plan or apply).
 **Hard initial ceiling:** USD $25 for this project's AWS usage.  
 **Current measured spend:** $0; GPU instance hours: 0.
 **Current quota (read-only, 2026-11-28):** 4.0 applied On-Demand G/VT vCPUs; this is not a capacity reservation or apply authorization. The preliminary rates below are dated and must be refreshed before a saved plan.
@@ -48,44 +48,51 @@ no inbound service rules. One public IPv4 address is billed while allocated.
 
 | Resource / assumption | Formula | Planning amount |
 | --- | --- | ---: |
-| Linux shared `g6.xlarge`, 12 hours | 12 × $0.8048/hour (AWS Price List API lookup, 2026-11-26) | $9.6576 |
-| In-use public IPv4, 12 hours | 12 × $0.005/hour | $0.0600 |
-| 100 GiB `gp3`, 12 hours | $0.08/GiB-month × 100 × 12/(24×30) | $0.0133 |
+| Linux shared `g6.xlarge`, 12 hours | 12 × $0.8048/hour (AWS Price List API lookup, 2026-11-28) | $9.6576 |
+| In-use public IPv4, 12 hours | 12 × $0.005/hour (AWS Price List API lookup, 2026-11-28) | $0.0600 |
+| 100 GiB `gp3`, 12 hours | $0.08/GB-month × 107.3742 GB × 12/(24×30), converting 100 GiB to decimal GB | $0.1432 |
 | State bucket and versions, up to 1 GiB-month | $0.023/GB-month planning cap; verify exact regional rate | $0.0230 |
 | S3 state/lock requests | Up to 1,000 write/list requests at $0.005/1,000; GET allowance | $0.0100 |
 | DynamoDB lock requests | Small allowance for GPU-root lock requests against the repository's existing table; no second table | $0.0100 |
 | EventBridge Scheduler expiry | Reserve one invocation even if account free tier applies | $0.0100 |
 | AWS Budgets notification | Alert-only monthly cost budget with no action | $0.0000 |
 | Internet data transfer out | Reserve 1 GiB at $0.90/GB, ten times the current $0.09/GB first-tier published rate; account aggregation and current rate must be checked | $0.9000 |
-| **Estimated pre-tax subtotal** | Sum of listed items | **$10.6839** |
-| Tax contingency | 25% of subtotal; conservative placeholder, not a tax determination | $2.6710 |
+| **Estimated pre-tax subtotal** | Sum of listed items | **$10.8138** |
+| Tax contingency | 25% of full-precision subtotal; conservative placeholder, not a tax determination | $2.7034 |
 | General contingency | Fixed reserve for price changes and small unmodeled usage | $5.0000 |
-| **Planning envelope** | Subtotal + contingency | **$18.3549** |
-| **Headroom under $25** | $25 − envelope | **$6.6451** |
+| **Planning envelope** | Full-precision subtotal + tax + general reserve | **$18.5172** |
+| **Headroom under $25** | $25 − envelope | **$6.4828** |
 
 The 12-hour runtime is a ceiling for all GPU instance time, not a planned target.
 This estimate covers neither an authorization nor a promise that every requested
 phase fits in 12 hours. Do not lengthen the run or add resources to use the headroom.
-For a concise project-status summary, this estimate rounds to `$18.35`; retain the
+For a concise project-status summary, this estimate rounds to `$18.52`; retain the
 unrounded arithmetic above when comparing it with the `$25` ceiling.
 
 ## Pricing sources and limitations
 
-- The `g6.xlarge` rate was retrieved from AWS Price List API on 2026-11-26 for Linux,
-  shared tenancy, and US East (N. Virginia). Refresh it with the same filters before
-  every billable plan; the [EC2 On-Demand pricing page](https://aws.amazon.com/ec2/pricing/on-demand/)
+- On 2026-11-28, read-only AWS Price List API queries for `us-east-1` returned
+  `$0.8048/Hrs` for the `g6.xlarge` `BoxUsage` On-Demand term (Linux, no preinstalled
+  software, shared tenancy, US East (N. Virginia)); the term's effective date is
+  `2026-11-01T00:00:00Z`. The same query returned separate unused-capacity-reservation
+  terms, which are not the instance run-rate used here. The API reports one GPU and
+  24 GB GPU memory. This catalog record is not a capacity guarantee or settled bill.
+  Refresh it with the same filters before every billable plan; the
+  [EC2 On-Demand pricing page](https://aws.amazon.com/ec2/pricing/on-demand/)
   explains the pricing model but does not promise this instance rate.
 - AWS's [EC2 On-Demand pricing page](https://aws.amazon.com/ec2/pricing/on-demand/)
   currently lists $0.09/GB for the first data-transfer-out tier after its shared
   100-GB monthly allowance. The planning line above deliberately reserves ten times
   that rate for one GB; account-wide free allowance may already be consumed, and the
   live regional rate still must be confirmed.
-- AWS's [VPC pricing page](https://aws.amazon.com/vpc/pricing/) lists in-use public
-  IPv4 at $0.005 per hour, billed in seconds with a 60-second minimum.
-- AWS's [EBS pricing page](https://aws.amazon.com/ebs/pricing/) gives a gp3 example
-  rate of $0.08 per GB-month and bills provisioned volume storage by time. The final
-  plan must confirm the `us-east-1` rate and whether the console/API's GiB size maps
-  to the quoted billable unit used in the estimate.
+- The AWS Price List API returned `USE1-PublicIPv4:InUseAddress` at `$0.005/Hrs` on
+  2026-11-28. AWS's [VPC pricing page](https://aws.amazon.com/vpc/pricing/) says
+  in-use public IPv4 is billed in seconds with a 60-second minimum.
+- The AWS Price List API returned `EBS:VolumeUsage.gp3` with the `GB-Mo` unit at
+  `$0.08/GB-Mo` on 2026-11-28. AWS's [EBS pricing page](https://aws.amazon.com/ebs/pricing/)
+  describes provisioned volume storage billing by time. The estimate converts the
+  Terraform size of 100 GiB to 107.3742 decimal GB before applying the catalog unit;
+  confirm the billing quantity and actual retained duration against the final plan.
 - AWS's [S3 pricing page](https://aws.amazon.com/s3/pricing/) charges for storage and
   requests. The $0.023 and request assumptions above are conservative planning
   values, not a locked regional quote. A versioned bucket retains prior Terraform
