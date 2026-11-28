@@ -2453,3 +2453,21 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   operation, or spend.
 - **Next:** publish PR #81 with a force-with-lease against its verified old head, then
   monitor its checks before restacking PR #82.
+
+## 2026-11-28 — Confirm cancellation fix and restack expiry-target validation
+
+- **Date and time:** 2026-11-28 17:29 UTC.
+- **Phase:** Phase 2 non-billable infrastructure checks.
+- **CI results:** PR #77 follow-up run `46169578415` passed all six jobs, including
+  local-e2e. Restacked PR #78 run `46170127067` and PR #79 run `46170178018` also
+  passed all six jobs each. PR #80 run `46170356996` had five jobs passed and
+  local-e2e pending at the latest check. PR #81 run `46170595453` had three passed
+  and Python, local-e2e, and supply-chain pending at the latest check.
+- **Changes:** restacked PR #82 expiry target checks onto PR #81 head `3355407`.
+  Kept the current PR #81 goal/status/journal records during conflict resolution and
+  recorded PR #82-specific work in its own ticket.
+- **Validation:** the focused plan-summary/wrapper suite passed 35 tests; Ruff passed;
+  the docs checker validated 33 files; `git diff --check` passed. No clean-room run.
+- **AWS / GPU / cost:** no AWS calls, resources, GPU actions, or spend.
+- **Next:** publish PR #82 with an exact force-with-lease, monitor its CI, then restack
+  PR #83 onto the verified new head.

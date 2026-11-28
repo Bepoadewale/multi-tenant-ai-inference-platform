@@ -1,6 +1,6 @@
 # Ticket 82 — Validate the GPU expiry schedule target
 
-**Status:** [PR #82](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/82) is open on PR #81; implementation head `3c50b00` passed all six required jobs in run `46143239396`. This documentation follow-up needs CI; no AWS operation.
+**Status:** [PR #82](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/82) is open and restacked on PR #81 head `3355407`. Earlier implementation head `3c50b00` passed all six jobs in run `46143239396`; that result predates this restack. Current-head CI is required; no AWS operation.
 
 ## Objective
 
@@ -31,8 +31,8 @@ operation.
 - [x] Reject a schedule invoking a different AWS action.
 - [x] Keep the exact reviewed deadline and one-time schedule checks.
 - [x] Pass the focused plan and wrapper tests, Ruff, and diff checks.
-- [x] Publish PR #82 on top of #81 and pass all six checks on implementation head `3c50b00`.
-- [ ] Pass CI on the final documentation head.
+- [x] Publish PR #82 on top of #81 and pass all six checks on earlier implementation head `3c50b00`.
+- [ ] Pass CI on the current restacked head `5ff9d3e`.
 - [ ] Receive owner review; no merge or AWS apply is authorized by this ticket.
 
 ## Validation and troubleshooting
@@ -48,8 +48,10 @@ git diff --check
 ```
 
 The initial edit to the schedule condition missed a boolean `or`; the syntax review
-found it before the test run, and it was fixed. The focused suite then passed 35 tests
-and Ruff reported no issues.
+found it before the test run, and it was fixed. The focused suite passed 35 tests and
+Ruff reported no issues on the earlier implementation branch. After restacking on
+PR #81 head `3355407`, the same 35 tests pass, Ruff passes, and `make gpu-docs-validate`
+checks 33 files. Current-head CI remains pending.
 
 ## Security, cost, and evidence limits
 
