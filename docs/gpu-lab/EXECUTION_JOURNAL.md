@@ -2185,3 +2185,13 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **AWS / GPU / cost:** none; no AWS query/write, model download, GPU activity, or spend.
 - **CI:** PR #58 run `46162221680` passed. PR #59 run `46162611345` and PR #60 run `46162969703` were still in progress. PR #61 fresh CI has not yet been published.
 - **Next:** commit the current goal/status/journal updates, push using an exact lease against old PR head `bfd3449`, update its PR body, and track one CI run.
+
+
+## 2026-11-28 — Restack benchmark and incident handbooks
+
+- **Phase:** non-billable documentation preparation; no GPU experiments or incidents are claimed.
+- **Branch / PR:** `codex/gpu-operations-evidence-handbooks`, PR #62, parent PR #61 head `1474752`; rebased from old parent `bfd3449`. One PR-specific documentation commit was replayed.
+- **Validation:** relative links in seven changed Markdown files passed. Reviewed the benchmark report and incident handbook for evidence labels; benchmark values remain explicitly unmeasured and incidents are procedures, not fabricated events. `git diff --check` passed.
+- **AWS / GPU / cost:** no AWS calls or mutations, GPU use, model download, benchmark measurement, or spend.
+- **CI:** PR #61 fresh checks are pending; PR #62 fresh CI has not been triggered yet.
+- **Next:** publish this restack with exact lease against old head `90e4aca`, then watch the one PR-triggered workflow.

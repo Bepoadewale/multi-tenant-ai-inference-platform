@@ -66,11 +66,13 @@ Old quota-denial statements below are dated historical snapshots, not current st
   invocation, data-transfer allowance, tax contingency, and a reserve. It still
   requires exact AMI, price, egress, tax-profile, and state-retention confirmation;
   it is not permission to apply.
-- PRs #30–#61 remain open and unmerged; merge authorization is outstanding. PR #59
+- PRs #30–#62 remain open and unmerged; merge authorization is outstanding. PR #59
   and #60 were rebased onto current PR #58 head `59925fd`; #60 head `9a8bd28` has
   fresh CI running after eight focused tests and Ruff passed locally. PR #61's
   interview guide was rebased onto #60 head `9a8bd28`; fresh CI is required. Earlier
-  passing CI on the old stack is not evidence for these updated heads. PR #53
+  passing CI on the old stack is not evidence for these updated heads. PR #62 adds
+  benchmark and incident-response handbooks; its updated stack and CI remain pending.
+  PR #53
   code head `e623b75` passed all five checks in `46023306230`, including a Linux AMD64
   gateway image build and CPU end-to-end. PR #56 head `852c873` passed all five checks
   in `46040861818`; PR #57 Ansible head `4795f12` passed all six checks, including a
