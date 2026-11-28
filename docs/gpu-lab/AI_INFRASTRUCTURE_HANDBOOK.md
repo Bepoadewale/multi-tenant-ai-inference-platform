@@ -158,6 +158,17 @@ is one rough size indicator, not the full serving memory requirement. Inference
 also needs temporary buffers, attention state, framework allocations, and often a
 copy of each request's prior attention information.
 
+A neural network is a set of connected numeric operations whose parameters are
+adjusted using examples. During **training**, the system compares predictions with
+target answers, calculates how the parameters contributed to the error, and updates
+the parameters repeatedly. Training usually needs gradients, optimizer state, and
+large datasets, so its memory and compute needs differ from serving. During
+**inference**, the model uses fixed weights to produce an answer; it does not update
+those weights. This project serves a prepared model and does not train or fine-tune
+it. **Fine-tuning** continues training from an existing model on a narrower dataset
+to adapt its behavior; it would require a separate dataset, quality/safety review,
+and compute plan. It is outside the single-L4 lab objective.
+
 ### Transformer attention and the KV cache
 
 Transformers process token representations through layers. In self-attention, each
@@ -320,6 +331,12 @@ are preferable where there is an objective rule, such as required JSON keys or a
 fixed expected label. Subjective quality should be clearly marked as subjective and
 use a documented rubric; a language-model judge can vary and should not be treated
 as a ground-truth oracle.
+
+A model registry is a catalog of model versions and their provenance, evaluation,
+and release status. MLflow can record runs, metrics, and model artifacts. In this
+repository, the prepared release workflow links a candidate to evaluation metadata
+and a proposed immutable plan. That local control path is not yet proof that the
+registry has held a real LLM artifact or that a candidate was served on an L4.
 
 An immutable release plan records the candidate revision, artifact digest, runtime
 image, evaluation report, and intended transition. Independent approval reduces the

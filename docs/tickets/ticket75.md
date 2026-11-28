@@ -16,9 +16,10 @@ handbook labels the architecture as proposed and points readers to current evide
 ## Changes
 
 - Explain GPU/CPU roles, L4 capacity, CUDA/driver/toolkit/container layers, GPU
-  parallelism, model/token/transformer concepts, KV cache, vLLM scheduling,
-  quantization, serving measurements, quotas/Redis, model governance, telemetry,
-  incident diagnosis, security, and cost.
+  parallelism, neural networks, training versus inference, fine-tuning, model/token/
+  transformer concepts, KV cache, vLLM scheduling, quantization, serving
+  measurements, quotas/Redis, model registry and governance, telemetry, incident
+  diagnosis, security, and cost.
 - Add diagrams, formulas, comparison tables, a symptom-to-diagnostic table, and a
   layered manual verification sequence.
 - Explain NCCL, tensor/pipeline parallelism, multi-node training, and Kubernetes GPU
