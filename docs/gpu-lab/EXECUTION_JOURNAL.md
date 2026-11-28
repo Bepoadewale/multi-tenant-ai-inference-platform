@@ -2216,3 +2216,13 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Validation:** prior-base check recorded in ticket64: 20 focused tests; full `make verify` passed (181 passed, 2 skipped); Ansible, Terraform, Compose, observability, Ruff, and dry-run preparation checks passed. On the refreshed stack, PR #59 and #60 CI runs `46162611345` and `46162969703` passed all six jobs; PRs #61–#63 runs are active. PR #64 needs CI on its refreshed head.
 - **AWS / GPU / cost:** no AWS query or mutation, no instance, no model download, no GPU execution, and no spend. Applied quota is 4.0 vCPUs, but project state/locking, Budget recipient and Budget, exact plan/cost, independent expiry, fresh capacity, and separate apply authorization remain launch gates.
 - **Next:** finish conflict review and link/status checks, publish PR #64 with exact lease against old head `06f1a11`, then monitor its single CI run.
+
+## 2026-11-28 — Restack bounded Triton profiling preparation
+
+- **Phase:** Phase 4 and non-billable preparation; no CUDA kernel or profiler has run on an L4.
+- **Branch / PR:** PR #65 (`codex/gpu-profiling-preparation`) restacked onto refreshed PR #64 head `2e2e4dd`, replacing old parent `06f1a11`.
+- **Changes retained:** bounded Triton vector-add benchmark and host guard, evidence preservation across runs, Nsight sampling guidance, tests, ticket, and manual steps. Shared current status records were retained from the refreshed parent during conflicts.
+- **Earlier evidence:** original PR #65 head `49076a5` passed six CI jobs in run `46114955314`, including the designated integrated local CPU clean-room run. The command sequence and limits are recorded in `docs/governance/VALIDATION.md`; this does not test GPU execution.
+- **Validation:** 12 focused Triton tests pass on the rebased source; Ruff passes for the Triton module and tests; `bash -n scripts/gpu-ec2-triton.sh`, `make gpu-triton-plan`, and `git diff --check` pass. The dry run reports zero network requests and zero GPU operations. A link scan found 107 valid relative links across nine changed Markdown files. The previous base passed 12 focused tests and `make verify` (193 passed, 2 skipped); those are not fresh-head checks.
+- **AWS / GPU / cost:** no AWS query or mutation, no GPU or model activity, and no spend. Quota is approved at 4.0 vCPUs; state/locking, Budget, exact plan/cost, expiry, capacity, and separate apply gates remain open.
+- **Next:** publish using an exact lease against old PR #65 head `24ea5e8`, update the PR description, and watch one refreshed CI run.

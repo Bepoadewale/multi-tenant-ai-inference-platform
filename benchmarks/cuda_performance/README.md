@@ -28,6 +28,73 @@ These are microbenchmarks. They do not represent LLM serving throughput, user la
 multi-tenant contention, or production performance. The vector kernel is intentionally
 simple and is not expected to beat an optimized library for all sizes.
 
+## Triton kernel
+
+The same CUDA/PyTorch learning environment includes Triton `3.8.0` in its hash-locked
+dependency set. Triton expresses a GPU kernel in Python and compiles it for the target
+GPU when first launched. The new vector-add exercise maps one Triton program to a
+fixed-size block of elements, masks the last partial block, checks every result against
+PyTorch, and measures only after warm-up with synchronized CUDA events. It reports an
+**effective** byte-rate calculated as three FP32 values per element (two reads and one
+write); this does not measure actual DRAM traffic because cache behavior is not counted.
+
+Run the no-GPU plan from the local workstation:
+
+```bash
+make gpu-triton-plan
+```
+
+On the approved EC2 host through Systems Manager, the operator wrapper verifies exact
+host identity and one visible L4, requires a separate confirmation, and limits the
+kernel batch to at most 120 seconds:
+
+```bash
+GPU_EC2_TRITON_CONFIRM=run make gpu-ec2-triton
+```
+
+The command stores a private aggregate JSON file under
+`/var/tmp/gpu-lab/cuda-performance/`. It imports neither Triton nor PyTorch in dry-run
+mode, refuses to fall back to CPU, and has not been executed on an L4 yet.
+
+## Nsight profiling
+
+Nsight Systems shows a short timeline of host calls, CUDA launches, memory copies, and
+kernel execution. Run the small, L4-guarded CUDA C++ vector program under it, with
+sampling disabled to reduce unrelated data and collection overhead:
+
+```bash
+mkdir -p /var/tmp/gpu-lab/profiling
+chmod 700 /var/tmp/gpu-lab/profiling
+nsys --version
+nsys profile --trace=cuda,nvtx --sample=none --cpuctxsw=none \
+  --force-overwrite=true --stats=true \
+  --output=/var/tmp/gpu-lab/profiling/vector-add \
+  /tmp/gpu-lab-vector-add 1048576 5 20
+nsys stats --report cuda_gpu_kern_sum --report cuda_api_sum \
+  /var/tmp/gpu-lab/profiling/vector-add.nsys-rep
+```
+
+Nsight Compute examines one kernel in more detail. Its replay and counter collection
+can change timings, so keep its result separate from normal benchmark data. NVIDIA
+drivers may restrict hardware counters to administrators; if a non-privileged attempt
+reports `ERR_NVGPUCTRPERM`, use the documented administrator path only for this
+bounded sample. Do not change driver security settings to bypass the restriction.
+
+```bash
+ncu --version
+sudo ncu --set basic --launch-count 1 --force-overwrite \
+  --export /var/tmp/gpu-lab/profiling/vector-add \
+  /tmp/gpu-lab-vector-add 1048576 5 20
+```
+
+Inspect the short report and record unavailable metrics. Do not profile DCGM hardware
+counters at the same time; counter clients can conflict. Keep raw profiler files
+outside Git, private, and short-lived. If `nsys` or `ncu` is absent from the reviewed
+toolkit package set, record it as unavailable and confirm any extra package's version,
+cost impact, and disk usage before installing it.
+
+The planned Nsight commands are based on NVIDIA's [Nsight Systems CLI guide](https://docs.nvidia.com/nsight-systems/UserGuide/), [Nsight Systems installation requirements](https://docs.nvidia.com/nsight-systems/InstallationGuide/), and [Nsight Compute profiling guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/). NVIDIA documents that Nsight Compute may require elevated permission for performance counters. CUDA Toolkit and its profiler contents still need to be confirmed on the selected Ubuntu host.
+
 ## Safe local dry-run
 
 From the repository root:

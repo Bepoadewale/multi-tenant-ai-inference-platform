@@ -132,15 +132,18 @@ verification, and a second Ansible run showing no unintended changes.
 
 ## Chapter 8 — CUDA and performance engineering
 
-The preparation code contains a CUDA vector-add kernel and synchronized PyTorch
-matrix experiments. The write-up must explain threads, blocks, grids, warps, memory
-hierarchy, launch overhead, host/device transfers, precision, and bottleneck analysis.
-The [CUDA lab guide](../../benchmarks/cuda_performance/README.md) defines dry-run and
-execution commands.
+The preparation code contains a CUDA vector-add kernel, synchronized PyTorch matrix
+experiments, and a bounded Triton vector-add exercise. The guide also prepares one
+short Nsight Systems timeline and an optional Nsight Compute sample; profiler results
+must be kept separate from unprofiled timings. The write-up must explain threads,
+blocks, grids, warps, memory hierarchy, launch overhead, host/device transfers,
+precision, and bottleneck analysis. The [CUDA lab guide](../../benchmarks/cuda_performance/README.md)
+defines the dry-run and exact host commands.
 
-**Pending:** compiled kernel output, CPU/GPU measurements, warm-up and repetitions,
-precision comparisons, profile evidence, hardware limits, and charts generated from
-real runs. A dry-run command list is not a performance result.
+**Pending:** compiled CUDA and Triton kernel output, CPU/GPU measurements, warm-up and
+repetitions, precision comparisons, profile availability/results, hardware limits, and
+charts generated from real runs. Local plans and source code are not performance
+results.
 
 ## Chapter 9 — Language models and serving
 

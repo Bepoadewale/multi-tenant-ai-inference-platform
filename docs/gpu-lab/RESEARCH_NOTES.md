@@ -482,6 +482,42 @@ metadata evidence only; the image was not pulled or run.
 
 No profiler, exporter, alert, or live metric was executed during this source review.
 
+## 2026-11-28 — prepare the Triton and Nsight lab
+
+- Triton's [official installation guide](https://triton-lang.org/main/getting-started/installation.html)
+  says to check its supported platform and hardware matrix before use. The repository's
+  standalone PyTorch CUDA lock already resolves Triton `3.8.0` from the pinned
+  PyTorch `2.14.0+cu130` dependency metadata. Reusing this locked environment avoids
+  adding a second unbounded Triton install. The new vector-add script has a dry-run
+  that imports neither library, bounds the workload, validates exactly one L4 before
+  execution, checks results against PyTorch, and writes only a private aggregate.
+  The kernel has not been JIT-compiled on an L4.
+- NVIDIA's [Nsight Systems installation guide](https://docs.nvidia.com/nsight-systems/InstallationGuide/)
+  lists x86_64 Linux workstation/cloud targets and CUDA user-mode driver support from
+  CUDA 12 onward. Its [CLI reference](https://docs.nvidia.com/nsight-systems/UserGuide/)
+  documents a limited CUDA/NVTX trace with CPU sampling disabled and `nsys stats` for
+  summarized kernel and API activity. The runbook uses this short capture on the
+  bounded CUDA vector-add program, not on the full server, to keep files and overhead
+  small.
+- NVIDIA's [Nsight Compute profiling guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/)
+  explains that kernel replay, cache flushing, and clock control can change measured
+  timing. It also documents `ERR_NVGPUCTRPERM` when performance counters are restricted.
+  The prepared `ncu` exercise is optional, requests one kernel launch with the basic
+  metric set, and records a permission failure without changing driver security
+  settings. Skip it if the selected host package or permission boundary does not expose
+  the counters.
+- CUDA Toolkit's [Linux installation guide](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/)
+  documents profiler package locations for toolkit installations, but the exact
+  Ubuntu `cuda-toolkit-13-0` dependency set must be checked on the pinned host. We do
+  not add a separate profiler repository or package to the Ansible role yet. The host
+  checks `command -v nsys` and `command -v ncu`; if absent, record the limitation and
+  review any package/version/cost change before installation.
+
+These sources informed the new bounded Triton exercise and documented profiler commands
+in the CUDA guide and manual reproduction guide. Local tests validate only planning,
+parameter bounds, wrapper confirmation, and host-check ordering. No Triton kernel or
+Nsight collection has run on real hardware.
+
 ## 2026-11-27 — vLLM tokenization and shared-server security
 
 - The current vLLM [tokenizer API reference](https://docs.vllm.ai/en/v0.15.1/api/vllm/entrypoints/serve/tokenize/protocol/)

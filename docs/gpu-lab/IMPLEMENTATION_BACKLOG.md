@@ -66,13 +66,14 @@ Old quota-denial statements below are dated historical snapshots, not current st
   invocation, data-transfer allowance, tax contingency, and a reserve. It still
   requires exact AMI, price, egress, tax-profile, and state-retention confirmation;
   it is not permission to apply.
-- PRs #30–#64 remain open and unmerged; merge authorization is outstanding. PR #59
+- PRs #30–#65 remain open and unmerged; merge authorization is outstanding. PR #59
   head `0cfbedb` passed six checks in `46162611345`; #60 head `9fc23f2` passed six
   checks in `46162969703`; #61 head `1474752` passed six checks in `46163194154`.
-  PR #62 run `46163327188` and #63 run `46163484312` are still running. PR #64 is
-  being restacked after review found configuration must work before the NVIDIA
-  driver exists. Twenty focused tests and full `make verify` passed on its earlier
-  base; fresh PR CI remains pending. PR #53
+  PR #62 run `46163327188` and #63 run `46163484312` are still running. PR #64
+  refreshed head `2e2e4dd` is published with fresh CI pending. PR #65 is rebased onto
+  #64 head `2e2e4dd`; its earlier head `49076a5` passed six checks in `46114955314`
+  and includes the designated local CPU clean-room record. Current-head checks for
+  #65 are pending. PR #53
   code head `e623b75` passed all five checks in `46023306230`, including a Linux AMD64
   gateway image build and CPU end-to-end. PR #56 head `852c873` passed all five checks
   in `46040861818`; PR #57 Ansible head `4795f12` passed all six checks, including a
@@ -118,9 +119,10 @@ five checks passed on latest head `de4c6e7` in run `46034523863`. PR #56 prepare
 host-only deployment controller and has 16 focused local tests passing; updated head
 `852c873` passed all five checks in `46040861818`.
 PR #55 remains open and unmerged. [PR #56](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/56)
-is open as a draft, stacked on PR #55. Initial head `ad10699` passed all five required
+is open and ready for review, stacked on PR #55. Initial head `ad10699` passed all five required
 checks in run `46039778508`, including one clean-room local end-to-end cycle. The
-current type-safety follow-up passed full local validation; its checks are pending.
+material tensor-parallel integer type-safety follow-up is head `852c873`; all five
+required checks passed in run `46040861818`, including the one workflow clean-room cycle.
 
 - [x] Bind full model revision, artifact digest, license, serving image/configuration,
   evaluation suite/report digests, and source commit.
@@ -137,7 +139,8 @@ current type-safety follow-up passed full local validation; its checks are pendi
   passes Ruff, 144 tests (2 skipped), audit, Compose/monitoring validation, and
   benchmark/evaluation/CUDA dry runs.
 - [x] Complete one CI clean-room cycle on the first validated controller head.
-- [ ] Rerun required CI after a material tensor-parallel type-safety fix.
+- [x] Rerun required CI after the material tensor-parallel type-safety fix; all five
+  jobs passed on head `852c873` in run `46040861818`.
 - [ ] Verify active champion, model bytes, sequential restart, inference, rollback,
   and interrupted-transaction recovery on the authorized L4 host.
 
@@ -252,9 +255,12 @@ and teardown/absence commands are ready.
 
 **Status:** PR #50 contains a non-billable ordered install manifest and hashed PyTorch lock. PR #57 adds a universal hash-locked Ansible 2.21.6 controller and local-host role for the dated Ubuntu/NVIDIA/CUDA/Docker candidate set. Its six checks, including one clean-room local run, passed on head `4795f12` in `46045068200`; PR #57 is ready for review. No GPU host has been configured; candidates are not runtime-verified.
 
-- [ ] Select and pin a standard Ubuntu 24.04 x86_64 AMI, kernel, NVIDIA driver,
-  CUDA Toolkit, Docker Engine, NVIDIA Container Toolkit, Python, and PyTorch after
-  verifying the exact version matrix against the pinned vLLM build.
+- [x] Select and pin a candidate standard Ubuntu 24.04 x86_64 AMI, R580.196.11 host
+  driver, CUDA Toolkit 13.0.3, Docker Engine 29.9.3, NVIDIA Container Toolkit 1.20.2,
+  Python 3.12, standalone PyTorch 2.14.0+cu130, vLLM 0.34.0, and the pinned Qwen
+  revision using official release and artifact metadata. Version-family compatibility
+  is researched on paper; live kernel, signed-index, package-install, model-license,
+  artifact, and runtime verification remain mandatory before or during the L4 batch.
 - [x] Record ordered host/container components, candidate versions, verification
   points, stop conditions, and items deliberately kept off the host in
   `GPU_HOST_INSTALL_MANIFEST.md`.
@@ -262,8 +268,9 @@ and teardown/absence commands are ready.
   CPython 3.12 / Linux x86_64; keep the install separate from the vLLM image.
 - [ ] Recheck signed package indexes and exact package versions against the pinned AMI
   and live Ubuntu kernel before launch; retain the reviewed package metadata.
-- [ ] Prepare scripts, packages, commands, output capture, and recovery steps before
-  launching paid compute.
+- [x] Prepare install automation, CUDA/PyTorch/Triton experiments, bounded host
+  commands, output capture, and recovery steps before paid compute; the commands are
+  recorded in the host manifest, manual guide, and batch runbook.
 - [ ] Manually install the driver and run `nvidia-smi`, a CUDA container, and a
   synchronized PyTorch computation on the L4.
 - [x] Prepare the Ansible role, signed-repository configuration, version pins, and
@@ -280,17 +287,22 @@ sanitized output are retained, and a repeated Ansible run makes no unintended ch
 
 ### Package 4 — CUDA performance laboratory
 
-**Status:** PR #49 (`codex/gpu-cuda-lab-preparation`) is open. Its current restacked
-head passes all five required jobs. The bounded CUDA C++ vector-add and synchronized
-PyTorch matrix/transfer lab is static preparation. No kernel has been compiled and no
-real measurements exist.
+**Status:** PR #49 (`codex/gpu-cuda-lab-preparation`) is open. PR #65's bounded Triton
+vector-add and Nsight instructions are rebased onto current PR #64 head `2e2e4dd`.
+Earlier PR #65 head `49076a5` passed all six required jobs in run `46114955314`; its
+local-e2e job is recorded as the single integrated local CPU clean-room acceptance
+run in `docs/governance/VALIDATION.md`. The current PR #65 head requires fresh checks.
+The designated run validates the local CPU stack only; no kernel has been compiled on
+a GPU and no real measurements exist.
 
 - [x] Prepare bounded CPU/GPU vector and matrix operations, separate host/device
   copies, supported precision checks, and warmup/repeat controls.
 - [x] Use CUDA events plus explicit synchronization for GPU timings; test the dry-run
   without importing PyTorch or touching a GPU.
-- [ ] Prepare optional Triton/Nsight exercises after runtime compatibility and tool
-  availability are confirmed.
+- [x] Prepare an optional Triton vector-add experiment using the existing hash-locked
+  Triton dependency, with a no-GPU plan, L4/host guard, result verification, runtime
+  cap, and private output. Document short Nsight Systems/Compute samples, counter
+  permission limits, package-availability checks, and separation from normal timings.
 - [ ] Compile and execute the experiments on the real single L4.
 - [ ] Record design, warm-up, repetitions, hardware/software context, raw values, and
   profiler availability before interpreting results.
