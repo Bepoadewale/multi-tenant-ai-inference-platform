@@ -74,6 +74,9 @@ GPU benchmark harness.
 - PR head `ac4184b` passed all five required CI jobs in run `46107629939`, including
   Python tests/dry-run and local E2E. This is CPU/static CI evidence; it does not
   validate a running vLLM service or GPU benchmark.
+- Documentation follow-up head `78b6188` also passed all five required jobs in run
+  `46108247828`. The current PR head therefore has passing checks after both the code
+  fix and the evidence/status refresh.
 - On 2026-11-28, `.venv/bin/ruff` and the focused tests passed using the existing
   hash-locked Python environment from the adjacent PR #57 worktree: Ruff passed and
   `gateway/tests/test_gpu_benchmark_runner.py` reported 3 passed. `make

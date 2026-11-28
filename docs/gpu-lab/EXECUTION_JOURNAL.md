@@ -1287,3 +1287,14 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   stacked on PR #46; no merge or cloud work was performed.
 - **Next:** continue static evaluation and operational-preparation review. The $25
   cap, zero approved G-series quota, and pending appeal continue to block GPU runs.
+
+## 2026-11-28 — Verify benchmark evidence follow-up CI
+
+- **Phase:** Phase 8 static preparation; PR #47 documentation update.
+- **Head and result:** commit `78b6188` passed all five required jobs in run
+  `46108247828`, including local E2E. The evidence manifest and ticket now distinguish
+  the code-head run `46107629939` from this documentation-head run.
+- **Boundary:** these checks did not start vLLM, contact a model, use AWS, or execute a
+  GPU benchmark. No GPU hours or project spend were incurred.
+- **Next:** rebase the evaluation preparation on the current PR #47 head and continue
+  the static review queue.
