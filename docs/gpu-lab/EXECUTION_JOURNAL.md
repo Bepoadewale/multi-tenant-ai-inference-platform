@@ -17,6 +17,41 @@
   remaining non-billable work and do not merge without authorization.
 
 
+## 2026-11-28 — Bind the saved GPU expiry target to project resources
+
+- **Phase:** Phase 2 static-only Terraform safety preparation; no GPU or AWS mutation.
+- **Starting state:** PR #82 final head `d5afac7` was clean and all six required CI
+  jobs passed in run `46143890538`. The saved-plan validator checked the project
+  schedule group and `TerminateInstances` action, but not the configured target role
+  or resource references.
+- **Branch/worktree:** `codex/gpu-expiry-binding-review`, based on PR #82 in
+  `/private/tmp/multi-tenant-ai-inference-platform-pr83`.
+- **Research:** read HashiCorp's official Terraform JSON output format. Since an EC2
+  identifier and generated IAM role ARN can remain unknown until apply, the plan's
+  `change.after` values may omit them; the parsed configuration retains expression
+  references that can be compared by exact resource address.
+- **Changes:** the saved-plan validator now requires the expiry schedule target to
+  reference this GPU instance and the project's expiry role. It also requires the
+  expiry IAM policy's role and resource references to bind to those same resources.
+  Added fixture cases for incorrect target roles and instance references, ticket83,
+  docs index entry, and documentation-link validation.
+- **Failed approaches:** the first test command used `python`, unavailable on the
+  workstation; `python3` was Python 3.14 without pytest. The first test run then
+  exposed an incorrect expectation that the IAM policy's ARN reference also included
+  the `.id` path; the code and fixture were corrected to the actual `.arn` reference.
+- **Validation:** focused suite passed **24 tests**; Ruff passed, the local docs-link
+  checker validated 34 Markdown files, and `git diff --check` passed.
+  Terraform fixture checks do not prove the live AWS provider's JSON shape. The next
+  permitted remote plan should confirm it before any apply.
+- **Security/evidence limits:** this checks resource references, not the runtime
+  schedule's successful delivery. Terraform mock tests separately check the policy
+  action and scope; a real scheduled termination remains unverified. No AWS query or
+  mutation, Terraform plan, GPU operation, model download, Docker build/container,
+  local clean-room run, or project spend occurred.
+- **Next:** finish documentation validation, publish the focused PR on top of #82,
+  and let its standard CI validate the final head. Do not merge without owner
+  authorization.
+
 ## 2026-11-28 — Restack and validate PR #58 local tenant and operator preparation
 
 - **Phase:** Phase 2 remains quota-blocked; Phase 3–6 code and instructions are being prepared without a GPU.
