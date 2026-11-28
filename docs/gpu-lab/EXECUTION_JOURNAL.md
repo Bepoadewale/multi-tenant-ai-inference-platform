@@ -17,6 +17,15 @@
   remaining non-billable work and do not merge without authorization.
 
 
+## 2026-11-28 — Restack the AI infrastructure handbook on the updated operator guide
+
+- **Phase:** Non-billable documentation preparation; Phase 2 remains quota-blocked.
+- **Branch / PR:** `codex/ai-infrastructure-handbook`, PR #59, rebased from former PR #58 head `351f164` onto updated PR #58 head `59925fd`.
+- **Rebase:** preserved the updated PR #57/58 goal and run state while retaining the handbook, ticket #59, and PR #58's local failure history. The handbook remains a documentation-only package.
+- **Validation:** handbook/index relative links and `git diff --check` pass. No application tests or GPU commands were needed for this docs-only rebase. The updated PR checks have not run yet.
+- **Cost and limits:** no AWS, GPU, model download, or spend. The handbook explains concepts and lab preparation; it does not claim live L4 evidence.
+- **Next:** publish with an exact force-with-lease, then monitor one PR CI workflow and continue restacking its descendants.
+
 ## 2026-11-28 — Restack and validate PR #58 local tenant and operator preparation
 
 - **Phase:** Phase 2 remains quota-blocked; Phase 3–6 code and instructions are being prepared without a GPU.
@@ -2143,3 +2152,46 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Remaining launch gates:** remote-state bootstrap, valid private Budget alert recipient and project Budget, current exact price and AZ-capacity check, remote saved-plan review, expiry safeguards, and separate apply authorization. Keep the $25 ceiling and one bounded GPU batch.
 - **CI results:** PR #56 run `46160784399` passed all five required checks, including local E2E. PR #57 run `46161064613` passed all six required checks, including Ansible and local E2E. PR #58 fresh CI has not yet been published at this journal entry.
 - **Next:** review the final PR #58 diff, push with exact lease against `59925fd`, update the PR description, and watch the single triggered run. Then carry descendants from their respective old parent heads, preserving only each PR's own commit range.
+
+
+## 2026-11-28 — Audit and complete handbook concept coverage
+
+- **Phase:** non-billable learning-document preparation; no AWS or GPU work.
+- **Branch / PR:** `codex/ai-infrastructure-handbook`, PR #59, based on PR #58.
+- **Audit finding:** the handbook described most required ideas but left several
+  important terms implicit. It did not clearly distinguish VRAM from host RAM, memory
+  bandwidth from capacity, MLflow tracking from a model registry and artifact store,
+  or error-budget and fault-isolation concepts.
+- **Change:** added those explanations, separate input/output cost-per-million-token
+  formulas, and an evidence-limited explanation of the observed local Redis incident.
+  The glossary now names the concepts directly.
+- **Validation:** `git diff --check` passed. A fresh CI run is needed for the updated
+  handbook. No additional clean-room run was performed.
+- **AWS / GPU / cost:** no AWS query or mutation, model download, GPU operation, or
+  spend.
+- **Next:** finish Markdown link validation, publish the focused handbook update, and
+  track its six standard PR checks.
+
+## 2026-11-28 — Validate the handbook concept-coverage update
+
+- **Phase:** pre-quota educational documentation.
+- **PR #59:** head `5d812ae` passed all six required jobs in run `46122060966`,
+  including the routine local end-to-end workflow. The ticket and evidence manifest
+  now identify that exact head and run.
+- **Clean-room boundary:** this did not start another manual clean-room run. The one
+  designated project-level local CPU cycle remains the record in
+  `docs/governance/VALIDATION.md`.
+- **AWS / GPU / cost:** no account call, cloud mutation, GPU, model download, or spend.
+- **Next:** leave PR #59 open for owner review; the documentation covers concepts and
+  plans but cannot establish real L4 behavior.
+
+
+## 2026-11-28 — Restack and validate the AI infrastructure handbook
+
+- **Phase:** non-billable documentation preparation; Phase 2 paid launch gates remain open.
+- **Branch / PR:** `codex/ai-infrastructure-handbook`, PR #59, parent PR #58 current head `fa4d819`; local head before this journal update `e17865e`.
+- **Rebase:** replayed PR #59's five own commits from former PR #58 head `59925fd` onto `fa4d819`. Conflicting shared goal, status, and journal text was resolved in favor of the latest quota approval and current launch gates. The handbook's GPU, distributed-systems, observability, FinOps, security, and reliability topics were retained.
+- **Validation:** checked relative Markdown links across eight changed Markdown files; no missing targets. `git diff --check` passed. The handbook is documentation only and makes no L4 execution claim.
+- **AWS / cost:** no AWS query or mutation, GPU, model/image pull, or spend in this handbook task. The current read-only result remains 4.0 applied G/VT vCPUs, with project backend and Budget absent; the $25 cap still applies.
+- **CI:** PR #58 run `46162221680` was still in progress at this check. PR #59 fresh CI has not been triggered yet.
+- **Next:** commit the status/journal follow-up, publish PR #59 using an exact lease against `151e1b6`, update the PR description, and watch its single CI run.

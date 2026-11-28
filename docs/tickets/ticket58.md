@@ -209,14 +209,14 @@ recovery. No separate manual clean-room run was launched.
 - **Drill expectation:** because shared rollout lookup runs before admission, the
   outage test now expects `503 shared rollout state unavailable` from both replicas.
 - **Local validation:** repository-root API and rollout test modules passed **10
-  tests**; Ruff passed. Bash syntax and documentation whitespace checks pass. The
-  fixed cross-process outage plus recovery drill has not run yet.
+  tests**; Ruff passed. Bash syntax and documentation whitespace checks pass.
+- **CI result:** run `46068015904` passed all six jobs. Local E2E verified both
+  gateways return 503 while Redis is stopped, Redis `PING` recovers, and both
+  gateway readiness checks pass. The cross-gateway cancellation drill also passed.
 - **Incident report:** `docs/gpu-lab/incidents/INCIDENT-LOCAL-REDIS-001.md` preserves
   the actual failure, detection, limits, root cause, and fix without calling it a
   production or GPU incident.
-- **Next gate:** publish the fix and run one CI workflow. Require both gateways to
-  return HTTP 503 while Redis is stopped, Redis `PING` to recover, and both gateway
-  readiness checks to pass. Keep PR #58 open; no merge is authorized.
+- **Next gate:** none for this change. Keep PR #58 open; no merge is authorized.
 
 ## Remaining limitations
 
