@@ -45,14 +45,24 @@ and runtime configuration on the same host.
 - [x] The role skips runtime verification while a reboot is pending and reports the
   operator checkpoint.
 - [x] CI installs dependencies by hash and syntax-checks the playbook.
-- [ ] CI checks pass for the latest PR head. The initial head passed Ansible,
-  observability, manifests, Python, and supply-chain checks; its local end-to-end job
-  was still pending when the safety follow-up was prepared.
+- [ ] CI checks pass for the latest rebased PR head. The earlier head passed Ansible,
+  observability, manifests, Python, and supply-chain checks; the safety follow-up
+  requires a fresh complete workflow.
 - [ ] Human review; no merge without the owner's authorization.
 - [ ] After manual installation on the approved host, run in check mode, review,
   configure, reboot through SSM if needed, rerun, and record second-run idempotency.
 - [ ] Independently verify `nvidia-smi`, CUDA computation, Docker GPU access, and
   PyTorch computation on the L4.
+
+## Rebase and validation follow-up — 2026-11-28
+
+PR #57 was rebased from PR #56 head `3292af9` onto updated PR #56 head `b9d41f6`.
+The shared execution journal conflicted; its current PR #56 state and the PR #57
+Ansible preparation and review-fix history were retained. The original Ansible
+validation command first failed because the isolated Ansible environment was not on
+`PATH`. Rerunning with `PATH=/tmp/gpu-ansible-venv/bin:$PATH` passed the playbook
+syntax check. Ruff and `git diff --check` also passed. No EC2 or GPU configuration ran.
+The rebased head needs a new required CI run.
 
 ## Commands and validation
 

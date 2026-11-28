@@ -17,6 +17,16 @@
   remaining non-billable work and do not merge without authorization.
 
 
+## 2026-11-28 — Rebase and validate Ansible host configuration
+
+- **Phase:** Phase 3 static host-configuration preparation; no GPU host access.
+- **Branch / PR:** `codex/gpu-ansible-host-configuration`, PR #57, rebased from PR #56 head `3292af9` onto updated PR #56 head `b9d41f6`.
+- **Rebase:** three PR #57 commits replayed. Preserved the newer PR #55/56 goal and journal state, and retained the PR #57 implementation and review-fix history.
+- **Failed command:** `make gpu-ansible-validate` initially failed because the isolated Ansible executable was not on `PATH` (`ansible-playbook: command not found`). No configuration ran.
+- **Successful validation:** reran with `PATH=/tmp/gpu-ansible-venv/bin:$PATH`; playbook syntax passed. Ruff and `git diff --check` passed.
+- **Cost and limits:** local static validation only; no AWS, host setup, GPU, package installation on EC2, or spend. A fresh PR CI run remains necessary after publication.
+- **Next:** publish the rebased PR #57 branch with an exact force-with-lease, then continue restacking its descendants.
+
 ## 2026-11-28 — PR #56 release-manifest review fix passed CI
 
 - **Phase:** Phase 9 static release tooling; Phase 2 remains quota-blocked.
