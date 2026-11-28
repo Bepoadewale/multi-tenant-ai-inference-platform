@@ -17,6 +17,15 @@
   remaining non-billable work and do not merge without authorization.
 
 
+## 2026-11-28 — Restack the AI infrastructure handbook on the updated operator guide
+
+- **Phase:** Non-billable documentation preparation; Phase 2 remains quota-blocked.
+- **Branch / PR:** `codex/ai-infrastructure-handbook`, PR #59, rebased from former PR #58 head `351f164` onto updated PR #58 head `59925fd`.
+- **Rebase:** preserved the updated PR #57/58 goal and run state while retaining the handbook, ticket #59, and PR #58's local failure history. The handbook remains a documentation-only package.
+- **Validation:** handbook/index relative links and `git diff --check` pass. No application tests or GPU commands were needed for this docs-only rebase. The updated PR checks have not run yet.
+- **Cost and limits:** no AWS, GPU, model download, or spend. The handbook explains concepts and lab preparation; it does not claim live L4 evidence.
+- **Next:** publish with an exact force-with-lease, then monitor one PR CI workflow and continue restacking its descendants.
+
 ## 2026-11-28 — Restack and validate PR #58 local tenant and operator preparation
 
 - **Phase:** Phase 2 remains quota-blocked; Phase 3–6 code and instructions are being prepared without a GPU.

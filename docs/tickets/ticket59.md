@@ -50,3 +50,12 @@ The text is an educational reference, not a substitute for the remaining hardwar
 experiments. Version-sensitive instructions must be refreshed before the approved GPU
 batch. CI and human review remain outstanding. After PR #58 changes its base, retarget
 this stacked PR and resolve any resulting review feedback.
+
+## Rebase follow-up — 2026-11-28
+
+The handbook branch was rebased from former PR #58 head `351f164` onto updated PR #58
+head `59925fd`. The shared execution journal had a conflict because the predecessor
+now includes the rebase and CI-failure history; both the updated PR #57/58 records and
+the handbook work record were retained. The documentation links and `git diff --check`
+pass. This PR still needs a fresh CI run and review. No AWS, GPU, model download, or
+cloud spend occurred.
