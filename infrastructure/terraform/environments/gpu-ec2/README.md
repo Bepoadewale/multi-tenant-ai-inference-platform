@@ -90,8 +90,11 @@ The detailed goal and runbook are in `docs/goals/SINGLE_L4_GPU_INFRASTRUCTURE_GO
 and `docs/gpu-lab/`. Before a paid operation, the owner must complete the repository's
 cloud-pilot authorization sequence, refresh the estimate, verify the account and
 quota, select an offered AZ, record a future expiry, review the exact saved plan, and
-confirm teardown. The current G/VT quota is zero, so provisioning is currently
-blocked. No quota request or apply is part of this static code package.
+confirm teardown. Read-only AWS checks on 2026-11-28 show 4.0 applied On-Demand G/VT vCPUs in
+`us-east-1`, enough by quota for one `g6.xlarge` but not a capacity reservation or
+apply authorization. The exact state/lock, verified Budget recipient, exact-plan/cost,
+expiry, and separate apply gates remain open. This static code package made no AWS
+mutation.
 
 After an authorized apply, use Session Manager to verify the instance and timer,
 configure the GPU manually, export sanitized evidence, then review a Terraform

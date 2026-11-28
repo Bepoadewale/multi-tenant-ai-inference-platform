@@ -4,6 +4,7 @@
 **Pricing research date:** 2026-11-27 (recheck before any plan or apply).  
 **Hard initial ceiling:** USD $25 for this project's AWS usage.  
 **Current measured spend:** $0; GPU instance hours: 0.
+**Current quota (read-only, 2026-11-28):** 4.0 applied On-Demand G/VT vCPUs; this is not a capacity reservation or apply authorization. The preliminary rates below are dated and must be refreshed before a saved plan.
 
 ## Read-only plan scope check
 
@@ -160,8 +161,9 @@ not run the lab.
 ## Before any billable apply
 
 - Recheck account identity, `us-east-1`, permission boundary, the exact On-Demand G/VT
-  quota, G6 offerings, and current capacity. Current recorded quota is zero vCPUs
-  (`L-DB2E81BA`), so no L4 launch is eligible now.
+  quota, G6 offerings, and current capacity. Read-only checks on 2026-11-28 show
+  4.0 applied vCPUs (`L-DB2E81BA`), enough by quota for one `g6.xlarge` but not an
+  AZ capacity reservation or authorization to launch.
 - Refresh every Price List input, the current tax profile, state retention, EBS size,
   data-transfer rate/aggregation, and Scheduler charges.
 - Prepare and inspect one saved Terraform plan: exact resource count, tags, account,
@@ -170,14 +172,15 @@ not run the lab.
 - Confirm the full adjusted estimate is below $25 with the stated reserve. If required
   execution cannot fit under $25, stop cloud work, finish safe local work, and request
   more budget through the user's authorization process.
-- On 2026-11-27, after the user explicitly asked to submit the quota request
-  immediately, a request for 4 On-Demand G/VT vCPUs was submitted. AWS reports its
-  status as `CASE_OPENED` (pending); the applied quota remains zero. No Terraform apply or infrastructure
-  mutation has been made. Quota approval does not authorize paid provisioning.
+- Historical request record (2026-11-27): the 4-vCPU quota increase was under review
+  at that time. The 2026-11-28 read-only result is `CASE_CLOSED` with 4.0 applied
+  vCPUs. No Terraform apply or infrastructure mutation has been made; quota approval
+  does not authorize paid provisioning.
 
 ## Current outcome
 
-The first cost gate is prepared but not passed for launch: the estimate is provisional,
-there is no final remote-state Terraform plan, and the quota increase request is still
-pending while the applied quota remains zero. AWS spend recorded for this goal remains
-`$0`.
+The cost gate is prepared but not passed for launch: the estimate is provisional,
+there is no final remote-state Terraform plan, and current price, AZ capacity, and a
+valid Budget recipient remain to be verified. Project state/lock and Budget resources
+are absent. The approved quota is 4.0 vCPUs, but it is not an apply authorization.
+AWS spend recorded for this goal remains `$0`.

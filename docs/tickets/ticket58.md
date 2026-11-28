@@ -247,3 +247,27 @@ fail-closed response. The follow-up uses an integrity-checked Trivy archive, nam
 smoke assertions, and shared rollout-state errors mapped to HTTP 503. Run
 `46068015904` later verified local Redis recovery, both gateway 503 responses, and ten
 cross-gateway stream cancellations. These are local CPU results, not L4 evidence.
+
+## 2026-11-28 restack and current readiness update
+
+PR #58 was carried from its former parent head `d5e4570` onto updated PR #57 head
+`fcc5651`. A first rebase boundary at common ancestor `2d2d417` selected 78 commits;
+that attempt was aborted before publication because it included 61 ancestor changes.
+The corrected boundary selected the 17 PR #58-specific commits. During the redirect
+security change, the new base had an additional invalid-response regression test; both
+were retained, and its mock now patches the evaluator's configured opener. The goal's
+current state was reconciled to the quota approval instead of retaining old `CASE_OPENED`
+status as current.
+
+`make verify` completed with Ruff clean, 160 tests passed (2 skipped), dependency audit
+clean, Compose and observability configuration checks, and no-operation benchmark,
+evaluation, and CUDA plans. Four exact digest-pinned validation images were removed
+after checking no containers used them. This was local/static validation, not a clean-room
+reproduction, AWS deployment, or GPU execution.
+
+A fresh read-only AWS CLI check found `CASE_CLOSED`, 4.0 applied On-Demand G/VT vCPUs,
+and no exact project state bucket, lock table, or Budget. The GPU quota is approved but
+there is still no live capacity reservation or apply permission. The project Budget and
+a verified private alert recipient, remote-state setup, exact saved plan and cost review,
+expiry confirmation, and separate apply authorization remain outstanding. No AWS write,
+project resource, GPU hour, or spend occurred. The $25 ceiling remains active.

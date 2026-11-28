@@ -2131,3 +2131,15 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   GPU access, or spend.
 - **Next:** include the exact changed-head syntax-check result in the ticket, publish
   the fixes, and use one PR CI run to validate the updated package.
+
+## 2026-11-28 — Reconcile quota approval and restack PR #58
+
+- **Phase:** Phase 2 preflight; paid GPU work remains gated. PR #58 carries Phase 6 tenant safety, local failure drills, and the manual GPU guide.
+- **Branch / PR:** `codex/gpu-manual-reproduction-guide`, PR #58. Parent PR #57 moved from old head `d5e4570` to `fcc5651` after PR #56 moved to `aa80c49`.
+- **Restack troubleshooting:** an initial rebase using the common historical base `2d2d417` would replay 78 commits, including 61 ancestor changes already represented by the new parent. It was aborted before publication. Using the actual former PR #57 head `d5e4570` as the cut point replayed only PR #58's 17 package commits. The evaluator redirect-security commit conflicted with a newer parent response-schema regression; both tests were retained and the schema mock was updated for the redirect-blocking opener. The goal conflict was resolved in favor of current quota and launch-gate facts.
+- **Validation:** `make verify` completed with Ruff clean, 160 tests passed (2 skipped), no known dependency vulnerabilities, Compose and observability configuration validation, and benchmark/evaluation/CUDA dry-run plans. No GPU operations or model network requests were part of those dry runs. `git diff --check` passed.
+- **Docker storage:** observability validation pulled four digest-pinned images. After confirming there were no containers based on them, those four exact images were removed. No project containers were present; unrelated containers and images were left alone.
+- **AWS status:** read-only CLI confirmed request `CASE_CLOSED` and applied On-Demand G/VT quota 4.0 vCPUs. Exact planned state bucket, lock table, and project Budget returned absent. This creates no instance capacity and is not apply authorization. No AWS write, project resource, GPU hour, or spend occurred.
+- **Remaining launch gates:** remote-state bootstrap, valid private Budget alert recipient and project Budget, current exact price and AZ-capacity check, remote saved-plan review, expiry safeguards, and separate apply authorization. Keep the $25 ceiling and one bounded GPU batch.
+- **CI results:** PR #56 run `46160784399` passed all five required checks, including local E2E. PR #57 run `46161064613` passed all six required checks, including Ansible and local E2E. PR #58 fresh CI has not yet been published at this journal entry.
+- **Next:** review the final PR #58 diff, push with exact lease against `59925fd`, update the PR description, and watch the single triggered run. Then carry descendants from their respective old parent heads, preserving only each PR's own commit range.

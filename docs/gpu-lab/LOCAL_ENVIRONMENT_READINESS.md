@@ -1,6 +1,6 @@
 # Local environment readiness
 
-**Checked:** 2026-11-27. This records workstation tooling, not an AWS or GPU host.
+**Checked:** 2026-11-27 for workstation tooling; AWS quota/status refreshed 2026-11-28. This records workstation tooling, not an AWS or GPU host.
 
 ## Workstation tools verified
 
@@ -37,7 +37,7 @@ workstation as a substitute for L4 validation.
 
 ## AWS and spending state
 
-The local command-line tools were rechecked on 2026-11-27 at 19:20 UTC: Python
+The local command-line tools were rechecked on 2026-11-27 at 19:20 UTC; AWS state was refreshed read-only on 2026-11-28: Python
 3.12.12, AWS CLI 2.32.6, Terraform 1.14.0, Docker client/server 29.0.1, and Compose
 2.40.3 are available. `ansible-playbook`, `nvcc`, `nvidia-smi`, and
 `nvidia-container-cli` remain absent on this Apple Silicon workstation, as expected;
@@ -45,15 +45,13 @@ the hash-locked Ansible controller runs on the future EC2 host, and NVIDIA tools
 installed there only after an authorized GPU launch.
 
 - No AWS mutation was performed during this readiness check.
-- A read-only AWS CLI check on 2026-11-27 using `ai-platform-pilot-key` matched the
-  expected project account. At 19:19 UTC the applied On-Demand G/VT quota in
-  `us-east-1` was still `0.0` vCPUs, and quota history still showed desired `4.0` and
-  `CASE_OPENED`. The user's manual appeal has no approved outcome visible through
-  this API query.
-  `g6.xlarge` is listed as an instance-type offering in five availability zones, but
-  that listing is not a capacity reservation or quota approval. The owner reports
-  sending an appeal through the existing AWS support case; no appeal decision is
-  confirmed by the API. An L4 launch remains blocked.
+- Historical 2026-11-27 AWS check: the applied quota was zero and the request showed
+  `CASE_OPENED`; that snapshot is superseded. The 2026-11-28 read-only AWS CLI check
+  confirms `CASE_CLOSED` and 4.0 applied On-Demand G/VT vCPUs in `us-east-1`. This is
+  enough by quota for one `g6.xlarge`, not an AZ reservation or apply authorization.
+  The exact state bucket, lock table, and Budget are absent; a valid private Budget
+  recipient is not verified. Earlier G6 offerings in five AZs are not a live capacity
+  reservation. No project resource or GPU hour exists.
 - The project ceiling remains USD $25. Quota approval alone does not authorize an
   apply; the exact plan, current complete cost estimate, runtime, expiry, and teardown
   gates remain required.

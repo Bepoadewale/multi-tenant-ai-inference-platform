@@ -5,6 +5,14 @@ claim that any cloud or GPU phase has run. Every package uses its own focused br
 and pull request. Review and required CI checks must pass before merge; implementation
 pull requests must include the repository's clean-room evidence.
 
+**Current readiness update (2026-11-28):** the existing request is `CASE_CLOSED` and
+4.0 On-Demand G/VT vCPUs are applied in `us-east-1`. This clears the quota threshold
+for one `g6.xlarge`; it does not authorize provisioning. The project state bucket,
+lock table, and Budget are absent, and the alert recipient is not verified. Exact
+remote-state plan, updated price/AZ-capacity review, independent expiry check, and
+separate apply authorization remain required. The user-set $25 total ceiling remains.
+Old quota-denial statements below are dated historical snapshots, not current state.
+
 ## Current state
 
 - Phase 1 design gate is complete. The repository audit and candidate architecture are recorded in
@@ -44,16 +52,15 @@ pull requests must include the repository's clean-room evidence.
   It is not remote-state locked and must not be applied. Ticket42 records its digest
   and security review; the remote-state plan remains outstanding.
 - No AWS resources or GPU instance hours have been used by this goal.
-- The applied On-Demand G and VT quota is zero in `us-east-1`, `us-east-2`, and
-  `us-west-2`. AWS email reports that the 4-vCPU `us-east-1` request was denied, while
-  Service Quotas history still returns `CASE_OPENED`. The owner reports appealing
-  through the existing case; see `QUOTA_APPEAL_DRAFT.md`. Do not duplicate the request
-  or launch while quota is zero.
-- The existing repository budget and Terraform state guardrails use a repository-
-  scoped bucket and lock table. GPU state must use a unique key namespace, not create
-  duplicate guardrails. The budget uses email notifications. A recipient must be
-  provided outside version control and verified before that alert is active; it is
-  not an enforcement control.
+- Historical quota snapshots below this note preceded the appeal decision. On
+  2026-11-28, read-only `us-east-1` checks show `CASE_CLOSED` and 4.0 applied On-Demand
+  G/VT vCPUs. That is sufficient by quota for one `g6.xlarge`; no AZ reservation is
+  implied and no duplicate request should be sent.
+- Terraform bootstrap code defines a repository-scoped budget and state/lock resources,
+  but the exact project Budget, state bucket, and lock table are currently absent. GPU
+  state should use a unique key namespace once the backend is authorized. The budget
+  alert recipient must be provided outside version control and verified; the alert is
+  not a spending limit.
 - The initial USD $25 limit is a hard ceiling. A provisional planning scenario now
   includes compute, public IPv4, gp3, temporary state and lock storage, one expiry
   invocation, data-transfer allowance, tax contingency, and a reserve. It still
@@ -227,9 +234,9 @@ cost and quota gate passes.
 - [x] Refresh and inspect a pinned-AMI local-state preview. Its plan contains 14
   creates for one `g6.xlarge`; it is ignored locally and is not suitable for apply.
 - [ ] Create and inspect the final remote-state saved plan and confirm the full current
-  cost and budget recipient. The existing quota request was denied by email, remains
-  `CASE_OPENED` in the API, and applied quota is zero. Do not apply until the quota and
-  $25 project gates are cleared.
+  cost and budget recipient. The quota is now approved at 4.0 vCPUs, but do not apply
+  until the remote state, recipient/Budget, $25 total cost, exact plan, expiry, and
+  separate authorization gates are cleared.
 
 **Exit gate:** exact plan creates one authorized L4 and only enumerated project
 resources, estimated total remains below $25 with safety margin, expiry is tested,
@@ -435,10 +442,10 @@ cost status, educational artifacts, and goal closure are complete.
 - If the complete mandatory work cannot be done under $25, stop paid work, document
   remaining requirements, finish non-billable work, and ask before increasing the
   ceiling or changing the design.
-- The applied G/VT On-Demand quota is zero in three checked regions. The first
-  4-vCPU request was denied by email, though the API history remains `CASE_OPENED`.
-  The owner reports an appeal through the existing Support Center case. Wait for
-  AWS's response; do not send a duplicate appeal or launch with zero applied quota.
+- Historical snapshot: the applied quota was zero in the checked regions before the
+  appeal was resolved. The current `us-east-1` result is 4.0 applied vCPUs and
+  `CASE_CLOSED`; no duplicate request is needed. The quota does not bypass the
+  remaining budget, backend, exact-plan, expiry, capacity, and apply gates.
 - Provisional 12-hour estimate: about `$10.68` before tax for one g6.xlarge, one public
   IPv4, 100 GiB gp3, short-lived S3 state and lock objects, one scheduler invocation,
   and 1 GiB of internet egress. A 25% tax allowance plus `$5` general reserve gives

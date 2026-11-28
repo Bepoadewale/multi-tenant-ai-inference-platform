@@ -1,3 +1,5 @@
+> **Historical record (2026-11-27):** This unsent draft reflects the quota denial and `CASE_OPENED` status at that time. It is superseded by the 2026-11-28 read-only result (`CASE_CLOSED`, 4.0 applied vCPUs). Do not send it or file a duplicate request.
+
 # On-Demand G/VT quota appeal record
 
 **Status:** the owner reports manually submitting this appeal through the existing
