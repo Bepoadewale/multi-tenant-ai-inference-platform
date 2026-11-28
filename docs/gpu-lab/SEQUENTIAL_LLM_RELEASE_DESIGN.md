@@ -1,10 +1,12 @@
 # Single-GPU LLM Release Design
 
-**Status:** PR #54 implements and tests the local immutable manifest, plan digest,
-stale-input, and independent-approval record primitives. The authenticated API,
-MLflow registration, sequential vLLM restart, deployment verification, and rollback
-remain unimplemented and unexecuted. PR #52 adds a private MLflow tracking service
-and sanitized evaluation upload path. **Reviewed:** 2026-11-27.
+**Status:** PR #54 implements and tests local immutable manifest, plan digest,
+stale-input, and independent-approval record primitives. PR #55 adds an authenticated
+gateway planning/approval API that reads a finished sanitized MLflow run and stores
+the exact manifests in a shared single-host SQLite volume. Independent live champion
+verification, model-file digest recomputation, sequential vLLM restart, deployment
+verification, and rollback remain unimplemented and unexecuted. PR #52 adds the
+private MLflow service and report upload path. **Reviewed:** 2026-11-27.
 
 ## Why the current release flow cannot deploy the GPU model
 
@@ -17,9 +19,11 @@ large models concurrently would also violate the one-L4 capacity constraint.
 
 PR #52 adds a small MLflow tracking server to the GPU Compose profile and lets the
 evaluator upload its sanitized report. The GPU host has its own temporary SQLite and
-artifact volume. PR #54 adds a tested local data/control layer for candidate metadata
-and approval records. These pieces still do not provide an authenticated release API,
-model registration, deployment, or rollback.
+artifact volume. PR #54 adds the local data/control layer. PR #55 adds authenticated
+planning and approval endpoints and checks candidate provenance against the MLflow
+run. The caller still supplies the champion manifest and model artifact digest; the
+API does not prove the currently running champion or recompute model-file hashes.
+There is still no vLLM deployment or rollback controller.
 
 Keep the existing ONNX flow unchanged. Add a separate LLM release path that records
 model artifacts and uses a sequential vLLM restart on the single L4.
@@ -117,9 +121,13 @@ replacement across multiple serving replicas.
   multi-GPU configuration, manifest tampering, and stale champion/candidate inputs.
 - [x] A local SQLite approval journal rejects self-approval and preserves the
   independently approved actor; this does not yet prove authenticated API identity.
-- The approval API must derive reviewer identity from the existing signed role token.
-- Plan and candidate records must be linked to the actual MLflow evaluation run and
-  verified model artifact before any host deployment.
+- [x] The gateway API derives requester/approver from `platform.admin` and
+  `release.approve` dependencies and reads the finished sanitized report from the
+  actual MLflow run ID supplied in the candidate request.
+- [ ] The host controller must compare the champion with independently recorded live
+  deployment state and recompute model-file digests before deployment.
+- [ ] Plan and candidate records must be linked to a model artifact whose bytes are
+  independently checked against the recorded digest.
 - A sanitized evaluation report is linked to a pinned model revision and runtime
   image digest.
 - A deterministic failing candidate is rejected before approval or deployment.

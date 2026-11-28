@@ -131,9 +131,16 @@ digest and a SQLite approval record that requires an actor different from the pl
 requester. A failed candidate, unpinned image, multi-GPU configuration, changed plan,
 or stale champion/candidate manifest is rejected.
 
-This is control logic, not a deployment command. The plan is not yet connected to an
-authenticated HTTP endpoint or the actual MLflow run, and it does not restart vLLM.
-The independent actor in the SQLite helper is a value passed by its caller; a future
-API must derive that identity from a verified `release.approve` token. No model should
-be switched based only on a local function call. These limits are recorded in the
+The gateway's authenticated planning API is documented in the [single-GPU profile
+guide](../../deployments/single-gpu/README.md). It derives the requester and approver
+from the existing `platform.admin` and `release.approve` signed roles, retrieves the
+finished sanitized MLflow report, and checks model ID and revision, runtime, source,
+artifact digest, and report metadata against the requested candidate. This code has
+local API tests with a fake MLflow client; a real MLflow run
+and signed-token request have not been exercised on the GPU host.
+
+The API does not independently recompute model-file digests or identify the live
+champion. It records the submitted champion manifest and candidate provenance, but it
+does not restart vLLM. A separate host-side deployment controller must verify current
+state and model files before applying a plan. These limits are recorded in the
 [sequential release design](../../docs/gpu-lab/SEQUENTIAL_LLM_RELEASE_DESIGN.md).

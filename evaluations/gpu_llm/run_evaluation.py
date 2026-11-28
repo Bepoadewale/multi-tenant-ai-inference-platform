@@ -80,6 +80,25 @@ def evaluation_exit_code(report: dict) -> int:
     return 2 if report["human_review_required"] else 0
 
 
+def release_runtime_config() -> dict:
+    """Read the exact vLLM settings shared by Compose and the evaluation report."""
+    return {
+        "served_model_name": os.getenv("GPU_EVAL_MODEL", "gpu-default"),
+        "dtype": os.getenv("GPU_EVAL_DTYPE", "UNSET"),
+        "max_model_len": int(os.getenv("GPU_EVAL_MAX_MODEL_LEN", "0")),
+        "max_num_seqs": int(os.getenv("GPU_EVAL_MAX_NUM_SEQS", "0")),
+        "max_num_batched_tokens": int(os.getenv("GPU_EVAL_MAX_BATCHED_TOKENS", "0")),
+        "gpu_memory_utilization": float(os.getenv("GPU_EVAL_MEMORY_UTILIZATION", "0")),
+        "tensor_parallel_size": int(os.getenv("GPU_EVAL_TENSOR_PARALLEL_SIZE", "0")),
+    }
+
+
+def runtime_config_digest(config: dict) -> str:
+    return hashlib.sha256(
+        json.dumps(config, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+
+
 def publish_report_to_mlflow(
     report_path: Path,
     report: dict,
@@ -92,13 +111,19 @@ def publish_report_to_mlflow(
     mlflow.set_tracking_uri(tracking_uri)
     mlflow.set_experiment(experiment_name)
     with mlflow.start_run(run_name=f"{report['suite_id']}-{report['started_at']}") as run:
+        provenance = report["provenance"]
         mlflow.log_params(
             {
                 "suite_id": report["suite_id"],
                 "suite_sha256": report["suite_sha256"],
                 "model": report["model"],
+                "model_id": report["model_id"],
                 "model_revision": report["model_revision"],
                 "case_count": report["case_count"],
+                "source_commit": provenance["source_commit"],
+                "model_artifact_sha256": provenance["model_artifact_sha256"],
+                "vllm_image": provenance["vllm_image"],
+                "runtime_config_sha256": provenance["runtime_config_sha256"],
             }
         )
         mlflow.log_metrics(
@@ -315,7 +340,15 @@ def main() -> int:
         "suite_id": suite["suite_id"],
         "suite_sha256": hashlib.sha256(args.suite.read_bytes()).hexdigest(),
         "model": args.model,
+        "model_id": os.getenv("GPU_EVAL_MODEL_ID", "UNSET"),
         "model_revision": args.model_revision,
+        "runtime_config": release_runtime_config(),
+        "provenance": {
+            "source_commit": os.getenv("GPU_EVAL_SOURCE_COMMIT", "UNSET"),
+            "model_artifact_sha256": os.getenv("GPU_EVAL_MODEL_ARTIFACT_SHA256", "UNSET"),
+            "vllm_image": os.getenv("GPU_EVAL_VLLM_IMAGE", "UNSET"),
+            "runtime_config_sha256": "",
+        },
         "started_at": started_at,
         "finished_at": datetime.now(UTC).isoformat(),
         "automatic_gate": "pass" if deterministic and all(deterministic) else "fail",
@@ -326,6 +359,9 @@ def main() -> int:
         "results": results,
         "content_policy": "prompts and completion text are not stored",
     }
+    report["provenance"]["runtime_config_sha256"] = runtime_config_digest(
+        report["runtime_config"]
+    )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_fd = os.open(output_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
     os.fchmod(output_fd, 0o600)

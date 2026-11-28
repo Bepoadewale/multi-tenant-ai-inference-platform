@@ -1,5 +1,6 @@
 import hashlib
 import json
+import sqlite3
 from dataclasses import replace
 from pathlib import Path
 
@@ -11,21 +12,28 @@ from evaluations.gpu_llm.release_control import (
     assert_not_stale,
     create_manifest,
     create_plan,
+    digest_json,
     verify_plan,
 )
 
 MODEL_REVISION = "a" * 40
 MODEL_SHA = "b" * 64
 IMAGE = "vllm/vllm-openai@sha256:" + "c" * 64
+SOURCE_COMMIT = "1" * 40
 RUNTIME_CONFIG = {
     "dtype": "bfloat16",
     "max_model_len": 8192,
     "max_num_seqs": 2,
+    "max_num_batched_tokens": 8192,
+    "gpu_memory_utilization": 0.85,
+    "served_model_name": "gpu-default",
     "tensor_parallel_size": 1,
 }
 
 
-def _report(path, *, gate="pass", failed=0, revision=MODEL_REVISION):
+def _report(
+    path, *, gate="pass", failed=0, revision=MODEL_REVISION, runtime_config=RUNTIME_CONFIG
+):
     path.write_text(
         json.dumps(
             {
@@ -36,6 +44,13 @@ def _report(path, *, gate="pass", failed=0, revision=MODEL_REVISION):
                 "automatic_gate": gate,
                 "failed_count": failed,
                 "human_review_required": True,
+                "runtime_config": runtime_config,
+                "provenance": {
+                    "source_commit": SOURCE_COMMIT,
+                    "model_artifact_sha256": MODEL_SHA,
+                    "vllm_image": IMAGE,
+                    "runtime_config_sha256": digest_json(runtime_config),
+                },
             }
         ),
         encoding="utf-8",
@@ -44,7 +59,7 @@ def _report(path, *, gate="pass", failed=0, revision=MODEL_REVISION):
 
 
 def _manifest(
-    path, *, revision=MODEL_REVISION, source_commit="1" * 40, alias="candidate"
+    path, *, revision=MODEL_REVISION, source_commit=SOURCE_COMMIT, alias="candidate"
 ):
     return create_manifest(
         path,
@@ -141,13 +156,23 @@ def test_plan_requires_independent_approval_and_stores_audit_identity(tmp_path):
         champion=champion,
         candidate=candidate,
     )
-
     with pytest.raises(ReleaseValidationError, match="pending approval with no approver"):
-        store.save(replace(pending, status="APPROVED", approved_by=pending.requester))
+        store.save(
+            replace(pending, status="APPROVED", approved_by=pending.requester),
+            champion=champion,
+            candidate=candidate,
+        )
     with pytest.raises(ReleaseValidationError, match="pending approval with no approver"):
-        store.save(replace(pending, status="PENDING_APPROVAL", approved_by="other-reviewer"))
+        store.save(
+            replace(pending, status="PENDING_APPROVAL", approved_by="other-reviewer"),
+            champion=champion,
+            candidate=candidate,
+        )
 
-    plan = store.save(pending)
+    plan = store.save(pending, champion=champion, candidate=candidate)
+    restored_champion, restored_candidate = store.get_manifests(plan.plan_id)
+    assert restored_champion.sha256 == champion.sha256
+    assert restored_candidate.sha256 == candidate.sha256
 
     with pytest.raises(ReleaseValidationError, match="different approver"):
         store.approve(plan.plan_id, "release-requester")
@@ -158,6 +183,22 @@ def test_plan_requires_independent_approval_and_stores_audit_identity(tmp_path):
 
     with pytest.raises(ReleaseValidationError, match="not pending approval"):
         store.approve(plan.plan_id, "second-reviewer")
+
+
+def test_store_initialization_adds_manifest_table_to_prior_schema(tmp_path):
+    database = tmp_path / "release" / "approvals.sqlite"
+    database.parent.mkdir()
+    with sqlite3.connect(database) as db:
+        db.execute(
+            """CREATE TABLE llm_release_plans (
+            plan_id TEXT PRIMARY KEY, plan_json TEXT NOT NULL,
+            plan_sha256 TEXT NOT NULL, status TEXT NOT NULL,
+            approved_by TEXT, approved_at TEXT)"""
+        )
+
+    store = ReleaseApprovalStore(database)
+    with pytest.raises(ReleaseValidationError, match="manifest evidence is incomplete"):
+        store.get_manifests("older-plan-without-manifest-table")
 
 
 def test_manifest_refuses_unpinned_images_and_multi_gpu_configuration(tmp_path):
@@ -173,6 +214,8 @@ def test_manifest_refuses_unpinned_images_and_multi_gpu_configuration(tmp_path):
             runtime_config=RUNTIME_CONFIG,
             source_commit="1" * 40,
         )
+    multi_gpu_config = {**RUNTIME_CONFIG, "tensor_parallel_size": 2}
+    report = _report(tmp_path / "multi-gpu-report.json", runtime_config=multi_gpu_config)
     with pytest.raises(ReleaseValidationError, match="tensor_parallel_size=1"):
         create_manifest(
             report,
@@ -181,7 +224,7 @@ def test_manifest_refuses_unpinned_images_and_multi_gpu_configuration(tmp_path):
             model_license="Apache-2.0",
             model_artifact_sha256=MODEL_SHA,
             vllm_image=IMAGE,
-            runtime_config={**RUNTIME_CONFIG, "tensor_parallel_size": 2},
+            runtime_config=multi_gpu_config,
             source_commit="1" * 40,
         )
 

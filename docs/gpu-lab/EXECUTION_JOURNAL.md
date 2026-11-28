@@ -1,6 +1,23 @@
 # GPU Lab Execution Journal
 
+## 2026-11-28 — Rebase authenticated release planning onto approval-integrity fix
+
+- **Phase:** Phase 9 static model-release preparation; quota-gated GPU validation remains pending.
+- **Branch / PR:** `codex/gpu-llm-release-api`, PR #55, rebased from predecessor `69f0b39` onto PR #54 head `cfcc1be`.
+- **Troubleshooting:** the rebase exposed overlap in the plan store and tests. Kept the newer store guard that rejects inserted plans with an approver, and retained #55 manifest-digest checks. An initial focused test run found that #54 now requires champion and candidate manifests as keyword arguments; updated the invalid-insert and normal-save test paths to supply both.
+- **Validation:** focused release-control and API suites passed **13 tests**; Ruff and `git diff --check` passed. One pre-existing Starlette/httpx deprecation warning remains.
+- **Cost and limits:** local tests only; no AWS, GPU, model download, or spend. The required single integrated clean-room run remains planned after the static stack settles; no second clean-room run was started.
+- **Next:** publish the rebased PR #55 branch with an exact force-with-lease, run its checks, then restack descendants and resolve conflicts without losing each package's evidence.
+
 ## 2026-11-27 — Quota status rechecked without mutation
+
+
+## 2026-11-27 — Quota status rechecked without mutation
+
+- **Phase:** Phase 2 static-only EC2 preparation; no AWS mutation.
+- **Historical state at that check:** the owner-provided AWS email reported that the initial 4-vCPU request was denied. The owner reported manually sending an appeal through the existing case. At that time, read-only Service Quotas history showed `CASE_OPENED` and applied quota `0.0` vCPUs. This historical snapshot is superseded by the 2026-11-28 read-only check, which shows `CASE_CLOSED` and 4.0 applied vCPUs.
+- **Decision at that time:** do not submit a duplicate request or start billable infrastructure. Continue non-billable code, deployment, and runbook preparation.
+- **Cost:** no resources or GPU instance-hours used by this check.
 ## 2026-11-27 — Attempt the authorized quota-case update with AWS CLI
 
 - **Phase:** Phase 2 — static-only EC2 preparation; GPU execution remains blocked.
@@ -1888,3 +1905,87 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
   establish authenticated identity, live artifact trust, deployment, or rollback.
 - **Next:** publish after restacking on the current predecessor, run PR CI, then reply
   to and resolve the two review threads with the passing evidence.
+
+## 2026-11-27 — Prepare authenticated LLM release API
+
+- **Phase:** Phase 9 static release integration; Phase 2 remains blocked by zero
+  applied On-Demand G/VT quota.
+- **Branch / PR:** `codex/gpu-llm-release-api`; PR #55 is not yet published. Base is
+  PR #54 head `69f0b39`. No PR has been merged and no change was made to `main`.
+- **Starting state:** PR #54's five required checks passed in run `46028053505`. The
+  local Python 3.12 virtual environment exists. No project-owned AWS resource is
+  known to exist, and no GPU instance has been used.
+- **Objective and research:** connect the existing role checks and private MLflow
+  evaluation service to immutable sequential LLM release records. Preserve the
+  ONNX release route. Keep vLLM restart/deployment outside the gateway because it
+  requires a separately scoped host controller.
+- **Changes:** added API routes to create/read plans and independently approve them;
+  validate a finished MLflow run, sanitized report, underlying model ID/revision,
+  serving alias, source commit, declared artifact digest, pinned image, runtime
+  configuration, suite digest, and deterministic gate; store champion/candidate
+  manifests with the plan; enable SQLite write-ahead logging and migration of the
+  manifest table. The GPU Compose profile mounts the same named SQLite volume into
+  both gateway replicas and passes the exact serving configuration and provenance to
+  the evaluator. The base gateway defaults to writable ephemeral `/tmp` storage; the
+  GPU profile overrides it with persistent-for-the-host shared storage. The model ID
+  is now recorded separately from the served API alias. Documentation, status, risk,
+  evidence, and ticket #55 were updated.
+- **Troubleshooting history:** system `ruff` was not on PATH; reran using
+  `.venv/bin/ruff`. The first focused test command used only `PYTHONPATH=gateway/src`
+  and failed to import the root `evaluations` namespace; Makefile and pytest paths
+  now include `.`. The first model-ID mismatch test failed earlier at the missing
+  model-revision comparison; the fake run fixture was corrected to reach the target
+  assertion. Ruff found a duplicate `model` key in a report fixture; removed it.
+  Review also identified that the original default `.local` SQLite path could not be
+  created by the non-root container user; changed the default to `/tmp` and retained
+  `/gpu-release` as the GPU Compose override.
+- **Validation:** focused release/API/evaluation tests passed (18); full `make verify`
+  passed Ruff and 128 tests (2 skipped), dependency audit with no known vulnerabilities,
+  base/GPU Compose parsing, Prometheus and Alertmanager validation, dashboard parsing,
+  and benchmark/evaluation/CUDA dry runs. `git diff --check` passed. The test run has
+  one existing Starlette/httpx deprecation warning. Cloud and GPU actions remained
+  disabled; dry runs made zero model requests and GPU operations.
+- **Security and limits:** actor IDs are derived from existing role dependencies;
+  self-approval is rejected by the store. MLflow report content remains sanitized.
+  The API does not have Docker access. Champion manifest and model-file digest are
+  still caller supplied; no independent running-state/file-byte verification exists.
+  SQLite is shared by two containers only on one EC2 host, not a distributed database.
+  No signed-token HTTP call to a live MLflow instance or real model artifact was tested.
+- **Cost:** no AWS API mutation, model/image download, GPU hour, or project cloud
+  spend. The $25 cap and zero-quota stop remain unchanged.
+- **Next:** finish review, commit and publish PR #55 stacked on PR #54, wait on one
+  CI watcher, resolve failures, then continue non-billable preparation on a narrowly
+  scoped host-side release controller.
+
+## 2026-11-27 — Publish PR #55 and reconcile its live state
+
+- **Phase:** Phase 9 static LLM release integration; Phase 2 remains quota-blocked.
+- **Branch / PR:** `codex/gpu-llm-release-api`, [PR #55](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/55), stacked on PR #54. Commit `f16c5194c9a7c674078e21cfb7a665c65ef33076`.
+- **Starting state:** GitHub CLI authenticated as Bepoadewale. PR #54 was confirmed
+  open at `69f0b392e98167cfb08f0c6fca62335655d6e41d`; no remote PR #55 branch
+  existed. The worktree was clean after the code/docs commit.
+- **Actions:** pushed the new branch and opened PR #55 with a detailed description of
+  design, validation, failures, alternatives, security, cost, and known limitations.
+  Reconciled the goal, status, backlog, ticket, and evidence manifest to show that
+  PR #55 exists.
+- **Validation:** commit `f16c519` contains full local verification: Ruff, 128 tests
+  (2 skipped), clean dependency audit, Compose and observability parsing, GPU benchmark,
+  evaluation, and CUDA dry-run checks, 13-file local Markdown-link check, and
+  `git diff --check`. GitHub CI is pending; it has not been watched yet.
+- **Cost/security:** no AWS mutation, GPU resource or hour, model/image download, or
+  cloud spend. No credentials were copied into the repository.
+- **Next:** start a single watcher for PR #55 required checks, then record the terminal
+  outcome and address any failed check before selecting the next package.
+
+## 2026-11-27 — Verify PR #55 CI
+
+- **Phase:** Phase 9 static LLM release integration; Phase 2 remains quota-blocked.
+- **Branch / PR:** `codex/gpu-llm-release-api`, PR #55, head `b94fc2781bc3ef9235507e459498703c6a41cea8`.
+- **Validation:** one `gh pr checks 55 --watch --interval 120` watcher observed all five
+  required checks pass in run `46033196309`: Python, manifests, GPU observability,
+  supply-chain, and local end-to-end (4m55s). The PR remains open and unmerged.
+- **Cost/security:** hosted CI used local CPU and static validation only; no AWS
+  credentials or GPU operations are configured. No AWS resources, GPU hours, or spend.
+- **Next:** record this CI result in the PR and status documents, then continue the
+  non-billable host-side release-controller work as a separate PR package. Human review
+  and merge remain pending; no merge is authorized by this task.

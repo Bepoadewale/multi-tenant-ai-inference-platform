@@ -21,7 +21,7 @@ pull requests must include the repository's clean-room evidence.
   open.
 - PR #37 is open against PR #36 to record the dated Ubuntu/NVIDIA/CUDA, vLLM image,
   and pinned Qwen model compatibility candidates. PRs #38–#51 are stacked one at a
-  time through PR #50. All current required checks on PRs #32–#52 pass. This is
+  time through PR #50. PR #54 passed all five checks in run `46028053505`. This is
   research and static CI evidence, not proof of GPU execution; exact target-AMI
   packages and real L4 validation remain open.
 - PR #38 is open as a focused model-artifact verification helper based on PR #37.
@@ -90,19 +90,46 @@ image build, dependency audit, and existing CPU local end-to-end flow passed.
 ### Package — immutable single-L4 LLM release records
 
 **Status:** PR #54 adds local manifest/plan digest validation, stale-input protection,
-and independent-approver state in SQLite. Authenticated API and host-side deployment
-are not included in this package.
+and independent-approver state in SQLite. PR #55 adds the authenticated plan and
+approval API, MLflow evaluation checks, and shared single-host manifest storage. Both
+remain open and unmerged; the PR #55 worktree is being validated before publication.
 
 - [x] Bind full model revision, artifact digest, license, serving image/configuration,
   evaluation suite/report digests, and source commit.
 - [x] Reject deterministic failures, unpinned image tags, multi-GPU configuration,
   tampered manifests/plans, stale manifests, and self-approval.
-- [ ] Connect plan approval to the existing signed `release.approve` identity.
-- [ ] Link plan and manifest records to the actual MLflow run and verified model file.
+- [x] Connect plan approval and request identity to existing signed role dependencies.
+- [x] Link the candidate to a finished MLflow run, sanitized report, and declared
+  model/runtime/source provenance.
+- [ ] Independently verify the active champion and model file bytes on the host.
 - [ ] Implement and test the host-side sequential restart and verified rollback path.
 
-**Exit gate:** authenticated independent approval binds to the exact candidate and
-runtime, then a bounded operator command can deploy or restore it on one L4.
+**Exit gate:** an authenticated independent approval binds to the exact candidate and
+runtime; a bounded host controller verifies live state and model bytes, then deploys,
+checks readiness, or restores the known-good model on one L4.
+
+### Package — authenticated LLM release planning and approval API
+
+**Status:** [PR #55](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/55)
+is open; focused tests and full `make verify` pass. All five required CI jobs passed
+on head `b94fc27` in run `46033196309`. No AWS or GPU operation is involved.
+
+- [x] Require `platform.admin` to create/read plans and `release.approve` to approve.
+- [x] Reject a candidate unless its finished MLflow run and sanitized report match the
+  model ID/revision, source commit, declared artifact digest, immutable serving image,
+  runtime configuration, evaluation suite, and deterministic gate.
+- [x] Persist the plan and both manifests in a shared SQLite volume for the two gateway
+  containers on one host; enable WAL and a bounded busy wait.
+- [x] Keep the API unable to access Docker or restart vLLM.
+- [ ] Add host-side verification of current live champion and model file digests.
+- [ ] Implement sequential deployment, readiness checks, and rollback.
+
+**Limit:** the champion and model artifact digest are still caller-supplied. This API
+records and checks them against evaluation metadata; it does not prove running state or
+model bytes. The SQLite volume is single-host storage, not a distributed or highly
+available database.
+
+**Evidence:** see `docs/tickets/ticket55.md` and the updated evidence manifest.
 
 ### Package 0 — Goal charter and baseline gates
 

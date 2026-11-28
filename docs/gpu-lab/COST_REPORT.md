@@ -31,10 +31,11 @@ short-lived Terraform state bucket, one expiry schedule invocation, and 1 GiB of
 internet data transfer out. It does not include any EKS, database, cache, NAT
 Gateway, load balancer, managed monitoring, or DavDeploy resources.
 
-The GPU Compose profile keeps vLLM model cache, Redis data, and MLflow's temporary
-SQLite/artifact volume on the instance's existing encrypted root disk. MLflow adds no
-separate AWS service or volume, but its artifacts consume part of the 100 GiB disk
-allowance; monitor free space and export evidence before termination.
+The GPU Compose profile keeps vLLM model cache, Redis data, MLflow's temporary
+SQLite/artifact volume, and the shared gateway release-plan SQLite volume on the
+instance's existing encrypted root disk. These named Docker volumes add no AWS
+service or EBS volume, but their files consume part of the 100-GiB disk allowance;
+monitor free space and export evidence before termination.
 
 The VPC, subnet, route table, internet gateway, and security group have no hourly
 charge by themselves. Systems Manager Session Manager has no additional connection

@@ -120,12 +120,22 @@ def create_manifest(
         raise ReleaseValidationError("evaluation model revision does not match candidate")
     if report.get("automatic_gate") != "pass" or report.get("failed_count") != 0:
         raise ReleaseValidationError("candidate did not pass deterministic evaluation gates")
+    if not _IMAGE.fullmatch(vllm_image):
+        raise ReleaseValidationError("vLLM image must be pinned by SHA-256 digest")
+    provenance = report.get("provenance", {})
+    report_runtime_config = report.get("runtime_config")
+    if report_runtime_config != runtime_config:
+        raise ReleaseValidationError("evaluation runtime configuration does not match candidate")
+    if provenance.get("source_commit") != source_commit:
+        raise ReleaseValidationError("evaluation source commit does not match candidate")
+    if provenance.get("model_artifact_sha256") != model_artifact_sha256:
+        raise ReleaseValidationError("evaluation model artifact digest does not match candidate")
+    if provenance.get("vllm_image") != vllm_image:
+        raise ReleaseValidationError("evaluation vLLM image does not match candidate")
     if not _REVISION.fullmatch(model_revision):
         raise ReleaseValidationError("model revision must be a full 40-character commit SHA")
     if not _REVISION.fullmatch(source_commit):
         raise ReleaseValidationError("source commit must be a full 40-character commit SHA")
-    if not _IMAGE.fullmatch(vllm_image):
-        raise ReleaseValidationError("vLLM image must be pinned by SHA-256 digest")
     if not model_id.strip() or not model_license.strip() or not source_commit.strip():
         raise ReleaseValidationError("model ID, license, and source commit are required")
     if deployment_alias not in {"champion", "candidate"}:
@@ -140,6 +150,8 @@ def create_manifest(
     if config.get("tensor_parallel_size") != 1:
         raise ReleaseValidationError("single-L4 deployment requires tensor_parallel_size=1")
     config_digest = digest_json(config)
+    if provenance.get("runtime_config_sha256") != config_digest:
+        raise ReleaseValidationError("evaluation runtime configuration digest does not match candidate")
     return ReleaseManifest(
         schema_version=1,
         model_id=model_id,
@@ -255,12 +267,33 @@ class ReleaseApprovalStore:
                 plan_sha256 TEXT NOT NULL, status TEXT NOT NULL,
                 approved_by TEXT, approved_at TEXT)"""
             )
+            db.execute(
+                """CREATE TABLE IF NOT EXISTS llm_release_manifests (
+                plan_id TEXT NOT NULL, deployment_alias TEXT NOT NULL,
+                manifest_json TEXT NOT NULL, manifest_sha256 TEXT NOT NULL,
+                PRIMARY KEY (plan_id, deployment_alias))"""
+            )
 
     def _connect(self) -> sqlite3.Connection:
-        return sqlite3.connect(self.path, timeout=10)
+        connection = sqlite3.connect(self.path, timeout=10)
+        connection.execute("PRAGMA journal_mode=WAL")
+        connection.execute("PRAGMA busy_timeout=10000")
+        return connection
 
-    def save(self, plan: ReleasePlan) -> ReleasePlan:
+    def save(
+        self,
+        plan: ReleasePlan,
+        *,
+        champion: ReleaseManifest,
+        candidate: ReleaseManifest,
+    ) -> ReleasePlan:
         verify_plan(plan)
+        verify_manifest(champion)
+        verify_manifest(candidate)
+        if champion.sha256 != plan.champion_manifest_sha256:
+            raise ReleaseValidationError("champion manifest does not match plan")
+        if candidate.sha256 != plan.candidate_manifest_sha256:
+            raise ReleaseValidationError("candidate manifest does not match plan")
         if plan.status != "PENDING_APPROVAL" or plan.approved_by is not None:
             raise ReleaseValidationError(
                 "new release plans must be pending approval with no approver"
@@ -276,7 +309,38 @@ class ReleaseApprovalStore:
                     plan.approved_by,
                 ),
             )
+            db.executemany(
+                "INSERT INTO llm_release_manifests VALUES (?, ?, ?, ?)",
+                [
+                    (
+                        plan.plan_id,
+                        manifest.deployment_alias,
+                        canonical_json(asdict(manifest)).decode("utf-8"),
+                        manifest.sha256,
+                    )
+                    for manifest in (champion, candidate)
+                ],
+            )
         return plan
+
+    def get_manifests(self, plan_id: str) -> tuple[ReleaseManifest, ReleaseManifest]:
+        with self._connect() as db:
+            rows = db.execute(
+                "SELECT deployment_alias, manifest_json, manifest_sha256 "
+                "FROM llm_release_manifests WHERE plan_id = ? ORDER BY deployment_alias",
+                (plan_id,),
+            ).fetchall()
+        manifests = {}
+        for alias, raw_manifest, expected_digest in rows:
+            manifest = ReleaseManifest(**json.loads(raw_manifest))
+            verify_manifest(manifest)
+            if manifest.sha256 != expected_digest:
+                raise ReleaseValidationError("stored release manifest digest does not match contents")
+            manifests[alias] = manifest
+        try:
+            return manifests["champion"], manifests["candidate"]
+        except KeyError as error:
+            raise ReleaseValidationError("release plan manifest evidence is incomplete") from error
 
     def get(self, plan_id: str) -> ReleasePlan:
         with self._connect() as db:

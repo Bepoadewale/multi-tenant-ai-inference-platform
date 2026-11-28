@@ -1,4 +1,5 @@
 from fastapi import Depends, FastAPI, HTTPException
+from inference_gateway.api.gpu_release import router as gpu_release_router
 from inference_gateway.auth.admin import platform_admin
 from inference_gateway.auth.service import authenticated_tenant
 from inference_gateway.models import ChatCompletionRequest, RolloutWeights, Tenant
@@ -9,6 +10,7 @@ from starlette.responses import Response
 
 app = FastAPI(title="Multi-tenant AI Inference Platform", version="0.1.0")
 configure_tracing(app, "inference-gateway")
+app.include_router(gpu_release_router)
 
 
 @app.get("/healthz")

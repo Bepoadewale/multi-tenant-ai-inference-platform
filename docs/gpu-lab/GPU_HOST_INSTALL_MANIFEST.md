@@ -32,6 +32,7 @@ repair a missing or broken driver.
 | 11 | Docker Compose network | Gateway (2 replicas), Redis, vLLM | Existing gateway image is built from this repository; Redis and vLLM image/model pins must match the reviewed Compose environment. Bind operator interfaces to loopback only. | Reuses existing authentication, tenant admission, shared quota, routing, and CPU/GPU runtime abstraction. | Health/readiness checks, authorized tenant request, denied tenant request, streaming, quota sharing across replicas. |
 | 12 | Docker Compose network | DCGM Exporter, Node Exporter, Prometheus, Grafana, Alertmanager, OpenTelemetry Collector, Tempo, Redis exporter | Use the immutable image digests already in the single-GPU Compose profile; recheck registry manifests at preflight. | Measures GPU, host, gateway, Redis, vLLM, alert, and trace behavior without managed monitoring services. | Prometheus targets are healthy and real GPU/inference series move during a request; dashboard and alert drill use those series. |
 | 13 | Docker Compose network / encrypted instance disk | Private, single-host MLflow tracking server | PR #52 adds MLflow 3.18.0 using SQLite and a named artifact volume on the encrypted 100-GiB root disk. It is an evaluation evidence store, not a durable production registry. Its host port is loopback-only; there is no inbound security-group rule. | Records model version metadata, evaluation aggregates, release evidence, and rollback results within the disposable host. | Check health, write a sanitized evaluation report, verify no prompt/completion text is logged, export required artifacts, and confirm the named volume is removed with the host. Include image size, disk, and memory in the fit check. |
+| 14 | Docker Compose network / encrypted instance disk | Shared gateway LLM release-plan SQLite state | PR #55 prepares a SQLite volume mounted by both gateway containers on the same EC2 host. Write-ahead logging handles local concurrent requests; it is not a distributed database or cross-host lock. | Preserves release plans, manifests, approvals, and approver identity across gateway restarts on this disposable host. | Create a plan through an authenticated gateway request, read it through the other replica, verify self-approval is denied, export sanitized state, and confirm the named volume is removed with the host. Include SQLite/WAL files in disk monitoring. |
 
 ## What does not belong on the host
 
@@ -42,6 +43,9 @@ repair a missing or broken driver.
 - The single-GPU Compose profile has a private, disposable MLflow service from PR #52.
   It uses SQLite and the encrypted root disk; export evidence before teardown. Do not
   treat this single-host store as a durable production model registry.
+- The GPU release-plan SQLite volume is shared only between gateway replicas on this
+  one EC2 host. It is not a multi-host coordination store. The approval API has no
+  Docker access and cannot restart vLLM.
 - Do not install a second independent PyTorch into vLLM's environment. The server
   image owns its Python and CUDA user-space dependencies.
 - Do not install a desktop driver or graphical display stack on this headless host.
