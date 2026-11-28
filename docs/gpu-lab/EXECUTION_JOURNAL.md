@@ -1581,3 +1581,157 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Cost/resources:** no AWS calls, GPU use, or spend.
 - **Next:** add the lock to the focused host-install PR, update installation steps,
   then validate the package and scripts only on an authorized Ubuntu/L4 host.
+
+## 2026-11-27 — Document the single-L4 LLM release gap
+
+- **Phase:** Phase 9 non-billable design; no model or GPU operation.
+- **Branch:** `codex/gpu-sequential-release-design`, based on host-install PR #50.
+- **Inspection:** compared `gateway/api/release.py`, the ONNX model catalog, the
+  single-GPU Compose profile, and the sanitized LLM evaluation report.
+- **Finding:** the existing API is tied to the ONNX stable/candidate pair and writes
+  weighted Redis rollouts. The GPU profile has one vLLM endpoint and no MLflow service,
+  while the evaluator does not publish its report. Reusing those ONNX canary weights
+  would misrepresent two routes to the same model server as a real canary.
+- **Change:** drafted a separate sequential LLM release design with a manifest,
+  independent approval, stale-plan checks, vLLM restart, readiness/smoke checks, and
+  verified rollback. The design explicitly records the service interruption and the
+  local SQLite/artifact-store limits.
+- **Validation:** source inspection only; all runtime release behavior remains
+  unimplemented and unverified.
+- **Cost/resources:** no AWS calls, model downloads, GPU hours, or spend.
+- **Next:** publish the design as a focused PR, then implement the private MLflow and
+  LLM release path with tests before the paid batch.
+
+## 2026-11-27 — Recheck L4 runtime release and host manifest before approval
+
+- **Phase:** Phase 2 remains blocked on quota; static preparation spans Phases 3, 5,
+  and 9.
+- **Branch / PR:** `codex/gpu-sequential-release-design`, PR #51 stacked on PR #50.
+- **Starting state:** PR #50 head `fef4951` had passed all five required jobs in run
+  `46012380712`. PR #51 head `b205929` passed all five required jobs, including the
+  local end-to-end job, in run `46013204318`. No PR was merged.
+- **Research:** rechecked NVIDIA Container Toolkit installation guidance, vLLM's
+  current GPU installation page, the official vLLM v0.34.0 release notes and image
+  publication, the Hugging Face Qwen2.5-1.5B model card, and the current OCI registry
+  manifest. The vLLM documentation lists L4 support and compute capability 7.5+;
+  v0.34.0 publishes CUDA 13.0, requires Hugging Face Hub 2.0+, and changes KV-cache
+  sizing behavior. The image's linux/amd64 digest still matches the candidate pin.
+- **Changes:** corrected the goal, status, evidence, ticket, install manifest, and
+  release notes for the completed PR checks; documented the new vLLM image/runtime
+  preflight; clarified that the 85% memory setting is only a conservative lab cap and
+  has no measured capacity evidence. Added current release notes to the deployment
+  guide. No vLLM configuration behavior changed.
+- **Validation:** local links across seven edited Markdown files resolved; `git diff
+  --check` passed. One local validation snippet used `python` and failed because only
+  `python3` is available; rerunning with `python3` passed. The registry manifest query
+  returned the same OCI index and AMD64 digest; it fetched registry metadata only.
+- **Cloud and cost:** no AWS API call or mutation, package/image layer pull, model
+  download, GPU execution, instance-hour, or project spend occurred. The owner reports
+  that the appeal was manually sent; quota approval remains unconfirmed and no GPU
+  launch is eligible.
+- **Next:** publish the updated PR #51 status/research documentation, watch its new
+  CI run once, then continue non-billable host automation and deployment-readiness
+  review. Manual host configuration must precede any claim that Ansible is validated.
+
+## 2026-11-27 — Restack GPU deployment PRs after gateway correctness work
+
+- **Phase:** Non-billable integration work across Phases 5–11; Phase 2 remains blocked
+  by zero applied On-Demand G/VT quota.
+- **Starting state:** PRs #33–#36 held the stream accounting, request-scoped Redis
+  admission leases, model-aware token reservations, and preflight cleanup fixes, but
+  the GPU infrastructure chain beginning at PR #37 was based directly on PR #32 and
+  omitted them. Earlier CI on PRs #33–#36 passed.
+- **Changes:** changed PR #37's base to PR #36 and rebased each child branch #38–#51
+  onto its immediately preceding PR. Preserved each PR as a separate review unit and
+  kept its unique code, tests, tickets, and research. Shared status/journal conflicts
+  were resolved by retaining the current parent records and carrying forward package-
+  specific evidence entries. Updated branches #37–#50 were pushed with
+  `--force-with-lease`; PR #51's final status update is being committed on the same
+  branch before its updated head is pushed.
+- **Validation:** GitHub PR metadata confirms the sequential base chain from #36
+  through #51. PRs #33–#36 retain their passing checks. The old CI results for #37–#51
+  apply to earlier branch heads only; each restacked head needs a fresh workflow run.
+  No merge was performed and `main` was not modified.
+- **Cloud and cost:** no AWS calls, resources, packages, image layers, model weights,
+  GPU hours, or project spend were used.
+- **Next:** publish the final #51 restack/status commit, then let the updated PR checks
+  complete and fix any failures before describing the static stack as CI-ready.
+
+## 2026-11-27 — Verify quota appeal status without mutation
+
+- **Phase:** Phase 2; AWS mutation remains blocked.
+- **Starting state:** the owner reported manually sending an appeal through the
+  existing Support Center case. No approval had been confirmed.
+- **Commands:** read-only `sts get-caller-identity`, `service-quotas get-service-quota`,
+  and `list-requested-service-quota-change-history-by-quota` with profile
+  `ai-platform-pilot-key`, region `us-east-1`.
+- **Result:** identity matched the expected project account; applied On-Demand G/VT
+  quota `L-DB2E81BA` is `0.0`; the existing 4-vCPU request still reports
+  `CASE_OPENED`. The CLI does not confirm appeal delivery or approval.
+- **Decision:** do not launch, submit another appeal, or create a new quota request.
+- **Cost:** all queries were read-only; no resource, GPU hour, or project spend.
+- **Next:** wait for AWS to update the existing request/case while continuing only
+  non-billable repository work.
+
+## 2026-11-27 — Refresh workstation and stacked PR readiness
+
+- **Time:** 14:41 UTC.
+- **Phase:** Phase 2 remains blocked on quota; static readiness work only.
+- **Branch / PR:** `codex/gpu-sequential-release-design-restack`, PR #51, head
+  `44c467a` at the start of this check.
+- **Starting state:** PRs #32–#50 had fresh successful required checks on their
+  current heads after the deployment stack was rebased to include PRs #33–#36.
+  PR #51's workflow `46017455801` had four jobs pass and its local end-to-end job was
+  still running. No PR was merged; `main` was untouched.
+- **Workstation checks:** verified AWS CLI 2.32.6, Terraform 1.14.0, Docker Compose
+  2.40.3, `uv` 0.9.15, GitHub CLI 2.101.0, and Python interpreters. `python3` resolves
+  to 3.14.0; `python3.12` is separately installed at 3.12.12, and `python3.13` at
+  3.13.9. Ansible, `nvcc`, `nvidia-smi`, and NVIDIA Container Toolkit CLI are absent
+  from this Apple Silicon workstation. Python 3.12 is the correct explicit local
+  interpreter for the repository's CPython 3.12 GPU lock; a local interpreter does
+  not substitute for GPU-host validation.
+- **Read-only AWS checks:** `sts get-caller-identity` with the designated key profile
+  matched the expected account. `get-service-quota` returned applied G/VT quota `0.0`
+  in `us-east-1`. EC2 lists `g6.xlarge` offerings in five us-east-1 Availability
+  Zones; this is not capacity assurance. No AWS write, apply, GPU hour, or spend.
+- **Documentation:** corrected the local readiness record and implementation status
+  with the interpreter distinction and current quota/offering data. Updated the goal
+  with current restacked CI status. No appeal was resubmitted; its owner-reported
+  submission remains unconfirmed by AWS API status.
+- **Validation:** `make gpu-ec2-validate`, `make gpu-compose-config`,
+  `make gpu-benchmark-plan`, `make gpu-evaluation-plan`, and `make gpu-cuda-plan`
+  passed. Dry-runs planned 33 benchmark commands with a 120-minute cap, seven
+  evaluation cases with zero network requests, and CUDA operations with zero GPU
+  calls. A read-only `make gpu-ec2-preflight` using the reviewed AMI and a bounded
+  future expiry correctly stopped with `refusing: On-Demand G/VT quota is 0.0 vCPUs;
+  4 are required`; it did not reach an apply step. `git diff --check` passed.
+- **Next:** finish PR #51's one remaining CI check, update the
+  evidence/status records with terminal results, and continue only non-billable work.
+
+## 2026-11-27 — Restacked deployment CI and static readiness passed
+
+- **Phase:** Phase 2 remains quota-blocked; no AWS mutation or GPU execution.
+- **PR state:** current restacked heads PRs #32–#51 have all required checks passing.
+  PR #51 workflow `46017455801` finished with all five jobs successful, including
+  local end-to-end. PRs remain open and unmerged.
+- **Static commands:** `make gpu-ec2-validate`, `make gpu-compose-config`,
+  `make gpu-benchmark-plan`, `make gpu-evaluation-plan`, and `make gpu-cuda-plan`
+  passed. Dry-runs planned 33 benchmark commands with a 120-minute cap, seven
+  evaluation cases with zero network requests, and CUDA operations with zero GPU
+  calls. A read-only `make gpu-ec2-preflight` correctly stopped with
+  `On-Demand G/VT quota is 0.0 vCPUs; 4 are required`; it did not reach an apply step.
+- **Documentation:** updated the persistent goal, status, backlog, evidence manifest,
+  and workstation readiness record. The local Python default is 3.14.0; Python 3.12.12
+  is installed explicitly and should be selected as `python3.12` for the repository's
+  CPython 3.12 lock. The workstation has no Ansible or NVIDIA host tools, which is
+  expected before access to a standard Ubuntu L4 instance.
+- **AWS state:** the key profile still resolves to the expected account, applied quota
+  is zero, and `g6.xlarge` appears in five availability zones. Offerings do not reserve
+  capacity. The owner reports sending the existing-case appeal; AWS API status does
+  not confirm a decision. No duplicate appeal or request was sent.
+- **Cost/security:** no AWS write, instance, model/image download, GPU hour, or project
+  spend. The `python3.14` default correction does not change the target CPython 3.12
+  lock or host setup.
+- **Next:** add the private MLflow and sanitized evaluation-report path in a focused
+  non-billable PR; keep it off public host ports and preserve the existing ONNX release
+  flow.

@@ -19,9 +19,11 @@ pull requests must include the repository's clean-room evidence.
   publication.
   Two helper review findings have regression tests and are fixed. Human review remains
   open.
-- PR #37 is open against PR #32 to record the dated Ubuntu/NVIDIA/CUDA, vLLM image,
-  and pinned Qwen model compatibility candidates. It is research evidence, not proof
-  of GPU execution; exact target-AMI packages and real L4 validation remain open.
+- PR #37 is open against PR #36 to record the dated Ubuntu/NVIDIA/CUDA, vLLM image,
+  and pinned Qwen model compatibility candidates. PRs #38–#51 are stacked one at a
+  time through PR #50. All current required checks on PRs #32–#51 pass. This is
+  research and static CI evidence, not proof of GPU execution; exact target-AMI
+  packages and real L4 validation remain open.
 - PR #38 is open as a focused model-artifact verification helper based on PR #37.
   Head `5256060` records the verifier, fixture tests, and Terraform validation; its
   head passed all four required checks in run `45946331836`. Fixture tests do not
@@ -57,6 +59,9 @@ pull requests must include the repository's clean-room evidence.
   invocation, data-transfer allowance, tax contingency, and a reserve. It still
   requires exact AMI, price, egress, tax-profile, and state-retention confirmation;
   it is not permission to apply.
+- PRs #32–#51 are still open and unmerged. After restacking PRs #37–#51 behind the
+  gateway safety fixes in #33–#36, every required check passes on current heads. PR
+  #51's current-head workflow is `46017455801`. No AWS resources or GPU execution.
 
 ## Ordered implementation packages
 
@@ -141,7 +146,7 @@ and teardown/absence commands are ready.
 
 ### Package 3 — Manual Linux, NVIDIA, CUDA, Docker, and Ansible
 
-**Status:** non-billable install manifest is in open PR #50 (`codex/gpu-host-install-manifest`); checks are pending and no GPU host has been configured. The documented candidate stack is not a final pin or a runtime-verified combination.
+**Status:** PR #50 contains a non-billable ordered install manifest and hashed PyTorch lock. Its current restacked head passes all five required jobs. No GPU host has been configured; candidate versions are not runtime-verified.
 
 - [ ] Select and pin a standard Ubuntu 24.04 x86_64 AMI, kernel, NVIDIA driver,
   CUDA Toolkit, Docker Engine, NVIDIA Container Toolkit, Python, and PyTorch after
@@ -158,18 +163,19 @@ and teardown/absence commands are ready.
 - [ ] Manually install the driver and run `nvidia-smi`, a CUDA container, and a
   synchronized PyTorch computation on the L4.
 - [ ] Then implement Ansible roles/playbooks and run them twice to test idempotency.
-- [ ] Resolve the MLflow registry path for the single-GPU release/evaluation phase;
-  MLflow is in the default local Compose but not in the dedicated GPU Compose profile.
+- [ ] Add a private MLflow tracking service to the dedicated GPU Compose profile and
+  publish only sanitized evaluation metadata/reports to it. The service must have no
+  public host port; the default local MLflow instance is not reachable from EC2.
 
 **Exit gate:** real GPU and container computation passes, exact versions and raw
 sanitized output are retained, and a repeated Ansible run makes no unintended changes.
 
 ### Package 4 — CUDA performance laboratory
 
-**Status:** PR #49 (`codex/gpu-cuda-lab-preparation`) is open and its current CI run
-`45998860857` passed all five required jobs on code head `ce8bbba`. The bounded CUDA C++ vector-add and synchronized PyTorch
-matrix/transfer lab is static preparation. No kernel has been compiled and no real
-measurements exist.
+**Status:** PR #49 (`codex/gpu-cuda-lab-preparation`) is open. Its current restacked
+head passes all five required jobs. The bounded CUDA C++ vector-add and synchronized
+PyTorch matrix/transfer lab is static preparation. No kernel has been compiled and no
+real measurements exist.
 
 - [x] Prepare bounded CPU/GPU vector and matrix operations, separate host/device
   copies, supported precision checks, and warmup/repeat controls.
@@ -247,12 +253,13 @@ captured and described with units and limits.
 
 ### Package 8 — Benchmarking, FinOps, evaluation, release, and rollback
 
-**Status:** PR #47 is open on `codex/gpu-benchmark-preparation` against PR #46. The
-direct vLLM serving matrix and capped runner passed local static validation and all
-five required checks in run `45994609421`; its timeout cleanup regression test passes.
-Gateway benchmarking, actual performance results, actual model evaluation, and
-releases remain outstanding. Ticket #48 adds a static synthetic evaluation suite and
-dry-run; its CI and runtime behavior remain pending.
+**Status:** PRs #47–#51 prepare static benchmarking, evaluation, and sequential-release design. All required checks pass on their current restacked heads. Gateway benchmarking, actual GPU performance, live model evaluation, and release/rollback behavior remain outstanding.
+
+The current ONNX release API does not support the one-target vLLM profile. The
+single-GPU Compose file also lacks MLflow, and the evaluation runner does not publish
+its sanitized report. PR #51 documents a separate sequential LLM release path; no
+candidate has been registered or deployed. Private registry integration and report
+publishing are the next static implementation package.
 
 - [x] Prepare the official `vllm bench serve` runner, context-bounded synthetic
   workloads, gated high concurrency, repeated aggregates, and hardware/software
