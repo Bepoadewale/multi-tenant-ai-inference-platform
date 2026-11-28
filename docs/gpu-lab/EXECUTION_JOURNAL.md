@@ -2247,3 +2247,13 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **Validation:** relative Markdown link scan and `git diff --check` are run before publication. No runtime or GPU test applies.
 - **AWS / GPU / cost:** no AWS query or mutation, GPU, model download, or spend. The $25 limit and separate apply authorization still govern any future paid work.
 - **Next:** publish PR #67 with exact lease against old head `7b9fb9f`, update its PR description, and watch one CI run; continue sequential restacks.
+
+## 2026-11-28 — Restack GPU automation-readiness notes in PR #68
+
+- **Phase:** Phase 11 static automation and CI readiness; no host/cloud execution.
+- **Branch / PR:** PR #68 (`codex/gpu-ci-automation-readiness`) rebased from old #67 parent `7b9fb9f` onto refreshed PR #67 head `5dc225f`.
+- **Change:** reconciled ticket #68 with current PR #64–#67 evidence, corrected the reason the remote plan remains gated (remote state and Budget controls are absent; quota is approved), and recorded the one designated local CPU clean-room run as complete historical evidence.
+- **Validation:** source audit references existing Makefile and workflow files; 60 relative links across three changed Markdown files resolved and `git diff --check` passed. No code test, AWS call, or GPU operation is required for this docs-only package.
+- **Current CI:** PR #65 run `46164362977` passed all six jobs; PR #66 run `46164644804` and PR #67 run `46164896175` are active. PR #68 needs fresh checks after publication.
+- **Cost/security:** no credentials, cloud mutation, GPU, model download, or spend. $25 ceiling and separate apply authorization remain.
+- **Next:** publish PR #68 with exact lease against old head `6afa0ef`, update its description, and monitor one CI run.
