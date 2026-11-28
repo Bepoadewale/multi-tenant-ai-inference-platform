@@ -63,20 +63,22 @@ this workflow.
 - `bash -n` passed for the four bootstrap shell scripts.
 - `make terraform-validate` passed for the bootstrap, existing EKS, and GPU Terraform
   roots.
-- `make verify` passed: Ruff; 199 tests passed and 2 skipped; no known dependency
+- Before restacking, `make verify` passed: Ruff; 199 tests passed and 2 skipped; no known dependency
   vulnerabilities; base/GPU Compose and observability validation passed; benchmark,
   evaluation, and CUDA targets ran in dry-run mode only.
-- `git diff --check` passed.
-- The first test attempt used the system Python and failed because pytest was absent.
-  The documented Python 3.12 virtual environment was then installed and used for all
-  successful validation.
+- After restacking on the updated quota-readiness branch, six focused fake-tool tests
+  passed using `.venv/bin/python -m pytest`; `bash -n` and `make terraform-validate`
+  passed again for the current source. Full `make verify` and fresh CI remain pending.
+- The first test attempt used the system `pytest` command, which is not installed on
+  this workstation. Using the repository's `.venv/bin/python -m pytest` succeeded.
+- `git diff --check` passed before the current documentation follow-up.
 - The pre-existing bootstrap preview target was invoked without its required account
   variable and stopped immediately. It made no AWS call; no retry was needed because
   static Terraform validation was run separately.
 - Review found that the bootstrap's old Terraform minimum (`1.8.0`) was below the
   S3-native lockfile feature requirement (`1.10`). Updated the bootstrap root and
   operator guide to require Terraform `>=1.10.0, <2.0.0` before publishing the PR.
-- Pull request CI is pending. No Terraform plan, apply, or state migration was run.
+- Fresh pull request CI is pending. No Terraform plan, apply, or state migration was run.
 
 ## Security and cost
 
@@ -89,9 +91,7 @@ incurred by this ticket.
 
 ## Outstanding work
 
-- Run local focused tests, shell syntax checks, Terraform static validation, and the
-  repository's required verification.
-- Review the exact proposed changes and confirm CI on this PR head.
+- Run the full current-head verification and review CI results.
 - Obtain the owner's private alert address and explicit authorization before any
   future bootstrap apply; a passing PR does not authorize AWS changes.
 - Later document teardown for the state bucket, including versioned-object handling,
@@ -99,7 +99,7 @@ incurred by this ticket.
 
 ## Acceptance status
 
-**Local acceptance passed before the minimum-version correction; the bootstrap
-Terraform validation is being rerun and PR CI will verify the corrected head.** Cloud
+**Focused local tests, shell syntax, and all Terraform-root validations pass on the
+restacked source. Full local verification and current-head PR CI are pending.** Cloud
 bootstrap and state migration remain intentionally unexecuted until independently
 authorized.

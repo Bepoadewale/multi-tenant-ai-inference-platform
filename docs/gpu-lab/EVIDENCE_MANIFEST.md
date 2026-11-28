@@ -195,6 +195,10 @@ evidence.
 
 | Quota reconciliation and guarded EC2 preflight, as recorded in ticket73 | 2026-11-28 | Phase 2 / PR #73 | Read-only AWS CLI and local preflight command | Applied G/VT quota read 4.0 vCPUs; five AZ offerings were returned; project backend/Budget resources were absent; preflight stopped at missing state bucket before planning or mutation. A later same-day read-only check recorded `CASE_CLOSED`. | No capacity reservation, valid Budget recipient, exact remote plan, apply approval, GPU host, or spend. Evidence is command summary, not a captured terminal screenshot. |
 
+| PR #71 and #72 refreshed CI | 2026-11-28 | PR #71 run `46166173924`; PR #72 head `81cb61f` run `46166571475` | GitHub Actions | Both refreshed stacked heads passed all six jobs, including local CPU E2E. | No AWS mutation, GPU computation, GPU inference, or live L4 validation. |
+
+| PR #74 bootstrap guardrails, restacked local validation | 2026-11-28 | Phase 2 / PR #74, local commits `d7bbb25` and `cf8fe0d` on PR #73 head `4bdf624` | Local virtual environment, Bash, and Terraform | Six fake-tool tests pass; four bootstrap shell scripts pass syntax checks; `make terraform-validate` passes for all three Terraform roots. | Fresh PR CI has not run; fake tools do not contact AWS or prove real Budget notification, state migration, or any cloud resource behavior. |
+
 ## Entry format for future evidence
 
 For every new item, record:
