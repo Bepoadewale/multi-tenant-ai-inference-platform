@@ -2267,3 +2267,13 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **CI:** PR #66 run `46164644804` passed all six jobs. PR #67 run `46164896175` and #68 run `46165126075` were active at this snapshot. PR #69 needs fresh CI on the rebased head.
 - **AWS / GPU / cost:** Price List reads are catalog queries only; no infrastructure, GPU, model download, or spend. State, Budget recipient, exact saved plan, capacity, expiry, and separate apply authorization remain open.
 - **Next:** publish #69 with exact lease against old head `f21d61a`, update the PR body, and watch one CI run.
+
+## 2026-11-28 — Restack architecture candidate summary in PR #70
+
+- **Phase:** Phase 1 architecture and Phase 3/5 software research; no host compatibility was executed.
+- **Branch / PR:** PR #70 (`codex/gpu-readiness-architecture-facts`) rebased four commits onto refreshed PR #69 head `f5915e8`, replacing old parent `f21d61a`.
+- **Change:** keeps the proposed software stack aligned with the dated pinned candidates while clearly distinguishing candidate pins from proven driver/CUDA/container/PyTorch/vLLM compatibility on L4.
+- **Current AWS facts:** quota is approved at 4.0 vCPUs; missing project state/locking, Budget/recipient, exact plan/cost, expiry, fresh capacity, and separate apply authorization remain. The current cost report uses `$18.51932705` as a planning estimate only.
+- **CI:** PR #67 run `46164896175` passed. PR #68 run `46165126075` and #69 run `46165420078` are active. PR #70 needs fresh CI after publication.
+- **Validation:** 68 relative links across four changed Markdown files resolve and `git diff --check` passes. No GPU compatibility, software install, AWS operation, or spend is claimed.
+- **Next:** complete links and diff review, publish using exact lease against old PR #70 head `5f70852`, update PR details, and monitor one current-head CI run.

@@ -3,13 +3,13 @@
 **Status: ACTIVE — Phase 2, isolated EC2 infrastructure (static preparation only)**
 **Source of truth:** this document, the linked execution journal, pull requests, and evidence records.  
 **Last updated:** 2026-11-28
-**Current branch:** PR #64 and #65 passed six checks in runs `46163910205` and `46164362977`; PR #66 head `846b5cf` passed all six in `46164644804`. PR #67 head `5dc225f` run `46164896175` and PR #68 head `ff88165` run `46165126075` are active. PR #69 cost research is rebased locally onto #68 and requires fresh CI. No AWS resource or GPU activity.
+**Current branch:** PRs #64–#67 passed refreshed checks in runs `46163910205`, `46164362977`, `46164644804`, and `46164896175`. PR #68 head `ff88165` run `46165126075` and PR #69 head `f5915e8` run `46165420078` are active. PR #70 architecture fact update is rebased locally on #69 and needs fresh CI. No AWS resource or GPU activity.
 **Registration PR:** [#30 — docs: register single-L4 GPU infrastructure goal](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/30) (open; current head `04cb564`, required checks passed). **Phase 2 PR:** [#32 — guarded single-L4 EC2 foundation](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/32) (open and ready for review; current head `da2567e`).
 **Baseline repair PR:** [#31 — fix: apply audited dependency constraints](https://github.com/Bepoadewale/multi-tenant-ai-inference-platform/pull/31) (open; head `9710932`, required checks passed).
 **GPU quota:** the latest read-only CLI check confirms the existing request is `CASE_CLOSED` with desired value 4.0 and applied On-Demand G/VT quota is 4.0 vCPUs in `us-east-1`, sufficient numerically for one `g6.xlarge`. This does not reserve AZ capacity or authorize provisioning. Do not submit another quota request.
 **Launch gates still open:** exact project remote state and locking, a valid private Budget-alert recipient and project Budget, exact saved-plan/cost review, fresh regional capacity validation, independent expiry verification, and a separate explicit apply authorization. No GPU instance or other project AWS resources exist.
 
-**Latest progress (2026-11-28):** PRs #59–#66 passed refreshed CI. PR #67 run `46164896175` and PR #68 run `46165126075` are active. PR #69 refreshes the cost envelope to `$18.51932705`, leaving `$6.48067295` under the project cap under documented assumptions; this remains an estimate, not authorization. No L4 or AWS execution has occurred.
+**Latest progress (2026-11-28):** PRs #59–#67 passed refreshed CI. PR #68 run `46165126075` and PR #69 run `46165420078` are active. PR #69's documented cost estimate is `$18.51932705` under assumptions and leaves `$6.48067295` under the $25 ceiling; final plan review and separate authorization remain required. PR #70 aligns architecture text with pinned candidates without claiming runtime compatibility. No L4 or AWS execution has occurred.
 
 ## Project objective
 

@@ -76,10 +76,30 @@ flowchart BT
 ```
 
 This drawing separates the host driver from CUDA user-space libraries. The final
-vLLM container can supply its own matching CUDA runtime and PyTorch dependencies;
-the host CUDA Toolkit is mainly needed for compiling CUDA C++ experiments. The driver
-must still support the container's CUDA runtime. Exact versions remain unpinned until
-the chosen dated vLLM release and image/wheel are verified against the selected AMI.
+vLLM container supplies its own CUDA runtime and PyTorch dependencies; the host CUDA
+Toolkit is mainly needed for compiling CUDA C++ experiments. The driver must still
+support the container's CUDA runtime.
+
+The repository now pins researched candidates so a future run can be reproduced:
+
+| Layer | Pinned candidate | What is established |
+| --- | --- | --- |
+| Host OS | Ubuntu 24.04 x86-64 Canonical AMI | AMI identity and static preflight checks are prepared; kernel behavior on an L4 is untested. |
+| NVIDIA driver | `580.196.11-1ubuntu1` | Package version and signing inputs were checked in official indexes on 2026-11-27; installation and reboot are untested. |
+| Host CUDA Toolkit | `13.0.3-1` | Candidate package is pinned for CUDA C++ exercises; no host compiler or kernel has run. |
+| NVIDIA Container Toolkit | `1.20.2-1` | Candidate package is pinned; Docker GPU device access is untested. |
+| Docker | Engine `5:29.9.3-1~ubuntu.24.04~noble`; Compose `5.8.0-1~ubuntu.24.04~noble` | Candidate package versions are pinned; host installation is untested. |
+| Standalone CUDA PyTorch lab | PyTorch `2.14.0+cu130`, CPython 3.12, Linux x86-64 | Hash-locked separately for CUDA experiments; it is not layered into the vLLM image. No GPU tensor operation has run. |
+| Model server | vLLM OpenAI image `v0.34.0`, pinned to AMD64 image digest `sha256:cf5b2fdd087eb4f6d261736967cc5cde974bd22ff4df50365f8fa419b6b4c484` | Registry metadata and release compatibility notes were researched; image load and inference on an L4 are untested. |
+| Initial model | `Qwen/Qwen2.5-1.5B-Instruct` revision `989aa7980e4cf806f80c7fef2b1adb7bc71aa306` | Hub metadata reports Apache-2.0 and a pinned weight digest; weights have not been downloaded or loaded. |
+
+These are dated, pinned candidates, not an already proven compatible stack. Refresh
+package availability, signatures, image digest, model license and digest, current
+driver/runtime support, and price immediately before an authorized batch. The live
+L4 run must validate this exact combination or capture a reasoned version change in
+the journal and update the locks before proceeding. See
+[`RESEARCH_NOTES.md`](RESEARCH_NOTES.md), the [host install manifest](GPU_HOST_INSTALL_MANIFEST.md),
+and the [GPU batch runbook](GPU_BATCH_RUNBOOK.md) for sources and steps.
 
 ## Proposed identity, authorization, and tenant quotas
 
