@@ -178,6 +178,8 @@ evidence.
 
 | PR #69 price refresh and corrected gp3 units | 2026-11-28 | Cost planning / PR #69 | Read-only AWS Price List API lookups and local decimal arithmetic | Records catalog rates and a corrected `$18.5193` 12-hour estimate; 100 GiB is converted to decimal GB before applying the gp3 GB-month rate. | Not an invoice, account-wide cost guarantee, apply authorization, actual GPU execution, or billed result. The current rebased PR head still needs CI. |
 
+| PR #69 restack on current CI-readiness parent | 2026-11-28 | Cost planning / PR #69 | Rebase and document review | Cost estimate remains `$18.5193` with all assumptions labeled; PR #69 is locally based on PR #68 head `6afa0ef`. | Prior passing CI run `46115952390` does not validate the new head `bc0ea0e`; no new AWS/GPU action or spend. |
+
 ## Entry format for future evidence
 
 For every new item, record:
