@@ -3,29 +3,31 @@
 ## Objective
 
 Make the durable implementation backlog distinguish current GitHub state from older
-per-package notes. Record PR #66's final check result and keep the pre-quota readiness
-target clear.
+per-package notes. Record PR #66's latest status and keep the goal clear: finish
+feasible non-GPU work and launch safeguards before the authorized L4 batch.
 
 ## Current state
 
-- PR #66 historical head `094576e` passed six checks in `46093702808`; that does not validate the current restack. Current PR #66 head `2c5766e` is rebased on PR #65 governance-record head `24ea5e8` and needs fresh CI. PR #67 has been locally rebased on #66 head `2c5766e`; current local head `5f1b911` is not yet published.
+- PR #66 historical head `094576e` passed six checks in `46093702808`; that does not validate the current restack. Current PR #66 head `846b5cf` is rebased on PR #65 head `37b3b30`; CI run `46164644804` is active. PR #67 is locally rebased on #66 head `846b5cf`; its current local head is not yet published.
 - One read-only CLI snapshot on 2026-11-28 found 37 open PRs, #30–#66. Every PR was
   non-draft and all displayed check runs were completed successfully. The snapshot
   does not show review approval, merge permission, or merged code.
-- The guarded GPU plan wrapper runs the strict preflight before Terraform initializes
-  the remote backend. The preflight requires four On-Demand G/VT vCPUs; the latest
-  applied quota is zero. The remote-state plan is therefore not available through the
-  guarded command until quota changes. Do not bypass that safety check.
-- The exact-name AWS inventory recorded on 2026-11-26 found the planned shared S3
-  state bucket, DynamoDB lock table, and budget absent. The bootstrap preview has
-  seven creates and an invalid placeholder email. After quota changes, the remote plan
-  still requires separately authorized bootstrap resources and a verified budget
-  recipient. Do not treat quota approval as authorization to create them.
+- The guarded GPU plan wrapper runs strict preflight before Terraform initializes the
+  remote backend. The latest quota is approved at 4.0 On-Demand G/VT vCPUs. The exact
+  project state bucket and lock table are absent, so the remote-state plan is not
+  ready; Budget controls and exact cost review are also open. Keep every guard intact.
+- The exact-name AWS inventory recorded on 2026-11-28 found the planned shared S3
+  state bucket, DynamoDB lock table, and Budget absent. The bootstrap preview has
+  seven creates and an invalid placeholder email. It requires separately authorized
+  bootstrap resources and a verified Budget recipient. Do not treat quota approval as
+  authorization to create them.
 - A separate workflow run `46093697237` appeared on the branch push for the
   manually-dispatched AWS OIDC workflow. GitHub reported zero jobs and no logs. The
   workflow file requires a manual dispatch and explicit inputs; no AWS step ran. The
   reason for the empty push event is unknown and does not affect the required PR CI.
 - The untracked root `uv.lock` belongs to the user and remains untouched.
+- The latest read-only inventory shows stacked PRs through #84. Earlier counts below
+  are dated snapshots, not live status.
 - PR #67 current rebased head has not yet been published; its historical CI runs apply only to the original pre-restack commits and do not validate this new base.
 
 ## Research and design
@@ -47,13 +49,13 @@ target clear.
 - [x] Record the final PR #66 check result and current PR count in the goal and status.
 - [x] Label older package status notes as historical snapshots.
 - [x] Remove stale “current head” claims from the goal's older PR references.
-- [x] Record that the remote plan is stopped by the zero-quota guard and that the
-  manually-dispatched AWS workflow did not run any job.
+- [x] Record that approved quota does not bypass missing remote-state and Budget gates;
+  the manually-dispatched AWS workflow did not run any job.
 - [x] Record the absent shared-state/budget prerequisites and separate bootstrap
   authorization gate.
 - [x] Preserve the historical pre-restack CI evidence and label it as such.
 - [x] Add the ticket to the documentation index, evidence manifest, and journal.
-- [x] Rebase PR #67 on current PR #66 head `2c5766e`.
+- [x] Rebase PR #67 on current PR #66 head `846b5cf`.
 - [ ] Publish the rebased PR #67 and pass its current required CI.
 - [ ] Obtain human review; do not merge without owner authorization.
 
@@ -83,6 +85,6 @@ remain in force.
 
 ## Evidence and outstanding work
 
-See the execution journal and evidence manifest for the GitHub snapshot, passing PR
-workflow, and failed zero-job workflow distinction. AWS quota remains zero and the
-existing request remains `CASE_OPENED`; no L4 acceptance criterion has been met.
+See the execution journal and evidence manifest for the GitHub snapshot, prior passing
+PR workflow, and failed zero-job workflow distinction. AWS quota is approved at 4.0
+vCPUs and request history is `CASE_CLOSED`; no L4 acceptance criterion has been met.

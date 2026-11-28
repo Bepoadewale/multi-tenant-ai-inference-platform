@@ -66,14 +66,14 @@ Old quota-denial statements below are dated historical snapshots, not current st
   invocation, data-transfer allowance, tax contingency, and a reserve. It still
   requires exact AMI, price, egress, tax-profile, and state-retention confirmation;
   it is not permission to apply.
-- PRs #30–#65 remain open and unmerged; merge authorization is outstanding. PR #59
+- PRs #30–#67 remain open and unmerged; merge authorization is outstanding. PR #59
   head `0cfbedb` passed six checks in `46162611345`; #60 head `9fc23f2` passed six
   checks in `46162969703`; #61 head `1474752` passed six checks in `46163194154`.
   PR #62 run `46163327188`, #63 run `46163484312`, and #64 run `46163910205` passed
   all six refreshed jobs. PR #65 head `37b3b30` is running `46164362977`; its earlier
   head `49076a5` passed six checks in `46114955314` and includes the designated local
-  CPU clean-room record. PR #66 is rebased onto #65 and needs current CI after
-  publication. PR #53
+  CPU clean-room record. PR #66 head `846b5cf` is running `46164644804`; PR #67 is
+  restacked locally onto #66 and needs fresh CI. PR #53
   code head `e623b75` passed all five checks in `46023306230`, including a Linux AMD64
   gateway image build and CPU end-to-end. PR #56 head `852c873` passed all five checks
   in `46040861818`; PR #57 Ansible head `4795f12` passed all six checks, including a
@@ -392,7 +392,7 @@ captured and described with units and limits.
 
 ### Package 8 — Benchmarking, FinOps, evaluation, release, and rollback
 
-**Status:** PRs #47–#52 prepare static benchmarking, evaluation, private MLflow evidence, and sequential-release design. PR #52 head `55f4d59` passed all five checks in run `46020258170`. PR #60 adds an authenticated gateway benchmark with privacy-safe metadata and a strict L4 guard. Current rebased head `9a8bd28` passed focused tests locally and its fresh six-job CI is running. Actual GPU performance, live model evaluation, and release/rollback behavior remain outstanding.
+**Status:** PRs #47–#52 prepare static benchmarking, evaluation, private MLflow evidence, and sequential-release design. PR #52 head `55f4d59` passed all five checks in run `46020258170`. PR #60 adds an authenticated gateway benchmark with privacy-safe metadata and a strict L4 guard. Its current head `9fc23f2` passed all six required jobs in run `46162969703`. Actual GPU performance, live model evaluation, and release/rollback behavior remain outstanding.
 
 The existing ONNX release API still does not support the one-target vLLM profile. PR
 #52 adds a private MLflow tracking service and evaluator report publication, while PR
