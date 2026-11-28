@@ -43,7 +43,7 @@ GPU, model-serving, benchmark, or production reliability evidence.
 
 Markdown link/heading validation passed across eight touched documents, and `git diff
 --check` passed. Upstream PR #74 head `944b457` passed all six required checks in run
-`46128237140`. PR #75 CI and final editorial review remain pending.
+`46128237140`. PR #75 head `5284057` passed all six required checks in run `46129296996`, including routine PR local end-to-end CI. This does not represent a second designated project clean-room run.
 No software behavior changed; no local clean-room run, AWS operation, image/model
 download, or GPU execution is part of this documentation package.
 
@@ -58,4 +58,4 @@ download, or GPU execution is part of this documentation package.
 
 ## Acceptance status
 
-**In progress.** The draft exists; local checks and PR CI remain open.
+**Documentation acceptance passed on head `5284057`; all six PR CI checks passed in run `46129296996`. The document remains an educational draft about a system whose real-L4 acceptance criteria are pending.
