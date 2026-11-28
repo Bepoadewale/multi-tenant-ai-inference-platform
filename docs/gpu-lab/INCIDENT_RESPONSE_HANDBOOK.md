@@ -8,9 +8,10 @@ they have not been injected on an L4. Do not report them as completed drills.
 ## Operating boundaries
 
 - Confirm the current project goal, AWS account, region, quota, Terraform state, and
-  resource inventory before touching infrastructure. The recorded applied G/VT
-  quota is approved at 4.0 vCPUs, but launch controls are still open; do not launch
-  a host until every gate in the project goal is independently verified.
+  resource inventory before touching infrastructure. The latest applied G/VT quota
+  is `4.0` vCPUs, but request history still says `CASE_OPENED`; recheck quota and live
+  capacity before any plan or apply. Do not treat the quota value as permission to
+  launch.
 - The project spending ceiling is USD $25. An alert is not a hard cap. Follow the
   approved run window and expiry in the [GPU batch runbook](GPU_BATCH_RUNBOOK.md).
 - Use only the project Terraform root, exact reviewed plan, project tags, and

@@ -75,8 +75,9 @@ the launched Ubuntu AMI and kernel. No packages were installed.
 2. Before any AWS mutation, verify the expected account using the key-based profile as
    instructed by the project credential map, then recheck region, applied quota, G6
    availability, exact resources, current prices, and the reviewed saved plan. Do not
-   print credentials. The latest read-only check found quota `0.0`; G6 offerings are
-   visible in us-east-1 but do not guarantee capacity.
+   print credentials. The 2026-11-28 check found applied quota `4.0` vCPUs, while the
+   request record remains `CASE_OPENED`. G6 offerings exist in several us-east-1 AZs,
+   but do not guarantee capacity. The project state bucket and budget are absent.
 3. The hash-locked Ansible requirements and host role are prepared for the future EC2
    host. Do not run its local-connection playbook on this workstation.
 4. After authorized provisioning and the manual learning pass, run Ansible on the Ubuntu

@@ -2,18 +2,19 @@
 
 Research was started on 2026-11-26 and updated on 2026-11-28. This remains a Phase 1 design record, not a final compatibility matrix. Recheck sources immediately before implementation because prices, quota, software releases, and model artifacts change.
 
-**Current AWS quota status (read-only check, 2026-11-28):** applied On-Demand G/VT
-quota is 4.0 vCPUs in `us-east-1` and request history is `CASE_CLOSED`. This is enough
-by quota for one `g6.xlarge`, but it does not guarantee Availability Zone capacity or
-authorize spending. Project remote state, locking, Budget and verified recipient,
-exact saved-plan/cost review, expiry validation, and separate apply authorization
-remain open.
+**Latest quota observation (2026-11-28):** the applied On-Demand G/VT quota reads
+`4.0` vCPUs and the later read-only request-history check reports `CASE_CLOSED`.
+Earlier same-day results reported `CASE_OPENED` and are historical. Earlier
+zero-quota results are also historical. EC2 lists `g6.xlarge` in five us-east-1 AZs;
+this does not reserve launch capacity. See ticket73 for the earlier read-only query,
+empty project resource inventory, and guarded preflight stop at the missing state
+bucket.
 
 ## AWS hardware, region and quota
 
 - AWS's [G6 product page](https://aws.amazon.com/ec2/instance-types/g6/) and [accelerated instance specification table](https://docs.aws.amazon.com/ec2/latest/instancetypes/ac.html) describe G6 as NVIDIA L4 based. The single-GPU `g6.xlarge` is listed with 4 vCPUs, 16 GiB host memory, one L4, and 22 GiB of listed GPU memory; `g6.2xlarge` has 8 vCPUs, 32 GiB, and one L4 with the same listed GPU memory. The GPU is commonly described as a 24 GB L4; AWS's table expresses the per-instance memory as 22 GiB. Capacity and runtime compatibility still need live validation.
 - Read-only `describe-instance-type-offerings` in `us-east-1` listed `g6.xlarge` in `us-east-1a`, `1b`, `1c`, `1d`, and `1f`; it listed `g6.2xlarge` in `1a`, `1b`, `1c`, `1d`, and `1f`. Offering means the type is supported in that AZ, not that capacity can be launched.
-- Historical read-only Service Quotas lookup returned `Running On-Demand G and VT instances = 0.0 vCPUs`, quota code `L-DB2E81BA`. AWS [EC2 instance quota documentation](https://docs.aws.amazon.com/ec2/latest/instancetypes/ec2-instance-quotas.html) says this quota is adjustable; AWS's [quota increase procedure](https://docs.aws.amazon.com/servicequotas/latest/userguide/request-quota-increase.html) notes increases require a request and may be reviewed. A 4-vCPU increase was submitted for one `g6.xlarge`; at the time, the owner reported a denial email and appeal. The latest 2026-11-28 CLI status is recorded above; do not submit a duplicate request.
+- A historical read-only Service Quotas lookup returned `Running On-Demand G and VT instances = 0.0 vCPUs`, quota code `L-DB2E81BA`. Later 2026-11-28 checks returned applied quota `4.0`; request history first showed `CASE_OPENED`, then `CASE_CLOSED`. AWS [EC2 instance quota documentation](https://docs.aws.amazon.com/ec2/latest/instancetypes/ec2-instance-quotas.html) says this quota is adjustable; AWS's [quota increase procedure](https://docs.aws.amazon.com/servicequotas/latest/userguide/request-quota-increase.html) notes increases require a request and may be reviewed. The user reported GPU capacity was approved. The applied value is enough numerically for one `g6.xlarge`, but there is no reserved AZ capacity. Do not submit a duplicate appeal or quota request.
 - Read-only AWS Price List API queries on 2026-11-28 returned the `g6.xlarge`
   `BoxUsage` On-Demand rate at **$0.8048 per instance-hour** for Linux, no
   preinstalled software, shared tenancy, and `US East (N. Virginia)`, effective
@@ -69,10 +70,7 @@ Continue with current primary documentation before each phase: [AWS G6](https://
 ## Decisions still open
 
 - Whether the `$25` cap can cover the requested GPU-dependent validation with enough runtime to install the driver, download the model, integrate/observe/benchmark it, run safe incident drills, and export evidence. The instance-only estimate leaves room but time-consuming manual setup could use it quickly.
-- Historical open question at the time of the initial research: whether AWS would
-  change the applied quota after the owner-reported appeal. The latest quota state is
-  recorded at the top of this document; check regional capacity immediately before a
-  separately authorized launch.
+- Whether AWS has live G6 capacity in the selected AZ when a separately authorized launch is ready. The applied quota is 4.0 vCPUs and the later request-history check is `CASE_CLOSED`; neither reserves capacity. Do not submit a duplicate request.
 - Exact Ubuntu LTS point release/AMI, kernel, driver branch, CUDA compatibility, Docker Toolkit release, PyTorch build, vLLM release, and container image digest.
 - Exact encrypted Terraform state/locking arrangement that follows repository governance without creating long-lived costs above the project cap.
 - Which monitoring components can coexist on 16 GiB host memory without invalidating the inference experiment; measure before selecting `g6.2xlarge`.

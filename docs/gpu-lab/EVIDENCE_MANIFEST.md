@@ -193,6 +193,8 @@ evidence.
 
 | PR #72 report-learning restack | 2026-11-28 | Educational report preparation / PR #72 / local head `0b1f4df` | Local Git rebase and documentation review | Retains the PRE-GPU draft and adds explanations while updating quota and launch-gate status from refreshed parent PR #71 head `127d0a8`. | Local head is not yet published or CI-validated; no AWS/GPU execution, benchmark, or runtime compatibility is demonstrated. |
 
+| Quota reconciliation and guarded EC2 preflight, as recorded in ticket73 | 2026-11-28 | Phase 2 / PR #73 | Read-only AWS CLI and local preflight command | Applied G/VT quota read 4.0 vCPUs; five AZ offerings were returned; project backend/Budget resources were absent; preflight stopped at missing state bucket before planning or mutation. A later same-day read-only check recorded `CASE_CLOSED`. | No capacity reservation, valid Budget recipient, exact remote plan, apply approval, GPU host, or spend. Evidence is command summary, not a captured terminal screenshot. |
+
 ## Entry format for future evidence
 
 For every new item, record:
