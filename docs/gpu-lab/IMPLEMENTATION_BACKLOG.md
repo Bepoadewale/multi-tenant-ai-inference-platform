@@ -21,7 +21,7 @@ pull requests must include the repository's clean-room evidence.
   open.
 - PR #37 is open against PR #36 to record the dated Ubuntu/NVIDIA/CUDA, vLLM image,
   and pinned Qwen model compatibility candidates. PRs #38–#51 are stacked one at a
-  time through PR #50. All current required checks on PRs #32–#51 pass. This is
+  time through PR #50. All current required checks on PRs #32–#52 pass. This is
   research and static CI evidence, not proof of GPU execution; exact target-AMI
   packages and real L4 validation remain open.
 - PR #38 is open as a focused model-artifact verification helper based on PR #37.
@@ -59,7 +59,7 @@ pull requests must include the repository's clean-room evidence.
   invocation, data-transfer allowance, tax contingency, and a reserve. It still
   requires exact AMI, price, egress, tax-profile, and state-retention confirmation;
   it is not permission to apply.
-- PRs #32–#51 are still open and unmerged. After restacking PRs #37–#51 behind the
+- PRs #32–#52 are still open and unmerged. After restacking PRs #37–#51 behind the
   gateway safety fixes in #33–#36, every required check passes on current heads. PR
   #51's current-head workflow is `46017455801`. No AWS resources or GPU execution.
 
@@ -163,9 +163,10 @@ and teardown/absence commands are ready.
 - [ ] Manually install the driver and run `nvidia-smi`, a CUDA container, and a
   synchronized PyTorch computation on the L4.
 - [ ] Then implement Ansible roles/playbooks and run them twice to test idempotency.
-- [ ] Add a private MLflow tracking service to the dedicated GPU Compose profile and
-  publish only sanitized evaluation metadata/reports to it. The service must have no
-  public host port; the default local MLflow instance is not reachable from EC2.
+- [x] Add a private MLflow tracking service to the dedicated GPU Compose profile and
+  publish only sanitized evaluation metadata/reports to it. PR #52 implements the
+  static/local path; the optional operator UI/API port binds only to loopback. Live
+  artifact upload on the L4 remains unverified.
 
 **Exit gate:** real GPU and container computation passes, exact versions and raw
 sanitized output are retained, and a repeated Ansible run makes no unintended changes.
@@ -253,13 +254,13 @@ captured and described with units and limits.
 
 ### Package 8 — Benchmarking, FinOps, evaluation, release, and rollback
 
-**Status:** PRs #47–#51 prepare static benchmarking, evaluation, and sequential-release design. All required checks pass on their current restacked heads. Gateway benchmarking, actual GPU performance, live model evaluation, and release/rollback behavior remain outstanding.
+**Status:** PRs #47–#52 prepare static benchmarking, evaluation, private MLflow evidence, and sequential-release design. PR #52 head `55f4d59` passed all five checks in run `46020258170`. Gateway benchmarking, actual GPU performance, live model evaluation, and release/rollback behavior remain outstanding.
 
 The current ONNX release API does not support the one-target vLLM profile. The
-single-GPU Compose file also lacks MLflow, and the evaluation runner does not publish
-its sanitized report. PR #51 documents a separate sequential LLM release path; no
-candidate has been registered or deployed. Private registry integration and report
-publishing are the next static implementation package.
+The existing ONNX release API still does not support the one-target vLLM profile. PR
+#52 adds a private MLflow tracking service and evaluator report publication, while PR
+#51 documents the separate sequential LLM release path. No candidate has been
+registered or deployed. Immutable release plans and approval enforcement remain open.
 
 - [x] Prepare the official `vllm bench serve` runner, context-bounded synthetic
   workloads, gated high concurrency, repeated aggregates, and hardware/software

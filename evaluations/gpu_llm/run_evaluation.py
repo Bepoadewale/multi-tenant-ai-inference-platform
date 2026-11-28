@@ -80,6 +80,46 @@ def evaluation_exit_code(report: dict) -> int:
     return 2 if report["human_review_required"] else 0
 
 
+def publish_report_to_mlflow(
+    report_path: Path,
+    report: dict,
+    tracking_uri: str,
+    experiment_name: str,
+) -> str:
+    """Store sanitized evaluation metadata and report without prompt text."""
+    import mlflow
+
+    mlflow.set_tracking_uri(tracking_uri)
+    mlflow.set_experiment(experiment_name)
+    with mlflow.start_run(run_name=f"{report['suite_id']}-{report['started_at']}") as run:
+        mlflow.log_params(
+            {
+                "suite_id": report["suite_id"],
+                "suite_sha256": report["suite_sha256"],
+                "model": report["model"],
+                "model_revision": report["model_revision"],
+                "case_count": report["case_count"],
+            }
+        )
+        mlflow.log_metrics(
+            {
+                "automatic_gate_pass": float(report["automatic_gate"] == "pass"),
+                "human_review_required": float(report["human_review_required"]),
+                "passed_count": float(report["passed_count"]),
+                "failed_count": float(report["failed_count"]),
+            }
+        )
+        mlflow.set_tags(
+            {
+                "runtime": "vllm",
+                "content_policy": "prompt_and_completion_text_excluded",
+                "report_schema_version": str(report["schema_version"]),
+            }
+        )
+        mlflow.log_artifact(str(report_path), artifact_path="evaluation")
+        return run.info.run_id
+
+
 def request_case(
     base_url: str,
     model: str,
@@ -212,8 +252,15 @@ def main() -> int:
     parser.add_argument("--base-url", default=os.getenv("GPU_EVAL_BASE_URL", "http://127.0.0.1:8000/v1"))
     parser.add_argument("--model", default=os.getenv("GPU_EVAL_MODEL", "gpu-default"))
     parser.add_argument("--model-revision", default=os.getenv("GPU_EVAL_MODEL_REVISION"))
+    parser.add_argument("--mlflow-tracking-uri", default=os.getenv("MLFLOW_TRACKING_URI"))
+    parser.add_argument(
+        "--mlflow-experiment",
+        default=os.getenv("GPU_EVAL_MLFLOW_EXPERIMENT", "single-l4-llm-evaluation"),
+    )
     parser.add_argument("--timeout-seconds", type=float, default=90)
-    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument(
+        "--output", type=Path, default=os.getenv("GPU_EVAL_OUTPUT", str(DEFAULT_OUTPUT))
+    )
     parser.add_argument(
         "--show-subjective-response",
         action="store_true",
@@ -284,10 +331,18 @@ def main() -> int:
     os.fchmod(output_fd, 0o600)
     with os.fdopen(output_fd, "w", encoding="utf-8") as output_file:
         output_file.write(json.dumps(report, indent=2) + "\n")
-    print(json.dumps({key: report[key] for key in (
+    mlflow_run_id = None
+    if args.mlflow_tracking_uri:
+        mlflow_run_id = publish_report_to_mlflow(
+            output_path, report, args.mlflow_tracking_uri, args.mlflow_experiment
+        )
+    summary = {key: report[key] for key in (
         "suite_id", "model", "automatic_gate", "human_review_required",
         "case_count", "passed_count", "failed_count"
-    )}, indent=2))
+    )}
+    if mlflow_run_id:
+        summary["mlflow_run_id"] = mlflow_run_id
+    print(json.dumps(summary, indent=2))
     print(f"Sanitized evaluation report: {output_path}")
     if evaluation_exit_code(report) == 2:
         print("Automatic checks passed; human review is still required before release.")

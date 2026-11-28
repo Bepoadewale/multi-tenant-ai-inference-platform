@@ -83,6 +83,21 @@ suite digest, and a digest of each generated answer. It never saves prompts or
 generated text. The report file is restricted to the current user on Unix-like
 systems.
 
+
+The Compose profile also includes an optional one-shot evaluation service that waits
+for healthy vLLM and MLflow services, then publishes the sanitized report and
+aggregate metadata to the local MLflow server:
+
+```bash
+docker compose --env-file deployments/single-gpu/.env \
+  -f deployments/single-gpu/compose.yaml \
+  --profile gpu-evaluation run --build --rm evaluator
+```
+
+It prints the MLflow run ID. Access the UI only through an approved Systems Manager
+port-forward to `127.0.0.1:15011`; the host port is not exposed publicly. Export the
+report and needed artifacts before authorized teardown.
+
 By default, subjective response text is not printed or saved. For a controlled
 interactive review, add `--show-subjective-response` and inspect it directly in the
 terminal; do not redirect or retain that terminal output. The runner returns exit code

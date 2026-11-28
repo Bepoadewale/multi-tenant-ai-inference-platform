@@ -1,7 +1,8 @@
 # Single-GPU LLM Release Design
 
-**Status:** proposed design; no LLM release has been registered or deployed through
-the GPU profile. **Reviewed:** 2026-11-27.
+**Status:** sequential release remains proposed; PR #52 adds a static private MLflow
+tracking service and sanitized evaluation upload path. No LLM release has been
+registered or deployed through the GPU profile. **Reviewed:** 2026-11-27.
 
 ## Why the current release flow cannot deploy the GPU model
 
@@ -12,11 +13,11 @@ one vLLM endpoint and one served-model alias. Giving two names different weights
 both names point to the same vLLM process would not create a real canary; loading two
 large models concurrently would also violate the one-L4 capacity constraint.
 
-The GPU Compose profile currently has no MLflow service. The default local Compose
-does include MLflow, but it is not reachable from EC2. The static LLM evaluator writes
-a sanitized report outside Git; it does not send the report to MLflow. Therefore the
-current GPU profile does not yet satisfy model registry, governed release, or rollback
-acceptance criteria.
+PR #52 adds a small MLflow tracking server to the GPU Compose profile and lets the
+evaluator upload its sanitized report. The default local Compose registry is still not
+reachable from EC2, so the GPU host has its own temporary SQLite and artifact volume.
+This completes only the static/local evidence-storage path; it does not satisfy the
+model release, independent approval, deployment, or rollback criteria.
 
 Keep the existing ONNX flow unchanged. Add a separate LLM release path that records
 model artifacts and uses a sequential vLLM restart on the single L4.
@@ -90,12 +91,13 @@ No traffic-weighted canary or simultaneous model load is claimed.
 
 ## MLflow placement and storage
 
-The first lab can run one small MLflow tracking/model-registry service inside the
-private GPU Compose network, backed by a temporary local SQLite database and an
-encrypted EBS-backed artifact directory. Do not publish its port to the internet.
-Include the extra container's system-memory and disk use in the 16-GiB host capacity
-check. Export sanitized evidence before termination because the root volume is
-disposable. The L4 and model-serving process do not need a managed registry service.
+PR #52 configures one small MLflow tracking service inside the private GPU Compose
+network, backed by a temporary SQLite database and encrypted EBS-backed artifact
+directory. Its host UI/API mapping is loopback-only for Systems Manager forwarding;
+the AWS security group still has no inbound rules. Include the extra container's
+system-memory and disk use in the 16-GiB host capacity check. Export sanitized
+evidence before termination because the root volume is disposable. The L4 and
+model-serving process do not need a managed registry service.
 
 SQLite and one host are suitable only for this short laboratory. A production system
 would use a highly available metadata database, durable object storage, access
@@ -104,7 +106,8 @@ replacement across multiple serving replicas.
 
 ## Implementation acceptance criteria
 
-- The GPU profile can reach its private MLflow tracking and model registry services.
+- [x] Static Compose and evaluator configuration targets a private MLflow tracking
+  server; a live MLflow/model-registry request still requires the L4 batch.
 - A sanitized evaluation report is linked to a pinned model revision and runtime
   image digest.
 - A deterministic failing candidate is rejected before approval or deployment.
