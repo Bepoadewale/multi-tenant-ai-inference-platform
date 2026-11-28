@@ -2236,3 +2236,14 @@ Preserve earlier entries. Record actual actions and outcomes; never replace fail
 - **CI:** refreshed runs for PRs #59–#64 passed, including #64 run `46163910205`; PR #65 run `46164362977` is active. PR #66 requires a new run after publication.
 - **AWS / cost:** no AWS query in this session beyond the documented prior result, no AWS mutation, no spend, no GPU or model download. The $25 ceiling and open launch gates remain.
 - **Next:** run final status/link review, publish #66 with an exact lease against old head `2c5766e`, update its PR description, and monitor its one required CI run.
+
+## 2026-11-28 — Reconcile backlog snapshots in PR #67
+
+- **Phase:** non-billable documentation and PR-state hygiene.
+- **Branch / PR:** PR #67 (`codex/gpu-backlog-current-status`) rebased from old #66 parent `2c5766e` onto refreshed PR #66 head `846b5cf`.
+- **Changes:** updated stale quota-zero and pre-quota text to reflect applied 4.0-vCPU quota and `CASE_CLOSED`, while preserving dated historical snapshots; the remote-state and Budget gaps still block planning. Updated current CI references for #59–#66 and clarified that human review/merge state is separate from CI.
+- **Conflict handling:** the rebase conflicted in the shared journal. Kept the latest parent journal and will record this restack as a new entry, rather than replacing current history with an older snapshot.
+- **Current CI:** #64 run `46163910205` passed all six jobs; #65 run `46164362977` and #66 run `46164644804` remain active. PR #67 needs fresh CI after publication.
+- **Validation:** relative Markdown link scan and `git diff --check` are run before publication. No runtime or GPU test applies.
+- **AWS / GPU / cost:** no AWS query or mutation, GPU, model download, or spend. The $25 limit and separate apply authorization still govern any future paid work.
+- **Next:** publish PR #67 with exact lease against old head `7b9fb9f`, update its PR description, and watch one CI run; continue sequential restacks.
