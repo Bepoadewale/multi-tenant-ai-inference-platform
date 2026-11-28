@@ -67,3 +67,5 @@ apply authorization.
 
 Human PR review remains open. The final remote-state plan, validated budget recipient,
 explicit bounded apply authorization, and all real L4 execution remain outstanding.
+- PR #69 is rebased onto current PR #68 head `ff88165`; its refreshed head needs to be
+  published and receive fresh CI. Historical PR #69 checks do not validate this base.

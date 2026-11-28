@@ -176,6 +176,8 @@ evidence.
 
 | PR #68 rebase on current backlog status | 2026-11-28 | Automation readiness / PR #68 | Local rebase and documentation review | PR #68's automation audit is locally based on updated PR #67 head `7b9fb9f`. | Current head `224b035` is unpublished and lacks fresh CI; no AWS/GPU action occurred. |
 
+| PR #69 price refresh and corrected gp3 units | 2026-11-28 | Cost planning / PR #69 | Read-only AWS Price List API lookups and local decimal arithmetic | Records catalog rates and a corrected `$18.5193` 12-hour estimate; 100 GiB is converted to decimal GB before applying the gp3 GB-month rate. | Not an invoice, account-wide cost guarantee, apply authorization, actual GPU execution, or billed result. The current rebased PR head still needs CI. |
+
 ## Entry format for future evidence
 
 For every new item, record:
