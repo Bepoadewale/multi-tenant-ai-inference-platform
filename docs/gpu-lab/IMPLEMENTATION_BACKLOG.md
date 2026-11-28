@@ -22,6 +22,8 @@ pull requests must include the repository's clean-room evidence.
 - PR #37 is open against PR #32 to record the dated Ubuntu/NVIDIA/CUDA, vLLM image,
   and pinned Qwen model compatibility candidates. It is research evidence, not proof
   of GPU execution; exact target-AMI packages and real L4 validation remain open.
+- PR #38 is being prepared as a focused model-artifact verification helper based on
+  PR #37. Its fixture tests do not replace checking the actual downloaded artifact.
 - No AWS resources or GPU instance hours have been used by this goal.
 - The account's applied On-Demand G and VT quota is zero. A 4-vCPU quota increase
   request was submitted on 2026-11-27 and AWS reports `CASE_OPENED` (pending); see the
@@ -151,6 +153,8 @@ open.
   tokenizer/template before downloading.
 - [ ] Prepare the exact download, cache, launch, health/readiness, inference, streaming,
   telemetry, export, and teardown commands before the GPU batch.
+- [ ] Before that batch, use the local verifier from ticket #38 to check the pinned
+  Qwen `model.safetensors` after download; fixture tests are not artifact evidence.
 - [ ] Start manually, verify real L4 inference and streaming, then reproduce with
   Docker Compose without publishing the endpoint or internal services.
 
